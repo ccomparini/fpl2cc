@@ -594,28 +594,27 @@ public:
          // start of string, or start/end brace (in that order)
          // and in each case (recursively?) scan to the match...
          // Alternately, make it easy on myself and change the
-         // syntax to use something like "~{" "}~" to bracket
+         // syntax to use something like "+{" "}+" to bracket
          // the code (though those could still exist in strings)
          // actually yeah do that because then it's just reading
          // regex (because you can't nest)
          // oh but it needs to be minimal match, not greedy....
-         //std::cmatch got = read_re("~{(.*)}~
+         //std::cmatch got = read_re("+{(.*)}+
          eat_space();
          const utf8_byte *start = NULL;
          const utf8_byte *end   = NULL;
-// XXX actaully the "code" can also just be a ';' meaning do default.
-         if(read_byte_equalling('~') && read_byte_equalling('{')) {
+         if(read_byte_equalling(';')) {
+             return default_code();
+         } else if(read_byte_equalling('+') && read_byte_equalling('{')) {
              start = inpp();
              while(char byte_in = read_byte()) {
                  if(byte_in == '}') {
-                     if(read_byte() == '~') {
+                     if(read_byte() == '+') {
+                         end = inpp() - 2;
                          break;
                      }
                  }
              }
-             end = inpp();
-         } else if(read_byte_equalling(';')) {
-             return default_code();
          }
 
          if(start && end) {
