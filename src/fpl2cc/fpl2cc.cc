@@ -1,7 +1,10 @@
 #include <climits>
+//#include <format> c++20
 #include <fstream>
 #include <map>
+#include <queue>
 #include <regex>
+#include <set>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,6 +13,16 @@
 #include <vector>
 
 //#include <jest_scanner.h>
+
+
+void fail(const char *fmt...) {
+    va_list args;
+    va_start(args, fmt);
+    vfprintf(stderr, fmt, args);
+    va_end(args);
+
+    exit(1);
+}
 
 /*
 
@@ -155,9 +168,68 @@ inline size_t space_length(const utf8_byte *at) {
     // can't get here.
 }
 
+// Returns the length of the encoding of the character at *in, in bytes.
+// For purposes of this function, a character is a single utf-8 encoded
+// character, or a multi-ascii-character newline, such as is used by
+// ms dos and descendants.
+// If the pointer passed points to the middle of a character, returns
+// the length of the remaining bytes (or tries to - GIGO, at this point).
+// Returns 0 if given a NULL pointer.
+static size_t char_length(const utf8_byte *in) {
+    if(size_t nll = newline_length(in)) {
+        return nll;
+    }
+
+    if(!in) return 0;
+
+    // https://en.wikipedia.org/wiki/UTF-8#Encoding
+    // if the high bit isn't set, it's a single byte:
+    if((*in & 0x80) == 0) return 1;
+
+    // otherwise, if we're at the start of the character,
+    // the top 2 bits will be set, and bits following
+    // specify the size.  so if the top 2 bits are set,
+    // we'll assume we're at the start of a char and take
+    // that byte's word for it on the size:
+    if((*in & 0xe0) == 0xc0) return 2;  // 0b110x xxxx
+    if((*in & 0xf0) == 0xe0) return 3;  // 0b1110 xxxx
+    if((*in & 0xf8) == 0xf0) return 4;  // 0b1111 0xxx
+
+    // looks like we're in the middle of a character.
+    // count bytes until the start of a new character,
+    // which we can identify by either the top bit being 0
+    // or the top 2 bits being 1:
+    const utf8_byte *rd = in;
+    for(rd = in; *rd & 0x80; rd++) {
+        if((*in & 0xc0) == 0xc0) break; // start of char w/ code point > 127
+    }
+    return rd - in + 1;
+}
+
+
+
+int line_number(const utf8_byte *start, const utf8_byte *end) {
+
+    // we rescan for line numbers instead of keeping a counter
+    // because (1) it's easier than checking every read, which
+    // may or may not be multi-byte or whatever and (2) since
+    // the source file is (probably) small, and we only sometimes
+    // care about the line number, it's going to be either fast
+    // enough, or (with luck) net faster than keeping a line
+    // counter and updating it on every read.
+    int line_no = 1;
+    const utf8_byte *rd;
+    for(rd = start; rd < end; rd += char_length(rd)) {
+        if(newline_length(rd)) {
+            line_no++;
+        }
+    }
+    return line_no;
+}
+
 /*
 
-Production rules are ordered;  first one matches.  XXX maybe not, if LR
+Production rules are ordered;  first one matches.
 
 Production rules can be looked up by name.
 
@@ -184,8 +256,8 @@ Anyway, given a certain position in the text,
  
  */
 
-struct ProdExpr { // or step?
-    std::string expr; // either a regex, string or name of production
+struct GrammarElement {
+    std::string expr; // either a regex, string or name of product
     typedef enum {
         NONE,
         TERM_EXACT,
@@ -194,14 +266,99 @@ struct ProdExpr { // or step?
     } Type;
     Type type;
 
+    GrammarElement(const std::string &str, Type tp)
+        : expr(str), type(tp) { }
+
+    // returns a negative, 0, or positive value depending on
+    // if this element can be considered <, ==, or > than the
+    // other element:
+    inline int compare(const GrammarElement &other) const {
+        int cmp = type - other.type;
+        if(cmp == 0) {
+            cmp = expr.compare(other.expr);
+        }
+        return cmp;
+    }
+    friend bool operator<(const GrammarElement& left, const GrammarElement& right) {
+        return left.compare(right) < 0;
+    }
+
+    inline bool is_terminal() const {
+        return(type == TERM_EXACT || type == TERM_REGEX);
+    }
+
+    inline std::string to_str() const {
+        const char *lb = "";
+        const char *rb = "";
+        switch(type) {
+            case TERM_EXACT: 
+                lb = "'";
+                rb = "'";
+                break;
+            case TERM_REGEX:
+                lb = "/";
+                rb = "/";
+                break;
+            case NONTERM_PRODUCTION:
+                lb = "";
+                rb = "";
+                break;
+            default:
+                lb = "??????";
+                rb = "??????";
+                break;
+        };
+
+        std::string out;
+        out += lb;
+        out += expr;
+        out += rb;
+
+        return out;
+    }
+};
+
+struct ProdExpr { // or step?
+    GrammarElement gexpr;
+
     int min_times;
     int max_times;
 
-    ProdExpr(const std::string &str, Type tp)
-        : expr(str), type(tp), min_times(1), max_times(1) { }
+    ProdExpr(const std::string &str, GrammarElement::Type tp)
+        : gexpr(str,tp), min_times(1), max_times(1) { }
 
-    bool is_terminal() {
-        return(type == TERM_EXACT || type == TERM_REGEX);
+    inline bool matches(const GrammarElement &other) const {
+        return gexpr.compare(other) == 0;
+    }
+
+    inline bool is_terminal() const {
+        return gexpr.is_terminal();
+    }
+
+    inline std::string production_name() const {
+        if(gexpr.type == GrammarElement::NONTERM_PRODUCTION) {
+            return gexpr.expr;
+        } else {
+            return "[NOT A PRODUCTION]";
+        }
+    }
+
+    inline std::string to_str() const {
+        std::string out(gexpr.to_str());
+
+        if((min_times != 1) || (max_times != 1)) {
+            out += "{";
+            out += std::to_string(min_times);
+            out += ",";
+            if(max_times == INT_MAX) {
+                out += "∞";
+            } else {
+                out += std::to_string(max_times);
+            }
+            out += "}";
+        }
+
+        return out;
     }
 };
 
@@ -209,20 +366,293 @@ struct ProductionRule {
     std::string product;
     std::vector<ProdExpr> steps;
     std::string code;
+    const utf8_byte *start_of_text;
+
+    ProductionRule(const utf8_byte *at) : start_of_text(at) {
+    }
 
     void add_step(ProdExpr step) {
         steps.push_back(step);
     }
+
+    // return NULL if index is out of bounds
+    const ProdExpr *step(unsigned int index) const {
+        if(index < steps.size()) {
+            return &steps[index];
+        }
+        return NULL;
+    }
+
+    std::string to_str() const {
+        std::string out;
+        for(auto step : steps) {
+            out += step.to_str();
+            out += " ";
+        }
+
+        if(!out.empty())
+            out.pop_back(); // remove trailing space
+
+        return out;
+    }
+
 };
 
-/*
-struct SourceSegment {
-    utf8_byte 
+class Productions {
+    const utf8_byte *source;
+
+    std::vector<ProductionRule>     rules;
+    std::multimap<std::string, int> rules_for_product; // product  -> rule ind
+
+    std::vector<const GrammarElement>     elements;
+    std::map<const GrammarElement, int>   element_index;
+
+    void record_element(const GrammarElement &nge) {
+        if(element_index.find(nge) == element_index.end()) {
+            element_index[nge] = elements.size();
+            elements.push_back(nge);
+        }
+    }
+
+    struct lr_item {
+        // Modified from classic lr - in our case,
+        // there's no "or" in rules so we can just
+        // refer to the rule itself.  So each item
+        // can be encoded as a rule ID and the step
+        // within that rule:
+        uint16_t rule;     // offset into rules
+        uint16_t position; // offset into rule->steps
+
+        friend bool operator<(const lr_item& left, const lr_item& right) {
+            if(left.rule == right.rule)
+                return left.position < right.position;
+            return left.rule < right.rule;
+        }
+
+        lr_item(int rl, int pos) : rule(rl), position(pos) { }
+
+        std::string to_str(const Productions *prds) const {
+            const ProductionRule &rl = prds->rules[rule];
+
+            const int bs = 40;
+            char buf[bs];
+            snprintf(buf, bs, "%s (rule %i):", rl.product.c_str(), rule);
+            std::string out(buf);
+            buf[bs - 1] = '\0';
+
+            int step;
+            for(step = 0; step < rl.steps.size(); ++step) {
+                out += " ";
+                if(step == position)
+                    out += "•";
+                out += rl.steps[step].to_str();
+            }
+            if(step == position)
+                out += "•";
+
+            return out;
+        }
+    };
+    inline const ProdExpr &lr_item_step(const lr_item &it) {
+        return rules[it.rule].steps[it.position];
+    }
+
+    struct lr_set {
+        std::string _id_cache;
+        std::set<lr_item> items;
+
+        lr_set() { }
+
+        // 1-item set:
+        lr_set(const lr_item &in) { items.insert(in); }
+
+        std::string id() {
+            if(_id_cache.length() == 0) { 
+                const int len = items.size()*4 + 1; // 4 digits per item
+                char buf[len];
+                char *bw = buf;
+                for(auto it : items) {
+                    snprintf(bw, 5, "%02x%02x", it.rule, it.position);
+                    bw += 4;
+                }
+                buf[len - 1] = '\0';
+                _id_cache = std::string(buf);
+            }
+            return _id_cache;
+        }
+
+        void add(const lr_set &set) {
+            for(auto it : set.items) {
+                items.insert(it);
+            }
+        }
+
+        std::string to_str(const Productions *prds, int indent = 0) const {
+            // efficient? probably not. do I care?
+            std::string out;
+            for(auto it : items) {
+                for(int ind = 0; ind < indent; ind++) {
+                    out.append("    ");
+                }
+                out.append(it.to_str(prds));
+                out.append("\n");
+            }
+            return out;
+        }
+    };
+
+    //void lr_closure_add_rules(lr_set &set, const ProdExpr *right_of_dot) {
+    void lr_closure_add_rules(lr_set &set, const ProductionRule &rule, int pos) {
+        const ProdExpr *right_of_dot = rule.step(pos);
+
+        if(right_of_dot && !right_of_dot->is_terminal()) {
+            // The thing to the right of the dot is a product,
+            // so we need to add items for each rule that can
+            // produce that (per the aho/sethi/ullman pg 222,
+            // rule #2, closure procedure).
+            std::string pname = right_of_dot->production_name();
+            auto strl  = rules_for_product.lower_bound(pname);
+            auto endrl = rules_for_product.upper_bound(pname);
+
+            if(strl == endrl) {
+                const utf8_byte *sot = rule.start_of_text;
+                fail(
+                    "Nothing produces «%s» "
+                    "(used by rule starting with «%.20s» at line %i\n",
+                    pname.c_str(), sot, line_number(source, sot)
+                );
+            }
+
+            for(auto rit = strl; rit != endrl; ++rit) {
+                // (these are always position 0)
+                set.items.insert(lr_item(rit->second, 0));
+            }
+        }
+    }
+
+    // based on the closure algorithm on page 222 of Aho, Sethi, Ullman
+    // (1988), but with the addition of support for the *+?! operators
+    // in fpl.
+    lr_set lr_closure(const lr_set &in) {
+        lr_set set = in;
+        int last_size;
+        do {
+            last_size = set.items.size();
+            // NOTE this could be a lot more efficient if we started
+            // at element (last_size - 1)...
+            for(auto &item: set.items) {
+                // support for *+?!
+                //   - the "+" case is no different from the default
+                //     here - we'll do the more-than-one case in the
+                //     generated code (by not advancing the state)
+                //   - the "*" and "?" cases:  since the expression is
+                //     optional, we do need to consider what's after
+                //     it as another possible start to a given match.
+                //   - "!" is complicated and might be unnecessary.
+                //     axe it? axing. consider it axed!
+                const ProductionRule &rule = rules[item.rule];
+                int pos = item.position;
+                const ProdExpr *right_of_dot;
+                // while loop here handles positions at eof (= NULL)
+                // as well helping handle optional expressions
+                // (i.e. expressions with "*" and "?"):
+                while(right_of_dot = rule.step(pos)) {
+                    //lr_closure_add_rules(set, right_of_dot);
+                    lr_closure_add_rules(set, rule, pos);
+
+                    // only need to keep looking for following symbols
+                    // if the current one is optional. so, if this expr
+                    // is not optional, we're done with this item:
+                    if(right_of_dot->min_times > 0) {
+                        break;
+                    }
+                    pos++;
+                }
+            }
+        } while(set.items.size() > last_size); // i.e. do until we add no more
+
+        return set;
+    }
+
+    // "goto" operation from page 224 Aho, Sethi and Ullman
+    lr_set lr_goto(const lr_set &in, const GrammarElement &sym) {
+        lr_set set;
+        for(auto item : in.items) {
+            const ProductionRule &rule = rules[item.rule];
+            const ProdExpr &step = rule.steps[item.position];
+            if(step.matches(sym)) {
+                set.add(lr_item(item.rule, item.position + 1));
+            }
+        }
+        return lr_closure(set);
+    }
+
+public:
+
+    Productions(const utf8_byte *src) : source(src) { }
+
+    void push_back(const ProductionRule &rule) {
+        int rule_num = rules.size();
+        rules.push_back(rule);
+
+        for(const ProdExpr &step : rule.steps) {
+            record_element(step.gexpr);
+        }
+
+        rules_for_product.insert(std::make_pair(rule.product, rule_num));
+    }
+
+    std::string code_for_state(const lr_set &set) {
+        for(auto item : set.items) {
+            //fprintf(stderr, "oh HAI we would generate code for a state here\n");
+        }
+        return "oh hai stuff here thanks";
+    }
+
+    void generate_code() {
+        // stuff we need to initialize before generating code:
+        //extract_terminals();
+
+        std::set<std::string> processed_set_ids;
+        const auto no_set = processed_set_ids.end();
+
+        std::vector<lr_set> states;
+
+        // for now, we're going to consider the first rule
+        // (rule 0) to be the starting point (and start with
+        // the first expression in that rule, of course):
+        states.push_back(lr_closure(lr_item(0, 0)));
+
+        // Aho, Sethi, and Ullman page 224... uhh, modified.
+        int latest_set = 0;
+        while(latest_set < states.size()) {
+            lr_set set = states[latest_set++];
+
+            for(auto elem : elements) {
+                lr_set state = lr_goto(set, elem);
+                if(state.items.size() > 0) {
+// fprintf(stderr, "   .. the goto «%s, %s» gave us %lu items so we'll push it (%s)\n", set.id().c_str(), elem.to_str().c_str(), state.items.size(), state.id().c_str());
+// fprintf(stderr, "%s went to\n", set.to_str(this, 3).c_str());
+// fprintf(stderr, "%s\n", state.to_str(this, 3).c_str());
+                    if(processed_set_ids.find(state.id()) == no_set) {
+                        states.push_back(state);
+                        processed_set_ids.insert(state.id());
+                    }
+                }
+            }
+        }
+
+        for(auto state : states) {
+            printf("/*\n%s */\n", state.to_str(this, 1).c_str());
+            printf("void state_%s() { \n", state.id().c_str());
+            printf("    %s\n", code_for_state(state).c_str());
+            printf("}\n\n");
+        }
+    }
 };
- */
 
 // TODO:
-//   - Make this the scanner class both for this and jest
+//   ~ Make this the scanner class both for this and jest
 //   x Support regex
 //   - rename it to something better
 //   - put this in its own header
@@ -232,8 +662,9 @@ struct SourceSegment {
 //     and within the read buffer.  This would also allow null/undef
 //     strings (eg with length -1 or position NULL).  you can easily
 //     convert to std::string using the lenght constructor, also.
+//     OR just keep it and don't worry
 //   - use string segments in the above classes.
-//   - fix cases where this doesn't count newlines for line number.
+//   x fix cases where this doesn't count newlines for line number.
 //     possibly do that by simply counting newlines only when asked.
 class SourceReader {
 public:
@@ -292,44 +723,6 @@ public:
         }
     }
 
-    // Returns the length of the encoding of the character at *in, in bytes.
-    // For purposes of this function, a character is a single utf-8 encoded
-    // character, or a multi-ascii-character newline, such as is used by
-    // ms dos and descendants.
-    // If the pointer passed points to the middle of a character, returns
-    // the length of the remaining bytes (or tries to - GIGO, at this point).
-    // Returns 0 if given a NULL pointer.
-    static size_t char_length(const utf8_byte *in) {
-        if(size_t nll = newline_length(in)) {
-            return nll;
-        }
-
-        if(!in) return 0;
-
-        // https://en.wikipedia.org/wiki/UTF-8#Encoding
-        // if the high bit isn't set, it's a single byte:
-        if((*in & 0x80) == 0) return 1;
-
-        // otherwise, if we're at the start of the character,
-        // the top 2 bits will be set, and bits following
-        // specify the size.  so if the top 2 bits are set,
-        // we'll assume we're at the start of a char and take
-        // that byte's word for it on the size:
-        if((*in & 0xe0) == 0xc0) return 2;  // 0b110x xxxx
-        if((*in & 0xf0) == 0xe0) return 3;  // 0b1110 xxxx
-        if((*in & 0xf8) == 0xf0) return 4;  // 0b1111 0xxx
-
-        // looks like we're in the middle of a character.
-        // count bytes until the start of a new character,
-        // which we can identify by either the top bit being 0
-        // or the top 2 bits being 1:
-        const utf8_byte *rd = in;
-        for(rd = in; *rd & 0x80; rd++) {
-            if((*in & 0xc0) == 0xc0) break; // start of char w/ code point > 127
-        }
-        return rd - in + 1;
-    }
-
     // XXX kill this and/or rename to unicode_codepoint or such...
     // or something.  and move it.
     static unich unicode_char(size_t &size_out, const utf8_byte *in) {
@@ -358,23 +751,7 @@ public:
     }
 
     int line_number(const utf8_byte *up_to = NULL) {
-        if(!up_to) up_to = buffer.data() + read_pos;
-
-        // we rescan for line numbers instead of keeping a counter
-        // because (1) it's easier than checking every read, which
-        // may or may not be multi-byte or whatever and (2) since
-        // the source file is (probably) small, and we only sometimes
-        // care about the line number, it's going to be either fast
-        // enough, or (with luck) net faster than keeping a line
-        // counter and updating it on every read.
-        int line_no = 1;
-        const utf8_byte *rd;
-        for(rd = buffer.data(); rd < up_to; rd += char_length(rd)) {
-            if(newline_length(rd)) {
-                line_no++;
-            }
-        }
-        return line_no;
+        return ::line_number(buffer.data(), up_to);
     }
 
     inline void skip_bytes(int skip) {
@@ -506,6 +883,9 @@ public:
                 expr.max_times = 1;
                 read_pos++;
                 break;
+          /*
+             don't need this and it's a PITA to implement in LR
+             because you have to invalidate prefixes:
             case '!':
                 // "!" means don't match this item.
                 // it's a suffix because that's
@@ -514,6 +894,7 @@ public:
                 expr.max_times = 0;
                 read_pos++;
                 break;
+           */
             default:
                 expr.min_times = 1;
                 expr.max_times = 1;
@@ -530,7 +911,7 @@ public:
             const utf8_byte *inp = inpp();
 
             std::string expr_str;
-            ProdExpr::Type type = ProdExpr::Type::NONE;
+            GrammarElement::Type type = GrammarElement::Type::NONE;
 
 	    switch(*inp) {
                 case '\0':
@@ -541,11 +922,11 @@ public:
                     break;
                 case '"':
                     expr_str = read_to_byte('"');
-                    type     = ProdExpr::Type::TERM_EXACT;
+                    type     = GrammarElement::Type::TERM_EXACT;
                     break;
                 case '/':
                     expr_str = read_to_byte('/');
-                    type     = ProdExpr::Type::TERM_REGEX;
+                    type     = GrammarElement::Type::TERM_REGEX;
                     break;
                 case '-':
                     read_byte();
@@ -559,11 +940,11 @@ public:
                 default:
                     // should be the name of a production
                     expr_str = read_re("[A-Za-z_]+")[0];
-                    type     = ProdExpr::Type::NONTERM_PRODUCTION;
+                    type     = GrammarElement::Type::NONTERM_PRODUCTION;
                     break;
 	    }
 
-            if(type != ProdExpr::Type::NONE) {
+            if(type != GrammarElement::Type::NONE) {
                 if(expr_str.length() >= 1) {
                     ProdExpr expr(expr_str, type);
                     read_quantifiers(expr);
@@ -655,15 +1036,6 @@ void usage() {
     );
 }
 
-void fail(const char *fmt...) {
-    va_list args;
-    va_start(args, fmt);
-    vfprintf(stderr, fmt, args);
-    va_end(args);
-
-    exit(1);
-}
-
 
 /*
  Input is:
@@ -684,10 +1056,10 @@ void fpl2cc(const char *infn) {
 
     SourceReader inp(in, fail);
 
-    std::multimap<std::string, ProductionRule> productions;
+    Productions productions(inp.buffer.data());
     const char *error;
     while(!inp.eof()) {
-        ProductionRule rule;
+        ProductionRule rule(inp.inpp());
 
         // read the expressions/steps leading to the production
         // (until and including the "->")
@@ -707,19 +1079,14 @@ void fpl2cc(const char *infn) {
             // read the code for the production
             rule.code = inp.read_code();
 
-for (auto step = rule.steps.begin() ; step != rule.steps.end(); ++step) {
-    printf("[%i-%i]%s%s ",
-        step->min_times, step->max_times, step->expr.c_str(), step->is_terminal()?".":""
-    );
-}
-printf("-> %s {\n%s\n}\n", rule.product.c_str(), rule.code.c_str());
-
-            // add it to the production table
-            productions.insert(std::pair<std::string, ProductionRule>(rule.product, rule));
+            // add it to the set of productions
+            productions.push_back(rule);
         }
 
         inp.eat_space();
     }
+
+    productions.generate_code();
 }
 
 int main(int argc, const char** argv) {
