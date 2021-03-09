@@ -1,5 +1,4 @@
 #include <climits>
-//#include <format> c++20
 #include <fstream>
 #include <map>
 #include <queue>
@@ -11,8 +10,6 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-
-//#include <jest_scanner.h>
 
 
 void fail(const char *fmt...) {
@@ -45,8 +42,6 @@ void fail(const char *fmt...) {
   Expressions may be followed (no space) by one of *, +, or ?
   to mean 0-or-more, 1-or-more, or 0-or-1 respectively.
 
-  Expressions may be preceeded by ! to mean "not match" (i.e. exactly 0).
-
   Comments start with "#" and go to the end of the line.
 
   All input tokens are separated by space.
@@ -58,10 +53,12 @@ void fail(const char *fmt...) {
   Code blocks access their corresponding expressions via pseudo-positional
   argument variables named arg[0..x] (so the first is called arg0, second
   arg1, etc).  The type of each argument variable depends on the types 
-  of the expressions:
+  and (possible) repetitions of the expressions:
     - quoted string      -> std::string
     - regular expression -> std::smatch
     - production name    -> Jest::Member
+
+  If there's any repetition,... XXX
 
   Code blocks should use a normal "return" statement to return a pointer
   to a Jest::Member.
@@ -610,9 +607,6 @@ public:
     }
 
     void generate_code() {
-        // stuff we need to initialize before generating code:
-        //extract_terminals();
-
         std::set<std::string> processed_set_ids;
         const auto no_set = processed_set_ids.end();
 
@@ -631,9 +625,6 @@ public:
             for(auto elem : elements) {
                 lr_set state = lr_goto(set, elem);
                 if(state.items.size() > 0) {
-// fprintf(stderr, "   .. the goto «%s, %s» gave us %lu items so we'll push it (%s)\n", set.id().c_str(), elem.to_str().c_str(), state.items.size(), state.id().c_str());
-// fprintf(stderr, "%s went to\n", set.to_str(this, 3).c_str());
-// fprintf(stderr, "%s\n", state.to_str(this, 3).c_str());
                     if(processed_set_ids.find(state.id()) == no_set) {
                         states.push_back(state);
                         processed_set_ids.insert(state.id());
@@ -725,6 +716,8 @@ public:
 
     // XXX kill this and/or rename to unicode_codepoint or such...
     // or something.  and move it.
+    // The value of size_out will be set to the size in bytes of
+    // the utf-8 representation of the character (scanned from *in)
     static unich unicode_char(size_t &size_out, const utf8_byte *in) {
         if(!in) {
             size_out = 0;
@@ -776,7 +769,6 @@ public:
         skip_bytes(nll); // line comment includes the terminating newline
     }
 
-    // XXX might no longer be necessary
     std::string read_to_space() {
         const utf8_byte *start = inpp();
         size_t length = 0;
@@ -803,8 +795,6 @@ public:
     inline bool read_byte_equalling(char chr) {
         if(const utf8_byte *in = inpp()) {
             if(*in == chr) {
-                // XXX note we're not counting newlines in this case.
-                // none of the callers use this to read a newline.
                 read_pos++;
                 return true;
             }
@@ -835,7 +825,6 @@ public:
         skip_bytes(1); // XXX convert this whole thing to utf-8
         const utf8_byte *start = inpp();
 
-        // XXX this is weak...
         if(!*start) return std::string("");
 
         size_t total_size = 0;
@@ -1000,7 +989,7 @@ public:
 
          if(start && end) {
              return to_std_string(start, end - start);
-         } // XXX else error
+         }
 
          // else error - no start of code or ';'
          error("expected start of code (\"+{\") or \";\"");
