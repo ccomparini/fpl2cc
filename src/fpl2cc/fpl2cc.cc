@@ -225,6 +225,25 @@ int line_number(const utf8_byte *start, const utf8_byte *end) {
 }
 
 /*
+   Returns a version of the string passed which is suitable for
+   embedding in a c (or c++) program
+ */
+std::string c_str_escape(const std::string src) {
+    std::string escaped;
+    for(const char &inch : src) {
+        // escape quotes and backslashes so that they make
+        // it through the c compiler without prematurely
+        // terminating the string:
+        if(inch == '"' || inch == '\\') {
+            escaped += '\\';
+        } // else normal char
+
+        escaped += inch;
+    }
+    return escaped;
+}
+
+/*
 
 Production rules are ordered;  first one matches.
 
@@ -328,6 +347,10 @@ struct ProdExpr { // or step?
         return gexpr.compare(other) == 0;
     }
 
+    inline GrammarElement::Type type() const {
+        return gexpr.type;
+    }
+
     inline bool is_terminal() const {
         return gexpr.is_terminal();
     }
@@ -337,6 +360,14 @@ struct ProdExpr { // or step?
             return gexpr.expr;
         } else {
             return "[NOT A PRODUCTION]";
+        }
+    }
+
+    inline std::string terminal_string() const {
+        if(is_terminal()) {
+            return gexpr.expr; 
+        } else {
+            return "[NOT TERMINAL]";
         }
     }
 
@@ -404,6 +435,10 @@ class Productions {
     std::vector<const GrammarElement>     elements;
     std::map<const GrammarElement, int>   element_index;
 
+    struct lr_set;
+    std::vector<lr_set> states;
+    std::map<const std::string, int> state_index; // keyed by set id
+
     void record_element(const GrammarElement &nge) {
         if(element_index.find(nge) == element_index.end()) {
             element_index[nge] = elements.size();
@@ -455,7 +490,7 @@ class Productions {
     }
 
     struct lr_set {
-        std::string _id_cache;
+        mutable std::string _id_cache;
         std::set<lr_item> items;
 
         lr_set() { }
@@ -463,7 +498,9 @@ class Productions {
         // 1-item set:
         lr_set(const lr_item &in) { items.insert(in); }
 
-        std::string id() {
+        // the id of the set is a unique string which can be compared
+        // determine if 2 sets are identical or not.
+        std::string id() const {
             if(_id_cache.length() == 0) { 
                 const int len = items.size()*4 + 1; // 4 digits per item
                 char buf[len];
@@ -484,10 +521,15 @@ class Productions {
             }
         }
 
-        std::string to_str(const Productions *prds, int indent = 0) const {
+        std::string to_str(
+            const Productions *prds,
+            int indent = 0,
+            const char *line_prefix = ""
+        ) const {
             // efficient? probably not. do I care?
             std::string out;
             for(auto it : items) {
+                out.append(line_prefix);
                 for(int ind = 0; ind < indent; ind++) {
                     out.append("    ");
                 }
@@ -498,7 +540,6 @@ class Productions {
         }
     };
 
-    //void lr_closure_add_rules(lr_set &set, const ProdExpr *right_of_dot) {
     void lr_closure_add_rules(lr_set &set, const ProductionRule &rule, int pos) {
         const ProdExpr *right_of_dot = rule.step(pos);
 
@@ -599,18 +640,74 @@ public:
         rules_for_product.insert(std::make_pair(rule.product, rule_num));
     }
 
-    std::string code_for_state(const lr_set &set) {
-        for(auto item : set.items) {
-            //fprintf(stderr, "oh HAI we would generate code for a state here\n");
+    // returns the name of the function to use for the
+    // given state
+    std::string state_fn(const lr_set &state) {
+        std::string fn("state_");
+        int state_num = state_index[state.id()];
+        fn += std::to_string(state_num);
+        return fn;
+    }
+
+    std::string code_for_state(const lr_set &state) {
+        const std::string ind = "    "; // indent string
+        std::string out;
+        int state_num = state_index[state.id()];
+
+        out += "//\n";
+        out += state.to_str(this, 1, "//");
+        out += "//\n";
+        out += "void "; out += state_fn(state); out += "() {\n";
+
+        // if we match a terminal, we need to shift and go
+        // to a new state ("rule 1"):
+        int terminals_so_far = 0;
+        for(auto item : state.items) {
+            const ProductionRule &rule = rules[item.rule];
+            const ProdExpr *step = rule.step(item.position);
+            if(step) {
+                if(step->is_terminal()) {
+                    out += ind;
+                    if(terminals_so_far > 0) {
+                        out += "else ";
+                    }
+
+                    out += "if(";
+                    switch(step->type()) {
+                        case GrammarElement::TERM_EXACT:
+                            out += "shift_exact(\"";
+                            out += step->terminal_string();
+                            break;
+                        case GrammarElement::TERM_REGEX:
+                            out += "shift_re(\"";
+                            out += c_str_escape(step->terminal_string());
+                            break;
+                        default:
+                            fail(
+                                "bug: unknown type %i at %i in state %s",
+                                step->type(), item.position, state.id().c_str()
+                            );
+                            break;
+                    }
+                    out += "\")) {\n";
+                    out += ind + ind + "// " + item.to_str(this) + "\n";
+                    out += ind + ind + state_fn(state) + "();\n";
+                    out += ind + "}\n";
+
+                    terminals_so_far++;
+                }
+            } // else we expect eof XXX... I think
         }
-        return "oh hai stuff here thanks";
+        out += "\n\n    // XXX reduce code here thanks\n";
+
+        out += "}\n"; // end of state_ function
+
+        return out;
     }
 
     void generate_code() {
         std::set<std::string> processed_set_ids;
         const auto no_set = processed_set_ids.end();
-
-        std::vector<lr_set> states;
 
         // for now, we're going to consider the first rule
         // (rule 0) to be the starting point (and start with
@@ -633,11 +730,10 @@ public:
             }
         }
 
-        for(auto state : states) {
-            printf("/*\n%s */\n", state.to_str(this, 1).c_str());
-            printf("void state_%s() { \n", state.id().c_str());
-            printf("    %s\n", code_for_state(state).c_str());
-            printf("}\n\n");
+        for(int stind = 0; stind < states.size(); ++stind) {
+            lr_set state = states[stind];
+            state_index.insert(std::make_pair(state.id(), stind));
+            printf("%s\n", code_for_state(state).c_str());
         }
     }
 };
