@@ -273,7 +273,7 @@ Anyway, given a certain position in the text,
  */
 
 struct GrammarElement {
-    std::string expr; // either a regex, string or name of product
+    std::string expr; // either a string, regex, or name of product
     typedef enum {
         NONE,
         TERM_EXACT,
@@ -439,6 +439,13 @@ class Productions {
     std::vector<lr_set> states;
     std::map<const std::string, int> state_index; // keyed by set id
 
+    void add_state(const lr_set &st) {
+        state_index.insert(
+            std::make_pair(st.id(), states.size())
+        );
+        states.push_back(st);
+    }
+
     void record_element(const GrammarElement &nge) {
         if(element_index.find(nge) == element_index.end()) {
             element_index[nge] = elements.size();
@@ -498,8 +505,9 @@ class Productions {
         // 1-item set:
         lr_set(const lr_item &in) { items.insert(in); }
 
-        // the id of the set is a unique string which can be compared
-        // determine if 2 sets are identical or not.
+        // The id of the set is a string generated from the
+        // content of the item which can be compared to determine
+        // if 2 sets are identical or not.
         std::string id() const {
             if(_id_cache.length() == 0) { 
                 const int len = items.size()*4 + 1; // 4 digits per item
@@ -595,7 +603,6 @@ class Productions {
                 // as well helping handle optional expressions
                 // (i.e. expressions with "*" and "?"):
                 while(right_of_dot = rule.step(pos)) {
-                    //lr_closure_add_rules(set, right_of_dot);
                     lr_closure_add_rules(set, rule, pos);
 
                     // only need to keep looking for following symbols
@@ -616,9 +623,9 @@ class Productions {
     lr_set lr_goto(const lr_set &in, const GrammarElement &sym) {
         lr_set set;
         for(auto item : in.items) {
-            const ProductionRule &rule = rules[item.rule];
-            const ProdExpr &step = rule.steps[item.position];
-            if(step.matches(sym)) {
+            const ProdExpr *step = rules[item.rule].step(item.position);
+            if(step && step->matches(sym)) {
+                // XXX need to deal with repetitions/optionals here,
                 set.add(lr_item(item.rule, item.position + 1));
             }
         }
@@ -649,56 +656,99 @@ public:
         return fn;
     }
 
+
+    /*
+       Let's say:
+
+       struct { const utf8_byte *pos, int length, operator bool() } terminal;
+       .. length <= 0 is a false value.  Alternately pos = NULL.
+
+       struct { void *product, int grammar_element_id  } production;
+
+       terminal scan_xxx() returns the terminal or one with length <= 0.
+       can be inline.  
+
+       state_x() {
+           terminal scanned; 
+           production prod;
+
+           if(scanned = scan_xxx(...)) {
+               prod = state_y();
+           } else if(scanned = scan_xxx(...)) {
+               prod = state_z();
+           } .. etc
+
+           if(prod.grammar_element_id == 
+           } .. else if next prod.grammar_element_id ==
+
+           return mem;
+       }
+    */
+    std::string code_for_terminals(const lr_set &state, const std::string &ind) {
+        std::string out;
+
+        int cases_so_far = 0;
+        for(auto item : state.items) {
+            const ProductionRule &rule = rules[item.rule];
+            const ProdExpr *right_of_dot = rule.step(item.position);
+            if(right_of_dot) {
+                if(right_of_dot->is_terminal()) {
+                    out += ind;
+                    if(cases_so_far > 0) {
+                        out += "else ";
+                    }
+
+                    // if we match a terminal, we need to shift and go
+                    // to a new state:
+                    out += "if(";
+                    switch(right_of_dot->type()) {
+                        case GrammarElement::TERM_EXACT:
+                            out += "shift_exact(\"";
+                            out += right_of_dot->terminal_string();
+                            break;
+                        case GrammarElement::TERM_REGEX:
+                            out += "shift_re(\"";
+                            out += c_str_escape(right_of_dot->terminal_string());
+                            break;
+                        default:
+                            fail(
+                                "bug: unknown type %i at %i in state %s",
+                                right_of_dot->type(), item.position, state.id().c_str()
+                            );
+                            break;
+                    }
+                    out += "\")) {\n";
+                    out += ind + ind + "// " + item.to_str(this) + "\n";
+                    lr_set next_state = lr_goto(state, right_of_dot->gexpr);
+                    out += ind + ind + state_fn(next_state) + "();\n";
+                    out += ind + "}\n";
+
+                    cases_so_far++;
+                }
+            }
+        }
+
+        return out;
+    }
+
     std::string code_for_state(const lr_set &state) {
         const std::string ind = "    "; // indent string
         std::string out;
-        int state_num = state_index[state.id()];
 
         out += "//\n";
         out += state.to_str(this, 1, "//");
         out += "//\n";
         out += "void "; out += state_fn(state); out += "() {\n";
 
-        // if we match a terminal, we need to shift and go
-        // to a new state ("rule 1"):
-        int terminals_so_far = 0;
-        for(auto item : state.items) {
-            const ProductionRule &rule = rules[item.rule];
-            const ProdExpr *step = rule.step(item.position);
-            if(step) {
-                if(step->is_terminal()) {
-                    out += ind;
-                    if(terminals_so_far > 0) {
-                        out += "else ";
-                    }
+        out += code_for_terminals(state, ind);
 
-                    out += "if(";
-                    switch(step->type()) {
-                        case GrammarElement::TERM_EXACT:
-                            out += "shift_exact(\"";
-                            out += step->terminal_string();
-                            break;
-                        case GrammarElement::TERM_REGEX:
-                            out += "shift_re(\"";
-                            out += c_str_escape(step->terminal_string());
-                            break;
-                        default:
-                            fail(
-                                "bug: unknown type %i at %i in state %s",
-                                step->type(), item.position, state.id().c_str()
-                            );
-                            break;
-                    }
-                    out += "\")) {\n";
-                    out += ind + ind + "// " + item.to_str(this) + "\n";
-                    out += ind + ind + state_fn(state) + "();\n";
-                    out += ind + "}\n";
+        //out += code_for_productions(state, ind);
 
-                    terminals_so_far++;
-                }
-            } // else we expect eof XXX... I think
-        }
-        out += "\n\n    // XXX reduce code here thanks\n";
+        // if we're at the end of the item we need to reduce
+        // according to the next possible 
+        //out += "\n\n    // XXX reduce code here thanks\n";
+        out += "\n\n";
+        //out += 
 
         out += "}\n"; // end of state_ function
 
@@ -706,13 +756,12 @@ public:
     }
 
     void generate_code() {
-        std::set<std::string> processed_set_ids;
-        const auto no_set = processed_set_ids.end();
+        const auto no_set = state_index.end();
 
         // for now, we're going to consider the first rule
         // (rule 0) to be the starting point (and start with
         // the first expression in that rule, of course):
-        states.push_back(lr_closure(lr_item(0, 0)));
+        add_state(lr_closure(lr_item(0, 0)));
 
         // Aho, Sethi, and Ullman page 224... uhh, modified.
         int latest_set = 0;
@@ -722,17 +771,14 @@ public:
             for(auto elem : elements) {
                 lr_set state = lr_goto(set, elem);
                 if(state.items.size() > 0) {
-                    if(processed_set_ids.find(state.id()) == no_set) {
-                        states.push_back(state);
-                        processed_set_ids.insert(state.id());
+                    if(state_index.find(state.id()) == no_set) {
+                        add_state(state);
                     }
                 }
             }
         }
 
-        for(int stind = 0; stind < states.size(); ++stind) {
-            lr_set state = states[stind];
-            state_index.insert(std::make_pair(state.id(), stind));
+        for(lr_set state : states) {
             printf("%s\n", code_for_state(state).c_str());
         }
     }
