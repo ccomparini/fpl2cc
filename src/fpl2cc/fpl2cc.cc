@@ -678,8 +678,9 @@ public:
                prod = state_z();
            } .. etc
 
-           if(prod.grammar_element_id == 
-           } .. else if next prod.grammar_element_id ==
+           if(prod.grammar_element_id == whatever element id)
+           } .. else if next prod.grammar_element_id == ...) {
+           } .. etc
 
            return mem;
        }
@@ -700,6 +701,7 @@ public:
 
                     // if we match a terminal, we need to shift and go
                     // to a new state:
+                    lr_set next_state = lr_goto(state, right_of_dot->gexpr);
                     out += "if(";
                     switch(right_of_dot->type()) {
                         case GrammarElement::TERM_EXACT:
@@ -719,7 +721,6 @@ public:
                     }
                     out += "\")) {\n";
                     out += ind + ind + "// " + item.to_str(this) + "\n";
-                    lr_set next_state = lr_goto(state, right_of_dot->gexpr);
                     out += ind + ind + state_fn(next_state) + "();\n";
                     out += ind + "}\n";
 
@@ -731,6 +732,32 @@ public:
         return out;
     }
 
+    std::string code_for_prods(const lr_set &state, const std::string &ind) {
+        std::string out;
+        std::map<int, int> element_ids_done;
+
+        for(auto item : state.items) {
+            const ProdExpr *right_of_dot = rules[item.rule].step(item.position);
+            if(right_of_dot) {
+                if(right_of_dot->type() == GrammarElement::NONTERM_PRODUCTION) {
+                    int el_id = element_index[right_of_dot->gexpr];
+
+                    if(element_ids_done.find(el_id) == element_ids_done.end()) {
+                        lr_set next_state = lr_goto(state, right_of_dot->gexpr);
+                        if(element_ids_done.size() > 0)
+                            out += ind + "else ";
+                        out += ind + "if(prd.grammar_element_id == " + std::to_string(el_id) + ") {\n";
+                        out += ind + ind + "// " + item.to_str(this) + "\n";
+                        out += ind + ind + "prd = " + state_fn(next_state) + "();\n";
+                        out += ind + "}\n";
+                        element_ids_done[el_id] = state_index[state.id()];
+                    }
+                }
+            }
+        }
+        return out;
+    }
+
     std::string code_for_state(const lr_set &state) {
         const std::string ind = "    "; // indent string
         std::string out;
@@ -738,16 +765,15 @@ public:
         out += "//\n";
         out += state.to_str(this, 1, "//");
         out += "//\n";
-        out += "void "; out += state_fn(state); out += "() {\n";
+        out += "production "; out += state_fn(state); out += "() {\n";
 
-        out += code_for_terminals(state, ind);
+        out += code_for_terminals(state, ind) + "\n";
 
-        //out += code_for_productions(state, ind);
+        out += code_for_prods(state, ind) + "\n";
 
         // if we're at the end of the item we need to reduce
         // according to the next possible 
-        //out += "\n\n    // XXX reduce code here thanks\n";
-        out += "\n\n";
+        out += "\n    // XXX reduce code here thanks\n";
         //out += 
 
         out += "}\n"; // end of state_ function
