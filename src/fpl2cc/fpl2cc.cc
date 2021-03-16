@@ -203,8 +203,6 @@ static size_t char_length(const utf8_byte *in) {
     return rd - in + 1;
 }
 
-
-
 int line_number(const utf8_byte *start, const utf8_byte *end) {
 
     // we rescan for line numbers instead of keeping a counter
@@ -223,6 +221,218 @@ int line_number(const utf8_byte *start, const utf8_byte *end) {
     }
     return line_no;
 }
+
+class SourceReader {
+    std::string input_filename;
+    utf8_buffer buffer;
+
+    ErrorCallback *on_error;
+    size_t read_pos;
+public:
+    //SourceReader(std::ifstream &in, ErrorCallback *ecb) :
+    SourceReader(const char *infn, ErrorCallback *ecb) :
+        input_filename(infn),
+        on_error(ecb),
+        read_pos(0)
+    {
+        std::ifstream in(infn);
+        if(!in.is_open()) {
+            fail("can't open '%s': %s\n", infn, strerror(errno));
+        }
+
+        in.seekg(0, std::ios::end);   
+        size_t filesize = in.tellg();
+        in.seekg(0, std::ios::beg);
+
+        // stdlib templates are giving me a pita with the iterator approach
+        // because of the char/utf8_byte thing so Im just going to buffer
+        // and copy
+        utf8_byte buf[filesize + 1];
+        in.read(reinterpret_cast<char *>(buf), filesize + 1);
+        buf[filesize] = '\0';
+        buffer.assign(buf, filesize + 1);
+    }
+
+    std::string base_name() const {
+        // "base name" is everything before the first "."
+        // in the filename...
+        size_t end_of_base = input_filename.find(".");
+        if(end_of_base > 0) {
+            return input_filename.substr(0, end_of_base);
+        }
+
+        // .. or, if there's no ".", it's the whole filename:
+        return input_filename;
+    }
+
+    void error(const char *fmt...) {
+        const int buf_size = 1024;
+        char msg_fmt[buf_size];
+        snprintf(msg_fmt, buf_size,
+            "Error line %i near \"%.12s\": %s\n", line_number(), inpp(), fmt
+        );
+
+        char full_msg[buf_size];
+        va_list args;
+        va_start(args, fmt);
+        vsnprintf(full_msg, buf_size, msg_fmt, args);
+        va_end(args);
+
+        on_error(full_msg);
+    }
+
+    inline bool eof() {
+        // -1 is because we stuff a '\0' at the end of the buffer
+        return read_pos >= buffer.length() - 1;
+    }
+
+    inline const utf8_byte *inpp() {
+        if(!eof()) {
+            return buffer.data() + read_pos;
+        } else {
+            return NULL;
+        }
+    }
+
+    // XXX kill this and/or rename to unicode_codepoint or such...
+    // or something.  and move it.
+    // The value of size_out will be set to the size in bytes of
+    // the utf-8 representation of the character (scanned from *in)
+    static unich unicode_char(size_t &size_out, const utf8_byte *in) {
+        if(!in) {
+            size_out = 0;
+            return '\0';
+        }
+
+        unich out;
+        uint8_t acc = in[0];
+        out = acc & 0x7f;
+        size_out = 1;
+        while((acc & 0xc0) == 0xc0) {
+            acc <<= 1;
+            unich inb = in[size_out];
+            if((inb & 0xc0) != 0x80) {
+                // invalid input...
+                fprintf(stderr, "invalid utf-8 byte 0x%0x\n", inb);
+                // (but I guess blaze on..)
+            }
+            out |= inb << size_out*6;
+            size_out++;
+        }
+
+        return out;
+    }
+
+    int line_number(const utf8_byte *up_to = NULL) {
+        return ::line_number(buffer.data(), up_to);
+    }
+
+    inline void skip_bytes(int skip) {
+        read_pos += skip;
+    }
+
+    inline void skip_char() {
+        read_pos += char_length(inpp());
+    }
+
+    void eat_space() {
+        while(size_t adv = space_length(inpp())) {
+            skip_bytes(adv);
+        }
+    }
+
+    void eat_comment() {
+        size_t nll;
+        while(!(nll = newline_length(inpp()))) {
+            skip_char();
+        }
+        skip_bytes(nll); // line comment includes the terminating newline
+    }
+
+    std::string read_to_space() {
+        const utf8_byte *start = inpp();
+        size_t length = 0;
+        while(const utf8_byte *in = inpp()) {
+            if(space_length(in))
+                break;
+
+            size_t len = char_length(in);
+            length += len;
+            skip_bytes(len);
+        }
+
+        return to_std_string(start, length);
+    }
+
+    inline char read_byte() {
+        if(const utf8_byte *in = inpp()) {
+            read_pos++;
+            return *in;
+        }
+        return '\0';
+    }
+
+    inline bool read_byte_equalling(char chr) {
+        if(const utf8_byte *in = inpp()) {
+            if(*in == chr) {
+                read_pos++;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    inline std::string read_to_byte(utf8_byte end_char) {
+        return read_to_match('\0', end_char);
+    }
+
+    inline std::cmatch read_re(const char *re) {
+        std::cmatch matched;
+        // match_continuous is so that it will start the
+        // match at exactly at the inpp (and ideally won't
+        // try to keep matching the rest of the input)
+        auto opts = std::regex_constants::match_continuous;
+        const char *inp = reinterpret_cast<const char *>(inpp());
+        if(std::regex_search(inp, matched, std::regex(re), opts)) {
+            read_pos += matched.length();
+        }
+        return matched;
+    }
+
+    // returns the string inside the matching chars.
+    // returns empty string if no match.  yeah, it's ambiguous.. hmm
+    std::string read_to_match(unich start_match, unich end_match) {
+        skip_bytes(1); // XXX convert this whole thing to utf-8
+        const utf8_byte *start = inpp();
+
+        if(!*start) return std::string("");
+
+        size_t total_size = 0;
+        // XXX how did passing '\0' as start of match work before, when this
+        // started at depth 0?  test this whole thing.  the escaping is also suspect.
+        int depth = 1; // assume we're starting on a match
+        do {
+            size_t size;
+            unich in = unicode_char(size, inpp());
+            if(in == start_match) {
+                depth++;
+            } else if(in == end_match) {
+                depth--;
+            } else if(in == '\\') {
+                // next char is escaped - skip it:
+                read_pos   += size;
+                total_size += size;
+            }
+            read_pos   += size;
+            total_size += size;
+        } while(depth > 0);
+
+        // string length total_size - 1 so as to not include the
+        // terminating char
+        return to_std_string(start, total_size - 1);
+    }
+
+};
 
 /*
    Returns a version of the string passed which is suitable for
@@ -656,6 +866,12 @@ public:
         return fn;
     }
 
+/*
+    // returns the name to use for the public class for the generated parser
+    std::string class_name() {
+        return base_name();
+    }
+ */
 
     /*
        Let's say:
@@ -682,7 +898,10 @@ public:
            } .. else if next prod.grammar_element_id == ...) {
            } .. etc
 
-           return mem;
+           // .. call the production code for the rule here,
+           // with ... hmm params
+
+           return prod;
        }
     */
     std::string code_for_terminals(const lr_set &state, const std::string &ind) {
@@ -742,15 +961,25 @@ public:
                 if(right_of_dot->type() == GrammarElement::NONTERM_PRODUCTION) {
                     int el_id = element_index[right_of_dot->gexpr];
 
-                    if(element_ids_done.find(el_id) == element_ids_done.end()) {
+                    auto existing = element_ids_done.find(el_id);
+                    if(existing == element_ids_done.end()) { // i.e. no existing code for this
                         lr_set next_state = lr_goto(state, right_of_dot->gexpr);
+                        out += ind;
                         if(element_ids_done.size() > 0)
-                            out += ind + "else ";
-                        out += ind + "if(prd.grammar_element_id == " + std::to_string(el_id) + ") {\n";
+                            out += "else ";
+                        out += "if(prd.grammar_element_id == " + std::to_string(el_id) + ") {\n";
                         out += ind + ind + "// " + item.to_str(this) + "\n";
                         out += ind + ind + "prd = " + state_fn(next_state) + "();\n";
                         out += ind + "}\n";
                         element_ids_done[el_id] = state_index[state.id()];
+                    } else if(existing->second != state_index[state.id()]) {
+                        // gar this error message could be more informative.
+                        // we might really want to know what the current item is
+                        // conflicting _with_.. hmm
+                        fail(
+                            "conflicting gotos for %s\n",
+                            item.to_str(this).c_str()
+                        );
                     }
                 }
             }
@@ -765,7 +994,8 @@ public:
         out += "//\n";
         out += state.to_str(this, 1, "//");
         out += "//\n";
-        out += "production "; out += state_fn(state); out += "() {\n";
+        out += "FPLBaseParser::product "; out += state_fn(state); out += "() {\n";
+        out += ind + "product prd;\n";
 
         out += code_for_terminals(state, ind) + "\n";
 
@@ -774,14 +1004,14 @@ public:
         // if we're at the end of the item we need to reduce
         // according to the next possible 
         out += "\n    // XXX reduce code here thanks\n";
-        //out += 
 
+        out += ind + "return prd;\n";
         out += "}\n"; // end of state_ function
 
         return out;
     }
 
-    void generate_code() {
+    void generate_code(const SourceReader &src) {
         const auto no_set = state_index.end();
 
         // for now, we're going to consider the first rule
@@ -804,395 +1034,159 @@ public:
             }
         }
 
-        for(lr_set state : states) {
-            printf("%s\n", code_for_state(state).c_str());
+        std::string out = "#include \"fpl2cc/fpl_base_parser.h\"\n\n";
+        out += "class " + src.base_name() + "_parser : FPLBaseParser {\n";
+
+/*
+        // reverse helps with inlining (I hope).
+        for(auto it = states.rbegin(); it != states.rend(); ++it) {
+            out += code_for_state(*it).c_str();
         }
+ */
+        for(lr_set state : states) {
+            out += code_for_state(state).c_str();
+        }
+
+        out += "};\n"; // end of class
+
+        printf("%s\n", out.c_str());
     }
 };
 
-// TODO:
-//   ~ Make this the scanner class both for this and jest
-//   x Support regex
-//   - rename it to something better
-//   - put this in its own header
-//   - don't use std::string because it's not COW.  instead use
-//     string segments consisting of either utf8_byte * and length
-//     or offset and length.  string segments are always immutable
-//     and within the read buffer.  This would also allow null/undef
-//     strings (eg with length -1 or position NULL).  you can easily
-//     convert to std::string using the lenght constructor, also.
-//     OR just keep it and don't worry
-//   - use string segments in the above classes.
-//   x fix cases where this doesn't count newlines for line number.
-//     possibly do that by simply counting newlines only when asked.
-class SourceReader {
-public:
-    utf8_buffer buffer;
+void read_quantifiers(SourceReader &src, ProdExpr &expr) {
+    const utf8_byte *inp = src.inpp();
+    if(!inp) return; // EOF.  this is really an error..
 
-    ErrorCallback *on_error;
-    size_t read_pos;
-public:
-    SourceReader(std::ifstream &in, ErrorCallback *ecb) :
-        on_error(ecb),
-        read_pos(0)
-    {
-        in.seekg(0, std::ios::end);   
-        size_t filesize = in.tellg();
-        in.seekg(0, std::ios::beg);
-
-        // stdlib templates are giving me a pita with the iterator approach
-        // because of the char/utf8_byte thing so Im just going to buffer
-        // and copy, though it gives me a pain.
-        // .. come to think of it, is there any advantage really in using
-        // a std container here for the buffer?  maybe just read it straight
-        // and free it in a destructor.
-
-        utf8_byte buf[filesize + 1];
-        in.read(reinterpret_cast<char *>(buf), filesize + 1);
-        buf[filesize] = '\0';
-        buffer.assign(buf, filesize + 1);
-    }
-
-    void error(const char *fmt...) {
-        const int buf_size = 1024;
-        char msg_fmt[buf_size];
-        snprintf(msg_fmt, buf_size,
-            "Error line %i near \"%.12s\": %s\n", line_number(), inpp(), fmt
-        );
-
-        char full_msg[buf_size];
-        va_list args;
-        va_start(args, fmt);
-        vsnprintf(full_msg, buf_size, msg_fmt, args);
-        va_end(args);
-
-        on_error(full_msg);
-    }
-
-    inline bool eof() {
-        // -1 is because we stuff a '\0' at the end of the buffer
-        return read_pos >= buffer.length() - 1;
-    }
-
-    inline const utf8_byte *inpp() {
-        if(!eof()) {
-            return buffer.data() + read_pos;
-        } else {
-            return NULL;
-        }
-    }
-
-    // XXX kill this and/or rename to unicode_codepoint or such...
-    // or something.  and move it.
-    // The value of size_out will be set to the size in bytes of
-    // the utf-8 representation of the character (scanned from *in)
-    static unich unicode_char(size_t &size_out, const utf8_byte *in) {
-        if(!in) {
-            size_out = 0;
-            return '\0';
-        }
-
-        unich out;
-        uint8_t acc = in[0];
-        out = acc & 0x7f;
-        size_out = 1;
-        while((acc & 0xc0) == 0xc0) {
-            acc <<= 1;
-            unich inb = in[size_out];
-            if((inb & 0xc0) != 0x80) {
-                // invalid input...
-                fprintf(stderr, "invalid utf-8 byte 0x%0x\n", inb);
-                // (but I guess blaze on..)
-            }
-            out |= inb << size_out*6;
-            size_out++;
-        }
-
-        return out;
-    }
-
-    int line_number(const utf8_byte *up_to = NULL) {
-        return ::line_number(buffer.data(), up_to);
-    }
-
-    inline void skip_bytes(int skip) {
-        read_pos += skip;
-    }
-
-    inline void skip_char() {
-        read_pos += char_length(inpp());
-    }
-
-    void eat_space() {
-        while(size_t adv = space_length(inpp())) {
-            skip_bytes(adv);
-        }
-    }
-
-    void eat_comment() {
-        size_t nll;
-        while(!(nll = newline_length(inpp()))) {
-            skip_char();
-        }
-        skip_bytes(nll); // line comment includes the terminating newline
-    }
-
-    std::string read_to_space() {
-        const utf8_byte *start = inpp();
-        size_t length = 0;
-        while(const utf8_byte *in = inpp()) {
-            if(space_length(in))
-                break;
-
-            size_t len = char_length(in);
-            length += len;
-            skip_bytes(len);
-        }
-
-        return to_std_string(start, length);
-    }
-
-    inline char read_byte() {
-        if(const utf8_byte *in = inpp()) {
+    switch(*inp) {
+        case '*':
+            expr.min_times = 0;
+            expr.max_times = INT_MAX;
+            src.skip_bytes(1);
+            break;
+        case '+':
+            expr.min_times = 1;
+            expr.max_times = INT_MAX;
+            src.skip_bytes(1);
+            break;
+        case '?':
+            expr.min_times = 0;
+            expr.max_times = 1;
+            src.skip_bytes(1);
+            break;
+      /*
+         don't need this and it's a PITA to implement in LR
+         because you have to invalidate prefixes:
+        case '!':
+            // "!" means don't match this item.
+            // it's a suffix because that's
+            // easier for me to parse.
+            expr.min_times = 0;
+            expr.max_times = 0;
             read_pos++;
-            return *in;
-        }
-        return '\0';
+            break;
+       */
+        default:
+            expr.min_times = 1;
+            expr.max_times = 1;
+            break;
     }
+}
 
-    inline bool read_byte_equalling(char chr) {
-        if(const utf8_byte *in = inpp()) {
-            if(*in == chr) {
-                read_pos++;
-                return true;
-            }
-        }
-        return false;
-    }
+int read_expressions(SourceReader &src, ProductionRule &rule) {
+    int num_read = 0;
+    bool done = false;
+    do {
+        src.eat_space();
 
-    inline std::string read_to_byte(utf8_byte end_char) {
-        return read_to_match('\0', end_char);
-    }
+        const utf8_byte *inp = src.inpp();
 
-    inline std::cmatch read_re(const char *re) {
-        std::cmatch matched;
-        // match_continuous is so that it will start the
-        // match at exactly at the inpp (and ideally won't
-        // try to keep matching the rest of the input)
-        auto opts = std::regex_constants::match_continuous;
-        const char *inp = reinterpret_cast<const char *>(inpp());
-        if(std::regex_search(inp, matched, std::regex(re), opts)) {
-            read_pos += matched.length();
-        }
-        return matched;
-    }
+        std::string expr_str;
+        GrammarElement::Type type = GrammarElement::Type::NONE;
 
-    // returns the string inside the matching chars.
-    // returns empty string if no match.  yeah, it's ambiguous.. hmm
-    std::string read_to_match(unich start_match, unich end_match) {
-        skip_bytes(1); // XXX convert this whole thing to utf-8
-        const utf8_byte *start = inpp();
-
-        if(!*start) return std::string("");
-
-        size_t total_size = 0;
-        // XXX how did passing '\0' as start of match work before, when this
-        // started at depth 0?  test this whole thing.  the escaping is also suspect.
-        int depth = 1; // assume we're starting on a match
-        do {
-            size_t size;
-            unich in = unicode_char(size, inpp());
-            if(in == start_match) {
-                depth++;
-            } else if(in == end_match) {
-                depth--;
-            } else if(in == '\\') {
-                // next char is escaped - skip it:
-                read_pos   += size;
-                total_size += size;
-            }
-            read_pos   += size;
-            total_size += size;
-        } while(depth > 0);
-
-        // string length total_size - 1 so as to not include the
-        // terminating char
-        return to_std_string(start, total_size - 1);
-    }
-
-    void read_quantifiers(ProdExpr &expr) {
-        const utf8_byte *inp = inpp();
-        if(!inp) return; // EOF.  this is really an error..
-
-	switch(*inp) {
-            case '*':
-                expr.min_times = 0;
-                expr.max_times = INT_MAX;
-                read_pos++;
+        switch(*inp) {
+            case '\0':
+                done = true;
+                break; // EOF
+            case '#':
+                src.eat_comment();
                 break;
-            case '+':
-                expr.min_times = 1;
-                expr.max_times = INT_MAX;
-                read_pos++;
+            case '"':
+                expr_str = src.read_to_byte('"');
+                type     = GrammarElement::Type::TERM_EXACT;
                 break;
-            case '?':
-                expr.min_times = 0;
-                expr.max_times = 1;
-                read_pos++;
+            case '/':
+                expr_str = src.read_to_byte('/');
+                type     = GrammarElement::Type::TERM_REGEX;
                 break;
-          /*
-             don't need this and it's a PITA to implement in LR
-             because you have to invalidate prefixes:
-            case '!':
-                // "!" means don't match this item.
-                // it's a suffix because that's
-                // easier for me to parse.
-                expr.min_times = 0;
-                expr.max_times = 0;
-                read_pos++;
-                break;
-           */
-            default:
-                expr.min_times = 1;
-                expr.max_times = 1;
-                break;
-        }
-    }
-
-    int read_expressions(ProductionRule &rule) {
-        int num_read = 0;
-        bool done = false;
-        do {
-            eat_space();
-
-            const utf8_byte *inp = inpp();
-
-            std::string expr_str;
-            GrammarElement::Type type = GrammarElement::Type::NONE;
-
-	    switch(*inp) {
-                case '\0':
+            case '-':
+                src.read_byte();
+                if(src.read_byte_equalling('>')) {
+                    // just scanned "->", so we're done:
                     done = true;
-                    break; // EOF
-                case '#':
-                    eat_comment();
-                    break;
-                case '"':
-                    expr_str = read_to_byte('"');
-                    type     = GrammarElement::Type::TERM_EXACT;
-                    break;
-                case '/':
-                    expr_str = read_to_byte('/');
-                    type     = GrammarElement::Type::TERM_REGEX;
-                    break;
-                case '-':
-                    read_byte();
-                    if(read_byte_equalling('>')) {
-                        // just scanned "->", so we're done:
-                        done = true;
-                    } else {
-                        error("read unexpected '-'");
-                    }
-                    break;
-                default:
-                    // should be the name of a production
-                    expr_str = read_re("[A-Za-z_]+")[0];
-                    type     = GrammarElement::Type::NONTERM_PRODUCTION;
-                    break;
-	    }
-
-            if(type != GrammarElement::Type::NONE) {
-                if(expr_str.length() >= 1) {
-                    ProdExpr expr(expr_str, type);
-                    read_quantifiers(expr);
-                    rule.add_step(expr);
-                    num_read++;
                 } else {
-                    // sigh c++ enums
-                    error("expected type %i but got .. nothing?", type);
+                    src.error("read unexpected '-'");
                 }
+                break;
+            default:
+                // should be the name of a production
+                expr_str = src.read_re("[A-Za-z_]+")[0];
+                type     = GrammarElement::Type::NONTERM_PRODUCTION;
+                break;
+        }
+
+        if(type != GrammarElement::Type::NONE) {
+            if(expr_str.length() >= 1) {
+                ProdExpr expr(expr_str, type);
+                read_quantifiers(src, expr);
+                rule.add_step(expr);
+                num_read++;
+            } else {
+                // sigh c++ enums
+                src.error("expected type %i but got .. nothing?", type);
             }
-        } while(!(done || eof()));
+        }
+    } while(!(done || src.eof()));
 
-        return num_read;
-    }
+    return num_read;
+}
 
-    // returns a string containing the code to "generate" when
-    // the production ends in a ';'
-    std::string default_code() {
-        return "return arg1;";
-    }
+// returns a string containing the code to "generate" when
+// the production ends in a ';'
+std::string default_code() {
+    return "return arg1;";
+}
 
-    std::string read_code() {
-         // strategy:  invoke the jest scanner to read from the
-         // starting '{' to the ending '}'.  the idea here is that
-         // it won't be confused by brackets embedded in comments
-         // or strings.
-         // alternately, we scan until any of start of comment,
-         // start of string, or start/end brace (in that order)
-         // and in each case (recursively?) scan to the match...
-         // Alternately, make it easy on myself and change the
-         // syntax to use something like "+{" "}+" to bracket
-         // the code (though those could still exist in strings)
-         // actually yeah do that because then it's just reading
-         // regex (because you can't nest)
-         // oh but it needs to be minimal match, not greedy....
-         //std::cmatch got = read_re("+{(.*)}+
-         eat_space();
-         const utf8_byte *start = NULL;
-         const utf8_byte *end   = NULL;
-         if(read_byte_equalling(';')) {
-             return default_code();
-         } else if(read_byte_equalling('+') && read_byte_equalling('{')) {
-             start = inpp();
-             while(char byte_in = read_byte()) {
-                 if(byte_in == '}') {
-                     if(read_byte() == '+') {
-                         end = inpp() - 2;
-                         break;
-                     }
+std::string read_code(SourceReader &src) {
+     // code is within "+{" "}+" brackets.
+     // this is done simplistically, which means you will
+     // derail it if you put +{ or }+ in a comment or
+     // string or whatever.  so try not to do that.
+     // oh but it needs to be minimal match, not greedy....
+     src.eat_space();
+     const utf8_byte *start = NULL;
+     const utf8_byte *end   = NULL;
+     if(src.read_byte_equalling(';')) {
+         return default_code();
+     } else if(src.read_byte_equalling('+') && src.read_byte_equalling('{')) {
+         start = src.inpp();
+         while(char byte_in = src.read_byte()) {
+             if(byte_in == '}') {
+                 if(src.read_byte() == '+') {
+                     end = src.inpp() - 2;
+                     break;
                  }
              }
          }
+     }
 
-         if(start && end) {
-             return to_std_string(start, end - start);
-         }
+     if(start && end) {
+         return to_std_string(start, end - start);
+     }
 
-         // else error - no start of code or ';'
-         error("expected start of code (\"+{\") or \";\"");
-         return "";
-    }
-};
-
-
-/*
-   (note) each item has only so many possible things it can transition to:
-    - if the next thing in the rule is direct, whatever's next in the rule
-    - if the next thing is another production, whatever's first in each
-      variant of that production (recursively, if the first thing in the
-      production is another production.
-    - if at the end of the rule, whatever's next in any rule containing
-      the production of this rule
-
-    (note) transitions may cycle, so you can't just expand/flatten the
-    above.  But, if it makes it easy or fast or whatever, you could
-    flatten rules with no recursion, or in any case rules where there
-    are only direct items (eg identifier).  But in the general case,
-    I guess cycle.
-
-sketch:
-    for each rule, have a list of items 
-    
- */
-
-void usage() {
-    fprintf(stderr,
-        "\nUsage:    fpl2cc <source> [target]\n\n"
-        "If no [target] is specified, prints to stdout.\n\n"
-    );
+     // else error - no start of code or ';'
+     src.error("expected start of code (\"+{\") or \";\"");
+     return "";
 }
-
 
 /*
  Input is:
@@ -1205,22 +1199,17 @@ Also, comments.  Let's use # just cuz.
 
  */
 void fpl2cc(const char *infn) {
-    std::ifstream in(infn);
+    SourceReader inp(infn, fail);
 
-    if(!in.is_open()) {
-        fail("can't open '%s': %s\n", infn, strerror(errno));
-    }
-
-    SourceReader inp(in, fail);
-
-    Productions productions(inp.buffer.data());
+    //Productions productions(inp.buffer.data());
+    Productions productions(inp.inpp());
     const char *error;
     while(!inp.eof()) {
         ProductionRule rule(inp.inpp());
 
         // read the expressions/steps leading to the production
         // (until and including the "->")
-        if(inp.read_expressions(rule)) {
+        if(read_expressions(inp, rule)) {
 
             // read what the expressions above produce:
             inp.eat_space();
@@ -1234,7 +1223,7 @@ void fpl2cc(const char *infn) {
             }
 
             // read the code for the production
-            rule.code = inp.read_code();
+            rule.code = read_code(inp);
 
             // add it to the set of productions
             productions.push_back(rule);
@@ -1243,7 +1232,14 @@ void fpl2cc(const char *infn) {
         inp.eat_space();
     }
 
-    productions.generate_code();
+    productions.generate_code(inp);
+}
+
+void usage() {
+    fprintf(stderr,
+        "\nUsage:    fpl2cc <source> [target]\n\n"
+        "If no [target] is specified, prints to stdout.\n\n"
+    );
 }
 
 int main(int argc, const char** argv) {
