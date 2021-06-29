@@ -66,6 +66,19 @@ void fail(const char *fmt...) {
  */
 
 /*
+ TODO
+
+  x fix the thing where it does 'class ./foo' if you tell it ./foo.fpl
+  - buffering the entire input is busted for things like stdin.
+    stream instead;  but possibly fix that via chicken/egging it
+    and generate the new parser with this.
+  - Sort out reducing.  I think reducing is wrong presently.  huh can it
+    just simply return on reduce?  only if the callers know what to do,
+    because it's the callers which will have to slap in the code for
+    the matched rule.  I think.  hah
+ */
+
+/*
 .. forget this for now;  save for rewrite in jest
 class Options {
 public:
@@ -82,6 +95,7 @@ public:
         }
     }
 }
+^^ Tue Jun 29 11:37:46 PDT 2021 oh, the optimism.  the naive optimism.
  */
 
 /*
@@ -625,7 +639,7 @@ public:
                     } else if(existing->second != state_index[state.id()]) {
                         // gar this error message could be more informative.
                         // we might really want to know what the current item is
-                        // conflicting _with_.. hmm
+                        // conflicting _with_.. XXX
                         fail(
                             "conflicting gotos for %s\n",
                             item.to_str(this).c_str()
@@ -849,7 +863,7 @@ std::string read_code(fpl_reader &src) {
 /*
  Input is:
 
-   <exprs or productions to match> -> <production name> { <code> }
+   <exprs or productions to match> -> <production name> +{ <code> }+
                     or
    <exprs to match> -> <production name> ;
 
