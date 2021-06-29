@@ -1,6 +1,14 @@
 #ifndef FPL_READER_H
 #define FPL_READER_H
 
+#ifdef __APPLE__
+// sigh thanks apple
+namespace fs = std::__fs::filesystem;
+#else
+namespace fs = std::filesystem;
+#endif
+
+#include <filesystem>
 #include <fstream>
 #include <regex>
 #include <string>
@@ -68,15 +76,18 @@ public:
     }
 
     std::string base_name() const {
+
+        std::string infn = fs::path(input_filename).filename();
+
         // "base name" is everything before the first "."
         // in the filename...
-        size_t end_of_base = input_filename.find(".");
+        size_t end_of_base = infn.find(".");
         if(end_of_base > 0) {
-            return input_filename.substr(0, end_of_base);
+            return infn.substr(0, end_of_base);
         }
 
         // .. or, if there's no ".", it's the whole filename:
-        return input_filename;
+        return infn;
     }
 
     inline size_t bytes_left() {
