@@ -1,9 +1,22 @@
 #ifndef FPL_READER_H
 #define FPL_READER_H
 
+#include <filesystem>
 #include <fstream>
 #include <regex>
 #include <string>
+
+#if __cplusplus <= 199711L
+  #error because it uses <filesystem>, fpl_reader.h need c++11 or better
+#endif
+
+#ifdef __APPLE__
+// sigh thanks apple
+namespace fs = std::__fs::filesystem;
+#else
+namespace fs = std::filesystem;
+#endif
+
 
 typedef uint32_t unich; // 4 byte unicode char; for realz, unlike wchar_t
 typedef void (ErrorCallback)(const char *fmt...);
@@ -68,15 +81,18 @@ public:
     }
 
     std::string base_name() const {
+
+        std::string infn = fs::path(input_filename).filename();
+
         // "base name" is everything before the first "."
         // in the filename...
-        size_t end_of_base = input_filename.find(".");
+        size_t end_of_base = infn.find(".");
         if(end_of_base > 0) {
-            return input_filename.substr(0, end_of_base);
+            return infn.substr(0, end_of_base);
         }
 
         // .. or, if there's no ".", it's the whole filename:
-        return input_filename;
+        return infn;
     }
 
     inline size_t bytes_left() {
