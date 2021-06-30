@@ -675,6 +675,52 @@ public:
         return out;
     }
 
+    // ... this mostly just tries to fix indent
+    std::string format_code(const std::string code) {
+        const int chars_per_indent = 4;
+        int indent = 0;
+        bool new_line = false;
+
+        std::string output;
+
+        const std::string::size_type code_length = code.size();
+        for(std::string::size_type inp = 0; inp < code_length; inp++) {
+            if(code[inp] == '{') {
+                // good-enough hack to avoid issues with
+                // quoted { or comments with { or whatever:
+                // only count '{' at end of line
+                if(code[inp + 1] == '\n') {
+                    indent += chars_per_indent;
+                }
+            } else if(code[inp] == '}') {
+                // counterpart to the above good-enough hack:
+                // only count '}' if it's immediately after
+                // an indent
+                if(new_line)
+                    indent -= chars_per_indent;
+            } else if(code[inp] == '\n') {
+                // skip spaces;  we'll convert them to the correct indent:
+                while(inp < code_length && isspace(code[inp]))
+                    inp++;
+                if(inp < code_length)
+                    inp--;
+                new_line = true;
+                continue;
+            }
+
+            if(new_line) {
+                output.push_back('\n');
+                for(int ind = 0; ind < indent; ind++)
+                    output.push_back(' ');
+                new_line = false;
+            }
+
+            output.push_back(code[inp]);
+
+        }
+        return output;
+    }
+
     void generate_code(const fpl_reader &src) {
         const auto no_set = state_index.end();
 
@@ -713,7 +759,7 @@ public:
 
         out += "};\n"; // end of class
 
-        printf("%s\n", out.c_str());
+        printf("%s\n", format_code(out).c_str());
     }
 };
 
