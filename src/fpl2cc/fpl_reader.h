@@ -37,14 +37,14 @@ class fpl_reader {
     size_t read_pos;
 
 public:
-    fpl_reader(const char *infn, ErrorCallback *ecb) :
+    fpl_reader(const std::string &infn, ErrorCallback *ecb) :
         input_filename(infn),
         on_error(ecb),
         read_pos(0)
     {
         std::ifstream in(infn);
         if(!in.is_open()) {
-            on_error("can't open '%s': %s\n", infn, strerror(errno));
+            on_error("can't open '%s': %s\n", infn.c_str(), strerror(errno));
         }
 
         in.seekg(0, std::ios::end);   

@@ -78,25 +78,45 @@ void fail(const char *fmt...) {
     the matched rule.  I think.  hah
  */
 
-/*
-.. forget this for now;  save for rewrite in jest
-class Options {
-public:
+struct Options {
+    std::string src_fpl;
     bool generate_main;
 
-    Options(int argc, const char** argv) {
-        for(int argi = 0; argi < argc; argi++) {
+    // janky, but good enough:
+    std::string _fail;
+    Options(int argc, const char* const* argv) {
+        generate_main = false;
+
+        _fail = "";
+        for(int argi = 1; argi < argc; argi++) {
             const char *arg = argv[argi];
-            if(arg[0] == '-' && arg[1] == '-') {
-                arg = arg + 2;
-                if() {
+            if(!arg[0]) continue; // I guess ignore blank args
+
+            if(arg[0] == '-') {
+                if(arg[1] == '-') {
+                    // double dash '--foo' style args:
+                    const char *optarg = arg + 2;
+                    if(!strcmp(optarg, "generate_main")) {
+                        generate_main = true;
+                    } else {
+                        _fail = "Unknown option: "; _fail += optarg;
+                    }
+                } else {
+                    // single-dash arg:
+                    _fail = "Unknown option: "; _fail += arg;
+                }
+            } else {
+                if(src_fpl.length() != 0) {
+                    _fail = "only one source fpl is supported at present";
+                } else {
+                    src_fpl = arg;
                 }
             }
         }
     }
-}
-^^ Tue Jun 29 11:37:46 PDT 2021 oh, the optimism.  the naive optimism.
- */
+};
+
+
 
 /*
    Returns a version of the string passed which is suitable for
@@ -916,8 +936,8 @@ std::string read_code(fpl_reader &src) {
 Also, comments.  Let's use # just cuz.
 
  */
-void fpl2cc(const char *infn) {
-    fpl_reader inp(infn, fail);
+void fpl2cc(const Options &opts) {
+    fpl_reader inp(opts.src_fpl, fail);
 
     Productions productions(inp);
     while(!inp.eof()) {
@@ -949,6 +969,11 @@ void fpl2cc(const char *infn) {
     }
 
     productions.generate_code(inp);
+
+    if(opts.generate_main) {
+        // XXX implement
+        printf("\n\nint main() { /* XXX implement me */ }\n");
+    }
 }
 
 void usage() {
@@ -959,12 +984,14 @@ void usage() {
 }
 
 int main(int argc, const char** argv) {
+    Options opts(argc, argv);
 
-    if(argc != 2) {
+    if(opts._fail.length()) {
+        fprintf(stderr, "%s\n", opts._fail.c_str());
         usage();
         exit(1);
     } else {
-        fpl2cc(argv[1]);
+        fpl2cc(opts);
     }
 
     exit(0);
