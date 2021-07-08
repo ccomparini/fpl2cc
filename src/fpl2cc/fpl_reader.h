@@ -35,6 +35,7 @@ inline std::string to_std_string(const utf8_byte *str, int len) {
     return std::string(reinterpret_cast<const char *>(str), len);
 }
 
+
 class fpl_reader {
 
     std::string input_filename;
@@ -44,7 +45,18 @@ class fpl_reader {
     size_t read_pos;
 
 public:
-    fpl_reader(const std::string &infn, ErrorCallback *ecb) :
+
+    // default error callback/handler:
+    static void default_fail(const char *fmt...) {
+        va_list args;
+        va_start(args, fmt);
+        vfprintf(stderr, fmt, args);
+        va_end(args);
+
+        exit(1);
+    }
+
+    fpl_reader(const std::string &infn, ErrorCallback *ecb = default_fail) :
         input_filename(infn),
         on_error(ecb),
         read_pos(0)

@@ -75,7 +75,8 @@ void fail(const char *fmt...) {
   - Sort out reducing.  I think reducing is wrong presently.  huh can it
     just simply return on reduce?  only if the callers know what to do,
     because it's the callers which will have to slap in the code for
-    the matched rule.  I think.  hah
+    the matched rule.  I think.  hah.  (the way it is now, state functions
+    need to see stuff above them on the stack, which ain't gonna work)
  */
 
 struct Options {
@@ -370,8 +371,8 @@ class Productions {
             const int bs = 40;
             char buf[bs];
             snprintf(buf, bs, "%s (rule %i):", rl.product.c_str(), rule);
-            std::string out(buf);
             buf[bs - 1] = '\0';
+            std::string out(buf);
 
             int step;
             for(step = 0; step < rl.steps.size(); ++step) {
@@ -554,13 +555,6 @@ public:
         return fn;
     }
 
-/*
-    // returns the name to use for the public class for the generated parser
-    std::string class_name() {
-        return base_name();
-    }
- */
-
     /*
        Let's say:
 
@@ -702,6 +696,7 @@ public:
 
         // if we're at the end of the item we need to reduce
         // according to the next possible ...... XXX
+//out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(state) + "\\n\");\n";
         out += "    // XXX reduce code here thanks\n"
                "    if(--prd.reduce_count == 0) {\n";
         out += code_for_handling_reduce(state);
@@ -795,8 +790,32 @@ public:
         return out;
     }
 
-    void generate_code(const fpl_reader &src) {
+    std::string parser_class_name(const Options &opts, const fpl_reader &src) {
+        return src.base_name() + "_parser";
+    }
+
+    std::string code_for_main(const std::string &parser_class) {
+        std::string out("\n\n");
+
+        // the main() generated here is pretty much just a test stub.
+        // if people want something fancier, they can make their own.
+        out += "int main(int argc, const char **argv) {\n";
+        out += "    if(argc < 2) {\n";
+        out += "        fpl_reader::default_fail(";
+        out += "            \"Please provide a source file name.\\n\"";
+        out += "        );\n";
+        out += "    }\n";
+        out += "    fpl_reader inp(argv[1]);\n";
+        out +=      parser_class + " parser(inp);\n";
+        out += "    parser.parse();\n";
+        out += "}\n";
+
+        return out;
+    }
+
+    void generate_code(const Options &opts, const fpl_reader &src) {
         const auto no_set = state_index.end();
+        const std::string parser_class = parser_class_name(opts, src);
 
         // for now, we're going to consider the first rule
         // (rule 0) to be the starting point (and start with
@@ -818,8 +837,10 @@ public:
             }
         }
 
-        std::string out = "#include \"fpl2cc/fpl_base_parser.h\"\n\n";
-        out += "class " + src.base_name() + "_parser : FPLBaseParser {\n";
+        std::string out;
+        out += "#include \"fpl2cc/fpl_reader.h\"\n";
+        out += "#include \"fpl2cc/fpl_base_parser.h\"\n";
+        out += "\nclass " + parser_class + " : FPLBaseParser {\n";
 
         out += nonterm_enum();
 
@@ -833,7 +854,15 @@ public:
             out += code_for_state(state).c_str();
         }
 
+        out += "\npublic:\n";
+        out += "    " + parser_class + "(fpl_reader &src) : FPLBaseParser(src) { }\n";
+        out += "    void parse() { state_0(); };\n";
+
         out += "};\n"; // end of class
+
+        if(opts.generate_main) {
+            out += code_for_main(parser_class);
+        }
 
         printf("%s\n", format_code(out).c_str());
     }
@@ -1026,23 +1055,13 @@ void fpl2cc(const Options &opts) {
         inp.eat_space();
     }
 
-    productions.generate_code(inp);
+    productions.generate_code(opts, inp);
 
-    if(opts.generate_main) {
-        // XXX implement
-        printf(
-            "\n\n"
-            "int main() {\n"
-            "    /* XXX implement me */\n"
-            "    \n"
-            "}\n\n"
-        );
-    }
 }
 
 void usage() {
     fprintf(stderr,
-        "\nUsage:    fpl2cc <source> [target]\n\n"
+        "\nUsage:    fpl2cc [options] <source> [target]\n\n"
         "If no [target] is specified, prints to stdout.\n\n"
     );
 }
