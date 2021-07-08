@@ -1,6 +1,13 @@
 #ifndef FPL_READER_H
 #define FPL_READER_H
 
+#ifdef __APPLE__
+// sigh thanks apple
+namespace fs = std::__fs::filesystem;
+#else
+namespace fs = std::filesystem;
+#endif
+
 #include <filesystem>
 #include <fstream>
 #include <regex>
