@@ -390,6 +390,10 @@ class Productions {
         return rules[it.rule].steps[it.position];
     }
 
+    // an lr_set is a set of lr items.
+    // it is it's own special class mostly so that we can
+    // compare them to find the set of parser states.
+    // (each state can be represented by an lr_set)
     struct lr_set {
         mutable std::string _id_cache;
         std::set<lr_item> items;
@@ -624,7 +628,7 @@ public:
                     }
                     out += "\")) {\n";
                     out += ind + ind + "// " + item.to_str(this) + "\n";
-                    out += ind + ind + state_fn(next_state) + "();\n";
+                    out += ind + ind + "prd = " + state_fn(next_state) + "();\n";
                     out += ind + "}\n";
 
                     cases_so_far++;
@@ -646,12 +650,14 @@ public:
                     int el_id = element_index[right_of_dot->gexpr];
 
                     auto existing = element_ids_done.find(el_id);
-                    if(existing == element_ids_done.end()) { // i.e. no existing code for this
+                    if(existing == element_ids_done.end()) {
+                        // (i.e. no existing code for this)
                         lr_set next_state = lr_goto(state, right_of_dot->gexpr);
                         out += ind;
                         if(element_ids_done.size() > 0)
                             out += "else ";
-                        out += "if(prd.grammar_element_id == " + std::to_string(el_id) + ") {\n";
+                        out += "if(prd.grammar_element_id == NontermID::_"
+                               + right_of_dot->gexpr.to_str() + ") {\n";
                         out += ind + ind + "// " + item.to_str(this) + "\n";
                         out += ind + ind + "prd = " + state_fn(next_state) + "();\n";
                         out += ind + "}\n";
@@ -671,8 +677,17 @@ public:
         return out;
     }
 
+    std::string code_for_handling_reduce(const lr_set &state) {
+        std::string out;
+        // 2 possible cases here:
+        //  - there exists explicit code for the production
+        // if(state.
+
+        return out;
+    }
+
     std::string code_for_state(const lr_set &state) {
-        const std::string ind = "    "; // indent string
+        const std::string ind = "    "; // XXX kill this - we reindent anyway
         std::string out;
 
         out += "//\n";
@@ -686,8 +701,12 @@ public:
         out += code_for_prods(state, ind) + "\n";
 
         // if we're at the end of the item we need to reduce
-        // according to the next possible 
-        out += "\n    // XXX reduce code here thanks\n";
+        // according to the next possible ...... XXX
+        out += "\n"
+               "    // XXX reduce code here thanks\n"
+               "    if(--prd.reduce_count == 0) {\n";
+        out += code_for_handling_reduce(state);
+        out += "    }\n";
 
         out += ind + "return prd;\n";
         out += "}\n"; // end of state_ function
@@ -741,6 +760,37 @@ public:
         return output;
     }
 
+    // returns an enum string for nonterminals.
+    // this makes the generated code easier to read - eg
+    // instead of "if(prd.grammar_element_id == 62)" we
+    // can do "if(prd.grammar_element_id == NontermID::_decimal_constant)"
+    std::string nonterm_enum() {
+        std::string out;
+
+        out += "typedef enum {\n";
+        for(int el_id = 0; el_id < elements.size(); ++el_id) {
+            // include terminals as comments.  we don't need them
+            // in the enum, but it's nice to be able to see all the
+            // grammar elements in one place
+            if(elements[el_id].type != GrammarElement::NONTERM_PRODUCTION)
+                out += "// ";
+            else
+                out += "_"; // hack to avoid keyword collisions
+
+            out += elements[el_id].to_str();
+            out += " = ";
+            out += std::to_string(el_id);
+
+            // sigh.. languages which don't allow trailing comma..
+            if(el_id + 1 < elements.size()) 
+                out += ",\n";
+            else
+                out += "\n";
+        }
+        out += "} NontermID;\n";
+        return out;
+    }
+
     void generate_code(const fpl_reader &src) {
         const auto no_set = state_index.end();
 
@@ -766,6 +816,8 @@ public:
 
         std::string out = "#include \"fpl2cc/fpl_base_parser.h\"\n\n";
         out += "class " + src.base_name() + "_parser : FPLBaseParser {\n";
+
+        out += nonterm_enum();
 
 /*
         // reverse helps with inlining (I hope).
@@ -972,7 +1024,13 @@ void fpl2cc(const Options &opts) {
 
     if(opts.generate_main) {
         // XXX implement
-        printf("\n\nint main() { /* XXX implement me */ }\n");
+        printf(
+            "\n\n"
+            "int main() {\n"
+            "    /* XXX implement me */\n"
+            "    \n"
+            "}\n\n"
+        );
     }
 }
 
