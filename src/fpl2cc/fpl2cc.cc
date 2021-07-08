@@ -640,7 +640,7 @@ public:
     }
 
     std::string code_for_prods(const lr_set &state, const std::string &ind) {
-        std::string out("// nonterminals\n");
+        std::string out;
         std::map<int, int> element_ids_done;
 
         for(auto item : state.items) {
@@ -702,8 +702,7 @@ public:
 
         // if we're at the end of the item we need to reduce
         // according to the next possible ...... XXX
-        out += "\n"
-               "    // XXX reduce code here thanks\n"
+        out += "    // XXX reduce code here thanks\n"
                "    if(--prd.reduce_count == 0) {\n";
         out += code_for_handling_reduce(state);
         out += "    }\n";
@@ -792,7 +791,7 @@ public:
             else
                 out += "\n";
         }
-        out += "} NontermID;\n";
+        out += "} NontermID;\n\n";
         return out;
     }
 
@@ -906,8 +905,10 @@ int read_expressions(fpl_reader &src, ProductionRule &rule) {
                 eat_comment(src);
                 break;
             case '"':
-                expr_str = src.read_to_byte('"');
+            case '\'':
+                expr_str = src.read_to_byte(*inp);
                 type     = GrammarElement::Type::TERM_EXACT;
+                break;
                 break;
             case '/':
                 expr_str = src.read_to_byte('/');
