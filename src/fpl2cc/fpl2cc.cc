@@ -640,7 +640,7 @@ public:
     }
 
     std::string code_for_prods(const lr_set &state, const std::string &ind) {
-        std::string out;
+        std::string out("// nonterminals\n");
         std::map<int, int> element_ids_done;
 
         for(auto item : state.items) {
@@ -718,7 +718,7 @@ public:
     std::string format_code(const std::string code) {
         const int chars_per_indent = 4;
         int indent = 0;
-        bool new_line = false;
+        int new_lines = 0;
 
         std::string output;
 
@@ -735,23 +735,28 @@ public:
                 // counterpart to the above good-enough hack:
                 // only count '}' if it's immediately after
                 // an indent
-                if(new_line)
+                if(new_lines > 0)
                     indent -= chars_per_indent;
             } else if(code[inp] == '\n') {
                 // skip spaces;  we'll convert them to the correct indent:
-                while(inp < code_length && isspace(code[inp]))
+                while(inp < code_length && isspace(code[inp])) {
+                    // (.. but preserve newlines)
+                    if(code[inp] == '\n') new_lines++;
                     inp++;
+                }
                 if(inp < code_length)
                     inp--;
-                new_line = true;
                 continue;
             }
 
-            if(new_line) {
-                output.push_back('\n');
+            if(new_lines > 0) {
+                while(new_lines > 0) {
+                    output.push_back('\n');
+                    --new_lines;
+                }
+
                 for(int ind = 0; ind < indent; ind++)
                     output.push_back(' ');
-                new_line = false;
             }
 
             output.push_back(code[inp]);
