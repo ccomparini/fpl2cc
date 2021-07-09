@@ -44,6 +44,18 @@ class fpl_reader {
     ErrorCallback *on_error;
     size_t read_pos;
 
+    // ... surely there's a better way to get an empty match set..?
+    std::cmatch empty_match;
+    inline std::cmatch no_match() {
+        if(!empty_match.ready()) {
+           // generate an empty match set by looking for an arbitrary
+           // character in an empty string.  there must be a better way..
+           std::regex_search("", empty_match, std::regex("a"));
+        }
+        return empty_match;
+    }
+    
+
 public:
 
     // default error callback/handler:
@@ -123,6 +135,12 @@ public:
         return read_pos >= buffer.length() - 1;
     }
 
+    // returns a pointer to the next byte of the input
+    // buffer, or NULL if at eof.
+    // why not return an empty string at eof?  because
+    // then you can't embed \0.  but, if I were to redo
+    // this, I would just disallow embedding \0 and
+    // return empty string on eof.  oh well.
     inline const utf8_byte *inpp() {
         if(!eof()) {
             return buffer.data() + read_pos;
@@ -131,6 +149,8 @@ public:
         }
     }
 
+    // as inpp(), above, but returns as a const char *
+    // for ease in passing to standard library stuff.
     inline const char *inpp_as_char() {
         return reinterpret_cast<const char *>(inpp());
     }
@@ -183,11 +203,11 @@ public:
     // the length of the remaining bytes (or tries to - GIGO, at this point).
     // Returns 0 if given a NULL pointer.
     static size_t char_length(const utf8_byte *in) {
+        if(!in) return 0;
+
         if(size_t nll = newline_length(in)) {
             return nll;
         }
-
-        if(!in) return 0;
 
         // https://en.wikipedia.org/wiki/UTF-8#Encoding
         // if the high bit isn't set, it's a single byte:
@@ -324,6 +344,10 @@ public:
 
     std::string read_to_space() {
         const utf8_byte *start = inpp();
+
+        if(!start)
+            return std::string("");
+
         size_t length = 0;
         while(const utf8_byte *in = inpp()) {
             if(space_length(in))
@@ -360,10 +384,11 @@ public:
     }
 
     inline const utf8_byte *read_exact_match(const std::string &match) {
-        if(match.compare(0, bytes_left(), inpp_as_char()))
-            return NULL; // (didn't match)
-
-        return inpp();
+        if(const char *in = inpp_as_char()) {
+            if(!match.compare(0, bytes_left(), inpp_as_char()))
+                return inpp();
+        }
+        return NULL; // (didn't match)
     }
 
     inline std::cmatch read_re(const std::string &re) {
@@ -372,8 +397,13 @@ public:
         // match at exactly at the inpp (and ideally won't
         // try to keep matching the rest of the input)
         auto opts = std::regex_constants::match_continuous;
-        if(std::regex_search(inpp_as_char(), matched, std::regex(re), opts)) {
-            read_pos += matched.length();
+        if(const char *in = inpp_as_char()) {
+            if(std::regex_search(in, matched, std::regex(re), opts))
+                read_pos += matched.length();
+            // (matched is now set to whatever was matched, if anything)
+        } else {
+            // (we are at eof - no match)
+            matched = no_match();
         }
         return matched;
     }
