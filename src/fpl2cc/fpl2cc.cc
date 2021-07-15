@@ -298,7 +298,7 @@ struct ProductionRule {
         steps.push_back(step);
     }
 
-    // return NULL if index is out of bounds
+    // returns NULL if index is out of bounds
     const ProdExpr *step(unsigned int index) const {
         if(index < steps.size()) {
             return &steps[index];
@@ -405,16 +405,19 @@ class Productions {
         lr_set(const lr_item &in) { items.insert(in); }
 
         // The id of the set is a string generated from the
-        // content of the item which can be compared to determine
+        // content of the items which can be compared to determine
         // if 2 sets are identical or not.
         std::string id() const {
             if(_id_cache.length() == 0) { 
-                const int len = items.size()*4 + 1; // 4 digits per item
+                const int bytes_per_item = 8;
+                const int len = items.size()*bytes_per_item + 1;
                 char buf[len];
                 char *bw = buf;
                 for(auto it : items) {
-                    snprintf(bw, 5, "%02x%02x", it.rule, it.position);
-                    bw += 4;
+                    snprintf(
+                        bw, bytes_per_item+1, "%04x%04x", it.rule, it.position
+                    );
+                    bw += bytes_per_item;
                 }
                 buf[len - 1] = '\0';
                 _id_cache = std::string(buf);
