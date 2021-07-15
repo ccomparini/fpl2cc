@@ -589,6 +589,8 @@ public:
     std::string code_for_terminals(const lr_set &state, const std::string &ind) {
         std::string out;
 
+        out += "FPLBaseParser::terminal shifted;\n";
+
         int cases_so_far = 0;
         for(auto item : state.items) {
             const ProductionRule &rule = rules[item.rule];
@@ -603,10 +605,12 @@ public:
                     // if we match a terminal, we need to shift and go
                     // to a new state:
                     lr_set next_state = lr_goto(state, right_of_dot->gexpr);
-                    out += "if(";
+                    // (extra parens avoids a warning.. sigh)
+                    out += "if((shifted = ";
                     switch(right_of_dot->type()) {
                         case GrammarElement::TERM_EXACT:
                             out += "shift_exact(\"";
+// XXX I think we need to c_str_escape here too
                             out += right_of_dot->terminal_string();
                             break;
                         case GrammarElement::TERM_REGEX:
@@ -620,7 +624,8 @@ public:
                             );
                             break;
                     }
-                    out += "\")) {\n";
+                    out += "\"))) {\n";
+out += "    fprintf(stderr, \"" + state_fn(state) + " shifted terminal " + right_of_dot->to_str() + " of '%s' to " + state_fn(next_state) + "\\n\", shifted.to_str().c_str());\n";
                     out += ind + ind + "// " + item.to_str(this) + "\n";
                     out += ind + ind + "prd = " + state_fn(next_state) + "();\n";
                     out += ind + "}\n";
@@ -654,6 +659,7 @@ public:
                                + right_of_dot->gexpr.to_str() + ") {\n";
                         out += ind + ind + "// " + item.to_str(this) + "\n";
                         out += ind + ind + "prd = " + state_fn(next_state) + "();\n";
+out += "    fprintf(stderr, \"" + state_fn(state) + " shifted nonterminal " + right_of_dot->to_str() + " to " + state_fn(next_state) + "\\n\");\n";
                         out += ind + "}\n";
                         element_ids_done[el_id] = state_index[state.id()];
                     } else if(existing->second != state_index[state.id()]) {
@@ -690,13 +696,16 @@ public:
         out += "FPLBaseParser::product "; out += state_fn(state); out += "() {\n";
         out += ind + "product prd;\n";
 
+out += "    fprintf(stderr, \"entering state " + state_fn(state) + "\\n\");\n";
         out += code_for_terminals(state, ind) + "\n";
 
+        // ... or this is really the gotos
+out += "    fprintf(stderr, \"mebbe gotos for " + state_fn(state) + "\\n\");\n";
         out += code_for_prods(state, ind) + "\n";
 
         // if we're at the end of the item we need to reduce
         // according to the next possible ...... XXX
-//out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(state) + "\\n\");\n";
+out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(state) + "\\n\");\n";
         out += "    // XXX reduce code here thanks\n"
                "    if(--prd.reduce_count == 0) {\n";
         out += code_for_handling_reduce(state);
