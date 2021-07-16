@@ -258,9 +258,10 @@ struct ProdExpr { // or step?
         }
     }
 
+    // returns a c-source-code-ready string for the terminal
     inline std::string terminal_string() const {
         if(is_terminal()) {
-            return gexpr.expr; 
+            return c_str_escape(gexpr.expr);
         } else {
             return "[NOT TERMINAL]";
         }
@@ -631,12 +632,11 @@ public:
                     switch(right_of_dot->type()) {
                         case GrammarElement::TERM_EXACT:
                             out += "shift_exact(\"";
-// XXX I think we need to c_str_escape here too
                             out += right_of_dot->terminal_string();
                             break;
                         case GrammarElement::TERM_REGEX:
                             out += "shift_re(\"";
-                            out += c_str_escape(right_of_dot->terminal_string());
+                            out += right_of_dot->terminal_string();
                             break;
                         default:
                             fail(
@@ -646,7 +646,7 @@ public:
                             break;
                     }
                     out += "\"))) {\n";
-out += "    fprintf(stderr, \"" + state_fn(state) + " shifted terminal " + right_of_dot->to_str() + " of '%s' to " + state_fn(next_state) + "\\n\", shifted.to_str().c_str());\n";
+out += "    fprintf(stderr, \"" + state_fn(state) + " shifted terminal " + right_of_dot->terminal_string() + " of '%s' to " + state_fn(next_state) + "\\n\", shifted.to_str().c_str());\n";
                     out += "// " + item.to_str(this) + "\n";
                     std::string trans_id = transition_id(*right_of_dot, next_state);
                     uint32_t exists = done[trans_id];
@@ -697,7 +697,7 @@ out += "    fprintf(stderr, \"" + state_fn(state) + " shifted terminal " + right
                                + right_of_dot->gexpr.to_str() + ") {\n";
                         out += "    // " + item.to_str(this) + "\n";
                         out += "    prd = " + state_fn(next_state) + "();\n";
-out += "    fprintf(stderr, \"" + state_fn(state) + " shifted nonterminal " + right_of_dot->to_str() + " to " + state_fn(next_state) + "\\n\");\n";
+out += "    fprintf(stderr, \"" + state_fn(state) + " shifted nonterminal " + right_of_dot->terminal_string() + " to " + state_fn(next_state) + "\\n\");\n";
                         out += "}\n";
                         element_ids_done[el_id] = state_index[state.id()];
                     } else if(existing->second != state_index[state.id()]) {
