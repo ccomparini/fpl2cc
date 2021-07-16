@@ -365,6 +365,14 @@ class Productions {
 
         lr_item(int rl, int pos) : rule(rl), position(pos) { }
 
+        static lr_item from_id(uint32_t id) {
+            return lr_item((id >> 16) & 0xffff, id & 0xffff);
+        }
+
+        uint32_t id() const {
+            return rule << 16 | position;
+        }
+
         std::string to_str(const Productions *prds) const {
             const ProductionRule &rl = prds->rules[rule];
 
@@ -521,17 +529,26 @@ class Productions {
         return set;
     }
 
-    // "goto" operation from page 224 Aho, Sethi and Ullman
+    // "goto" operation from page 224 Aho, Sethi and Ullman.
+    // given a current state and a lookahead item, returns
+    // the next state.
     lr_set lr_goto(const lr_set &in, const GrammarElement &sym) {
         lr_set set;
         for(auto item : in.items) {
             const ProdExpr *step = rules[item.rule].step(item.position);
             if(step && step->matches(sym)) {
-                // XXX need to deal with repetitions/optionals here,
                 set.add(lr_item(item.rule, item.position + 1));
             }
         }
         return lr_closure(set);
+    }
+
+    std::string transition_id(const ProdExpr &pexp, const lr_set &to) {
+        char buf[40];
+        snprintf(buf, 40, "%0x_", element_index[pexp.gexpr]);
+        std::string out(buf);
+        out += to.id();
+        return out;
     }
 
 public:
@@ -589,19 +606,20 @@ public:
            return prod;
        }
     */
-    std::string code_for_terminals(const lr_set &state, const std::string &ind) {
+    std::string code_for_terminals(const lr_set &state) {
         std::string out;
+        std::map<std::string, uint32_t> done;
+        int conflict_count = 0;
 
         out += "FPLBaseParser::terminal shifted;\n";
 
-        int cases_so_far = 0;
         for(auto item : state.items) {
             const ProductionRule &rule = rules[item.rule];
             const ProdExpr *right_of_dot = rule.step(item.position);
             if(right_of_dot) {
                 if(right_of_dot->is_terminal()) {
-                    out += ind;
-                    if(cases_so_far > 0) {
+
+                    if(done.size() > 0) {
                         out += "else ";
                     }
 
@@ -629,19 +647,37 @@ public:
                     }
                     out += "\"))) {\n";
 out += "    fprintf(stderr, \"" + state_fn(state) + " shifted terminal " + right_of_dot->to_str() + " of '%s' to " + state_fn(next_state) + "\\n\", shifted.to_str().c_str());\n";
-                    out += ind + ind + "// " + item.to_str(this) + "\n";
-                    out += ind + ind + "prd = " + state_fn(next_state) + "();\n";
-                    out += ind + "}\n";
+                    out += "// " + item.to_str(this) + "\n";
+                    std::string trans_id = transition_id(*right_of_dot, next_state);
+                    uint32_t exists = done[trans_id];
+                    if(exists) {
+                        lr_item other = lr_item::from_id(exists);
+                        if(other.rule != item.rule) {
+                            conflict_count++;
+                            out += "// XXX conflicts with "
+                                 + other.to_str(this) + "\n";
+                        }
+                    }
+                    out += "prd = " + state_fn(next_state) + "();\n";
+                    out += "}\n";
 
-                    cases_so_far++;
+                    if(!exists)
+                        done[trans_id] = item.id();
                 }
             }
+        }
+
+        if(conflict_count > 0) {
+            fprintf(stderr,
+                "Warning: %i terminal conflicts.  See generated code.\n",
+                conflict_count
+            );
         }
 
         return out;
     }
 
-    std::string code_for_prods(const lr_set &state, const std::string &ind) {
+    std::string code_for_prods(const lr_set &state) {
         std::string out;
         std::map<int, int> element_ids_done;
 
@@ -655,15 +691,14 @@ out += "    fprintf(stderr, \"" + state_fn(state) + " shifted terminal " + right
                     if(existing == element_ids_done.end()) {
                         // (i.e. no existing code for this)
                         lr_set next_state = lr_goto(state, right_of_dot->gexpr);
-                        out += ind;
                         if(element_ids_done.size() > 0)
                             out += "else ";
                         out += "if(prd.grammar_element_id == NontermID::_"
                                + right_of_dot->gexpr.to_str() + ") {\n";
-                        out += ind + ind + "// " + item.to_str(this) + "\n";
-                        out += ind + ind + "prd = " + state_fn(next_state) + "();\n";
+                        out += "    // " + item.to_str(this) + "\n";
+                        out += "    prd = " + state_fn(next_state) + "();\n";
 out += "    fprintf(stderr, \"" + state_fn(state) + " shifted nonterminal " + right_of_dot->to_str() + " to " + state_fn(next_state) + "\\n\");\n";
-                        out += ind + "}\n";
+                        out += "}\n";
                         element_ids_done[el_id] = state_index[state.id()];
                     } else if(existing->second != state_index[state.id()]) {
                         // gar this error message could be more informative.
@@ -690,21 +725,20 @@ out += "    fprintf(stderr, \"" + state_fn(state) + " shifted nonterminal " + ri
     }
 
     std::string code_for_state(const lr_set &state) {
-        const std::string ind = "    "; // XXX kill this - we reindent anyway
         std::string out;
 
         out += "//\n";
         out += state.to_str(this, 1, "//");
         out += "//\n";
         out += "FPLBaseParser::product "; out += state_fn(state); out += "() {\n";
-        out += ind + "product prd;\n";
+        out += "product prd;\n";
 
 out += "    fprintf(stderr, \"entering state " + state_fn(state) + "\\n\");\n";
-        out += code_for_terminals(state, ind) + "\n";
+        out += code_for_terminals(state) + "\n";
 
         // ... or this is really the gotos
 out += "    fprintf(stderr, \"mebbe gotos for " + state_fn(state) + "\\n\");\n";
-        out += code_for_prods(state, ind) + "\n";
+        out += code_for_prods(state) + "\n";
 
         // if we're at the end of the item we need to reduce
         // according to the next possible ...... XXX
@@ -714,7 +748,7 @@ out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(st
         out += code_for_handling_reduce(state);
         out += "    }\n";
 
-        out += ind + "return prd;\n";
+        out += "    return prd;\n";
         out += "}\n"; // end of state_ function
 
         return out;
