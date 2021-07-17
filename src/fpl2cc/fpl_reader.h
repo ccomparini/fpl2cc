@@ -7,7 +7,7 @@
 #include <string>
 
 #if __cplusplus <= 199711L
-  #error because it uses <filesystem>, fpl_reader.h need c++11 or better
+  #error because it uses <filesystem>, fpl_reader.h needs c++11 or better
 #endif
 
 #ifdef __APPLE__
