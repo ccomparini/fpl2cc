@@ -81,7 +81,7 @@ public:
         buffer.assign(buf, filesize + 1);
     }
 
-    inline int line_number(const utf8_byte *start, const utf8_byte *end) {
+    inline int line_number(const utf8_byte *start, const utf8_byte *end) const {
 
         // we rescan for line numbers instead of keeping a counter
         // because (1) it's easier than checking every read, which
@@ -100,7 +100,7 @@ public:
         return line_no;
     }
 
-    inline int line_number(const utf8_byte *up_to = NULL) {
+    inline int line_number(const utf8_byte *up_to = NULL) const {
         return line_number(buffer.data(), up_to);
     }
 
