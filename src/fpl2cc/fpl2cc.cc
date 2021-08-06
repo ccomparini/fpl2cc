@@ -58,7 +58,8 @@ void fail(const char *fmt...) {
     - regular expression -> std::smatch
     - production name    -> Jest::Member
 
-  If there's any repetition,... XXX
+  If there's any repetition,... XXX handle repetition,
+  possibly in the state code itself.
 
   Code blocks should use a normal "return" statement to return a pointer
   to a Jest::Member.
@@ -145,7 +146,8 @@ Production rules are ordered;  first one matches.
 Production rules can be looked up by name.
 
 Each production rule is an array of things to match (items),
-and a code block (string).  Each item has a minimum and maximum
+the type of thing produced (string/GrammarElement) and typically
+a code block (string).  Each item has a minimum and maximum
 number of times to match (default 1; may be 0, 1, or, in the
 max case, infinite).
 
@@ -286,18 +288,22 @@ struct ProdExpr { // or step?
     }
 };
 
-struct ProductionRule {
-    std::string product;
+class ProductionRule {
+    std::string prod;
     std::vector<ProdExpr> steps;
-    std::string code;
-    const utf8_byte *start_of_text;
+    std::string code_str;
+    const utf8_byte *text;
 
-    ProductionRule(const utf8_byte *at) : start_of_text(at) {
+public:
+
+    ProductionRule(const utf8_byte *at) : text(at) {
     }
 
     void add_step(ProdExpr step) {
         steps.push_back(step);
     }
+
+    inline int num_steps() const { return steps.size(); }
 
     // returns NULL if index is out of bounds
     const ProdExpr *step(unsigned int index) const {
@@ -305,6 +311,36 @@ struct ProductionRule {
             return &steps[index];
         }
         return NULL;
+    }
+
+    const std::string &product(const std::string &pr) {
+        prod = pr;
+        return prod;
+    }
+
+    const std::string &product() const {
+        return prod;
+    }
+
+    GrammarElement product_ge() const {
+        return GrammarElement(product(), GrammarElement::NONTERM_PRODUCTION);
+    }
+
+    const utf8_byte *start_of_text() const {
+        return text;
+    }
+
+    const std::string code(const std::string &src) {
+        code_str = src;
+        return code();
+    }
+
+    std::string code() const {
+        return code_str;
+    }
+
+    const char *product_c_str() const {
+        return product().c_str();
     }
 
     std::string to_str() const {
@@ -358,11 +394,21 @@ class Productions {
         uint16_t rule;     // offset into rules
         uint16_t position; // offset into rule->steps
 
+        static const uint16_t no_rule = 0xffff;
+
         friend bool operator<(const lr_item& left, const lr_item& right) {
             if(left.rule == right.rule)
                 return left.position < right.position;
             return left.rule < right.rule;
         }
+
+        // "false" indicates an invalid or non-item.
+        operator bool() const { 
+            return rule != no_rule;
+        }
+
+        // constructs a false item:
+        lr_item() : rule(no_rule), position(0) { }
 
         lr_item(int rl, int pos) : rule(rl), position(pos) { }
 
@@ -379,16 +425,16 @@ class Productions {
 
             const int bs = 40;
             char buf[bs];
-            snprintf(buf, bs, "%s (rule %i):", rl.product.c_str(), rule);
+            snprintf(buf, bs, "%s (rule %i):", rl.product_c_str(), rule);
             buf[bs - 1] = '\0';
             std::string out(buf);
 
             int step;
-            for(step = 0; step < rl.steps.size(); ++step) {
-                out += " ";
+            for(step = 0; step < rl.num_steps(); ++step) {
                 if(step == position)
                     out += "•";
-                out += rl.steps[step].to_str();
+                out += " ";
+                out += rl.step(step)->to_str();
             }
             if(step == position)
                 out += "•";
@@ -396,9 +442,12 @@ class Productions {
             return out;
         }
     };
+/*
+XXX unused
     inline const ProdExpr &lr_item_step(const lr_item &it) {
-        return rules[it.rule].steps[it.position];
+        return rules[it.rule].step(it.position);
     }
+ */
 
     // an lr_set is a set of lr items.
     // it is it's own special class mostly so that we can
@@ -418,9 +467,9 @@ class Productions {
         // if 2 sets are identical or not.
         std::string id() const {
             if(_id_cache.length() == 0) { 
-                const int len_each = 2*(sizeof(lr_item::rule) + sizeof(lr_item::position));
                 // I hate assert but it's been bugging me that the size of
                 // the rule/position could change and cause this to break, so:
+                const int len_each = 2*(sizeof(lr_item::rule) + sizeof(lr_item::position));
                 assert(8 == len_each);
                 const int len = items.size()*len_each + 1;
                 char buf[len];
@@ -441,6 +490,19 @@ class Productions {
             for(auto it : set.items) {
                 items.insert(it);
             }
+        }
+
+        // returns an lr_item representing the reduction for
+        // this set/state, or a false-valued lr_item if there's
+        // no such reduction.
+        lr_item reduction_item(const Productions *prds) const {
+            for(auto it : items) {
+                const ProductionRule &rl = prds->rules[it.rule];
+                if(rl.num_steps() == it.position) {
+                    return it;
+                }
+            }
+            return lr_item(); // no reduction here
         }
 
         std::string to_str(
@@ -475,7 +537,7 @@ class Productions {
             auto endrl = rules_for_product.upper_bound(pname);
 
             if(strl == endrl) {
-                const utf8_byte *sot = rule.start_of_text;
+                const utf8_byte *sot = rule.start_of_text();
                 fail(
                     "Nothing produces «%s» "
                     "(used by rule starting with «%.20s» at line %i\n",
@@ -563,11 +625,12 @@ public:
         int rule_num = rules.size();
         rules.push_back(rule);
 
-        for(const ProdExpr &step : rule.steps) {
-            record_element(step.gexpr);
+        for(int stp = 0; stp < rule.num_steps(); stp++) {
+            record_element(rule.step(stp)->gexpr);
         }
+        record_element(rule.product_ge());
 
-        rules_for_product.insert(std::make_pair(rule.product, rule_num));
+        rules_for_product.insert(std::make_pair(rule.product(), rule_num));
     }
 
     // returns the name of the function to use for the
@@ -649,7 +712,7 @@ public:
                             break;
                     }
                     out += "\"))) {\n";
-out += "    fprintf(stderr, \"" + state_fn(state) + " shifted terminal " + right_of_dot->terminal_string() + " of '%s' to " + state_fn(next_state) + "\\n\", shifted.to_str().c_str());\n";
+out += "    fprintf(stderr, \"" + state_fn(state) + " shifted terminal '\%s' of '%s' to " + state_fn(next_state) + "\\n\", \"" + right_of_dot->terminal_string()  + "\", shifted.to_str().c_str());\n";
                     out += "// " + item.to_str(this) + "\n";
                     std::string trans_id = transition_id(*right_of_dot, next_state);
                     uint32_t exists = done[trans_id];
@@ -696,11 +759,11 @@ out += "    fprintf(stderr, \"" + state_fn(state) + " shifted terminal " + right
                         lr_set next_state = lr_goto(state, right_of_dot->gexpr);
                         if(element_ids_done.size() > 0)
                             out += "else ";
-                        out += "if(prd.grammar_element_id == NontermID::_"
+                        out += "if(prd.grammar_element_id() == NontermID::_"
                                + right_of_dot->gexpr.to_str() + ") {\n";
                         out += "    // " + item.to_str(this) + "\n";
                         out += "    prd = " + state_fn(next_state) + "();\n";
-out += "    fprintf(stderr, \"" + state_fn(state) + " shifted nonterminal " + right_of_dot->terminal_string() + " to " + state_fn(next_state) + "\\n\");\n";
+out += "    fprintf(stderr, \"" + state_fn(state) + " shifted nonterminal '" + right_of_dot->gexpr.to_str() + "' to " + state_fn(next_state) + "\\n\");\n";
                         out += "}\n";
                         element_ids_done[el_id] = state_index[state.id()];
                     } else if(existing->second != state_index[state.id()]) {
@@ -718,11 +781,33 @@ out += "    fprintf(stderr, \"" + state_fn(state) + " shifted nonterminal " + ri
         return out;
     }
 
+    std::string code_for_rule(const ProductionRule &rl) const {
+        std::string code_str = rl.code();
+        if(code_str.length() == 0) {
+            // default code:
+            // code_str += "\nreturn product(" + element_index[rl.product()] + ");";
+        }
+
+// XXX OK SO clear up when we reduce or what
+fprintf(stderr, "product from %p line %i is %s\n", rl.start_of_text(), inp.line_number(rl.start_of_text()), rl.product().c_str());
+
+            code_str += "\nreturn product(NontermID::_" + rl.product() + ");";
+
+        return code_str;
+    }
+
     std::string code_for_handling_reduce(const lr_set &state) {
         std::string out;
+out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(state) + "\\n\");\n";
         // 2 possible cases here:
-        //  - there exists explicit code for the production
-        // if(state.
+        //  - there exists explicit code for the production....
+        // XXX
+        lr_item item = state.reduction_item(this);
+        if(item) {
+            out += "// reduce by:\n//   " + item.to_str(this) + "\n";
+fprintf(stderr, " ....... I guess we have code for rule #%i\n", item.rule);
+            out += code_for_rule(rules[item.rule]);
+        }
 
         return out;
     }
@@ -745,11 +830,25 @@ out += "    fprintf(stderr, \"mebbe gotos for " + state_fn(state) + "\\n\");\n";
 
         // if we're at the end of the item we need to reduce
         // according to the next possible ...... XXX
-out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(state) + "\\n\");\n";
-        out += "    // XXX reduce code here thanks\n"
-               "    if(--prd.reduce_count == 0) {\n";
+        // OK 2 different things:
+        //  - we are at the end of a rule, in which case we 
+        //    need to jam in the production code, either from
+        //    whatever was in the fpl or the default (if that's
+        //    possible - I think we can default aliases where
+        //    all possible rules for a nonterm are simple
+        //    terminal -> nonterm)
+        //    I _think_ we're at the end of a rule iff there's
+        //    no product (i.e. if none of the nonterminal rules
+        //    have been matched).  So, if that's the case _and_
+        //    this state has an lr_item which matches the end
+        //    of a rule, create a product according to that
+        //    rule and the contents of the stack.
+        //  - we're unrolling the stack.... uhhh why do we
+        //    need a reduce count?
+//        out += "    // XXX reduce code here thanks\n"
+//               "    if(--prd.reduce_count == 0) {\n";
         out += code_for_handling_reduce(state);
-        out += "    }\n";
+//        out += "    }\n";
 
         out += "    return prd;\n";
         out += "}\n"; // end of state_ function
@@ -757,8 +856,8 @@ out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(st
         return out;
     }
 
-    // ... this mostly just tries to fix indent
-    std::string format_code(const std::string code) {
+    // reformat the generated code to fix indents and what have you.
+    std::string reformat_code(const std::string code) {
         const int chars_per_indent = 4;
         int indent = 0;
         int new_lines = 0;
@@ -810,8 +909,8 @@ out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(st
 
     // returns an enum string for nonterminals.
     // this makes the generated code easier to read - eg
-    // instead of "if(prd.grammar_element_id == 62)" we
-    // can do "if(prd.grammar_element_id == NontermID::_decimal_constant)"
+    // instead of "if(prd.grammar_element_id == 62)" we can
+    // do "if(prd.grammar_element_id == NontermID::_decimal_constant)"
     std::string nonterm_enum() {
         std::string out;
 
@@ -913,7 +1012,7 @@ out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(st
             out += code_for_main(parser_class);
         }
 
-        printf("%s\n", format_code(out).c_str());
+        printf("%s\n", reformat_code(out).c_str());
     }
 };
 
@@ -1024,12 +1123,6 @@ int read_expressions(fpl_reader &src, ProductionRule &rule) {
     return num_read;
 }
 
-// returns a string containing the code to "generate" when
-// the production ends in a ';'
-std::string default_code() {
-    return "return arg1;";
-}
-
 std::string read_code(fpl_reader &src) {
      // code is within "+{" "}+" brackets.
      // this is done simplistically, which means you will
@@ -1040,7 +1133,7 @@ std::string read_code(fpl_reader &src) {
      const utf8_byte *start = NULL;
      const utf8_byte *end   = NULL;
      if(src.read_byte_equalling(';')) {
-         return default_code();
+         return ""; // default code generated on the fly
      } else if(src.read_byte_equalling('+') && src.read_byte_equalling('{')) {
          start = src.inpp();
          while(char byte_in = src.read_byte()) {
@@ -1086,8 +1179,8 @@ void fpl2cc(const Options &opts) {
             // read what the expressions above produce:
             inp.eat_space();
             const utf8_byte *start = inp.inpp();
-            rule.product = inp.read_to_space();
-            if(rule.product.length() <= 0) {
+            rule.product(inp.read_to_space());
+            if(rule.product().length() <= 0) {
                 fail(
                     "missing production name on line %i near %.12s\n",
                     inp.line_number(start), start
@@ -1095,10 +1188,15 @@ void fpl2cc(const Options &opts) {
             }
 
             // read the code for the production
-            rule.code = read_code(inp);
+            rule.code(read_code(inp));
 
             // add it to the set of productions
             productions.push_back(rule);
+        } else {
+            fail(
+                "aint no expression? on line %i near %.12s\n",
+                inp.line_number(inp.inpp(), inp.inpp())
+            );
         }
 
         inp.eat_space();
