@@ -78,6 +78,9 @@ void fail(const char *fmt...) {
     because it's the callers which will have to slap in the code for
     the matched rule.  I think.  hah.  (the way it is now, state functions
     need to see stuff above them on the stack, which ain't gonna work)
+  - repetition:  optional counts perhaps already work;  max_times is not
+    implemented, however.  possible implementation for max_times:  in
+    each state, loop with a counter....
  */
 
 struct Options {
@@ -789,7 +792,7 @@ out += "    fprintf(stderr, \"" + state_fn(state) + " shifted nonterminal '" + r
         }
 
 // XXX OK SO clear up when we reduce or what
-fprintf(stderr, "product from %p line %i is %s\n", rl.start_of_text(), inp.line_number(rl.start_of_text()), rl.product().c_str());
+//fprintf(stderr, "product from %p line %i is %s\n", rl.start_of_text(), inp.line_number(rl.start_of_text()), rl.product().c_str());
 
             code_str += "\nreturn product(NontermID::_" + rl.product() + ");";
 
@@ -805,7 +808,7 @@ out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(st
         lr_item item = state.reduction_item(this);
         if(item) {
             out += "// reduce by:\n//   " + item.to_str(this) + "\n";
-fprintf(stderr, " ....... I guess we have code for rule #%i\n", item.rule);
+//fprintf(stderr, " ....... I guess we have code for rule #%i\n", item.rule);
             out += code_for_rule(rules[item.rule]);
         }
 
@@ -1057,6 +1060,7 @@ void read_quantifiers(fpl_reader &src, ProdExpr &expr) {
 
 void eat_comment(fpl_reader &src) {
     size_t nll;
+    // comments end at newline:
     while(!(nll = src.newline_length(src.inpp()))) {
         src.skip_char();
     }
@@ -1070,6 +1074,9 @@ int read_expressions(fpl_reader &src, ProductionRule &rule) {
         src.eat_space();
 
         const utf8_byte *inp = src.inpp();
+
+        if(!inp)
+            break;
 
         std::string expr_str;
         GrammarElement::Type type = GrammarElement::Type::NONE;
@@ -1192,11 +1199,16 @@ void fpl2cc(const Options &opts) {
 
             // add it to the set of productions
             productions.push_back(rule);
+/*
+this is not necessarily an error - the input file cound end with a comment,
+which doesn't get counted as an expression.  perhaps comment processing is
+goofy.  :P
         } else {
             fail(
                 "aint no expression? on line %i near %.12s\n",
-                inp.line_number(inp.inpp(), inp.inpp())
+                inp.line_number(), inp.inpp()
             );
+ */
         }
 
         inp.eat_space();

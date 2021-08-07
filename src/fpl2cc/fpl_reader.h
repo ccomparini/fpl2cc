@@ -81,7 +81,18 @@ public:
         buffer.assign(buf, filesize + 1);
     }
 
-    inline int line_number(const utf8_byte *start, const utf8_byte *end) const {
+    // returns the 1-based line number for the position passed.
+    // returns 0 if the position passed is outside the buffer entirely.
+    inline int line_number(const utf8_byte *pos = NULL) const {
+        const utf8_byte *buf = buffer.data();
+
+        // default is to get the line number for the current read position:
+        if(!pos) pos = buf + read_pos;
+
+        if(pos > buf + buffer.length()) return 0;
+        if(pos < buf)                   return 0;
+
+        if(eof(pos)) pos = buf + buffer.length();
 
         // we rescan for line numbers instead of keeping a counter
         // because (1) it's easier than checking every read, which
@@ -92,7 +103,7 @@ public:
         // counter and updating it on every read.
         int line_no = 1;
         const utf8_byte *rd;
-        for(rd = start; rd < end; rd += char_length(rd)) {
+        for(rd = buf; rd < pos; rd += char_length(rd)) {
             if(newline_length(rd)) {
                 line_no++;
             }
@@ -100,9 +111,6 @@ public:
         return line_no;
     }
 
-    inline int line_number(const utf8_byte *up_to = NULL) const {
-        return line_number(buffer.data(), up_to);
-    }
 
     std::string base_name() const {
 
@@ -119,13 +127,19 @@ public:
         return infn;
     }
 
-    inline size_t bytes_left() {
+    inline size_t bytes_left() const {
         return buffer.length() - read_pos;
     }
 
-    inline bool eof() {
+    inline bool eof() const {
         // -1 is because we stuff a '\0' at the end of the buffer
         return read_pos >= buffer.length() - 1;
+    }
+
+    // returns true if the position passed would be eof.
+    // results are undefined if the position is outside the buffer.
+    inline bool eof(const utf8_byte *pos) const {
+        return pos - buffer.data() >= buffer.length() - 1;
     }
 
     // returns a pointer to the next byte of the input
@@ -134,7 +148,7 @@ public:
     // then you can't embed \0.  but, if I were to redo
     // this, I would just disallow embedding \0 and
     // return empty string on eof.  oh well.
-    inline const utf8_byte *inpp() {
+    inline const utf8_byte *inpp() const {
         if(!eof()) {
             return buffer.data() + read_pos;
         } else {
