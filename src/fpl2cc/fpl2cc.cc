@@ -653,11 +653,11 @@ public:
 
        struct { void *product, int grammar_element_id  } production;
 
-       terminal scan_xxx() returns the terminal or one with length <= 0.
+       Terminal scan_xxx() returns the terminal or one with length <= 0.
        can be inline.  
 
        state_x() {
-           terminal scanned; 
+           Terminal scanned; 
            production prod;
 
            if(scanned = scan_xxx(...)) {
@@ -681,7 +681,7 @@ public:
         std::map<std::string, uint32_t> done;
         int conflict_count = 0;
 
-        out += "FPLBaseParser::terminal shifted;\n";
+        out += "FPLBaseParser::Terminal shifted;\n";
 
         for(auto item : state.items) {
             const ProductionRule &rule = rules[item.rule];
@@ -788,13 +788,13 @@ out += "    fprintf(stderr, \"" + state_fn(state) + " shifted nonterminal '" + r
         std::string code_str = rl.code();
         if(code_str.length() == 0) {
             // default code:
-            // code_str += "\nreturn product(" + element_index[rl.product()] + ");";
+            // code_str += "\nreturn Product(" + element_index[rl.product()] + ");";
         }
 
 // XXX OK SO clear up when we reduce or what
 //fprintf(stderr, "product from %p line %i is %s\n", rl.start_of_text(), inp.line_number(rl.start_of_text()), rl.product().c_str());
 
-            code_str += "\nreturn product(NontermID::_" + rl.product() + ");";
+            code_str += "\nreturn Product(NontermID::_" + rl.product() + ");";
 
         return code_str;
     }
@@ -821,8 +821,8 @@ out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(st
         out += "//\n";
         out += state.to_str(this, 1, "//");
         out += "//\n";
-        out += "FPLBaseParser::product "; out += state_fn(state); out += "() {\n";
-        out += "product prd;\n";
+        out += "FPLBaseParser::Product "; out += state_fn(state); out += "() {\n";
+        out += "Product prd;\n";
 
 out += "    fprintf(stderr, \"entering state " + state_fn(state) + "\\n\");\n";
         out += code_for_terminals(state) + "\n";
