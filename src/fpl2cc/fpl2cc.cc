@@ -359,6 +359,11 @@ public:
         return out;
     }
 
+/*
+    const &std::vector<ProdExpr> steps() const {
+        return steps;
+    }
+ */
 };
 
 class Productions {
@@ -624,7 +629,7 @@ public:
 
     Productions(fpl_reader &src) : inp(src) { }
 
-    void push_back(const ProductionRule &rule) {
+    void push_rule(const ProductionRule &rule) {
         int rule_num = rules.size();
         rules.push_back(rule);
 
@@ -676,6 +681,8 @@ public:
            return prod;
        }
     */
+// XXX this sub goes:
+/*
     std::string code_for_terminals(const lr_set &state) {
         std::string out;
         std::map<std::string, uint32_t> done;
@@ -745,7 +752,10 @@ out += "    fprintf(stderr, \"" + state_fn(state) + " shifted terminal '\%s' of 
 
         return out;
     }
+ */
 
+/*
+// XXX this code goes:
     std::string code_for_prods(const lr_set &state) {
         std::string out;
         std::map<int, int> element_ids_done;
@@ -783,7 +793,10 @@ out += "    fprintf(stderr, \"" + state_fn(state) + " shifted nonterminal '" + r
         }
         return out;
     }
+ */
 
+/*
+// XXX kill this:
     std::string code_for_rule(const ProductionRule &rl) const {
         std::string code_str = rl.code();
         if(code_str.length() == 0) {
@@ -798,7 +811,10 @@ out += "    fprintf(stderr, \"" + state_fn(state) + " shifted nonterminal '" + r
 
         return code_str;
     }
+ */
 
+/*
+// XXX kill this:
     std::string code_for_handling_reduce(const lr_set &state) {
         std::string out;
 out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(state) + "\\n\");\n";
@@ -814,6 +830,7 @@ out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(st
 
         return out;
     }
+ */
 
     std::string code_for_state(const lr_set &state) {
         std::string out;
@@ -822,7 +839,71 @@ out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(st
         out += state.to_str(this, 1, "//");
         out += "//\n";
         out += "FPLBaseParser::Product "; out += state_fn(state); out += "() {\n";
-        out += "Product prd;\n";
+        out += "    Product prd;\n";
+        out += "";
+        out += "if(0) {\n"; // now everything past this can be "else if"
+
+        // See Aho, Sethi, Ullman pg 234
+        // OK I THINK we can loop over state.items and for each:
+        //   const ProductionRule &rule = rules[item.rule];
+        //   const ProdExpr *right_of_dot = rule.step(item.position);
+        //   if(right_of_dot->is_terminal()) shift
+        //   elsif(right_of_dot is a nonterminal)
+        //   else error
+        std::map<int, int> element_ids_done; // for nonterminals - 
+        for(auto item : state.items) {
+            const ProductionRule &rule = rules[item.rule];
+            const ProdExpr *right_of_dot = rule.step(item.position);
+            if(right_of_dot) {
+                int el_id = element_index[right_of_dot->gexpr];
+                switch(right_of_dot->type()) {
+                    // shifts
+                    case GrammarElement::NONE:
+                        // XXX decent message here
+                        fail(".. no grammar element?");
+                        break;
+                    case GrammarElement::TERM_EXACT:
+                        // shift and set stack state to 
+                        out += "} else if(shift_exact(\"" + right_of_dot->terminal_string() + "\")) {\n";
+                        break;
+                    case GrammarElement::TERM_REGEX:
+                        out += "} else if(shift_re(\"" + right_of_dot->terminal_string() + "\")) {\n";
+                        break;
+                    case GrammarElement::NONTERM_PRODUCTION:
+                        // we need to know if the production is .. next up. and
+                        // shift it to the stack
+                        out += "} else if(shift_nonterm(NontermID::_" + right_of_dot->gexpr.to_str() + ")) {\n";
+                        break;
+                    default:
+                        // XXX decent message here
+                        fail(".. unknown grammar element type\n");
+                        break;
+                }
+            } else {
+                out += "} else {\n";
+                // end of rule
+                // reduce!  produce!
+                //  XXX code here
+                //  - one argument per element in the rule
+                //    how to handle rules with variable arguments? eg foo+
+                //    option a: boil the foo+ down to a single item
+                //              containing an array of other items
+                //    option b: call the production code with a list in
+                //              any case; allow indexing from either end
+                //              .. and hope that that lets you index what
+                //              you need.  option b sucks.
+                //  option a might be implementable in a fairly
+                //  straightforward way by making wildcard things
+                //  implicitly make their own elements. (i.e. if
+                //  there's foo+ or foo*, those each get their
+                //  own nonterminals).  <-- do this.
+                out += "    // reduce produce\n";
+                out += "    //   XXX stuff here";
+                out += "}\n";
+            }
+        }
+        out += "}\n";
+/*
 
 out += "    fprintf(stderr, \"entering state " + state_fn(state) + "\\n\");\n";
         out += code_for_terminals(state) + "\n";
@@ -852,6 +933,7 @@ out += "    fprintf(stderr, \"mebbe gotos for " + state_fn(state) + "\\n\");\n";
 //               "    if(--prd.reduce_count == 0) {\n";
         out += code_for_handling_reduce(state);
 //        out += "    }\n";
+*/
 
         out += "    return prd;\n";
         out += "}\n"; // end of state_ function
@@ -952,10 +1034,12 @@ out += "    fprintf(stderr, \"mebbe gotos for " + state_fn(state) + "\\n\");\n";
         // if people want something fancier, they can make their own.
         out += "int main(int argc, const char **argv) {\n";
         out += "    if(argc < 2) {\n";
+        // XXX this is weak;  make the reader able to read stdin
         out += "        fpl_reader::default_fail(";
         out += "            \"Please provide a source file name.\\n\"";
         out += "        );\n";
         out += "    }\n";
+        // XXX this is also weak; handle more than one source
         out += "    fpl_reader inp(argv[1]);\n";
         out +=      parser_class + " parser(inp);\n";
         out += "    parser.parse();\n";
@@ -970,7 +1054,8 @@ out += "    fprintf(stderr, \"mebbe gotos for " + state_fn(state) + "\\n\");\n";
 
         // for now, we're going to consider the first rule
         // (rule 0) to be the starting point (and start with
-        // the first expression in that rule, of course):
+        // the first expression in that rule, of course).
+        // staet_0 will then be the starting state.
         add_state(lr_closure(lr_item(0, 0)));
 
         // Aho, Sethi, and Ullman page 224... uhh, modified.
@@ -1007,7 +1092,14 @@ out += "    fprintf(stderr, \"mebbe gotos for " + state_fn(state) + "\\n\");\n";
 
         out += "\npublic:\n";
         out += "    " + parser_class + "(fpl_reader &src) : FPLBaseParser(src) { }\n";
-        out += "    void parse() { state_0(); };\n";
+        out += "    void parse() {\n";
+        // XXX there's a better way:
+        out += "        lr_push(StackEntry(reinterpret_cast<State>(&" + parser_class + "::state_0), Product()));\n";
+        out += "        while(lr_stack_size() > 0) {\n";
+        out += "            State st = current_state();\n";
+        out += "            (this->*st)();\n";
+        out += "        }\n";
+        out += "    };\n";
 
         out += "};\n"; // end of class
 
@@ -1198,7 +1290,7 @@ void fpl2cc(const Options &opts) {
             rule.code(read_code(inp));
 
             // add it to the set of productions
-            productions.push_back(rule);
+            productions.push_rule(rule);
 /*
 this is not necessarily an error - the input file cound end with a comment,
 which doesn't get counted as an expression.  perhaps comment processing is
