@@ -333,7 +333,7 @@ public:
         return text;
     }
 
-    const std::string code(const std::string &src) {
+    std::string code(const std::string &src) {
         code_str = src;
         return code();
     }
@@ -650,6 +650,15 @@ public:
         return fn;
     }
 
+    std::string state_goto(const lr_set &in, const GrammarElement &sym) {
+        lr_set next_state = lr_goto(in, sym);
+        std::string out;
+        // have to cast the function to a state the parent class can use.
+        // dislike.
+        out += "reinterpret_cast<State>(&" + state_fn(next_state) + ")";
+        return out;
+    }
+
     /*
        Let's say:
 
@@ -847,14 +856,27 @@ out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(st
         // OK I THINK we can loop over state.items and for each:
         //   const ProductionRule &rule = rules[item.rule];
         //   const ProdExpr *right_of_dot = rule.step(item.position);
-        //   if(right_of_dot->is_terminal()) shift
-        //   elsif(right_of_dot is a nonterminal)
-        //   else error
+        //   if(right_of_dot) {
+        //       if(right_of_dot->is_terminal() and g = lr_goto(item.rule, right_of_dot) {
+        //           lr_set next_state = lr_goto(state, right_of_dot->gexpr);
+        //           action = shift(next_state, symbol);
+        //       } else {
+        //           // right of dot is a product.  check "next up" for that
+        //           // product
+        //           
+        //       }
+        //   } else {
+        //       we're at the end of the rule, so reduce and produce,
+        //       placing the production in "next up"
+        //   }
         std::map<int, int> element_ids_done; // for nonterminals - 
+        const ProductionRule *reducer = NULL;
         for(auto item : state.items) {
             const ProductionRule &rule = rules[item.rule];
             const ProdExpr *right_of_dot = rule.step(item.position);
-            if(right_of_dot) {
+            if(!right_of_dot) {
+                reducer = &rule;
+            } else {
                 int el_id = element_index[right_of_dot->gexpr];
                 switch(right_of_dot->type()) {
                     // shifts
@@ -865,21 +887,28 @@ out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(st
                     case GrammarElement::TERM_EXACT:
                         // shift and set stack state to 
                         out += "} else if(shift_exact(\"" + right_of_dot->terminal_string() + "\")) {\n";
+                        out += "    " + state_goto(state, right_of_dot->gexpr) + ";\n";
                         break;
                     case GrammarElement::TERM_REGEX:
                         out += "} else if(shift_re(\"" + right_of_dot->terminal_string() + "\")) {\n";
+                        out += "    " + state_goto(state, right_of_dot->gexpr) + ";\n";
                         break;
                     case GrammarElement::NONTERM_PRODUCTION:
                         // we need to know if the production is .. next up. and
                         // shift it to the stack
                         out += "} else if(shift_nonterm(NontermID::_" + right_of_dot->gexpr.to_str() + ")) {\n";
+                        out += "    " + state_goto(state, right_of_dot->gexpr) + "; // XXX prolly aint right\n";
                         break;
                     default:
                         // XXX decent message here
                         fail(".. unknown grammar element type\n");
                         break;
                 }
+/*
             } else {
+                // XXX fail ok this has to happen AT THE END OF all
+                // the else shift stuff or else.. well it won't even
+                // compile
                 out += "} else {\n";
                 // end of rule
                 // reduce!  produce!
@@ -900,8 +929,20 @@ out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(st
                 out += "    // reduce produce\n";
                 out += "    //   XXX stuff here";
                 out += "}\n";
+ */
             }
         }
+
+        if(reducer) {
+            out += "} else {\n";
+            out += "/*\n";
+            out += "    // reduce/produce " + reducer->to_str() + "\n";
+            out += "    args = pop " + std::to_string(reducer->num_steps()) + " items:\n";
+            out += "    production = " + reducer->code() + "\n";
+            out += "    next state = stack[-1].state();\n";
+            out += "*/\n";
+        }
+
         out += "}\n";
 /*
 
