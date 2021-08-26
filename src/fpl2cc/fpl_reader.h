@@ -391,9 +391,16 @@ public:
     }
 
     inline const utf8_byte *read_exact_match(const std::string &match) {
+        int len = bytes_left();
+
+        if(len <= 0) return NULL;
+
         if(const char *in = inpp_as_char()) {
-            if(!match.compare(0, bytes_left(), inpp_as_char()))
+fprintf(stderr, "      looking for exact match with %i bytes left for %s at '%s'\n", len, match.c_str(), in);
+            if(!match.compare(0, len, in)) {
+fprintf(stderr, "         YES that matches\n");
                 return inpp();
+            }
         }
         return NULL; // (didn't match)
     }

@@ -73,14 +73,9 @@ void fail(const char *fmt...) {
   - buffering the entire input is busted for things like stdin.
     stream instead;  but possibly fix that via chicken/egging it
     and generate the new parser with this.
-  - Sort out reducing.  I think reducing is wrong presently.  huh can it
-    just simply return on reduce?  only if the callers know what to do,
-    because it's the callers which will have to slap in the code for
-    the matched rule.  I think.  hah.  (the way it is now, state functions
-    need to see stuff above them on the stack, which ain't gonna work)
   - repetition:  optional counts perhaps already work;  max_times is not
     implemented, however.  possible implementation for max_times:  in
-    each state, loop with a counter....
+    each state, loop with a counter.
  */
 
 struct Options {
@@ -325,7 +320,7 @@ public:
         return prod;
     }
 
-    GrammarElement product_ge() const {
+    GrammarElement product_element() const {
         return GrammarElement(product(), GrammarElement::NONTERM_PRODUCTION);
     }
 
@@ -450,12 +445,6 @@ class Productions {
             return out;
         }
     };
-/*
-XXX unused
-    inline const ProdExpr &lr_item_step(const lr_item &it) {
-        return rules[it.rule].step(it.position);
-    }
- */
 
     // an lr_set is a set of lr items.
     // it is it's own special class mostly so that we can
@@ -636,26 +625,32 @@ public:
         for(int stp = 0; stp < rule.num_steps(); stp++) {
             record_element(rule.step(stp)->gexpr);
         }
-        record_element(rule.product_ge());
+        record_element(rule.product_element());
 
         rules_for_product.insert(std::make_pair(rule.product(), rule_num));
     }
 
     // returns the name of the function to use for the
     // given state
-    std::string state_fn(const lr_set &state) {
+    std::string state_fn(const lr_set &state, bool fully_qualified = false) {
         std::string fn("state_");
+
         int state_num = state_index[state.id()];
         fn += std::to_string(state_num);
+
+        if(fully_qualified)
+            fn = fq_member_name(fn);
+
         return fn;
     }
 
+// XXX make this a function in the class instead
     std::string state_goto(const lr_set &in, const GrammarElement &sym) {
         lr_set next_state = lr_goto(in, sym);
         std::string out;
         // have to cast the function to a state the parent class can use.
         // dislike.
-        out += "reinterpret_cast<State>(&" + state_fn(next_state) + ")";
+        out += "reinterpret_cast<State>(&" + state_fn(next_state, true) + ")";
         return out;
     }
 
@@ -841,6 +836,18 @@ out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(st
     }
  */
 
+    std::string args_for_shift(const lr_set &state, const ProdExpr &expr) {
+        std::string el_id(std::to_string(element_index[expr.gexpr]));
+        if(expr.is_terminal()) {
+            return state_goto(state, expr.gexpr)
+                 + ", \"" + expr.terminal_string() + "\""
+                 + ", "   + el_id
+            ;
+        } else {
+            return state_goto(state, expr.gexpr) + ", " + el_id;
+        }
+    }
+
     std::string code_for_state(const lr_set &state) {
         std::string out;
 
@@ -869,7 +876,9 @@ out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(st
         //       we're at the end of the rule, so reduce and produce,
         //       placing the production in "next up"
         //   }
-        std::map<int, int> element_ids_done; // for nonterminals - 
+        std::map<int, int> nonterm_to_state;
+        std::map<std::string, uint32_t> terminal_transitions;
+
         const ProductionRule *reducer = NULL;
         for(auto item : state.items) {
             const ProductionRule &rule = rules[item.rule];
@@ -877,63 +886,49 @@ out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(st
             if(!right_of_dot) {
                 reducer = &rule;
             } else {
-                int el_id = element_index[right_of_dot->gexpr];
                 switch(right_of_dot->type()) {
                     // shifts
+                    case GrammarElement::TERM_EXACT:
+                        out += "} else if(shift_exact(" + args_for_shift(state, *right_of_dot) + ")) {\n";
+                        break;
+                    case GrammarElement::TERM_REGEX:
+                        out += "} else if(shift_re(" + args_for_shift(state, *right_of_dot) + ")) {\n";
+                        break;
+                    case GrammarElement::NONTERM_PRODUCTION:
+                        //if(nonterm_to_state[
+                        out += "} else if(shift_nonterm(" + args_for_shift(state, *right_of_dot) + ")) {\n";
+                        break;
                     case GrammarElement::NONE:
                         // XXX decent message here
                         fail(".. no grammar element?");
-                        break;
-                    case GrammarElement::TERM_EXACT:
-                        // shift and set stack state to 
-                        out += "} else if(shift_exact(\"" + right_of_dot->terminal_string() + "\")) {\n";
-                        out += "    " + state_goto(state, right_of_dot->gexpr) + ";\n";
-                        break;
-                    case GrammarElement::TERM_REGEX:
-                        out += "} else if(shift_re(\"" + right_of_dot->terminal_string() + "\")) {\n";
-                        out += "    " + state_goto(state, right_of_dot->gexpr) + ";\n";
-                        break;
-                    case GrammarElement::NONTERM_PRODUCTION:
-                        // we need to know if the production is .. next up. and
-                        // shift it to the stack
-                        out += "} else if(shift_nonterm(NontermID::_" + right_of_dot->gexpr.to_str() + ")) {\n";
-                        out += "    " + state_goto(state, right_of_dot->gexpr) + "; // XXX prolly aint right\n";
                         break;
                     default:
                         // XXX decent message here
                         fail(".. unknown grammar element type\n");
                         break;
                 }
-/*
-            } else {
-                // XXX fail ok this has to happen AT THE END OF all
-                // the else shift stuff or else.. well it won't even
-                // compile
-                out += "} else {\n";
-                // end of rule
-                // reduce!  produce!
-                //  XXX code here
-                //  - one argument per element in the rule
-                //    how to handle rules with variable arguments? eg foo+
-                //    option a: boil the foo+ down to a single item
-                //              containing an array of other items
-                //    option b: call the production code with a list in
-                //              any case; allow indexing from either end
-                //              .. and hope that that lets you index what
-                //              you need.  option b sucks.
-                //  option a might be implementable in a fairly
-                //  straightforward way by making wildcard things
-                //  implicitly make their own elements. (i.e. if
-                //  there's foo+ or foo*, those each get their
-                //  own nonterminals).  <-- do this.
-                out += "    // reduce produce\n";
-                out += "    //   XXX stuff here";
-                out += "}\n";
- */
+
+// XXX 
+                out += "    // transition ID: " + transition_id(*right_of_dot, lr_goto(state, right_of_dot->gexpr)) + "\n";
+                out += "    fprintf(stderr, \"shifted " + right_of_dot->to_str() + "\\n\");\n"; // XXX debug
             }
         }
 
         if(reducer) {
+            //  - one argument per element (step) in the rule
+            //    how to handle rules with variable arguments? eg foo+
+            //    option a: boil the foo+ down to a single item
+            //              containing an array of other items
+            //    option b: call the production code with a list in
+            //              any case; allow indexing from either end
+            //              .. and hope that that lets you index what
+            //              you need.  option b sucks.
+            //  option a might be implementable in a fairly
+            //  straightforward way by making wildcard things
+            //  implicitly make their own elements. (i.e. if
+            //  there's foo+ or foo*, those each get their
+            //  own nonterminals).  <-- do this.
+            //  XXX code here
             out += "} else {\n";
             out += "/*\n";
             out += "    // reduce/produce " + reducer->to_str() + "\n";
@@ -941,6 +936,19 @@ out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(st
             out += "    production = " + reducer->code() + "\n";
             out += "    next state = stack[-1].state();\n";
             out += "*/\n";
+            std::string product_type = reducer->product_element().to_str();
+            std::string num_steps = std::to_string(reducer->num_steps());
+            out += "    State next_state;\n";
+            out += "    Product args[" + num_steps + "];\n";
+            out += "    for(int aind = 0; aind < " + num_steps + "; ++aind) {\n";
+            out += "        StackEntry ste = lr_pop();\n";
+            out += "        next_state = ste.state;\n";
+            out += "        args[aind] = ste.product;\n";
+            out += "    }\n";
+            out += "    // XXX call the production code here, with the args\n";
+            out += "    void *result = NULL; // set result in production code\n";
+// XXX what deletes the product? ptrs here suck.  rework.
+            out += "    set_product(new Product(result, NontermID::_" + product_type + "));\n";
         }
 
         out += "}\n";
@@ -1064,8 +1072,13 @@ out += "    fprintf(stderr, \"mebbe gotos for " + state_fn(state) + "\\n\");\n";
         return out;
     }
 
-    std::string parser_class_name(const Options &opts, const fpl_reader &src) {
-        return src.base_name() + "_parser";
+    std::string parser_class_name() {
+        return inp.base_name() + "_parser";
+    }
+
+    // returns fully-qualified name of a member of the parser class
+    std::string fq_member_name(const std::string &mem) {
+        return parser_class_name() + "::" + mem;
     }
 
     std::string code_for_main(const std::string &parser_class) {
@@ -1091,7 +1104,7 @@ out += "    fprintf(stderr, \"mebbe gotos for " + state_fn(state) + "\\n\");\n";
 
     void generate_code(const Options &opts, const fpl_reader &src) {
         const auto no_set = state_index.end();
-        const std::string parser_class = parser_class_name(opts, src);
+        const std::string parser_class = parser_class_name();
 
         // for now, we're going to consider the first rule
         // (rule 0) to be the starting point (and start with
@@ -1333,7 +1346,7 @@ void fpl2cc(const Options &opts) {
             // add it to the set of productions
             productions.push_rule(rule);
 /*
-this is not necessarily an error - the input file cound end with a comment,
+this is not necessarily an error - the input file could end with a comment,
 which doesn't get counted as an expression.  perhaps comment processing is
 goofy.  :P
         } else {
