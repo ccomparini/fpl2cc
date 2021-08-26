@@ -19,7 +19,7 @@ namespace fs = std::filesystem;
 
 
 typedef uint32_t unich; // 4 byte unicode char; for realz, unlike wchar_t
-typedef void (ErrorCallback)(const char *fmt...);
+typedef void (ErrorCallback)(const char *fmt...); // printf style format
 
 typedef unsigned char utf8_byte;
 typedef std::basic_string<utf8_byte> utf8_buffer;
@@ -48,6 +48,74 @@ class fpl_reader {
         return empty_match;
     }
     
+    inline size_t bytes_left() const {
+        return buffer.length() - read_pos;
+    }
+
+    // returns true if the position passed would be eof.
+    // throws an error (and returns true) if the position
+    // is entirely outside the buffer
+    // see also the simpler eof() in the public section
+    inline bool eof(const utf8_byte *pos) const {
+        long int off = pos - buffer.data();
+        bool is_eof = false;
+        if((off < 0) || (off >= buffer.length())) {
+            // we're completely outside the buffer. count it as
+            // eof; in any case callers should not expect reads
+            // from that position to work
+            is_eof = true;
+
+            // call the on_error callback directly, since we can't
+            // set the line_number etc correctly anyway:
+            on_error(
+                "test for eof at invalid position: %p in buffer %p",
+                pos, buffer.data()
+            );
+        } else {
+            // else it's eof if we're at the last byte of the file
+            is_eof = off == buffer.length() - 1;
+        }
+        return is_eof;
+    }
+
+    // as inpp(), below, but returns as a const char *
+    // for ease in passing to standard library stuff.
+    inline const char *inpp_as_char() {
+        return reinterpret_cast<const char *>(inpp());
+    }
+
+    // returns the string inside the matching chars.
+    // returns empty string if no match.  yeah, it's ambiguous.. hmm
+    std::string read_to_match(unich start_match, unich end_match) {
+        skip_bytes(1); // XXX convert this whole thing to utf-8
+        const utf8_byte *start = inpp();
+
+        if(!*start) return std::string("");
+
+        size_t total_size = 0;
+        // XXX how did passing '\0' as start of match work before, when this
+        // started at depth 0?  test this whole thing.  the escaping is also suspect.
+        int depth = 1; // assume we're starting on a match
+        do {
+            size_t size;
+            unich in = unicode_char(size, inpp());
+            if(in == start_match) {
+                depth++;
+            } else if(in == end_match) {
+                depth--;
+            } else if(in == '\\') {
+                // next char is escaped - skip it:
+                read_pos   += size;
+                total_size += size;
+            }
+            read_pos   += size;
+            total_size += size;
+        } while(depth > 0);
+
+        // string length total_size - 1 so as to not include the
+        // terminating char
+        return to_std_string(start, total_size - 1);
+    }
 
 public:
 
@@ -111,7 +179,6 @@ public:
         return line_no;
     }
 
-
     std::string base_name() const {
 
         std::string infn = fs::path(input_filename).filename();
@@ -127,19 +194,9 @@ public:
         return infn;
     }
 
-    inline size_t bytes_left() const {
-        return buffer.length() - read_pos;
-    }
-
     inline bool eof() const {
         // -1 is because we stuff a '\0' at the end of the buffer
         return read_pos >= buffer.length() - 1;
-    }
-
-    // returns true if the position passed would be eof.
-    // results are undefined if the position is outside the buffer.
-    inline bool eof(const utf8_byte *pos) const {
-        return pos - buffer.data() >= buffer.length() - 1;
     }
 
     // returns a pointer to the next byte of the input
@@ -148,22 +205,18 @@ public:
     // then you can't embed \0.  but, if I were to redo
     // this, I would just disallow embedding \0 and
     // return empty string on eof.  oh well.
+    // XXX make private
     inline const utf8_byte *inpp() const {
         if(!eof()) {
             return buffer.data() + read_pos;
         } else {
+fprintf(stderr, "inpp at EOF -> NULL kthanks bye\n");
             return NULL;
         }
     }
 
-    // as inpp(), above, but returns as a const char *
-    // for ease in passing to standard library stuff.
-    inline const char *inpp_as_char() {
-        return reinterpret_cast<const char *>(inpp());
-    }
-
     void error(const char *fmt...) {
-        const int buf_size = 1024;
+        const int buf_size = 2048;
         char msg_fmt[buf_size];
         snprintf(msg_fmt, buf_size,
             "Error line %i near \"%.12s\": %s\n", line_number(), inpp(), fmt
@@ -420,39 +473,6 @@ fprintf(stderr, "         YES that matches\n");
             matched = no_match();
         }
         return matched;
-    }
-
-    // returns the string inside the matching chars.
-    // returns empty string if no match.  yeah, it's ambiguous.. hmm
-    std::string read_to_match(unich start_match, unich end_match) {
-        skip_bytes(1); // XXX convert this whole thing to utf-8
-        const utf8_byte *start = inpp();
-
-        if(!*start) return std::string("");
-
-        size_t total_size = 0;
-        // XXX how did passing '\0' as start of match work before, when this
-        // started at depth 0?  test this whole thing.  the escaping is also suspect.
-        int depth = 1; // assume we're starting on a match
-        do {
-            size_t size;
-            unich in = unicode_char(size, inpp());
-            if(in == start_match) {
-                depth++;
-            } else if(in == end_match) {
-                depth--;
-            } else if(in == '\\') {
-                // next char is escaped - skip it:
-                read_pos   += size;
-                total_size += size;
-            }
-            read_pos   += size;
-            total_size += size;
-        } while(depth > 0);
-
-        // string length total_size - 1 so as to not include the
-        // terminating char
-        return to_std_string(start, total_size - 1);
     }
 
 };
