@@ -645,12 +645,17 @@ public:
     }
 
 // XXX make this a function in the class instead
+// XXX or it's unnecessary now that a state is a class?
     std::string state_goto(const lr_set &in, const GrammarElement &sym) {
         lr_set next_state = lr_goto(in, sym);
         std::string out;
+/*
         // have to cast the function to a state the parent class can use.
         // dislike.
-        out += "reinterpret_cast<State>(&" + state_fn(next_state, true) + ")";
+        //out += "reinterpret_cast<State>(&" + state_fn(next_state, true) + ")";
+ */
+        // XXX do we even need the cast?  might be able to get rid of state_goto entirely
+        out += "State(&" + state_fn(next_state, true) + ")";
         return out;
     }
 
@@ -857,6 +862,7 @@ out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(st
         out += "FPLBaseParser::Product "; out += state_fn(state); out += "() {\n";
         out += "    Product prd;\n";
         out += "";
+out += "fprintf(stderr, \"%p->"+  state_fn(state) + " starting at byte %i (%p%s): '%s'\\n\", this, reader.current_position(), reader.inpp(), reader.eof()?\" EOF!\":\"\", reader.inpp());\n";
         out += "if(0) {\n"; // now everything past this can be "else if"
 
         // See Aho, Sethi, Ullman pg 234
@@ -1148,11 +1154,21 @@ out += "    fprintf(stderr, \"mebbe gotos for " + state_fn(state) + "\\n\");\n";
         out += "    " + parser_class + "(fpl_reader &src) : FPLBaseParser(src) { }\n";
         out += "    void parse() {\n";
         // XXX there's a better way:
+
+/*
+for(int stind = 0; stind < states.size(); stind++) {
+out += "fprintf(stderr, \"there is a state (%i) at %p\\n\", " + std::to_string(stind) + ", &" + state_fn(states[stind], true) + ");\n";
+} 
+ */
+out += "fprintf(stderr, \"starting parsing at byte %i (%p) : '%s'\\n\", reader.current_position(), reader.inpp(), reader.inpp());\n";
         out += "        lr_push(StackEntry(reinterpret_cast<State>(&" + parser_class + "::state_0), Product()));\n";
-        out += "        while(lr_stack_size() > 0) {\n";
+out += "fprintf(stderr, \"       after push, inpp is %p %s\\n\", reader.inpp(), reader.inpp());\n";
+        out += "        while((lr_stack_size() > 0) && !reader.eof()) {\n";
         out += "            State st = current_state();\n";
+out += "fprintf(stderr, \"%p about to enter state function. stack size: %i at byte %i %p '%s'\\n\", this, lr_stack_size(), reader.current_position(), reader.inpp(), reader.inpp());\n";
         out += "            (this->*st)();\n";
         out += "        }\n";
+        // XXX check if there's stuff still on the stack or if we're not at eof
         out += "    };\n";
 
         out += "};\n"; // end of class

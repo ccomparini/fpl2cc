@@ -147,6 +147,12 @@ public:
         in.read(reinterpret_cast<char *>(buf), filesize + 1);
         buf[filesize] = '\0';
         buffer.assign(buf, filesize + 1);
+
+fprintf(stderr, "OK WE HAVE BUFFERED THE FILE:\n%s\n----------\n", inpp());
+    }
+
+    inline int current_position() const {
+        return read_pos;
     }
 
     // returns the 1-based line number for the position passed.
