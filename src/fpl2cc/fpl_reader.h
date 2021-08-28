@@ -19,7 +19,7 @@ namespace fs = std::filesystem;
 
 
 typedef uint32_t unich; // 4 byte unicode char; for realz, unlike wchar_t
-typedef void (ErrorCallback)(const char *fmt...); // printf style format
+typedef void (ErrorCallback)(const char *fmt...); // printf format
 
 typedef unsigned char utf8_byte;
 typedef std::basic_string<utf8_byte> utf8_buffer;
@@ -404,7 +404,9 @@ fprintf(stderr, "inpp at EOF -> NULL kthanks bye\n");
 
     void eat_space() {
         while(size_t adv = space_length(inpp())) {
+fprintf(stderr, "         skipping %li bytes of space at '%6s'\n", adv, inpp());
             skip_bytes(adv);
+fprintf(stderr, "         now we are at '%6s'\n", inpp());
         }
     }
 

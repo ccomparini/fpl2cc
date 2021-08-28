@@ -649,13 +649,17 @@ public:
     std::string state_goto(const lr_set &in, const GrammarElement &sym) {
         lr_set next_state = lr_goto(in, sym);
         std::string out;
-/*
         // have to cast the function to a state the parent class can use.
         // dislike.
         //out += "reinterpret_cast<State>(&" + state_fn(next_state, true) + ")";
- */
+/*
         // XXX do we even need the cast?  might be able to get rid of state_goto entirely
         out += "State(&" + state_fn(next_state, true) + ")";
+ */
+        //out += "&" + state_fn(next_state, true);
+        //out += "static_cast<State>(&" + state_fn(next_state, true) + ")";
+        //out += "&" + state_fn(next_state);
+        out += "reinterpret_cast<State>(&" + state_fn(next_state, true) + ")";
         return out;
     }
 
@@ -853,16 +857,28 @@ out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(st
         }
     }
 
+    std::string state_function_declaration(const lr_set &state) {
+        std::string out;
+
+        //out += "static FPLBaseParser::Product " + state_fn(state);
+        //out += "(" + parser_class_name() + " *parser)";
+        //out += "(FPLBaseParser *parser)";
+        out += "FPLBaseParser::Product " + state_fn(state) + "()";
+
+        return out;
+    }
+
     std::string code_for_state(const lr_set &state) {
         std::string out;
 
         out += "//\n";
         out += state.to_str(this, 1, "//");
         out += "//\n";
-        out += "FPLBaseParser::Product "; out += state_fn(state); out += "() {\n";
+        out += state_function_declaration(state) + " {\n";
         out += "    Product prd;\n";
         out += "";
-out += "fprintf(stderr, \"%p->"+  state_fn(state) + " starting at byte %i (%p%s): '%s'\\n\", this, reader.current_position(), reader.inpp(), reader.eof()?\" EOF!\":\"\", reader.inpp());\n";
+//out += "fprintf(stderr, \""+  state_fn(state) + " starting at byte %i (%p%s): '%s'\\n\", parser->reader.current_position(), parser->reader.inpp(), parser->reader.eof()?\" EOF!\":\"\", parser->reader.inpp());\n";
+out += "fprintf(stderr, \""+  state_fn(state) + " starting at byte %i (%p%s): '%s'\\n\", reader.current_position(), reader.inpp(), reader.eof()?\" EOF!\":\"\", reader.inpp());\n";
         out += "if(0) {\n"; // now everything past this can be "else if"
 
         // See Aho, Sethi, Ullman pg 234
@@ -895,13 +911,16 @@ out += "fprintf(stderr, \"%p->"+  state_fn(state) + " starting at byte %i (%p%s)
                 switch(right_of_dot->type()) {
                     // shifts
                     case GrammarElement::TERM_EXACT:
+                        //out += "} else if(parser->shift_exact(" + args_for_shift(state, *right_of_dot) + ")) {\n";
                         out += "} else if(shift_exact(" + args_for_shift(state, *right_of_dot) + ")) {\n";
                         break;
                     case GrammarElement::TERM_REGEX:
+                        //out += "} else if(parser->shift_re(" + args_for_shift(state, *right_of_dot) + ")) {\n";
                         out += "} else if(shift_re(" + args_for_shift(state, *right_of_dot) + ")) {\n";
                         break;
                     case GrammarElement::NONTERM_PRODUCTION:
                         //if(nonterm_to_state[
+                        //out += "} else if(parser->shift_nonterm(" + args_for_shift(state, *right_of_dot) + ")) {\n";
                         out += "} else if(shift_nonterm(" + args_for_shift(state, *right_of_dot) + ")) {\n";
                         break;
                     case GrammarElement::NONE:
@@ -1136,7 +1155,7 @@ out += "    fprintf(stderr, \"mebbe gotos for " + state_fn(state) + "\\n\");\n";
         std::string out;
         out += "#include \"fpl2cc/fpl_reader.h\"\n";
         out += "#include \"fpl2cc/fpl_base_parser.h\"\n";
-        out += "\nclass " + parser_class + " : FPLBaseParser {\n";
+        out += "\nclass " + parser_class + " : public FPLBaseParser {\n";
 
         out += nonterm_enum();
 
@@ -1160,11 +1179,15 @@ for(int stind = 0; stind < states.size(); stind++) {
 out += "fprintf(stderr, \"there is a state (%i) at %p\\n\", " + std::to_string(stind) + ", &" + state_fn(states[stind], true) + ");\n";
 } 
  */
+//out += "fprintf(stderr, \"starting parsing at byte %i (%p) : '%s'\\n\", parser.reader.current_position(), parser.reader.inpp(), parser.reader.inpp());\n";
 out += "fprintf(stderr, \"starting parsing at byte %i (%p) : '%s'\\n\", reader.current_position(), reader.inpp(), reader.inpp());\n";
         out += "        lr_push(StackEntry(reinterpret_cast<State>(&" + parser_class + "::state_0), Product()));\n";
+//out += "fprintf(stderr, \"       after push, inpp is %p %s\\n\", parser.reader.inpp(), parser.reader.inpp());\n";
 out += "fprintf(stderr, \"       after push, inpp is %p %s\\n\", reader.inpp(), reader.inpp());\n";
+//        out += "        while((lr_stack_size() > 0) && !parser.reader.eof()) {\n";
         out += "        while((lr_stack_size() > 0) && !reader.eof()) {\n";
         out += "            State st = current_state();\n";
+//out += "fprintf(stderr, \"%p about to enter state function. stack size: %i at byte %i %p '%s'\\n\", this, lr_stack_size(), parser.reader.current_position(), parser.reader.inpp(), parser.reader.inpp());\n";
 out += "fprintf(stderr, \"%p about to enter state function. stack size: %i at byte %i %p '%s'\\n\", this, lr_stack_size(), reader.current_position(), reader.inpp(), reader.inpp());\n";
         out += "            (this->*st)();\n";
         out += "        }\n";
