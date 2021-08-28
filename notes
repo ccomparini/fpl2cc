@@ -1,0 +1,54 @@
+Sat Aug  7 17:26:46 PDT 2021
+
+OK so here's how it has to work.  in order:
+
+ - shift pushes to the stack and changes state.  in a pure
+   recursive ascent parser, this would mean basically calling
+   another function and using the "normal" stack as the stack
+ - reduce:  After a reduce, we have a goto.  goto basically
+   has to be done by the caller.  so that means not going to
+   another function until AFTER reducing to whatever.
+   like:
+    - pop the appropriate number of symbols off the stack.
+      (how many?  has to be based on the rule.  how to support
+      if the rule has multiple lengths of arguments?  like a list.)
+    - push(whatever was produced, whatever state 
+    - grrr...
+   .. you know, pure recursive ascent probably does make sense for this.
+   except it's a pita to get the arguments to your code generation code.
+   .. the caller (however far down the stack) has to do the code generation
+   too.  or slapping in the rule thingo.  makes me wonder if ascent
+   is really the way.
+
+So one _could_ have functions for the states and each entry on the the
+stack can be (result, *function).  A possible nice side effect of this
+is that on error, the function can potentially be state_error or something
+like that.  Makes returning an error easyish. (error in generaly can be a
+reduce/goto - perhaps that can even help debugging)
+
+... weird note:  the way I'm thinking of this, "accept" is basically
+a particular reduce case.  I think.  I think it _should_ be, anyway.
+IF NOT, do we need an eof token?  should probably have used empty
+string for such, anyway... sigh.
+
+
+Revision:
+
+    // stack is actually a member.  is product the thing to have on it?
+    product stack[] = ((&initial_state, nothing))
+    while(stack.length()) {
+      stack[-1].state_function->(this);
+    }
+
+    state functions: {
+      if(shift....) {
+        push (our shifty thing, new state)
+      } else if(reduce...) {
+        
+      } else {
+        // error.  possibly treat as a reduce.
+      }
+    }
+
+
+
