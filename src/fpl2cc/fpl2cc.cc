@@ -68,6 +68,7 @@ void fail(const char *fmt...) {
 
 /*
  TODO
+  - eliminate duplicate state transitions
   - buffering the entire input is busted for things like stdin.
     stream instead;  but possibly fix that via chicken/egging it
     and generate the new parser with this.
@@ -79,6 +80,7 @@ void fail(const char *fmt...) {
 struct Options {
     std::string src_fpl;
     bool generate_main;
+    bool debug_single_step;
 
     // janky, but good enough:
     std::string _fail;
@@ -94,8 +96,10 @@ struct Options {
                 if(arg[1] == '-') {
                     // double dash '--foo' style args:
                     const char *optarg = arg + 2;
-                    if(!strcmp(optarg, "generate_main")) {
+                    if(!strcmp(optarg, "generate-main")) {
                         generate_main = true;
+                    } else if(!strcmp(optarg, "debug-single-step")) {
+                        debug_single_step = true;
                     } else {
                         _fail = "Unknown option: "; _fail += optarg;
                     }
@@ -663,7 +667,24 @@ public:
         }
     }
 
-    std::string code_for_state(const lr_set &state) {
+    // for debugging, generate code which stops for input
+    // for each state.  user hits return to go to the next
+    // step.  this I found easier than lldb command line.
+    // I tried running lldb in visual studio code but for
+    // some reason it would hang on the first breakpoint
+    // with the subproc spinning at 100% cpu, which was not
+    // useful. so here's my punt:
+    std::string debug_single_step_code(const lr_set &state) {
+        std::string out;
+        std::string sfn = state_fn(state);
+        out += "fprintf(stderr, \"entering state " + sfn + ":\\n\");\n";
+        out += state.to_str(this, "fprintf(stderr, \"%s\", \"", "\\n\");\n");
+        out += "fprintf(stderr, \"%s\", to_str().c_str());\n";
+        out += "char stopper;  std::cin.get(stopper);\n";
+        return out;
+    }
+
+    std::string code_for_state(const Options &opts, const lr_set &state) {
         std::string out;
         std::string sfn = state_fn(state);
 
@@ -672,19 +693,18 @@ public:
         out += "//\n";
         out += "FPLBaseParser::Product " + sfn + "() {\n";
         out += "    Product prd;\n";
-out += "fprintf(stderr, \"entering state " + sfn + ":\\n\");\n";
-out += state.to_str(this, "fprintf(stderr, \"%s\", \"", "\\n\");\n");
-out += "fprintf(stderr, \"%s\", to_str().c_str());\n";
-out += "char stopper;\n"; // for the getc equiv cin.get(), below
-out += "std::cin.get(stopper);\n";
-        out += "if(0) {\n"; // now everything past this can be "else if"
+        if(opts.debug_single_step) {
+            out += debug_single_step_code(state);
+        }
+        out += "    if(0) {\n"; // now everything past this can be "else if"
 
         // See Aho, Sethi, Ullman pg 234
         // OK I THINK we can loop over state.items and for each:
         //   const ProductionRule &rule = rules[item.rule];
         //   const ProdExpr *right_of_dot = rule.step(item.position);
         //   if(right_of_dot) {
-        //       if(right_of_dot->is_terminal() and g = lr_goto(item.rule, right_of_dot) {
+        //       g = lr_goto(item.rule, right_of_dot);
+        //       if(right_of_dot->is_terminal()) {
         //           lr_set next_state = lr_goto(state, right_of_dot->gexpr);
         //           action = shift(next_state, symbol);
         //       } else {
@@ -707,7 +727,8 @@ out += "std::cin.get(stopper);\n";
                 reducer = &rule;
             } else {
                 std::string sargs = args_for_shift(state, *right_of_dot);
-                switch(right_of_dot->type()) {
+                const GrammarElement::Type type = right_of_dot->type();
+                switch(type) {
                     // shifts
                     case GrammarElement::TERM_EXACT:
                         out += "} else if(shift_exact("   + sargs + ")) {\n";
@@ -719,17 +740,17 @@ out += "std::cin.get(stopper);\n";
                         out += "} else if(shift_nonterm(" + sargs + ")) {\n";
                         break;
                     case GrammarElement::NONE:
-                        // XXX decent message here
-                        fail(".. no grammar element?");
-                        break;
-                    default:
-                        // XXX decent message here
-                        fail(".. unknown grammar element type\n");
+                        // .. this pretty much implies a bug in fpl2cc:
+                        fail(
+                            "Missing/unknown grammar element (id: %i %s)",
+                            type, right_of_dot->to_str().c_str()
+                        );
                         break;
                 }
 
-// XXX 
+/*
                 out += "    // transition ID: " + transition_id(*right_of_dot, lr_goto(state, right_of_dot->gexpr)) + "\n";
+ */
             }
         }
 
@@ -935,7 +956,7 @@ out += "    fprintf(stderr, \"reduced to " + product_type + "\\n\");\n";
         }
  */
         for(lr_set state : states) {
-            out += code_for_state(state).c_str();
+            out += code_for_state(opts, state).c_str();
         }
 
         out += "\npublic:\n";
@@ -1141,16 +1162,6 @@ void fpl2cc(const Options &opts) {
 
             // add it to the set of productions
             productions.push_rule(rule);
-/*
-this is not necessarily an error - the input file could end with a comment,
-which doesn't get counted as an expression.  perhaps comment processing is
-goofy.  :P
-        } else {
-            fail(
-                "aint no expression? on line %i near %.12s\n",
-                inp.line_number(), inp.inpp()
-            );
- */
         }
 
         inp.eat_space();
