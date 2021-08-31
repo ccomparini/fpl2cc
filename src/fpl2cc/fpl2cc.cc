@@ -68,13 +68,18 @@ void fail(const char *fmt...) {
 
 /*
  TODO
+  - reduce code generation:
+    - implement include mechanism so users can specify their product
+      types etc. (perhaps have a default?)
+      maybe it's a standard .h file?
+  - repetition:  optional counts perhaps already work;  max_times
+    is not implemented.  do them by boiling any foo* or foo+ or
+    whatever down to a single item (with subitems).  this makes
+    passing them to reduce code much saner.
   - eliminate duplicate state transitions
   - buffering the entire input is busted for things like stdin.
     stream instead;  but possibly fix that via chicken/egging it
     and generate the new parser with this.
-  - repetition:  optional counts perhaps already work;  max_times is not
-    implemented, however.  possible implementation for max_times:  in
-    each state, loop with a counter.
  */
 
 struct Options {
@@ -658,12 +663,11 @@ public:
     std::string args_for_shift(const lr_set &state, const ProdExpr &expr) {
         std::string el_id(std::to_string(element_index[expr.gexpr]));
         if(expr.is_terminal()) {
-            return state_goto(state, expr.gexpr)
-                 + ", \"" + expr.terminal_string() + "\""
-                 + ", "   + el_id
-            ;
+            return "\"" + expr.terminal_string() + "\""
+                 + ", " + el_id
+                 + ", " + state_goto(state, expr.gexpr);
         } else {
-            return state_goto(state, expr.gexpr) + ", " + el_id;
+            return el_id + ", " + state_goto(state, expr.gexpr);
         }
     }
 
@@ -684,12 +688,62 @@ public:
         return out;
     }
 
+    // returns code for reduce
+    std::string production_code(const Options &opts, const lr_set &state, const ProductionRule &rule) {
+        std::string out;
+
+        //   In what form should the production code be provided?
+        // What should we provide for the author of the production
+        // code?
+        //   For the moment, production code will need to be written
+        // in c++.  Authors of the production code should provide
+        // a matching header which defines their product type,
+        // as well as including anything else they're going to need
+        //   In the spirit of jest, we should provide as much visibility
+        // into the state of the compiler as possible.  Obviously we
+        // need to pass in the generated products.  Can we show the
+        // whole stack?
+        // pass, named:
+        //  - const &parser (with stack popped or not?)
+        //  - arguments from the stack:
+
+        //  - one argument per element (step) in the rule.
+        //    to handle repetition, boil any foo+ or foo*
+        //    down to a single item containing an array of
+        //    other items.  it's the only sane way.
+        //    implement by making wildcard things implicitly
+        //    make their own elements. (i.e. if there's foo+
+        //    or foo*, those each get their own nonterminals).
+        out += "/*\n";
+        out += "    // reduce/produce " + rule.to_str() + "\n";
+        out += "    args = pop " + std::to_string(rule.num_steps()) + " items:\n";
+        out += "    production = " + rule.code() + "\n";
+        out += "    next state = stack[-1].state();\n";
+        out += "*/\n";
+        std::string product_type = rule.product_element().to_str();
+        std::string num_steps = std::to_string(rule.num_steps());
+        out += "    State next_state;\n";
+        out += "    Product args[" + num_steps + "];\n";
+        out += "    for(int aind = 0; aind < " + num_steps + "; ++aind) {\n";
+        out += "        StackEntry ste = lr_pop();\n";
+        out += "        next_state = ste.state;\n";
+        out += "        args[aind] = ste.product;\n";
+        out += "    }\n";
+        out += "    // XXX call the production code here, with the args\n";
+        out += "    const void *result = \"" + product_type + "\"; // XXX set result in production code\n";
+//out += "    fprintf(stderr, \"reduced to " + product_type + "\\n\");\n";
+// XXX what deletes the product? ptrs here suck.  rework.
+        out += "    set_product(new Product(result, NontermID::_" + product_type + "));\n";
+
+        return out;
+    }
+
     std::string code_for_state(const Options &opts, const lr_set &state) {
         std::string out;
         std::string sfn = state_fn(state);
 
         out += "//\n";
-        out += state.to_str(this, "//");
+        out += state.to_str(this, "// ");
         out += "//\n";
         out += "FPLBaseParser::Product " + sfn + "() {\n";
         out += "    Product prd;\n";
@@ -760,40 +814,7 @@ public:
             // also much cooler would be to have a comprehensible message
             out += "    reader.error(\"unexpected input in " + sfn + "\");\n";
         } else {
-            //  - one argument per element (step) in the rule
-            //    how to handle rules with variable arguments? eg foo+
-            //    option a: boil the foo+ down to a single item
-            //              containing an array of other items
-            //    option b: call the production code with a list in
-            //              any case; allow indexing from either end
-            //              .. and hope that that lets you index what
-            //              you need.  option b sucks.
-            //  option a might be implementable in a fairly
-            //  straightforward way by making wildcard things
-            //  implicitly make their own elements. (i.e. if
-            //  there's foo+ or foo*, those each get their
-            //  own nonterminals).  <-- do this.
-            //  XXX code here
-            out += "/*\n";
-            out += "    // reduce/produce " + reducer->to_str() + "\n";
-            out += "    args = pop " + std::to_string(reducer->num_steps()) + " items:\n";
-            out += "    production = " + reducer->code() + "\n";
-            out += "    next state = stack[-1].state();\n";
-            out += "*/\n";
-            std::string product_type = reducer->product_element().to_str();
-            std::string num_steps = std::to_string(reducer->num_steps());
-            out += "    State next_state;\n";
-            out += "    Product args[" + num_steps + "];\n";
-            out += "    for(int aind = 0; aind < " + num_steps + "; ++aind) {\n";
-            out += "        StackEntry ste = lr_pop();\n";
-            out += "        next_state = ste.state;\n";
-            out += "        args[aind] = ste.product;\n";
-            out += "    }\n";
-            out += "    // XXX call the production code here, with the args\n";
-            out += "    const void *result = \"" + product_type + "\"; // XXX set result in production code\n";
-out += "    fprintf(stderr, \"reduced to " + product_type + "\\n\");\n";
-// XXX what deletes the product? ptrs here suck.  rework.
-            out += "    set_product(new Product(result, NontermID::_" + product_type + "));\n";
+            out += production_code(opts, state, *reducer);
         }
 
         out += "}\n";
@@ -962,9 +983,7 @@ out += "    fprintf(stderr, \"reduced to " + product_type + "\\n\");\n";
         out += "\npublic:\n";
         out += "    " + parser_class + "(fpl_reader &src) : FPLBaseParser(src) { }\n";
         out += "    void parse() {\n";
-        // XXX there's a better way:
-
-//out += "fprintf(stderr, \"starting parsing at byte %i (%p) : '%.12s'\\n\", reader.current_position(), reader.inpp(), reader.inpp());\n";
+        // XXX there's a better way.  no reinterpret cast.
         out += "        lr_push(StackEntry(reinterpret_cast<State>(&" + parser_class + "::state_0), Product()));\n";
         out += "        while((lr_stack_size() > 0) && !reader.eof()) {\n";
         out += "            State st = current_state();\n";
