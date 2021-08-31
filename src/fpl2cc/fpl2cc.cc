@@ -68,8 +68,6 @@ void fail(const char *fmt...) {
 
 /*
  TODO
-
-  x fix the thing where it does 'class ./foo' if you tell it ./foo.fpl
   - buffering the entire input is busted for things like stdin.
     stream instead;  but possibly fix that via chicken/egging it
     and generate the new parser with this.
@@ -647,191 +645,11 @@ public:
         std::string out;
         // have to cast the function to a state the parent class can use.
         // dislike.
+        // this is also going to bork if there are any virtual functions,
+        // I believe.
         out += "reinterpret_cast<State>(&" + state_fn(next_state, true) + ")";
         return out;
     }
-
-    /*
-       Let's say:
-
-       struct { const utf8_byte *pos, int length, operator bool() } terminal;
-       .. length <= 0 is a false value.  Alternately pos = NULL.
-
-       struct { void *product, int grammar_element_id  } production;
-
-       Terminal scan_xxx() returns the terminal or one with length <= 0.
-       can be inline.  
-
-       state_x() {
-           Terminal scanned; 
-           production prod;
-
-           if(scanned = scan_xxx(...)) {
-               prod = state_y();
-           } else if(scanned = scan_xxx(...)) {
-               prod = state_z();
-           } .. etc
-
-           if(prod.grammar_element_id == whatever element id)
-           } .. else if next prod.grammar_element_id == ...) {
-           } .. etc
-
-           // .. call the production code for the rule here,
-           // with ... hmm params
-
-           return prod;
-       }
-    */
-// XXX this sub goes:
-/*
-    std::string code_for_terminals(const lr_set &state) {
-        std::string out;
-        std::map<std::string, uint32_t> done;
-        int conflict_count = 0;
-
-        out += "FPLBaseParser::Terminal shifted;\n";
-
-        for(auto item : state.items) {
-            const ProductionRule &rule = rules[item.rule];
-            const ProdExpr *right_of_dot = rule.step(item.position);
-            if(right_of_dot) {
-                if(right_of_dot->is_terminal()) {
-
-                    if(done.size() > 0) {
-                        out += "else ";
-                    }
-
-                    // if we match a terminal, we need to shift and go
-                    // to a new state:
-                    lr_set next_state = lr_goto(state, right_of_dot->gexpr);
-                    // (extra parens avoids a warning.. sigh)
-                    out += "if((shifted = ";
-                    switch(right_of_dot->type()) {
-                        case GrammarElement::TERM_EXACT:
-                            out += "shift_exact(\"";
-                            out += right_of_dot->terminal_string();
-                            break;
-                        case GrammarElement::TERM_REGEX:
-                            out += "shift_re(\"";
-                            out += right_of_dot->terminal_string();
-                            break;
-                        default:
-                            fail(
-                                "bug: unknown type %i at %i in state %s",
-                                right_of_dot->type(), item.position, state.id().c_str()
-                            );
-                            break;
-                    }
-                    out += "\"))) {\n";
-out += "    fprintf(stderr, \"" + state_fn(state) + " shifted terminal '\%s' of '%s' to " + state_fn(next_state) + "\\n\", \"" + right_of_dot->terminal_string()  + "\", shifted.to_str().c_str());\n";
-                    out += "// " + item.to_str(this) + "\n";
-                    std::string trans_id = transition_id(*right_of_dot, next_state);
-                    uint32_t exists = done[trans_id];
-                    if(exists) {
-                        lr_item other = lr_item::from_id(exists);
-                        if(other.rule != item.rule) {
-                            conflict_count++;
-                            out += "// XXX conflicts with "
-                                 + other.to_str(this) + "\n";
-                        }
-                    }
-                    out += "prd = " + state_fn(next_state) + "();\n";
-                    out += "}\n";
-
-                    if(!exists)
-                        done[trans_id] = item.id();
-                }
-            }
-        }
-
-        if(conflict_count > 0) {
-            fprintf(stderr,
-                "Warning: %i terminal conflicts.  See generated code.\n",
-                conflict_count
-            );
-        }
-
-        return out;
-    }
- */
-
-/*
-// XXX this code goes:
-    std::string code_for_prods(const lr_set &state) {
-        std::string out;
-        std::map<int, int> element_ids_done;
-
-        for(auto item : state.items) {
-            const ProdExpr *right_of_dot = rules[item.rule].step(item.position);
-            if(right_of_dot) {
-                if(right_of_dot->type() == GrammarElement::NONTERM_PRODUCTION) {
-                    int el_id = element_index[right_of_dot->gexpr];
-
-                    auto existing = element_ids_done.find(el_id);
-                    if(existing == element_ids_done.end()) {
-                        // (i.e. no existing code for this)
-                        lr_set next_state = lr_goto(state, right_of_dot->gexpr);
-                        if(element_ids_done.size() > 0)
-                            out += "else ";
-                        out += "if(prd.grammar_element_id() == NontermID::_"
-                               + right_of_dot->gexpr.to_str() + ") {\n";
-                        out += "    // " + item.to_str(this) + "\n";
-                        out += "    prd = " + state_fn(next_state) + "();\n";
-out += "    fprintf(stderr, \"" + state_fn(state) + " shifted nonterminal '" + right_of_dot->gexpr.to_str() + "' to " + state_fn(next_state) + "\\n\");\n";
-                        out += "}\n";
-                        element_ids_done[el_id] = state_index[state.id()];
-                    } else if(existing->second != state_index[state.id()]) {
-                        // gar this error message could be more informative.
-                        // we might really want to know what the current item is
-                        // conflicting _with_.. XXX
-                        fail(
-                            "conflicting gotos for %s\n",
-                            item.to_str(this).c_str()
-                        );
-                    }
-                }
-            }
-        }
-        return out;
-    }
- */
-
-/*
-// XXX kill this:
-    std::string code_for_rule(const ProductionRule &rl) const {
-        std::string code_str = rl.code();
-        if(code_str.length() == 0) {
-            // default code:
-            // code_str += "\nreturn Product(" + element_index[rl.product()] + ");";
-        }
-
-// XXX OK SO clear up when we reduce or what
-//fprintf(stderr, "product from %p line %i is %s\n", rl.start_of_text(), inp.line_number(rl.start_of_text()), rl.product().c_str());
-
-            code_str += "\nreturn Product(NontermID::_" + rl.product() + ");";
-
-        return code_str;
-    }
- */
-
-/*
-// XXX kill this:
-    std::string code_for_handling_reduce(const lr_set &state) {
-        std::string out;
-out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(state) + "\\n\");\n";
-        // 2 possible cases here:
-        //  - there exists explicit code for the production....
-        // XXX
-        lr_item item = state.reduction_item(this);
-        if(item) {
-            out += "// reduce by:\n//   " + item.to_str(this) + "\n";
-//fprintf(stderr, " ....... I guess we have code for rule #%i\n", item.rule);
-            out += code_for_rule(rules[item.rule]);
-        }
-
-        return out;
-    }
- */
 
     std::string args_for_shift(const lr_set &state, const ProdExpr &expr) {
         std::string el_id(std::to_string(element_index[expr.gexpr]));
@@ -912,7 +730,6 @@ out += "std::cin.get(stopper);\n";
 
 // XXX 
                 out += "    // transition ID: " + transition_id(*right_of_dot, lr_goto(state, right_of_dot->gexpr)) + "\n";
-//                out += "    fprintf(stderr, \"shifted " + right_of_dot->to_str() + "\\n\");\n"; // XXX debug
             }
         }
 
@@ -1128,18 +945,9 @@ out += "    fprintf(stderr, \"reduced to " + product_type + "\\n\");\n";
 
 //out += "fprintf(stderr, \"starting parsing at byte %i (%p) : '%.12s'\\n\", reader.current_position(), reader.inpp(), reader.inpp());\n";
         out += "        lr_push(StackEntry(reinterpret_cast<State>(&" + parser_class + "::state_0), Product()));\n";
-//        out += "        const utf8_byte *last_inpp = reader.inpp();\n"; // fail because not all states move the inpp (eg any reduce)
         out += "        while((lr_stack_size() > 0) && !reader.eof()) {\n";
         out += "            State st = current_state();\n";
         out += "            (this->*st)();\n";
-/*
-        out += "            if(reader.inpp() == last_inpp) {\n";
-        out += "                reader.error(\"failed to advance at '%.12s'\\n\", last_inpp);\n";
-        out += "                exit(23);\n";
-        out += "            }\n";
-        out += "            last_inpp = reader.inpp();\n";
- */
-//out += "getc();\n";
         out += "        }\n";
         // XXX check if there's stuff still on the stack or if we're not at eof
         out += "    };\n";
