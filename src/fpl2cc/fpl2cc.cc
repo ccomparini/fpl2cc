@@ -504,18 +504,15 @@ class Productions {
 
         std::string to_str(
             const Productions *prds,
-            int indent = 0,
-            const char *line_prefix = ""
+            const char *line_prefix = "",
+            const char *line_suffix = "\n"
         ) const {
             // efficient? probably not. do I care?
             std::string out;
             for(auto it : items) {
                 out.append(line_prefix);
-                for(int ind = 0; ind < indent; ind++) {
-                    out.append("    ");
-                }
                 out.append(it.to_str(prds));
-                out.append("\n");
+                out.append(line_suffix);
             }
             return out;
         }
@@ -645,20 +642,11 @@ public:
     }
 
 // XXX make this a function in the class instead
-// XXX or it's unnecessary now that a state is a class?
     std::string state_goto(const lr_set &in, const GrammarElement &sym) {
         lr_set next_state = lr_goto(in, sym);
         std::string out;
         // have to cast the function to a state the parent class can use.
         // dislike.
-        //out += "reinterpret_cast<State>(&" + state_fn(next_state, true) + ")";
-/*
-        // XXX do we even need the cast?  might be able to get rid of state_goto entirely
-        out += "State(&" + state_fn(next_state, true) + ")";
- */
-        //out += "&" + state_fn(next_state, true);
-        //out += "static_cast<State>(&" + state_fn(next_state, true) + ")";
-        //out += "&" + state_fn(next_state);
         out += "reinterpret_cast<State>(&" + state_fn(next_state, true) + ")";
         return out;
     }
@@ -857,28 +845,20 @@ out += "    fprintf(stderr, \"ok like we are near the reduce for " + state_fn(st
         }
     }
 
-    std::string state_function_declaration(const lr_set &state) {
-        std::string out;
-
-        //out += "static FPLBaseParser::Product " + state_fn(state);
-        //out += "(" + parser_class_name() + " *parser)";
-        //out += "(FPLBaseParser *parser)";
-        out += "FPLBaseParser::Product " + state_fn(state) + "()";
-
-        return out;
-    }
-
     std::string code_for_state(const lr_set &state) {
         std::string out;
+        std::string sfn = state_fn(state);
 
         out += "//\n";
-        out += state.to_str(this, 1, "//");
+        out += state.to_str(this, "//");
         out += "//\n";
-        out += state_function_declaration(state) + " {\n";
+        out += "FPLBaseParser::Product " + sfn + "() {\n";
         out += "    Product prd;\n";
-        out += "";
-//out += "fprintf(stderr, \""+  state_fn(state) + " starting at byte %i (%p%s): '%s'\\n\", parser->reader.current_position(), parser->reader.inpp(), parser->reader.eof()?\" EOF!\":\"\", parser->reader.inpp());\n";
-out += "fprintf(stderr, \""+  state_fn(state) + " starting at byte %i (%p%s): '%s'\\n\", reader.current_position(), reader.inpp(), reader.eof()?\" EOF!\":\"\", reader.inpp());\n";
+out += "fprintf(stderr, \"entering state " + sfn + ":\\n\");\n";
+out += state.to_str(this, "fprintf(stderr, \"%s\", \"", "\\n\");\n");
+out += "fprintf(stderr, \"%s\", to_str().c_str());\n";
+out += "char stopper;\n"; // for the getc equiv cin.get(), below
+out += "std::cin.get(stopper);\n";
         out += "if(0) {\n"; // now everything past this can be "else if"
 
         // See Aho, Sethi, Ullman pg 234
@@ -908,20 +888,17 @@ out += "fprintf(stderr, \""+  state_fn(state) + " starting at byte %i (%p%s): '%
             if(!right_of_dot) {
                 reducer = &rule;
             } else {
+                std::string sargs = args_for_shift(state, *right_of_dot);
                 switch(right_of_dot->type()) {
                     // shifts
                     case GrammarElement::TERM_EXACT:
-                        //out += "} else if(parser->shift_exact(" + args_for_shift(state, *right_of_dot) + ")) {\n";
-                        out += "} else if(shift_exact(" + args_for_shift(state, *right_of_dot) + ")) {\n";
+                        out += "} else if(shift_exact("   + sargs + ")) {\n";
                         break;
                     case GrammarElement::TERM_REGEX:
-                        //out += "} else if(parser->shift_re(" + args_for_shift(state, *right_of_dot) + ")) {\n";
-                        out += "} else if(shift_re(" + args_for_shift(state, *right_of_dot) + ")) {\n";
+                        out += "} else if(shift_re("      + sargs + ")) {\n";
                         break;
                     case GrammarElement::NONTERM_PRODUCTION:
-                        //if(nonterm_to_state[
-                        //out += "} else if(parser->shift_nonterm(" + args_for_shift(state, *right_of_dot) + ")) {\n";
-                        out += "} else if(shift_nonterm(" + args_for_shift(state, *right_of_dot) + ")) {\n";
+                        out += "} else if(shift_nonterm(" + sargs + ")) {\n";
                         break;
                     case GrammarElement::NONE:
                         // XXX decent message here
@@ -935,11 +912,16 @@ out += "fprintf(stderr, \""+  state_fn(state) + " starting at byte %i (%p%s): '%
 
 // XXX 
                 out += "    // transition ID: " + transition_id(*right_of_dot, lr_goto(state, right_of_dot->gexpr)) + "\n";
-                out += "    fprintf(stderr, \"shifted " + right_of_dot->to_str() + "\\n\");\n"; // XXX debug
+//                out += "    fprintf(stderr, \"shifted " + right_of_dot->to_str() + "\\n\");\n"; // XXX debug
             }
         }
 
-        if(reducer) {
+        out += "} else {\n";
+        if(!reducer) {
+            // XXX cooler would be to reduce this to an error
+            // also much cooler would be to have a comprehensible message
+            out += "    reader.error(\"unexpected input in " + sfn + "\");\n";
+        } else {
             //  - one argument per element (step) in the rule
             //    how to handle rules with variable arguments? eg foo+
             //    option a: boil the foo+ down to a single item
@@ -954,7 +936,6 @@ out += "fprintf(stderr, \""+  state_fn(state) + " starting at byte %i (%p%s): '%
             //  there's foo+ or foo*, those each get their
             //  own nonterminals).  <-- do this.
             //  XXX code here
-            out += "} else {\n";
             out += "/*\n";
             out += "    // reduce/produce " + reducer->to_str() + "\n";
             out += "    args = pop " + std::to_string(reducer->num_steps()) + " items:\n";
@@ -971,43 +952,13 @@ out += "fprintf(stderr, \""+  state_fn(state) + " starting at byte %i (%p%s): '%
             out += "        args[aind] = ste.product;\n";
             out += "    }\n";
             out += "    // XXX call the production code here, with the args\n";
-            out += "    void *result = NULL; // set result in production code\n";
+            out += "    const void *result = \"" + product_type + "\"; // XXX set result in production code\n";
+out += "    fprintf(stderr, \"reduced to " + product_type + "\\n\");\n";
 // XXX what deletes the product? ptrs here suck.  rework.
             out += "    set_product(new Product(result, NontermID::_" + product_type + "));\n";
         }
 
         out += "}\n";
-/*
-
-out += "    fprintf(stderr, \"entering state " + state_fn(state) + "\\n\");\n";
-        out += code_for_terminals(state) + "\n";
-
-        // ... or this is really the gotos
-out += "    fprintf(stderr, \"mebbe gotos for " + state_fn(state) + "\\n\");\n";
-        out += code_for_prods(state) + "\n";
-
-        // if we're at the end of the item we need to reduce
-        // according to the next possible ...... XXX
-        // OK 2 different things:
-        //  - we are at the end of a rule, in which case we 
-        //    need to jam in the production code, either from
-        //    whatever was in the fpl or the default (if that's
-        //    possible - I think we can default aliases where
-        //    all possible rules for a nonterm are simple
-        //    terminal -> nonterm)
-        //    I _think_ we're at the end of a rule iff there's
-        //    no product (i.e. if none of the nonterminal rules
-        //    have been matched).  So, if that's the case _and_
-        //    this state has an lr_item which matches the end
-        //    of a rule, create a product according to that
-        //    rule and the contents of the stack.
-        //  - we're unrolling the stack.... uhhh why do we
-        //    need a reduce count?
-//        out += "    // XXX reduce code here thanks\n"
-//               "    if(--prd.reduce_count == 0) {\n";
-        out += code_for_handling_reduce(state);
-//        out += "    }\n";
-*/
 
         out += "    return prd;\n";
         out += "}\n"; // end of state_ function
@@ -1153,6 +1104,7 @@ out += "    fprintf(stderr, \"mebbe gotos for " + state_fn(state) + "\\n\");\n";
         }
 
         std::string out;
+        out += "#include <iostream>\n";
         out += "#include \"fpl2cc/fpl_reader.h\"\n";
         out += "#include \"fpl2cc/fpl_base_parser.h\"\n";
         out += "\nclass " + parser_class + " : public FPLBaseParser {\n";
@@ -1174,22 +1126,20 @@ out += "    fprintf(stderr, \"mebbe gotos for " + state_fn(state) + "\\n\");\n";
         out += "    void parse() {\n";
         // XXX there's a better way:
 
-/*
-for(int stind = 0; stind < states.size(); stind++) {
-out += "fprintf(stderr, \"there is a state (%i) at %p\\n\", " + std::to_string(stind) + ", &" + state_fn(states[stind], true) + ");\n";
-} 
- */
-//out += "fprintf(stderr, \"starting parsing at byte %i (%p) : '%s'\\n\", parser.reader.current_position(), parser.reader.inpp(), parser.reader.inpp());\n";
-out += "fprintf(stderr, \"starting parsing at byte %i (%p) : '%s'\\n\", reader.current_position(), reader.inpp(), reader.inpp());\n";
+//out += "fprintf(stderr, \"starting parsing at byte %i (%p) : '%.12s'\\n\", reader.current_position(), reader.inpp(), reader.inpp());\n";
         out += "        lr_push(StackEntry(reinterpret_cast<State>(&" + parser_class + "::state_0), Product()));\n";
-//out += "fprintf(stderr, \"       after push, inpp is %p %s\\n\", parser.reader.inpp(), parser.reader.inpp());\n";
-out += "fprintf(stderr, \"       after push, inpp is %p %s\\n\", reader.inpp(), reader.inpp());\n";
-//        out += "        while((lr_stack_size() > 0) && !parser.reader.eof()) {\n";
+//        out += "        const utf8_byte *last_inpp = reader.inpp();\n"; // fail because not all states move the inpp (eg any reduce)
         out += "        while((lr_stack_size() > 0) && !reader.eof()) {\n";
         out += "            State st = current_state();\n";
-//out += "fprintf(stderr, \"%p about to enter state function. stack size: %i at byte %i %p '%s'\\n\", this, lr_stack_size(), parser.reader.current_position(), parser.reader.inpp(), parser.reader.inpp());\n";
-out += "fprintf(stderr, \"%p about to enter state function. stack size: %i at byte %i %p '%s'\\n\", this, lr_stack_size(), reader.current_position(), reader.inpp(), reader.inpp());\n";
         out += "            (this->*st)();\n";
+/*
+        out += "            if(reader.inpp() == last_inpp) {\n";
+        out += "                reader.error(\"failed to advance at '%.12s'\\n\", last_inpp);\n";
+        out += "                exit(23);\n";
+        out += "            }\n";
+        out += "            last_inpp = reader.inpp();\n";
+ */
+//out += "getc();\n";
         out += "        }\n";
         // XXX check if there's stuff still on the stack or if we're not at eof
         out += "    };\n";
