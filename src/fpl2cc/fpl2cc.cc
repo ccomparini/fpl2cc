@@ -1156,7 +1156,6 @@ out += "    fprintf(stderr, \"reduced to " + product_type + "\\n\");\n";
 
 void read_quantifiers(fpl_reader &src, ProdExpr &expr) {
     const utf8_byte *inp = src.inpp();
-    if(!inp) return; // EOF.  this is really an error..
 
     switch(*inp) {
         case '*':
@@ -1210,7 +1209,7 @@ int read_expressions(fpl_reader &src, ProductionRule &rule) {
 
         const utf8_byte *inp = src.inpp();
 
-        if(!inp)
+        if(!*inp)
             break;
 
         std::string expr_str;

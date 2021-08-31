@@ -206,27 +206,20 @@ fprintf(stderr, "OK WE HAVE BUFFERED THE FILE:\n%s\n----------\n", inpp());
     }
 
     // returns a pointer to the next byte of the input
-    // buffer, or NULL if at eof.
-    // why not return an empty string at eof?  because
-    // then you can't embed \0.  but, if I were to redo
-    // this, I would just disallow embedding \0 and
-    // return empty string on eof.  oh well.
+    // buffer.
     // XXX make private
     inline const utf8_byte *inpp() const {
-        if(!eof()) {
-            return buffer.data() + read_pos;
-        } else {
-fprintf(stderr, "inpp at EOF -> NULL kthanks bye\n");
-            return NULL;
-        }
+        return buffer.data() + read_pos;
     }
 
 // why do I not instead make a std::string formatter .. anywayzzzz
     void error(const char *fmt...) {
         const int buf_size = 2048;
         char msg_fmt[buf_size];
+        const char *inp = eof()?"<EOF>":inpp_as_char();
+
         snprintf(msg_fmt, buf_size,
-            "Error line %i near \"%.12s\": %s\n", line_number(), inpp(), fmt
+            "Error line %i near \"%.12s\": %s\n", line_number(), inp, fmt
         );
 
         char full_msg[buf_size];
