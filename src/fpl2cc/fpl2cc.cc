@@ -12,6 +12,10 @@
 
 #include "fpl_reader.h"
 
+// XXX the reduce type needs to be supplied by the author of
+// the .fpl, and needs to match what's in the product.
+const std::string FPLReduceType("const void *");
+
 void fail(const char *fmt...) {
     va_list args;
     va_start(args, fmt);
@@ -335,13 +339,22 @@ public:
         return text;
     }
 
+    std::string default_code() const {
+        std::string out;
+        out += "return \"default XXX FIXME\"; // XXX yeah FIXME\n";
+        return out;
+    }
+
     std::string code(const std::string &src) {
         code_str = src;
         return code();
     }
 
     std::string code() const {
-        return code_str;
+        if(code_str.length() > 0) {
+            return code_str;
+        }
+        return default_code();
     }
 
     const char *product_c_str() const {
@@ -648,7 +661,17 @@ public:
         return fn;
     }
 
-// XXX make this a function in the class instead
+    std::string rule_fn(int rule_ind, bool fq = false) {
+        std::string fn("rule_");
+        fn += std::to_string(rule_ind);
+
+        if(fq)
+            fn = fq_member_name(fn);
+
+        return fn;
+    }
+
+
     std::string state_goto(const lr_set &in, const GrammarElement &sym) {
         lr_set next_state = lr_goto(in, sym);
         std::string out;
@@ -688,9 +711,28 @@ public:
         return out;
     }
 
-    // returns code for reduce
-    std::string production_code(const Options &opts, const lr_set &state, const ProductionRule &rule) {
+    std::string code_for_rule(const Options &opts, int rule_ind) {
+        const ProductionRule &rule = rules[rule_ind];
         std::string out;
+
+        // XXX parameters:
+        //  - the rule itself
+        //  - the current parser state
+        //  x arg[] array.  callers figure out length based on rule.
+        out += FPLReduceType + rule_fn(rule_ind) + "(Product arg[]) {\n";
+        out += rule.code();
+        out += "}\n";
+        return out;
+    }
+
+    // returns code for reduce within a given state
+    std::string production_code(
+        const Options &opts,
+        const lr_set &state,
+        int rule_ind
+    ) {
+        std::string out;
+        const ProductionRule &rule = rules[rule_ind];
 
         //   In what form should the production code be provided?
         // What should we provide for the author of the production
@@ -724,15 +766,15 @@ public:
         std::string num_steps = std::to_string(rule.num_steps());
         out += "    State next_state;\n";
         out += "    Product args[" + num_steps + "];\n";
+        //out += "    " + FPLReduceType + "args[" + num_steps + "];\n";
         out += "    for(int aind = 0; aind < " + num_steps + "; ++aind) {\n";
         out += "        StackEntry ste = lr_pop();\n";
         out += "        next_state = ste.state;\n";
         out += "        args[aind] = ste.product;\n";
+        //out += "        args[aind] = ste.product.;\n"; // FPLReduceType here???
         out += "    }\n";
         out += "    // XXX call the production code here, with the args\n";
-        out += "    const void *result = \"" + product_type + "\"; // XXX set result in production code\n";
-//out += "    fprintf(stderr, \"reduced to " + product_type + "\\n\");\n";
-// XXX what deletes the product? ptrs here suck.  rework.
+        out += "    " + FPLReduceType + "result = " + rule_fn(rule_ind) + "(args);\n";
         out += "    set_product(new Product(result, NontermID::_" + product_type + "));\n";
 
         return out;
@@ -773,12 +815,12 @@ public:
         std::map<int, int> nonterm_to_state;
         std::map<std::string, uint32_t> terminal_transitions;
 
-        const ProductionRule *reducer = NULL;
+        int reduce_rule = -1;
         for(auto item : state.items) {
             const ProductionRule &rule = rules[item.rule];
             const ProdExpr *right_of_dot = rule.step(item.position);
             if(!right_of_dot) {
-                reducer = &rule;
+                reduce_rule = item.rule;
             } else {
                 std::string sargs = args_for_shift(state, *right_of_dot);
                 const GrammarElement::Type type = right_of_dot->type();
@@ -809,12 +851,12 @@ public:
         }
 
         out += "} else {\n";
-        if(!reducer) {
+        if(reduce_rule < 0) {
             // XXX cooler would be to reduce this to an error
             // also much cooler would be to have a comprehensible message
             out += "    reader.error(\"unexpected input in " + sfn + "\");\n";
         } else {
-            out += production_code(opts, state, *reducer);
+            out += production_code(opts, state, reduce_rule);
         }
 
         out += "}\n";
@@ -970,12 +1012,10 @@ public:
 
         out += nonterm_enum();
 
-/*
-        // reverse helps with inlining (I hope).
-        for(auto it = states.rbegin(); it != states.rend(); ++it) {
-            out += code_for_state(*it).c_str();
+        for(int rnum = 0; rnum < rules.size(); rnum++) {
+            out += code_for_rule(opts, rnum);
         }
- */
+
         for(lr_set state : states) {
             out += code_for_state(opts, state).c_str();
         }
