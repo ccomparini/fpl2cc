@@ -1,4 +1,5 @@
 #include <climits>
+#include <list>
 #include <map>
 #include <queue>
 #include <regex>
@@ -86,10 +87,15 @@ void fail(const char *fmt...) {
     and generate the new parser with this.
  */
 
+//#define ENTRY_OPTIONS // implementation fail
+
 struct Options {
     std::string src_fpl;
     bool generate_main;
     bool debug_single_step;
+#ifdef ENTRY_OPTIONS
+    std::list<std::string> entry_points;
+#endif // ENTRY_OPTIONS
 
     // janky, but good enough:
     std::string _fail;
@@ -99,18 +105,41 @@ struct Options {
         _fail = "";
         for(int argi = 1; argi < argc; argi++) {
             const char *arg = argv[argi];
+
+            if(!arg)    continue; // should not be able to happen, but...
             if(!arg[0]) continue; // I guess ignore blank args
 
             if(arg[0] == '-') {
                 if(arg[1] == '-') {
                     // double dash '--foo' style args:
-                    const char *optarg = arg + 2;
-                    if(!strcmp(optarg, "generate-main")) {
-                        generate_main = true;
-                    } else if(!strcmp(optarg, "debug-single-step")) {
+                    std::string opt(arg + 2); // (+2 skips dashes)
+                    std::string val;
+                    size_t pos = opt.find_first_of("=");
+                    if(pos != std::string::npos) {
+                        val = opt.substr(pos + 1);
+                        opt = opt.substr(0, pos);
+                    }
+                    if(opt == "debug-single-step") {
                         debug_single_step = true;
+#ifdef ENTRY_OPTIONS
+                    } else if(opt == "entry") {
+                        // specifies an entry rule (i.e. a parsing
+                        // starting point)
+                        if(val.empty()) {
+                            argi++;
+                            if(argi < argc) {
+                                val = std::string(argv[argi]);
+                            }
+                        }
+                        if(val.empty()) {
+                            _fail = "--generate-main requires a value.";
+                        }
+                        entry_points.push_back(std::string(val));
+#endif // ENTRY_OPTIONS
+                    } else if(opt == "generate-main") {
+                        generate_main = true;
                     } else {
-                        _fail = "Unknown option: "; _fail += optarg;
+                        _fail = "Unknown option: "; _fail += opt;
                     }
                 } else {
                     // single-dash arg:
@@ -341,7 +370,12 @@ public:
 
     std::string default_code() const {
         std::string out;
-        out += "return \"default XXX FIXME\"; // XXX yeah FIXME\n";
+
+        // perhaps default could be:
+        //  - if one arg, just return that arg.  this allows aliasing.
+        //  - if more than one arg, return aggregate XXX do this part
+        out += "return arg[0].default_reduce();\n";
+
         return out;
     }
 
@@ -720,8 +754,9 @@ public:
         //  - the current parser state
         //  x arg[] array.  callers figure out length based on rule.
         out += FPLReduceType + rule_fn(rule_ind) + "(Product arg[]) {\n";
+        //out += "Product " + rule_fn(rule_ind) + "(Product arg[]) {\n";
         out += rule.code();
-        out += "}\n";
+        out += "\n}\n";
         return out;
     }
 
@@ -756,12 +791,11 @@ public:
         //    implement by making wildcard things implicitly
         //    make their own elements. (i.e. if there's foo+
         //    or foo*, those each get their own nonterminals).
-        out += "/*\n";
+        out += "\n";
         out += "    // reduce/produce " + rule.to_str() + "\n";
-        out += "    args = pop " + std::to_string(rule.num_steps()) + " items:\n";
-        out += "    production = " + rule.code() + "\n";
-        out += "    next state = stack[-1].state();\n";
-        out += "*/\n";
+        out += "    // args = pop " + std::to_string(rule.num_steps()) + " items:\n";
+        out += "    // next state = stack[-1].state();\n";
+        out += "\n";
         std::string product_type = rule.product_element().to_str();
         std::string num_steps = std::to_string(rule.num_steps());
         out += "    State next_state;\n";
@@ -771,10 +805,13 @@ public:
         out += "        StackEntry ste = lr_pop();\n";
         out += "        next_state = ste.state;\n";
         out += "        args[aind] = ste.product;\n";
-        //out += "        args[aind] = ste.product.;\n"; // FPLReduceType here???
         out += "    }\n";
-        out += "    // XXX call the production code here, with the args\n";
         out += "    " + FPLReduceType + "result = " + rule_fn(rule_ind) + "(args);\n";
+/*
+        out += "    Product result = " + rule_fn(rule_ind) + "(args);\n";
+        out += "    result.grammar_element_id( NontermID::_" + product_type + ");\n";
+ */
+        // XXX what deletes the product.  this is awful.
         out += "    set_product(new Product(result, NontermID::_" + product_type + "));\n";
 
         return out;
@@ -979,15 +1016,41 @@ public:
         return out;
     }
 
-    void generate_code(const Options &opts, const fpl_reader &src) {
+    void generate_states(const Options &opts) {
         const auto no_set = state_index.end();
-        const std::string parser_class = parser_class_name();
 
-        // for now, we're going to consider the first rule
-        // (rule 0) to be the starting point (and start with
-        // the first expression in that rule, of course).
-        // staet_0 will then be the starting state.
-        add_state(lr_closure(lr_item(0, 0)));
+#ifdef ENTRY_OPTIONS
+        if(opts.entry_points.empty()) {
+            // if no entry products have been specified, just
+            // consider the first rule (rule 0) to be the starting
+            // point
+#endif // ENTRY_OPTIONS
+            add_state(lr_closure(lr_item(0, 0)));
+#ifdef ENTRY_OPTIONS
+        } else {
+            // XXX fail implementation:  1) adding these here doesn't
+            // actually add them as starting points and 2) that's
+            // not what I think we want anyway.  What we'd need
+            // is a map of production->starting state and make it
+            // so users of the parser can specify what they are
+            // trying to produce.
+            for(auto entry_prod : opts.entry_points) {
+                auto strl  = rules_for_product.lower_bound(entry_prod);
+                auto endrl = rules_for_product.upper_bound(entry_prod);
+
+                if(strl == endrl) {
+                    fail(
+                        "Can't find entry rule for '%s'\n",
+                        entry_prod.c_str()
+                    );
+                }
+
+                for(auto rit = strl; rit != endrl; ++rit) {
+                    add_state(lr_closure(lr_item(rit->second, 0)));
+                }
+            }
+        }
+#endif // ENTRY_OPTIONS
 
         // Aho, Sethi, and Ullman page 224... uhh, modified.
         int latest_set = 0;
@@ -1003,6 +1066,14 @@ public:
                 }
             }
         }
+
+    }
+
+    void generate_code(const Options &opts) {
+        const std::string parser_class = parser_class_name();
+
+        generate_states(opts);
+
 
         std::string out;
         out += "#include <iostream>\n";
@@ -1226,7 +1297,7 @@ void fpl2cc(const Options &opts) {
         inp.eat_space();
     }
 
-    productions.generate_code(opts, inp);
+    productions.generate_code(opts);
 
 }
 
