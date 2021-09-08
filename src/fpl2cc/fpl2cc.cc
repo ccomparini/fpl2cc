@@ -14,8 +14,9 @@
 #include "fpl_reader.h"
 
 // XXX the reduce type needs to be supplied by the author of
-// the .fpl, and needs to match what's in the product.
-const std::string FPLReduceType("const void *");
+// the .fpl
+//const std::string FPLReduceType("const void *");
+const std::string FPLReduceType("std::string");
 
 void fail(const char *fmt...) {
     va_list args;
@@ -753,7 +754,7 @@ public:
         //  - the rule itself
         //  - the current parser state
         //  x arg[] array.  callers figure out length based on rule.
-        out += FPLReduceType + rule_fn(rule_ind) + "(Product arg[]) {\n";
+        out += FPLReduceType + " " + rule_fn(rule_ind) + "(Product arg[]) {\n";
         //out += "Product " + rule_fn(rule_ind) + "(Product arg[]) {\n";
         out += rule.code();
         out += "\n}\n";
@@ -806,7 +807,7 @@ public:
         out += "        next_state = ste.state;\n";
         out += "        args[aind] = ste.product;\n";
         out += "    }\n";
-        out += "    " + FPLReduceType + "result = " + rule_fn(rule_ind) + "(args);\n";
+        out += "    " + FPLReduceType + " result = " + rule_fn(rule_ind) + "(args);\n";
 /*
         out += "    Product result = " + rule_fn(rule_ind) + "(args);\n";
         out += "    result.grammar_element_id( NontermID::_" + product_type + ");\n";
@@ -1074,12 +1075,12 @@ public:
 
         generate_states(opts);
 
-
         std::string out;
         out += "#include <iostream>\n";
         out += "#include \"fpl2cc/fpl_reader.h\"\n";
         out += "#include \"fpl2cc/fpl_base_parser.h\"\n";
-        out += "\nclass " + parser_class + " : public FPLBaseParser {\n";
+        out += "\nclass " + parser_class +
+               " : public FPLBaseParser<" + FPLReduceType + "> {\n";
 
         out += nonterm_enum();
 
