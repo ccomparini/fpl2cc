@@ -668,7 +668,15 @@ class Productions {
 
 public:
 
-    Productions(fpl_reader &src) : inp(src) { }
+    Productions(fpl_reader &src) : inp(src) {
+        // element 0 is a null element and can be used to
+        // indicate missing/uninitialized elements or such.
+        // we count it as a nonterminal so that it can be
+        // accessed via the enum etc.
+        record_element(
+            GrammarElement("_fpl_null", GrammarElement::NONTERM_PRODUCTION)
+        );
+    }
 
     void push_rule(const ProductionRule &rule) {
         int rule_num = rules.size();
@@ -962,18 +970,25 @@ public:
     // do "if(prd.grammar_element_id == NontermID::_decimal_constant)"
     std::string nonterm_enum() {
         std::string out;
+        std::string nonterm_str_guts;
 
         out += "typedef enum {\n";
         for(int el_id = 0; el_id < elements.size(); ++el_id) {
-            // include terminals as comments.  we don't need them
-            // in the enum, but it's nice to be able to see all the
-            // grammar elements in one place
-            if(elements[el_id].type != GrammarElement::NONTERM_PRODUCTION)
-                out += "// ";
-            else
-                out += "_"; // hack to avoid keyword collisions
+            if(elements[el_id].type != GrammarElement::NONTERM_PRODUCTION) {
+                // include terminals as comments.  we don't need them
+                // in the enum (and how would they be named, anyway?),
+                // but it's nice to be able to see all the grammar
+                // elements in one place:
+                out += "// " + elements[el_id].to_str();
+            } else {
+                // prefix with underscore as a hack to avoid keyword
+                // collisions:
+                std::string name("_" + elements[el_id].to_str());
+                out += name;
+                nonterm_str_guts += "case " + std::to_string(el_id);
+                nonterm_str_guts += ": return \"" + name + "\";\n";
+            }
 
-            out += elements[el_id].to_str();
             out += " = ";
             out += std::to_string(el_id);
 
@@ -984,6 +999,12 @@ public:
                 out += "\n";
         }
         out += "} NontermID;\n\n";
+        out += "std::string nonterm_str(NontermID id) {\n";
+        out += "    switch(id) {\n";
+        out += nonterm_str_guts;
+        out += "    }\n";
+        out += "    return \"not a nonterm .. err XXX \";\n";
+        out += "}\n\n";
         return out;
     }
 
@@ -1094,13 +1115,20 @@ public:
 
         out += "\npublic:\n";
         out += "    " + parser_class + "(fpl_reader &src) : FPLBaseParser(src) { }\n";
-        out += "    void parse() {\n";
+        out += "    " + FPLReduceType + " parse() {\n";
         // XXX there's a better way.  no reinterpret cast.
         out += "        lr_push(StackEntry(reinterpret_cast<State>(&" + parser_class + "::state_0), Product()));\n";
         out += "        while((lr_stack_size() > 0) && !reader.eof()) {\n";
         out += "            State st = current_state();\n";
         out += "            (this->*st)();\n";
         out += "        }\n";
+        out += "        if(lr_stack_size() > 1)  {\n";
+        out += "            reader.error(\"XXX extra stuff on the stack\");\n";
+        out += "        }\n";
+        out += "        if(!reader.eof()) {\n";
+        out += "            reader.error(\"XXX out of stack but not input\");\n";
+        out += "        }\n";
+        out += "        return result();\n";
         // XXX check if there's stuff still on the stack or if we're not at eof
         out += "    };\n";
 
@@ -1202,8 +1230,10 @@ int read_expressions(fpl_reader &src, ProductionRule &rule) {
                 }
                 break;
             default:
-                // should be the name of a production
-                expr_str = src.read_re("[A-Za-z_]+")[0];
+                // should be the name of a production.
+                // production names must start with a letter, and
+                // thereafter may contain letters, digits, or underscores.
+                expr_str = src.read_re("[A-Za-z][A-Za-z0-9_]+")[0];
                 type     = GrammarElement::Type::NONTERM_PRODUCTION;
                 break;
         }
