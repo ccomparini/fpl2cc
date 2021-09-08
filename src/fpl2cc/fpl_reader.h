@@ -500,7 +500,7 @@ fprintf(stderr, "      matched regex: /%s/ len %li\n", re.c_str(), matched.lengt
     // since we translate things like newlines (to "\n"),
     // the output length might be more than 12 printable
     // chars. (but is that how it should be?)
-    inline std::string debug_peek(int num_chars = 12) {
+    inline std::string debug_peek(int num_chars = 12) const {
         std::string out;
         const utf8_byte *inp = buffer.data() + read_pos;
         for(int chp = 0; chp < num_chars; ++chp) {
