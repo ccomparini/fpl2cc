@@ -13,10 +13,6 @@
 
 #include "fpl_reader.h"
 
-// XXX the reduce type needs to be supplied by the author of
-// the .fpl
-//const std::string FPLReduceType("const void *");
-const std::string FPLReduceType("std::string");
 
 void fail(const char *fmt...) {
     va_list args;
@@ -74,8 +70,9 @@ void fail(const char *fmt...) {
 
 /*
  TODO
-  - reduce code generation:
-    - implement include mechanism so users can specify their product
+  - the "new Product" thing is going to leak memory.  fix that.
+  x reduce code generation:
+    x implement include mechanism so users can specify their product
       types etc. (perhaps have a default?)
       maybe it's a standard .h file?
   - repetition:  optional counts perhaps already work;  max_times
@@ -86,6 +83,10 @@ void fail(const char *fmt...) {
   - buffering the entire input is busted for things like stdin.
     stream instead;  but possibly fix that via chicken/egging it
     and generate the new parser with this.
+  - Document:
+    - the fact that you must supply "produces"
+    - the fact that the "produces" type must be to_string compatible;
+      you can make it so by creating such a function in +{ }+.
  */
 
 //#define ENTRY_OPTIONS // implementation fail
@@ -279,6 +280,10 @@ struct ProdExpr { // or step?
     ProdExpr(const std::string &str, GrammarElement::Type tp)
         : gexpr(str,tp), min_times(1), max_times(1) { }
 
+    inline bool is_single() const {
+        return((min_times == 1) && (max_times == 1));
+    }
+
     inline bool matches(const GrammarElement &other) const {
         return gexpr.compare(other) == 0;
     }
@@ -375,6 +380,7 @@ public:
         // perhaps default could be:
         //  - if one arg, just return that arg.  this allows aliasing.
         //  - if more than one arg, return aggregate XXX do this part
+        // .. or have the fpl author specify somehow.
         out += "return arg[0].default_reduce();\n";
 
         return out;
@@ -418,6 +424,9 @@ public:
 
 class Productions {
     fpl_reader inp;
+
+    std::string reduce_type;
+    std::string preamble;
 
     std::vector<ProductionRule>     rules;
     std::multimap<std::string, int> rules_for_product; // product  -> rule ind
@@ -678,6 +687,18 @@ public:
         );
     }
 
+    bool parse_directive(const std::string &in) {
+        // so far there's only one directive ("produces"), so:
+        std::regex  re("produces\\s*=?\\s*(.+)\\s*$");
+        std::cmatch matched;
+        if(std::regex_search(in.c_str(), matched, re)) {
+            reduce_type = matched[1];
+            return true;
+        }
+
+        return false;
+    }
+
     void push_rule(const ProductionRule &rule) {
         int rule_num = rules.size();
         rules.push_back(rule);
@@ -688,6 +709,11 @@ public:
         record_element(rule.product_element());
 
         rules_for_product.insert(std::make_pair(rule.product(), rule_num));
+    }
+
+    void add_preamble(const std::string &code) {
+        preamble += "\n";
+        preamble += code;
     }
 
     // returns the name of the function to use for the
@@ -713,7 +739,6 @@ public:
 
         return fn;
     }
-
 
     std::string state_goto(const lr_set &in, const GrammarElement &sym) {
         lr_set next_state = lr_goto(in, sym);
@@ -748,7 +773,9 @@ public:
         std::string out;
         std::string sfn = state_fn(state);
         out += "fprintf(stderr, \"entering state " + sfn + ":\\n\");\n";
-        out += state.to_str(this, "fprintf(stderr, \"%s\", \"", "\\n\");\n");
+        // this is fail because it doesn't escape the generated strings
+        // so quotes within derail everything:
+//        out += state.to_str(this, "fprintf(stderr, \"%s\", \"", "\\n\");\n");
         out += "fprintf(stderr, \"%s\", to_str().c_str());\n";
         out += "char stopper;  std::cin.get(stopper);\n";
         return out;
@@ -759,12 +786,33 @@ public:
         std::string out;
 
         // XXX parameters:
+        // this may be too complicated.
         //  - the rule itself
         //  - the current parser state
         //  x arg[] array.  callers figure out length based on rule.
-        out += FPLReduceType + " " + rule_fn(rule_ind) + "(Product arg[]) {\n";
-        //out += "Product " + rule_fn(rule_ind) + "(Product arg[]) {\n";
-        out += rule.code();
+        //  x uhh... argX for each arg, with the appropriate type
+        //    so that fpl authors don't have to convert each Product arg..
+        out += reduce_type + " " + rule_fn(rule_ind) + "(";
+        out += "Product arg[]";
+        for(int stind = 0; stind < rule.num_steps(); stind++) {
+            std::string arg_name = "arg_" + std::to_string(stind);
+            const ProdExpr *expr = rule.step(stind);
+            if(!expr) {
+                fail("Bug: no expression for %s in %s",
+                    arg_name.c_str(), rule.to_str().c_str()
+                );
+            } else if(!expr->is_single()) {
+                // the argument is either optional or can repeat or
+                // both, so we can't pass it simply.  so, instead,
+                // pass it as a product:
+                out += ", Product " + arg_name;
+            } else if(expr->is_terminal()) {
+                out += ", std::string " + arg_name;
+            } else {
+                out += ", " + reduce_type + " " + arg_name;
+            }
+        }
+        out += ") {\n" + rule.code();
         out += "\n}\n";
         return out;
     }
@@ -800,22 +848,34 @@ public:
         //    implement by making wildcard things implicitly
         //    make their own elements. (i.e. if there's foo+
         //    or foo*, those each get their own nonterminals).
-        out += "\n";
-        out += "    // reduce/produce " + rule.to_str() + "\n";
-        out += "    // args = pop " + std::to_string(rule.num_steps()) + " items:\n";
-        out += "    // next state = stack[-1].state();\n";
+        std::string ns_str = std::to_string(rule.num_steps());
         out += "\n";
         std::string product_type = rule.product_element().to_str();
-        std::string num_steps = std::to_string(rule.num_steps());
         out += "    State next_state;\n";
-        out += "    Product args[" + num_steps + "];\n";
-        //out += "    " + FPLReduceType + "args[" + num_steps + "];\n";
-        out += "    for(int aind = 0; aind < " + num_steps + "; ++aind) {\n";
+        out += "    Product args[" + ns_str + "];\n";
+        out += "    for(int aind = " + ns_str + " - 1; aind >= 0; --aind) {\n";
         out += "        StackEntry ste = lr_pop();\n";
         out += "        next_state = ste.state;\n";
         out += "        args[aind] = ste.product;\n";
         out += "    }\n";
-        out += "    " + FPLReduceType + " result = " + rule_fn(rule_ind) + "(args);\n";
+        out += "    " + reduce_type + " result = " + rule_fn(rule_ind);
+        out +=     "(args";
+        for(int stind = 0; stind < rule.num_steps(); stind++) {
+            std::string arg = ", args[" + std::to_string(stind) + "]";
+            const ProdExpr *expr = rule.step(stind);
+            if(!expr) {
+                fail("Bug: no expression for step %i in %s",
+                    stind, rule.to_str().c_str()
+                );
+            } else if(!expr->is_single()) {
+                out += arg;
+            } else if(expr->is_terminal()) {
+                out += arg + ".term_str()";
+            } else {
+                out += arg + ".val()";
+            }
+        }
+        out +=     ");\n";
 /*
         out += "    Product result = " + rule_fn(rule_ind) + "(args);\n";
         out += "    result.grammar_element_id( NontermID::_" + product_type + ");\n";
@@ -1088,7 +1148,6 @@ public:
                 }
             }
         }
-
     }
 
     void generate_code(const Options &opts) {
@@ -1097,11 +1156,17 @@ public:
         generate_states(opts);
 
         std::string out;
-        out += "#include <iostream>\n";
+        out += "#include <iostream>\n"; // XXX needed?
+        // preamble has to come before the fpl headers
+        // because (to my surpise) things like to_string
+        // functions (called by the template) have to be
+        // declared before the template (not just before
+        // template instantiation.. ?) (did I miss something?)
+        out += preamble;
         out += "#include \"fpl2cc/fpl_reader.h\"\n";
         out += "#include \"fpl2cc/fpl_base_parser.h\"\n";
         out += "\nclass " + parser_class +
-               " : public FPLBaseParser<" + FPLReduceType + "> {\n";
+               " : public FPLBaseParser<" + reduce_type + "> {\n";
 
         out += nonterm_enum();
 
@@ -1115,7 +1180,7 @@ public:
 
         out += "\npublic:\n";
         out += "    " + parser_class + "(fpl_reader &src) : FPLBaseParser(src) { }\n";
-        out += "    " + FPLReduceType + " parse() {\n";
+        out += "    " + reduce_type + " parse() {\n";
         // XXX there's a better way.  no reinterpret cast.
         out += "        lr_push(StackEntry(reinterpret_cast<State>(&" + parser_class + "::state_0), Product()));\n";
         out += "        while((lr_stack_size() > 0) && !reader.eof()) {\n";
@@ -1128,8 +1193,11 @@ public:
         out += "        if(!reader.eof()) {\n";
         out += "            reader.error(\"XXX out of stack but not input\");\n";
         out += "        }\n";
-        out += "        return result();\n";
-        // XXX check if there's stuff still on the stack or if we're not at eof
+        out += "        if(const Product *res = result()) {\n";
+        out += "            return res->val();\n";
+        out += "        }\n";
+        // XXX or, return whatever the fail type we were given
+        out += "        reader.error(\"XXX no result of parsing?\");\n";
         out += "    };\n";
 
         out += "};\n"; // end of class
@@ -1180,14 +1248,7 @@ void read_quantifiers(fpl_reader &src, ProdExpr &expr) {
     }
 }
 
-void eat_comment(fpl_reader &src) {
-    size_t nll;
-    // comments end at newline:
-    while(!(nll = src.newline_length(src.inpp()))) {
-        src.skip_char();
-    }
-    src.skip_bytes(nll); // line comment includes the terminating newline
-}
+
 
 int read_expressions(fpl_reader &src, ProductionRule &rule) {
     int num_read = 0;
@@ -1208,13 +1269,13 @@ int read_expressions(fpl_reader &src, ProductionRule &rule) {
                 done = true;
                 break; // EOF
             case '#':
-                eat_comment(src);
+                // line comment - just skip
+                src.read_line();
                 break;
             case '"':
             case '\'':
                 expr_str = src.read_to_byte(*inp);
                 type     = GrammarElement::Type::TERM_EXACT;
-                break;
                 break;
             case '/':
                 expr_str = src.read_to_byte('/');
@@ -1259,7 +1320,6 @@ std::string read_code(fpl_reader &src) {
      // this is done simplistically, which means you will
      // derail it if you put +{ or }+ in a comment or
      // string or whatever.  so try not to do that.
-     // oh but it needs to be minimal match, not greedy....
      src.eat_space();
      const utf8_byte *start = NULL;
      const utf8_byte *end   = NULL;
@@ -1300,33 +1360,46 @@ void fpl2cc(const Options &opts) {
     fpl_reader inp(opts.src_fpl, fail);
 
     Productions productions(inp);
-    while(!inp.eof()) {
-        ProductionRule rule(inp.inpp());
-
-        // read the expressions/steps leading to the production
-        // (until and including the "->")
-        if(read_expressions(inp, rule)) {
-
-            // read what the expressions above produce:
-            inp.eat_space();
-            const utf8_byte *start = inp.inpp();
-            rule.product(inp.read_to_space());
-            if(rule.product().length() <= 0) {
-                fail(
-                    "missing production name on line %i near %.12s\n",
-                    inp.line_number(start), start
-                );
-            }
-
-            // read the code for the production
-            rule.code(read_code(inp));
-
-            // add it to the set of productions
-            productions.push_rule(rule);
-        }
-
+    do {
         inp.eat_space();
-    }
+        if(*inp.inpp() == '#') {
+            inp.read_line();
+        } else if(*inp.inpp() == '+') {
+            // inlined/general code - goes at the top of the generated
+            // code.  Use to define types or whatever.
+            std::string code = read_code(inp);
+            if(code.length() > 0) {
+                productions.add_preamble(code);
+            }
+        } else if(inp.read_byte_equalling('@')) {
+            std::string line = inp.read_line();
+            if(!productions.parse_directive(line)) {
+                fail("Unknown directive: %s\n", line.c_str());
+            }
+        } else {
+            ProductionRule rule(inp.inpp());
+            if(read_expressions(inp, rule)) {
+                // .. we've read the expressions/steps leading to
+                // the production (including the "->").
+                // read what the expressions above produce:
+                inp.eat_space();
+                const utf8_byte *start = inp.inpp();
+                rule.product(inp.read_to_space());
+                if(rule.product().length() <= 0) {
+                    fail(
+                        "missing production name on line %i near %.12s\n",
+                        inp.line_number(start), start
+                    );
+                }
+
+                // read the code for the production
+                rule.code(read_code(inp));
+
+                // add it to the set of productions
+                productions.push_rule(rule);
+            }
+        }
+    } while(!inp.eof());
 
     productions.generate_code(opts);
 
