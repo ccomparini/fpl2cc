@@ -212,7 +212,7 @@ fprintf(stderr, "OK WE HAVE BUFFERED THE FILE:\n%s\n----------\n", inpp());
         return buffer.data() + read_pos;
     }
 
-// why do I not instead make a std::string formatter .. anywayzzzz
+    // why do I not instead make a std::string formatter? .. anywayzzzz
     void error(const char *fmt...) {
         const int buf_size = 2048;
         char msg_fmt[buf_size];
@@ -442,6 +442,23 @@ fprintf(stderr, "OK WE HAVE BUFFERED THE FILE:\n%s\n----------\n", inpp());
         return read_to_match('\0', end_char);
     }
 
+    // reads until we pass the next newline.
+    // returns all chars up to (but not including)
+    // that newline.
+    inline std::string read_line() {
+        size_t nll;
+
+        const utf8_byte *start = inpp();
+        const utf8_byte *end   = inpp();
+        while(!(nll = newline_length(inpp()))) {
+            skip_char();
+            end = inpp();
+        }
+        skip_bytes(nll);
+
+        return std::string((char *)start, end - start);
+    }
+
     inline const utf8_byte *read_exact_match(const std::string &match) {
         const utf8_byte *result = NULL;
 
@@ -449,7 +466,6 @@ fprintf(stderr, "OK WE HAVE BUFFERED THE FILE:\n%s\n----------\n", inpp());
         if(bytes_left() >= ml) {
             if(const char *in = inpp_as_char()) {
                 if(!match.compare(0, ml, in, ml)) {
-fprintf(stderr, "      matched exact: '%s' len %li\n", match.c_str(), match.length());
                     result = inpp();
                     read_pos += ml;
                 }
@@ -457,25 +473,6 @@ fprintf(stderr, "      matched exact: '%s' len %li\n", match.c_str(), match.leng
         } // else fewer bytes left than length sought -> no match
 
         return result;
-/*
-//fprintf(stderr, "  trying to match '%s' with %i bytes left\n", match.c_str(), len);
-
-        if(len <= 0) return NULL;
-
-        if(const char *in = inpp_as_char()) {
-            if(!match.compare(0, match.length(), in, match.length())) {
-fprintf(stderr, "      matched exact: '%s' len %li\n", match.c_str(), match.length());
-                return inpp();
-            }
-        }
-else {
-fprintf(stderr, "  OH EOF\n");
-}
-fprintf(stderr, "  '%s' does not match '%.*s'\n", match.c_str(), int(match.length()), inpp_as_char());
-if(*match.c_str() == *inpp_as_char()) {
-fprintf(stderr, "   ... though apparently they at least start with the same char\n");
-}
- */
     }
 
     inline std::cmatch read_re(const std::string &re) {
@@ -488,7 +485,6 @@ fprintf(stderr, "   ... though apparently they at least start with the same char
             if(std::regex_search(in, matched, std::regex(re), opts))
                 read_pos += matched.length();
             // (matched is now set to whatever was matched, if anything)
-fprintf(stderr, "      matched regex: /%s/ len %li\n", re.c_str(), matched.length());
         } else {
             // (we are at eof - no match)
             matched = no_match();
@@ -497,9 +493,9 @@ fprintf(stderr, "      matched regex: /%s/ len %li\n", re.c_str(), matched.lengt
     }
 
     // num chars is utf8 chars to look ahead.
-    // since we translate things like newlines (to "\n"),
-    // the output length might be more than 12 printable
-    // chars. (but is that how it should be?)
+    // since we translate things like newlines (to "\n")
+    // and eof, the output length might be more than 12
+    // printable chars. (but is that how it should be?)
     inline std::string debug_peek(int num_chars = 12) const {
         std::string out;
         const utf8_byte *inp = buffer.data() + read_pos;
