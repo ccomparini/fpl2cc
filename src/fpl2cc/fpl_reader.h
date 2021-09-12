@@ -497,6 +497,7 @@ fprintf(stderr, "OK WE HAVE BUFFERED THE FILE:\n%s\n----------\n", inpp());
     // and eof, the output length might be more than 12
     // printable chars. (but is that how it should be?)
     inline std::string debug_peek(int num_chars = 12) const {
+        if(!buffer.data()) return "<NO INPUT>";
         std::string out;
         const utf8_byte *inp = buffer.data() + read_pos;
         for(int chp = 0; chp < num_chars; ++chp) {

@@ -23,6 +23,16 @@ void fail(const char *fmt...) {
     exit(1);
 }
 
+static int num_warnings = 0;
+void warn(const char *fmt...) {
+    va_list args;
+    va_start(args, fmt);
+    vfprintf(stderr, fmt, args);
+    va_end(args);
+
+    num_warnings++;
+}
+
 /*
 
   fpl grammar:
@@ -70,6 +80,11 @@ void fail(const char *fmt...) {
 
 /*
  TODO
+  - detect conflicts (again)
+  - sort out the whole thing where states are returning useless
+    products.   I guess state functions should just manipulate
+    the .... parser state directly...?  that's what's actually being
+    used, anyway.
   - the "new Product" thing is going to leak memory.  fix that.
   x reduce code generation:
     x implement include mechanism so users can specify their product
@@ -238,6 +253,16 @@ struct GrammarElement {
 
     inline bool is_terminal() const {
         return(type == TERM_EXACT || type == TERM_REGEX);
+    }
+
+    std::string nonterm_id_str() const {
+        if(type == NONTERM_PRODUCTION)
+            return "NontermID::_" + expr;
+
+        // the ID passed isn't a nonterminal.
+        // returning a string like this should
+        // at least give something to grep for:
+        return "Error: " + expr + " is not a nonterminal";
     }
 
     inline std::string to_str() const {
@@ -597,9 +622,8 @@ class Productions {
             if(strl == endrl) {
                 const utf8_byte *sot = rule.start_of_text();
                 fail(
-                    "Nothing produces «%s» "
-                    "(used by rule starting with «%.20s» at line %i\n",
-                    pname.c_str(), sot, inp.line_number(sot)
+                    "Error at line %i: Nothing produces «%s»\n",
+                    inp.line_number(sot), pname.c_str()
                 );
             }
 
@@ -667,6 +691,8 @@ class Productions {
         return lr_closure(set);
     }
 
+    // XXX not used anymore; figure out if we need to for
+    // detecting conflicts
     std::string transition_id(const ProdExpr &pexp, const lr_set &to) {
         char buf[40];
         snprintf(buf, 40, "%0x_", element_index[pexp.gexpr]);
@@ -740,28 +766,6 @@ public:
         return fn;
     }
 
-    std::string state_goto(const lr_set &in, const GrammarElement &sym) {
-        lr_set next_state = lr_goto(in, sym);
-        std::string out;
-        // have to cast the function to a state the parent class can use.
-        // dislike.
-        // this is also going to bork if there are any virtual functions,
-        // I believe.
-        out += "reinterpret_cast<State>(&" + state_fn(next_state, true) + ")";
-        return out;
-    }
-
-    std::string args_for_shift(const lr_set &state, const ProdExpr &expr) {
-        std::string el_id(std::to_string(element_index[expr.gexpr]));
-        if(expr.is_terminal()) {
-            return "\"" + expr.terminal_string() + "\""
-                 + ", " + el_id
-                 + ", " + state_goto(state, expr.gexpr);
-        } else {
-            return el_id + ", " + state_goto(state, expr.gexpr);
-        }
-    }
-
     // for debugging, generate code which stops for input
     // for each state.  user hits return to go to the next
     // step.  this I found easier than lldb command line.
@@ -772,7 +776,7 @@ public:
     std::string debug_single_step_code(const lr_set &state) {
         std::string out;
         std::string sfn = state_fn(state);
-        out += "fprintf(stderr, \"entering state " + sfn + ":\\n\");\n";
+        out += "fprintf(stderr, \"%p entering state " + sfn + ":\\n\", this);\n";
         // this is fail because it doesn't escape the generated strings
         // so quotes within derail everything:
 //        out += state.to_str(this, "fprintf(stderr, \"%s\", \"", "\\n\");\n");
@@ -850,7 +854,6 @@ public:
         //    or foo*, those each get their own nonterminals).
         std::string ns_str = std::to_string(rule.num_steps());
         out += "\n";
-        std::string product_type = rule.product_element().to_str();
         out += "    State next_state;\n";
         out += "    Product args[" + ns_str + "];\n";
         out += "    for(int aind = " + ns_str + " - 1; aind >= 0; --aind) {\n";
@@ -876,14 +879,29 @@ public:
             }
         }
         out +=     ");\n";
-/*
-        out += "    Product result = " + rule_fn(rule_ind) + "(args);\n";
-        out += "    result.grammar_element_id( NontermID::_" + product_type + ");\n";
- */
         // XXX what deletes the product.  this is awful.
-        out += "    set_product(new Product(result, NontermID::_" + product_type + "));\n";
+        out += "    set_product(new Product(result, "
+             + rule.product_element().nonterm_id_str() + "));\n";
 
         return out;
+    }
+
+    std::string state_goto(const lr_set &in, const GrammarElement &sym) {
+        std::string out;
+        return out;
+    }
+
+    std::string args_for_shift(const lr_set &state, const ProdExpr &expr) {
+        lr_set next_state = lr_goto(state, expr.gexpr);
+        std::string el_id(std::to_string(element_index[expr.gexpr]));
+        if(expr.is_terminal()) {
+            return "\"" + expr.terminal_string() + "\""
+                 + ", " + el_id
+                 + ", &" + state_fn(next_state, true);
+        } else {
+            return expr.gexpr.nonterm_id_str()
+                 + ", &" + state_fn(next_state, true);
+        }
     }
 
     std::string code_for_state(const Options &opts, const lr_set &state) {
@@ -893,7 +911,7 @@ public:
         out += "//\n";
         out += state.to_str(this, "// ");
         out += "//\n";
-        out += "FPLBaseParser::Product " + sfn + "() {\n";
+        out += "void " + sfn + "() {\n";
         out += "    Product prd;\n";
         if(opts.debug_single_step) {
             out += debug_single_step_code(state);
@@ -918,8 +936,7 @@ public:
         //       we're at the end of the rule, so reduce and produce,
         //       placing the production in "next up"
         //   }
-        std::map<int, int> nonterm_to_state;
-        std::map<std::string, uint32_t> terminal_transitions;
+
 
         int reduce_rule = -1;
         for(auto item : state.items) {
@@ -929,6 +946,7 @@ public:
                 reduce_rule = item.rule;
             } else {
                 std::string sargs = args_for_shift(state, *right_of_dot);
+
                 const GrammarElement::Type type = right_of_dot->type();
                 switch(type) {
                     // shifts
@@ -967,13 +985,14 @@ public:
 
         out += "}\n";
 
-        out += "    return prd;\n";
         out += "}\n"; // end of state_ function
 
         return out;
     }
 
-    // reformat the generated code to fix indents and what have you.
+    // reformats the generated code to fix indents and what have you.
+    // this is fairly rough but does result in more or less readable
+    // code for most cases.
     std::string reformat_code(const std::string code) {
         const int chars_per_indent = 4;
         int indent = 0;
@@ -1165,8 +1184,11 @@ public:
         out += preamble;
         out += "#include \"fpl2cc/fpl_reader.h\"\n";
         out += "#include \"fpl2cc/fpl_base_parser.h\"\n";
-        out += "\nclass " + parser_class +
-               " : public FPLBaseParser<" + reduce_type + "> {\n";
+        out += "\n";
+        out += "class " + parser_class + ";\n";
+        out += "typedef void (" +  parser_class + "::*State)();\n";
+        out += "class " + parser_class
+             + " : public FPLBaseParser<" + reduce_type + ", State> {\n";
 
         out += nonterm_enum();
 
@@ -1181,8 +1203,7 @@ public:
         out += "\npublic:\n";
         out += "    " + parser_class + "(fpl_reader &src) : FPLBaseParser(src) { }\n";
         out += "    " + reduce_type + " parse() {\n";
-        // XXX there's a better way.  no reinterpret cast.
-        out += "        lr_push(StackEntry(reinterpret_cast<State>(&" + parser_class + "::state_0), Product()));\n";
+        out += "        lr_push(StackEntry(&" + parser_class + "::state_0, Product()));\n";
         out += "        while((lr_stack_size() > 0) && !reader.eof()) {\n";
         out += "            State st = current_state();\n";
         out += "            (this->*st)();\n";
