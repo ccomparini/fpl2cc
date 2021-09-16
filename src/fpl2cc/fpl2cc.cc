@@ -81,6 +81,7 @@ void warn(const char *fmt...) {
 /*
  TODO
   - detect conflicts (again)
+  - detect orphaned items
   - sort out the whole thing where states are returning useless
     products.   I guess state functions should just manipulate
     the .... parser state directly...?  that's what's actually being
@@ -361,11 +362,11 @@ class ProductionRule {
     std::string prod;
     std::vector<ProdExpr> steps;
     std::string code_str;
-    const utf8_byte *text;
+    size_t start_of_text;
 
 public:
 
-    ProductionRule(const utf8_byte *at) : text(at) {
+    ProductionRule(size_t at_byte) : start_of_text(at_byte) {
     }
 
     void add_step(ProdExpr step) {
@@ -395,8 +396,8 @@ public:
         return GrammarElement(product(), GrammarElement::NONTERM_PRODUCTION);
     }
 
-    const utf8_byte *start_of_text() const {
-        return text;
+    int line_number(const fpl_reader &inp) const {
+        return inp.line_number(start_of_text);
     }
 
     std::string default_code() const {
@@ -434,8 +435,7 @@ public:
             out += " ";
         }
 
-        if(!out.empty())
-            out.pop_back(); // remove trailing space
+        out += "-> " + product();
 
         return out;
     }
@@ -454,14 +454,14 @@ class Productions {
     std::string preamble;
 
     std::vector<ProductionRule>     rules;
-    std::multimap<std::string, int> rules_for_product; // product  -> rule ind
+    std::multimap<std::string, int> rules_for_product; // product -> rule ind
 
     std::vector<const GrammarElement>     elements;
     std::map<const GrammarElement, int>   element_index;
 
     struct lr_set;
     std::vector<lr_set> states;
-    std::map<const std::string, int> state_index; // keyed by set id
+    std::map<const std::string, int> state_index; // keyed by set/state id
 
     void add_state(const lr_set &st) {
         state_index.insert(
@@ -488,6 +488,8 @@ class Productions {
 
         static const uint16_t no_rule = 0xffff;
 
+        // this allows lr_items to be used as keys
+        // in things like std::map
         friend bool operator<(const lr_item& left, const lr_item& right) {
             if(left.rule == right.rule)
                 return left.position < right.position;
@@ -536,9 +538,7 @@ class Productions {
     };
 
     // an lr_set is a set of lr items.
-    // it is it's own special class mostly so that we can
-    // compare them to find the set of parser states.
-    // (each state can be represented by an lr_set)
+    // each state is represented by an lr_set.
     struct lr_set {
         mutable std::string _id_cache;
         std::set<lr_item> items;
@@ -620,10 +620,9 @@ class Productions {
             auto endrl = rules_for_product.upper_bound(pname);
 
             if(strl == endrl) {
-                const utf8_byte *sot = rule.start_of_text();
                 fail(
                     "Error at line %i: Nothing produces «%s»\n",
-                    inp.line_number(sot), pname.c_str()
+                    rule.line_number(inp), pname.c_str()
                 );
             }
 
@@ -652,8 +651,7 @@ class Productions {
                 //   - the "*" and "?" cases:  since the expression is
                 //     optional, we do need to consider what's after
                 //     it as another possible start to a given match.
-                //   - "!" is complicated and might be unnecessary.
-                //     axe it? axing. consider it axed!
+                //   x "!" is complicated, so I got rid of it
                 const ProductionRule &rule = rules[item.rule];
                 int pos = item.position;
                 const ProdExpr *right_of_dot;
@@ -672,7 +670,7 @@ class Productions {
                     pos++;
                 }
             }
-        } while(set.items.size() > last_size); // i.e. do until we add no more
+        } while(set.items.size() > last_size); // i.e. until we add no more
 
         return set;
     }
@@ -691,10 +689,9 @@ class Productions {
         return lr_closure(set);
     }
 
-    // XXX not used anymore; figure out if we need to for
-    // detecting conflicts
+    // used for detecting conflicts
     std::string transition_id(const ProdExpr &pexp, const lr_set &to) {
-        char buf[40];
+        char buf[40]; // 40 is arbitrarily larger than the 5 we'll need
         snprintf(buf, 40, "%0x_", element_index[pexp.gexpr]);
         std::string out(buf);
         out += to.id();
@@ -777,9 +774,6 @@ public:
         std::string out;
         std::string sfn = state_fn(state);
         out += "fprintf(stderr, \"%p entering state " + sfn + ":\\n\", this);\n";
-        // this is fail because it doesn't escape the generated strings
-        // so quotes within derail everything:
-//        out += state.to_str(this, "fprintf(stderr, \"%s\", \"", "\\n\");\n");
         out += "fprintf(stderr, \"%s\", to_str().c_str());\n";
         out += "char stopper;  std::cin.get(stopper);\n";
         return out;
@@ -881,7 +875,8 @@ public:
         out +=     ");\n";
         // XXX what deletes the product.  this is awful.
         out += "    set_product(new Product(result, "
-             + rule.product_element().nonterm_id_str() + "));\n";
+             + rule.product_element().nonterm_id_str()
+             + "));\n";
 
         return out;
     }
@@ -892,6 +887,11 @@ public:
     }
 
     std::string args_for_shift(const lr_set &state, const ProdExpr &expr) {
+// XXX pass in:
+//   - next_state
+//   - expr
+// ... or make this a method on ProdExpr::code_for_shift(lr_set &to_state)
+// ... which could actually return the whole target function call...
         lr_set next_state = lr_goto(state, expr.gexpr);
         std::string el_id(std::to_string(element_index[expr.gexpr]));
         if(expr.is_terminal()) {
@@ -902,6 +902,26 @@ public:
             return expr.gexpr.nonterm_id_str()
                  + ", &" + state_fn(next_state, true);
         }
+    }
+
+    void reduce_reduce_conflict(int r1, int r2) {
+        warn("reduce/reduce conflict:\n    %s line %i\n vs %s line %i\n",
+            rules[r1].to_str().c_str(), rules[r1].line_number(inp),
+            rules[r2].to_str().c_str(), rules[r2].line_number(inp)
+        );
+    }
+
+    void shift_reduce_conflict(int r1, int r2) {
+        // XXX fill in
+    }
+
+    // reports what is probably a shift/shift conflict,
+    // which would probably only happen due to a bug in
+    // this program...
+    void other_conflict(lr_item item1, lr_item item2) {
+        warn("conflict:\n    %s\n vs %s\n",
+           item1.to_str(this).c_str(), item2.to_str(this).c_str()
+        );
     }
 
     std::string code_for_state(const Options &opts, const lr_set &state) {
@@ -918,36 +938,54 @@ public:
         }
         out += "    if(0) {\n"; // now everything past this can be "else if"
 
-        // See Aho, Sethi, Ullman pg 234
-        // OK I THINK we can loop over state.items and for each:
-        //   const ProductionRule &rule = rules[item.rule];
-        //   const ProdExpr *right_of_dot = rule.step(item.position);
-        //   if(right_of_dot) {
-        //       g = lr_goto(item.rule, right_of_dot);
-        //       if(right_of_dot->is_terminal()) {
-        //           lr_set next_state = lr_goto(state, right_of_dot->gexpr);
-        //           action = shift(next_state, symbol);
-        //       } else {
-        //           // right of dot is a product.  check "next up" for that
-        //           // product
-        //           
-        //       }
-        //   } else {
-        //       we're at the end of the rule, so reduce and produce,
-        //       placing the production in "next up"
-        //   }
+        // let's think about conflicts, shall we?
+        // We should:
+        //   - if there's more than one reduce, report a reduce/reduce conflict
+        //   - if there's an existing symbol id -> next state for this symbol
+        //     - if the next state is the same, skip this transition because
+        //       it's redundant (can we eliminate this earlier than here? yes.)
+        //     - else there's either a shift/shift conflict, which makes no
+        //       sense, or it's a shift/reduce conflict (assuming one of the
+        //       states we're going to is just a reduce).  either way, report
+        //       it.
+        //       
+        //   - record symbol id -> next state
+        //
 
-
-        int reduce_rule = -1;
-        for(auto item : state.items) {
+        lr_item reduce_item;
+        std::map<int, int> transition; // grammar element id -> state number
+        std::map<int, lr_item> item_for_el_id;
+        for(lr_item item : state.items) {
             const ProductionRule &rule = rules[item.rule];
             const ProdExpr *right_of_dot = rule.step(item.position);
             if(!right_of_dot) {
-                reduce_rule = item.rule;
+                if(reduce_item) {
+                    reduce_reduce_conflict(item.rule, reduce_item.rule);
+                } else {
+                    reduce_item = item;
+                }
             } else {
+                lr_set next_state = lr_goto(state, right_of_dot->gexpr);
+                int el_id = element_index[right_of_dot->gexpr];
+
+// XXX redundant goto and other calculations here:
                 std::string sargs = args_for_shift(state, *right_of_dot);
 
+                auto existing = transition.find(el_id);
+                if(existing != transition.end()) {
+                    if(existing->second == state_index[next_state.id()]) {
+                        // already have a case for this transition.
+                        // no problem, no need to generate another copy;
+                        // just move on to the next item.
+                        continue;
+                    } else {
+                        // ... shift/shift conflict - probably can't happen.
+                        other_conflict(item, item_for_el_id[existing->first]);
+                    }
+                }
+
                 const GrammarElement::Type type = right_of_dot->type();
+// XXX maybe this can be an item method:
                 switch(type) {
                     // shifts
                     case GrammarElement::TERM_EXACT:
@@ -967,20 +1005,22 @@ public:
                         );
                         break;
                 }
+                transition[el_id] = state_index[next_state.id()];
+                item_for_el_id[el_id] = item;
 
-/*
-                out += "    // transition ID: " + transition_id(*right_of_dot, lr_goto(state, right_of_dot->gexpr)) + "\n";
- */
+                out += "    // transition ID: " + transition_id(
+                    *right_of_dot, lr_goto(state, right_of_dot->gexpr)
+                ) + "\n";
             }
         }
 
         out += "} else {\n";
-        if(reduce_rule < 0) {
+        if(!reduce_item) {
             // XXX cooler would be to reduce this to an error
             // also much cooler would be to have a comprehensible message
             out += "    reader.error(\"unexpected input in " + sfn + "\");\n";
         } else {
-            out += production_code(opts, state, reduce_rule);
+            out += production_code(opts, state, reduce_item.rule);
         }
 
         out += "}\n";
@@ -1118,7 +1158,6 @@ public:
     }
 
     void generate_states(const Options &opts) {
-        const auto no_set = state_index.end();
 
 #ifdef ENTRY_OPTIONS
         if(opts.entry_points.empty()) {
@@ -1154,6 +1193,7 @@ public:
 #endif // ENTRY_OPTIONS
 
         // Aho, Sethi, and Ullman page 224... uhh, modified.
+        const auto no_set = state_index.end();
         int latest_set = 0;
         while(latest_set < states.size()) {
             lr_set set = states[latest_set++];
@@ -1398,7 +1438,7 @@ void fpl2cc(const Options &opts) {
                 fail("Unknown directive: %s\n", line.c_str());
             }
         } else {
-            ProductionRule rule(inp.inpp());
+            ProductionRule rule(inp.current_position());
             if(read_expressions(inp, rule)) {
                 // .. we've read the expressions/steps leading to
                 // the production (including the "->").
@@ -1409,7 +1449,7 @@ void fpl2cc(const Options &opts) {
                 if(rule.product().length() <= 0) {
                     fail(
                         "missing production name on line %i near %.12s\n",
-                        inp.line_number(start), start
+                        rule.line_number(inp), start
                     );
                 }
 

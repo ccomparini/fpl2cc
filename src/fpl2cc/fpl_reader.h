@@ -65,8 +65,8 @@ class fpl_reader {
             // from that position to work
             is_eof = true;
 
-            // call the on_error callback directly, since we can't
-            // set the line_number etc correctly anyway:
+            // call the on_error callback directly, since the
+            // line number is going to be invalid anyway:
             on_error(
                 "test for eof at invalid position: %p in buffer %p",
                 pos, buffer.data()
@@ -117,6 +117,34 @@ class fpl_reader {
         return to_std_string(start, total_size - 1);
     }
 
+    inline int calc_line_number(const utf8_byte *pos) const {
+        const utf8_byte *buf = buffer.data();
+
+        // default is to get the line number for the current read position:
+        if(!pos) pos = buf + read_pos;
+
+        if(pos > buf + buffer.length()) return -1;
+        if(pos < buf)                   return -2;
+
+        if(eof(pos)) pos = buf + buffer.length();
+
+        // we rescan for line numbers instead of keeping a counter
+        // because (1) it's easier than checking every read, which
+        // may or may not be multi-byte or whatever and (2) since
+        // the source file is (probably) small, and we only sometimes
+        // care about the line number, it's going to be either fast
+        // enough, or (with luck) net faster than keeping a line
+        // counter and updating it on every read.
+        int line_no = 1;
+        const utf8_byte *rd;
+        for(rd = buf; rd < pos; rd += char_length(rd)) {
+            if(newline_length(rd)) {
+                line_no++;
+            }
+        }
+        return line_no;
+    }
+
 public:
 
     // default error callback/handler:
@@ -147,8 +175,6 @@ public:
         in.read(reinterpret_cast<char *>(buf), filesize + 1);
         buf[filesize] = '\0';
         buffer.assign(buf, filesize + 1);
-
-fprintf(stderr, "OK WE HAVE BUFFERED THE FILE:\n%s\n----------\n", inpp());
     }
 
     inline int current_position() const {
@@ -157,32 +183,13 @@ fprintf(stderr, "OK WE HAVE BUFFERED THE FILE:\n%s\n----------\n", inpp());
 
     // returns the 1-based line number for the position passed.
     // returns 0 if the position passed is outside the buffer entirely.
-    inline int line_number(const utf8_byte *pos = NULL) const {
-        const utf8_byte *buf = buffer.data();
+    inline int line_number(size_t offset) const {
+        return calc_line_number(buffer.data() + offset);
+    }
 
-        // default is to get the line number for the current read position:
-        if(!pos) pos = buf + read_pos;
-
-        if(pos > buf + buffer.length()) return 0;
-        if(pos < buf)                   return 0;
-
-        if(eof(pos)) pos = buf + buffer.length();
-
-        // we rescan for line numbers instead of keeping a counter
-        // because (1) it's easier than checking every read, which
-        // may or may not be multi-byte or whatever and (2) since
-        // the source file is (probably) small, and we only sometimes
-        // care about the line number, it's going to be either fast
-        // enough, or (with luck) net faster than keeping a line
-        // counter and updating it on every read.
-        int line_no = 1;
-        const utf8_byte *rd;
-        for(rd = buf; rd < pos; rd += char_length(rd)) {
-            if(newline_length(rd)) {
-                line_no++;
-            }
-        }
-        return line_no;
+    // as above, but returns the current input line number
+    inline int line_number() const {
+        return calc_line_number((const utf8_byte *)(NULL));
     }
 
     std::string base_name() const {
