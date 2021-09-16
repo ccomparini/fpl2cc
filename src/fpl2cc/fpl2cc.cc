@@ -81,7 +81,7 @@ void warn(const char *fmt...) {
 /*
  TODO
   - detect conflicts (again)
-  - detect orphaned items
+  x detect orphaned items
   - sort out the whole thing where states are returning useless
     products.   I guess state functions should just manipulate
     the .... parser state directly...?  that's what's actually being
@@ -461,7 +461,7 @@ class Productions {
 
     struct lr_set;
     std::vector<lr_set> states;
-    std::map<const std::string, int> state_index; // keyed by set/state id
+    std::map<const std::string, int> state_index; // keyed by set id
 
     void add_state(const lr_set &st) {
         state_index.insert(
@@ -1268,6 +1268,29 @@ public:
         }
 
         printf("%s\n", reformat_code(out).c_str());
+
+        report_unused_rules();
+    }
+
+    void report_unused_rules() {
+        bool used[rules.size()];
+        for(int rind = 0; rind < rules.size(); rind++) {
+            used[rind] = false;
+        }
+        for(lr_set state : states) {
+            for(lr_item item : state.items) {
+                used[item.rule] = true;
+            }
+        }
+        for(int rind = 0; rind < rules.size(); rind++) {
+            if(!used[rind]) {
+                const ProductionRule &rule = rules[rind];
+                warn(
+                    "Rule producing %s on line %i is unused\n",
+                    rule.product().c_str(), rule.line_number(inp)
+                );
+            }
+        }
     }
 };
 
