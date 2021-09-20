@@ -1024,7 +1024,7 @@ public:
         if(!reduce_item) {
             // XXX cooler would be to reduce this to an error
             // also much cooler would be to have a comprehensible message
-            out += "    base_parser.error(\"unexpected input in " + sfn + "\");\n";
+            out += "    base_parser.error(\"unexpected input in " + sfn + "\\n\");\n";
         } else {
             out += production_code(opts, state, reduce_item.rule);
         }
@@ -1135,6 +1135,18 @@ public:
         out += "    }\n";
         out += "    return \"not a nonterm .. err XXX \";\n";
         out += "}\n\n";
+        return out;
+    }
+
+    std::string state_to_string() {
+        std::string out("static std::string state_to_str(State st) {\n");
+        for(auto st: states) {
+            out += "if(&" + state_fn(st, true) + " == st) ";
+            out += "return \"" + state_fn(st) + "\";\n";
+        }
+        out += "    return \"<not a state>\";\n";
+        out += "}\n";
+
         return out;
     }
 
@@ -1262,6 +1274,8 @@ it needs, but c++ won't let you predeclare such methods.
         for(int rnum = 0; rnum < rules.size(); rnum++) {
             out += code_for_rule(opts, rnum);
         }
+
+        out += state_to_string();
 
         for(lr_set state : states) {
             out += code_for_state(opts, state).c_str();
