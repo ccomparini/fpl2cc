@@ -779,7 +779,7 @@ public:
     std::string debug_single_step_code(const lr_set &state) {
         std::string out;
         std::string sfn = state_fn(state);
-        out += "fprintf(stderr, \"%p entering state " + sfn + ":\\n\", this);\n";
+        out += "fprintf(stderr, \"%p entering " + sfn + ":\\n\", this);\n";
         out += "fprintf(stderr, \"%s\", base_parser.to_str().c_str());\n";
         out += "char stopper;  std::cin.get(stopper);\n";
         return out;
@@ -1042,35 +1042,40 @@ public:
     std::string reformat_code(const std::string code) {
         const int chars_per_indent = 4;
         int indent = 0;
-        int new_lines = 0;
+        int newlines = 0;
 
         std::string output;
 
-        // TODO:
+        // nice to have:
         //   - don't indent "public:", "private:" etc.. maybe anything
         //     which looks like a label?
         //   - trim space in parameter lists
+        // the problem is that the way this works now, the label
+        // etc will already have been copied by the time we realize
+        // it's a label.  maybe a better approach would be to recognize
+        // a full line, and only then indent/copy it..
 
         const std::string::size_type code_length = code.size();
         for(std::string::size_type inp = 0; inp < code_length; inp++) {
             if(code[inp] == '{') {
+                // only count '{' at end of line, which is a
                 // good-enough hack to avoid issues with
-                // quoted { or comments with { or whatever:
-                // only count '{' at end of line
+                // quoted { or comments with { or whatever.
                 if(code[inp + 1] == '\n') {
                     indent += chars_per_indent;
                 }
             } else if(code[inp] == '}') {
                 // counterpart to the above good-enough hack:
-                // only count '}' if it's immediately after
-                // an indent
-                if(new_lines > 0)
+                // only count '}' if it's the start of a
+                // new line:
+                if(newlines > 0)
                     indent -= chars_per_indent;
             } else if(code[inp] == '\n') {
-                // skip spaces;  we'll convert them to the correct indent:
+                // skip spaces at start of line - we'll convert them
+                // to the correct indent later.
                 while(inp < code_length && isspace(code[inp])) {
                     // (.. but preserve newlines)
-                    if(code[inp] == '\n') new_lines++;
+                    if(code[inp] == '\n') newlines++;
                     inp++;
                 }
                 if(inp < code_length)
@@ -1078,10 +1083,10 @@ public:
                 continue;
             }
 
-            if(new_lines > 0) {
-                while(new_lines > 0) {
+            if(newlines > 0) {
+                while(newlines > 0) {
                     output.push_back('\n');
-                    --new_lines;
+                    --newlines;
                 }
 
                 for(int ind = 0; ind < indent; ind++)
@@ -1282,23 +1287,8 @@ it needs, but c++ won't let you predeclare such methods.
         }
 
         out += "    " + parser_class + "(fpl_reader &src) : base_parser(src) { }\n";
-        out += "    " + reduce_type + " parse() {\n";
-        out += "        base_parser.lr_push(StackEntry(&" + parser_class + "::state_0, Product()));\n";
-        out += "        while((base_parser.lr_stack_size() > 0) && !base_parser.eof()) {\n";
-        out += "            State st = base_parser.current_state();\n";
-        out += "            (this->*st)();\n";
-        out += "        }\n";
-        out += "        if(base_parser.lr_stack_size() > 1)  {\n";
-        out += "            base_parser.error(\"XXX extra stuff on the stack\");\n";
-        out += "        }\n";
-        out += "        if(!base_parser.eof()) {\n";
-        out += "            base_parser.error(\"XXX out of stack but not input\");\n";
-        out += "        }\n";
-        out += "        if(const Product *res = base_parser.result()) {\n";
-        out += "            return res->val();\n";
-        out += "        }\n";
-        // XXX or, return whatever the fail type we were given
-        out += "        base_parser.error(\"XXX no result of parsing?\");\n";
+        out += "    inline " + reduce_type + " parse() {\n";
+        out += "        return base_parser.parse(*this);\n";
         out += "    };\n";
 
         out += "};\n"; // end of class
