@@ -407,7 +407,9 @@ public:
         //  - if one arg, just return that arg.  this allows aliasing.
         //  - if more than one arg, return aggregate XXX do this part
         // .. or have the fpl author specify somehow.
-        out += "return arg[0].default_reduce();\n";
+// FIXME this only makes sense if there's only one argument
+// and it's already reduced.
+        out += "return arg[0].val();\n";
 
         return out;
     }
@@ -742,9 +744,13 @@ public:
     // returns the name of the function to use for the
     // given state
     std::string state_fn(const lr_set &state, bool fully_qualified = false) {
+        int state_num = state_index[state.id()];
+        return state_fn(state_num, fully_qualified);
+    }
+
+    std::string state_fn(int state_num, bool fully_qualified = false) {
         std::string fn("state_");
 
-        int state_num = state_index[state.id()];
         fn += std::to_string(state_num);
 
         if(fully_qualified)
@@ -774,7 +780,7 @@ public:
         std::string out;
         std::string sfn = state_fn(state);
         out += "fprintf(stderr, \"%p entering state " + sfn + ":\\n\", this);\n";
-        out += "fprintf(stderr, \"%s\", to_str().c_str());\n";
+        out += "fprintf(stderr, \"%s\", base_parser.to_str().c_str());\n";
         out += "char stopper;  std::cin.get(stopper);\n";
         return out;
     }
@@ -851,7 +857,7 @@ public:
         out += "    State next_state;\n";
         out += "    Product args[" + ns_str + "];\n";
         out += "    for(int aind = " + ns_str + " - 1; aind >= 0; --aind) {\n";
-        out += "        StackEntry ste = lr_pop();\n";
+        out += "        StackEntry ste = base_parser.lr_pop();\n";
         out += "        next_state = ste.state;\n";
         out += "        args[aind] = ste.product;\n";
         out += "    }\n";
@@ -874,7 +880,7 @@ public:
         }
         out +=     ");\n";
         // XXX what deletes the product.  this is awful.
-        out += "    set_product(new Product(result, "
+        out += "    base_parser.set_product(new Product(result, "
              + rule.product_element().nonterm_id_str()
              + "));\n";
 
@@ -989,13 +995,13 @@ public:
                 switch(type) {
                     // shifts
                     case GrammarElement::TERM_EXACT:
-                        out += "} else if(shift_exact("   + sargs + ")) {\n";
+                        out += "} else if(base_parser.shift_exact("   + sargs + ")) {\n";
                         break;
                     case GrammarElement::TERM_REGEX:
-                        out += "} else if(shift_re("      + sargs + ")) {\n";
+                        out += "} else if(base_parser.shift_re("      + sargs + ")) {\n";
                         break;
                     case GrammarElement::NONTERM_PRODUCTION:
-                        out += "} else if(shift_nonterm(" + sargs + ")) {\n";
+                        out += "} else if(base_parser.shift_nonterm(" + sargs + ")) {\n";
                         break;
                     case GrammarElement::NONE:
                         // .. this pretty much implies a bug in fpl2cc:
@@ -1018,7 +1024,7 @@ public:
         if(!reduce_item) {
             // XXX cooler would be to reduce this to an error
             // also much cooler would be to have a comprehensible message
-            out += "    reader.error(\"unexpected input in " + sfn + "\");\n";
+            out += "    base_parser.error(\"unexpected input in " + sfn + "\");\n";
         } else {
             out += production_code(opts, state, reduce_item.rule);
         }
@@ -1039,6 +1045,11 @@ public:
         int new_lines = 0;
 
         std::string output;
+
+        // TODO:
+        //   - don't indent "public:", "private:" etc.. maybe anything
+        //     which looks like a label?
+        //   - trim space in parameter lists
 
         const std::string::size_type code_length = code.size();
         for(std::string::size_type inp = 0; inp < code_length; inp++) {
@@ -1118,7 +1129,7 @@ public:
                 out += "\n";
         }
         out += "} NontermID;\n\n";
-        out += "std::string nonterm_str(NontermID id) {\n";
+        out += "static std::string nonterm_str(int id) {\n";
         out += "    switch(id) {\n";
         out += nonterm_str_guts;
         out += "    }\n";
@@ -1211,6 +1222,8 @@ public:
 
     void generate_code(const Options &opts) {
         const std::string parser_class = parser_class_name();
+        // "base" is probably the wrong term.. XXX
+        const std::string base_parser_class = "FPLBaseParser<" + parser_class + ">";
 
         generate_states(opts);
 
@@ -1225,10 +1238,24 @@ public:
         out += "#include \"fpl2cc/fpl_reader.h\"\n";
         out += "#include \"fpl2cc/fpl_base_parser.h\"\n";
         out += "\n";
-        out += "class " + parser_class + ";\n";
-        out += "typedef void (" +  parser_class + "::*State)();\n";
-        out += "class " + parser_class
-             + " : public FPLBaseParser<" + reduce_type + ", State> {\n";
+        // parser_class is now really parser_impl_class or such...
+        out += "class " + parser_class + " {\n";
+/*
+Can't do the private declaractions first because the FPLBaseParser
+needs to know about state methods and such to determine the types
+it needs, but c++ won't let you predeclare such methods.
+ */
+        out += "public:\n";
+        out += "    // state() and reduce_type tell FPLBaseParser what types to use\n";
+        out += "    void state();\n"; // this must match state_x methods; XXX document/typedef?
+        out += "    static " + reduce_type + " reduce_type;\n"; // for telling the FPLBaseParser.. as above XXX document
+        out += "private:\n";
+        out += "    using FPLBP = " + base_parser_class + ";\n";
+        out += "    using State = FPLBP::State;\n";
+        out += "    using Product = FPLBP::Product;\n";
+        out += "    using StackEntry = FPLBP::StackEntry;\n";
+        out += "    FPLBP base_parser;\n";
+        out += "public:\n";
 
         out += nonterm_enum();
 
@@ -1240,25 +1267,24 @@ public:
             out += code_for_state(opts, state).c_str();
         }
 
-        out += "\npublic:\n";
-        out += "    " + parser_class + "(fpl_reader &src) : FPLBaseParser(src) { }\n";
+        out += "    " + parser_class + "(fpl_reader &src) : base_parser(src) { }\n";
         out += "    " + reduce_type + " parse() {\n";
-        out += "        lr_push(StackEntry(&" + parser_class + "::state_0, Product()));\n";
-        out += "        while((lr_stack_size() > 0) && !reader.eof()) {\n";
-        out += "            State st = current_state();\n";
+        out += "        base_parser.lr_push(StackEntry(&" + parser_class + "::state_0, Product()));\n";
+        out += "        while((base_parser.lr_stack_size() > 0) && !base_parser.eof()) {\n";
+        out += "            State st = base_parser.current_state();\n";
         out += "            (this->*st)();\n";
         out += "        }\n";
-        out += "        if(lr_stack_size() > 1)  {\n";
-        out += "            reader.error(\"XXX extra stuff on the stack\");\n";
+        out += "        if(base_parser.lr_stack_size() > 1)  {\n";
+        out += "            base_parser.error(\"XXX extra stuff on the stack\");\n";
         out += "        }\n";
-        out += "        if(!reader.eof()) {\n";
-        out += "            reader.error(\"XXX out of stack but not input\");\n";
+        out += "        if(!base_parser.eof()) {\n";
+        out += "            base_parser.error(\"XXX out of stack but not input\");\n";
         out += "        }\n";
-        out += "        if(const Product *res = result()) {\n";
+        out += "        if(const Product *res = base_parser.result()) {\n";
         out += "            return res->val();\n";
         out += "        }\n";
         // XXX or, return whatever the fail type we were given
-        out += "        reader.error(\"XXX no result of parsing?\");\n";
+        out += "        base_parser.error(\"XXX no result of parsing?\");\n";
         out += "    };\n";
 
         out += "};\n"; // end of class
