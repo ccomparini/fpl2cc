@@ -1197,7 +1197,8 @@ public:
         // XXX this is also weak; handle more than one source
         out += "    fpl_reader inp(argv[1]);\n";
         out +=      parser_class + " parser(inp);\n";
-        out += "    parser.parse();\n";
+        out += "    using namespace std;\n";
+        out += "    printf(\"result: %s\\n\", to_string(parser.parse()).c_str());\n";
         out += "}\n";
 
         return out;
