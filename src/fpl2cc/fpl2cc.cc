@@ -92,14 +92,9 @@ void warn(const char *fmt...) {
   - operator precedence:  it's a PITA to do the whole intermediate
     productions precedence thing.  So, make it part of FPL.
     Ideas:
-      - have earlier (or later?) rules take precedence.
-        OK problem is that then ... well, how to do it
-        without creating too many states?  because things
-        with the same precedence (and context) can go in
-        the same state.
-      - possibly as above, but enclose in some kind of
-        block, telling fpl "I meant to do that" so that
-        fpl can know the conflicts are expected.
+      - have later rules take precedence. (or earlier?)
+        How to do it without creating too many states?
+        Group precedences within (say) parens?
   x detect orphaned items
   x sort out the whole thing where states are returning useless
     products.   I guess state functions should just manipulate
@@ -125,13 +120,17 @@ void warn(const char *fmt...) {
 struct Options {
     std::string src_fpl;
     bool generate_main;
-    bool debug_single_step;
+    bool debug;
+    bool single_step;
     std::list<std::string> entry_points;
 
     // janky, but good enough:
     std::string _fail;
-    Options(int argc, const char* const* argv) {
-        generate_main = false;
+    Options(int argc, const char* const* argv) :
+        generate_main(false),
+        debug(false),
+        single_step(false)
+    {
 
         _fail = "";
         for(int argi = 1; argi < argc; argi++) {
@@ -150,8 +149,11 @@ struct Options {
                         val = opt.substr(pos + 1);
                         opt = opt.substr(0, pos);
                     }
-                    if(opt == "debug-single-step") {
-                        debug_single_step = true;
+                    if(opt == "debug") {
+                        debug = true;
+                    } else if(opt == "debug-single-step") {
+                        debug = true;
+                        single_step = true;
                     } else if(opt == "entry") {
                         // specifies an entry rule (i.e. a parsing
                         // starting point)
@@ -786,12 +788,16 @@ public:
     // some reason it would hang on the first breakpoint
     // with the subproc spinning at 100% cpu, which was not
     // useful. so here's my punt:
-    std::string debug_single_step_code(const lr_set &state) {
+    std::string debug_single_step_code(const Options &op, const lr_set &st) {
         std::string out;
-        std::string sfn = state_fn(state);
-        out += "fprintf(stderr, \"%p entering " + sfn + ":\\n\", this);\n";
-        out += "fprintf(stderr, \"%s\", base_parser.to_str().c_str());\n";
-        out += "char stopper;  std::cin.get(stopper);\n";
+        if(op.debug) {
+            std::string sfn = state_fn(st);
+            out += "fprintf(stderr, \"%p entering " + sfn + ":\\n\", this);\n";
+            out += "fprintf(stderr, \"%s\", base_parser.to_str().c_str());\n";
+            if(op.single_step) {
+                out += "char stopper;  std::cin.get(stopper);\n";
+            }
+        }
         return out;
     }
 
@@ -799,8 +805,7 @@ public:
         const ProductionRule &rule = rules[rule_ind];
         std::string out;
 
-        // XXX parameters:
-        // this may be too complicated.
+        // parameters (this may be too complicated):
         //  - the rule itself
         //  - the current parser state
         //  x arg[] array.  callers figure out length based on rule.
@@ -889,7 +894,7 @@ public:
             }
         }
         out +=     ");\n";
-        // XXX what deletes the product.  this is awful.
+        // XXX what deletes the product?  this is awful.
         out += "    base_parser.set_product(new Product(result, "
              + rule.product_element().nonterm_id_str()
              + "));\n";
@@ -903,11 +908,6 @@ public:
     }
 
     std::string args_for_shift(const lr_set &state, const ProdExpr &expr) {
-// XXX pass in:
-//   - next_state
-//   - expr
-// ... or make this a method on ProdExpr::code_for_shift(lr_set &to_state)
-// ... which could actually return the whole target function call...
         lr_set next_state = lr_goto(state, expr.gexpr);
         std::string el_id(std::to_string(element_index[expr.gexpr]));
         if(expr.is_terminal()) {
@@ -950,9 +950,8 @@ public:
         out += "//\n";
         out += "void " + sfn + "() {\n";
         out += "    Product prd;\n";
-        if(opts.debug_single_step) {
-            out += debug_single_step_code(state);
-        }
+        out += debug_single_step_code(opts, state);
+
         out += "    if(0) {\n"; // now everything past this can be "else if"
 
         // let's think about conflicts, shall we?
@@ -993,9 +992,6 @@ public:
                 lr_set next_state = lr_goto(state, right_of_dot->gexpr);
                 int el_id = element_index[right_of_dot->gexpr];
 
-// XXX redundant goto and other calculations here:
-                std::string sargs = args_for_shift(state, *right_of_dot);
-
                 auto existing = transition.find(el_id);
                 if(existing != transition.end()) {
                     if(existing->second == state_index[next_state.id()]) {
@@ -1013,13 +1009,13 @@ public:
                 switch(type) {
                     // shifts
                     case GrammarElement::TERM_EXACT:
-                        out += "} else if(base_parser.shift_exact("   + sargs + ")) {\n";
+                        out += "} else if(base_parser.shift_exact(";
                         break;
                     case GrammarElement::TERM_REGEX:
-                        out += "} else if(base_parser.shift_re("      + sargs + ")) {\n";
+                        out += "} else if(base_parser.shift_re(";
                         break;
                     case GrammarElement::NONTERM_PRODUCTION:
-                        out += "} else if(base_parser.shift_nonterm(" + sargs + ")) {\n";
+                        out += "} else if(base_parser.shift_nonterm(";
                         break;
                     case GrammarElement::NONE:
                         // .. this pretty much implies a bug in fpl2cc:
@@ -1029,6 +1025,9 @@ public:
                         );
                         break;
                 }
+                // XXX redundant goto and other calculations here. restructure.
+                out += args_for_shift(state, *right_of_dot) + ")) {\n";
+
                 transition[el_id] = state_index[next_state.id()];
                 item_for_el_id[el_id] = item;
 
@@ -1266,11 +1265,10 @@ public:
         out += "\n";
         // parser_class is now really parser_impl_class or such...
         out += "class " + parser_class + " {\n";
-/*
-Can't do the private declaractions first because the FPLBaseParser
-needs to know about state methods and such to determine the types
-it needs, but c++ won't let you predeclare such methods.
- */
+        // Can't do the private declarations first because the
+        // FPLBaseParser template needs to know about state methods
+        // and such to determine the types it needs, but c++ won't
+        // let you predeclare such methods.
         out += "public:\n";
         out += "    // state() and reduce_type tell FPLBaseParser what types to use\n";
         out += "    void state();\n"; // this must match state_x methods; XXX document/typedef?
