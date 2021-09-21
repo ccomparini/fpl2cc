@@ -80,15 +80,15 @@ void warn(const char *fmt...) {
 
 /*
  TODO
+  - sort out termination.
   - sort out specifying entry rules:
-    - specify within the fpl
+    - allow specifying within the fpl
     x fix the implementation - need to first generate a set
       for all the possible entries
   - make it so that if you forget the "return" in a rule, it at
     least returns something. Maybe have the generated code print
     a warning, too?
   - detect conflicts (again)
-  - sort out termination.
   - operator precedence:  it's a PITA to do the whole intermediate
     productions precedence thing.  So, make it part of FPL.
     Ideas:
@@ -112,7 +112,7 @@ void warn(const char *fmt...) {
     stream instead;  but possibly fix that via chicken/egging it
     and generate the new parser with this.
   - Document:
-    - the fact that you must supply "produces"
+    - the fact that you must supply "produces" (or have a default?)
     - the fact that the "produces" type must be to_string compatible;
       you can make it so by creating such a function in +{ }+.
  */
@@ -725,11 +725,21 @@ public:
         );
     }
 
+    // returns the code for an inline to_string function for...
+    // things which are already strings!  yay!
+    // this is effectively c++ compiler appeasement.
+    std::string to_string_identity() {
+        return "\ninline std::string to_string(const std::string &in) {\n"
+               "    return in;\n"
+               "}\n";
+    }
+
     bool parse_directive(const std::string &in) {
         std::regex  re("produces\\s*=?\\s*(.+)\\s*$");
         std::cmatch matched;
         if(std::regex_search(in.c_str(), matched, re)) {
             reduce_type = matched[1];
+            add_preamble(to_string_identity());
             return true;
         }
 
