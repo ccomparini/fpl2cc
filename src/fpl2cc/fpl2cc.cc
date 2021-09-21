@@ -80,22 +80,39 @@ void warn(const char *fmt...) {
 
 /*
  TODO
+  - sort out specifying entry rules:
+    - specify within the fpl
+    x fix the implementation - need to first generate a set
+      for all the possible entries
+  - make it so that if you forget the "return" in a rule, it at
+    least returns something. Maybe have the generated code print
+    a warning, too?
   - detect conflicts (again)
+  - sort out termination.
+  - operator precedence:  it's a PITA to do the whole intermediate
+    productions precedence thing.  So, make it part of FPL.
+    Ideas:
+      - have earlier (or later?) rules take precedence.
+        OK problem is that then ... well, how to do it
+        without creating too many states?  because things
+        with the same precedence (and context) can go in
+        the same state.
+      - possibly as above, but enclose in some kind of
+        block, telling fpl "I meant to do that" so that
+        fpl can know the conflicts are expected.
   x detect orphaned items
-  - sort out the whole thing where states are returning useless
+  x sort out the whole thing where states are returning useless
     products.   I guess state functions should just manipulate
     the .... parser state directly...?  that's what's actually being
     used, anyway.
   - the "new Product" thing is going to leak memory.  fix that.
-  x reduce code generation:
-    x implement include mechanism so users can specify their product
-      types etc. (perhaps have a default?)
-      maybe it's a standard .h file?
+    (pass on to the fpl author somehow?  or just don't declare it
+    and don't worry about copies?)
   - repetition:  optional counts perhaps already work;  max_times
     is not implemented.  do them by boiling any foo* or foo+ or
     whatever down to a single item (with subitems).  this makes
     passing them to reduce code much saner.
-  - eliminate duplicate state transitions
+  x eliminate duplicate state transitions
   - buffering the entire input is busted for things like stdin.
     stream instead;  but possibly fix that via chicken/egging it
     and generate the new parser with this.
@@ -105,15 +122,11 @@ void warn(const char *fmt...) {
       you can make it so by creating such a function in +{ }+.
  */
 
-//#define ENTRY_OPTIONS // implementation fail
-
 struct Options {
     std::string src_fpl;
     bool generate_main;
     bool debug_single_step;
-#ifdef ENTRY_OPTIONS
     std::list<std::string> entry_points;
-#endif // ENTRY_OPTIONS
 
     // janky, but good enough:
     std::string _fail;
@@ -139,7 +152,6 @@ struct Options {
                     }
                     if(opt == "debug-single-step") {
                         debug_single_step = true;
-#ifdef ENTRY_OPTIONS
                     } else if(opt == "entry") {
                         // specifies an entry rule (i.e. a parsing
                         // starting point)
@@ -153,7 +165,6 @@ struct Options {
                             _fail = "--generate-main requires a value.";
                         }
                         entry_points.push_back(std::string(val));
-#endif // ENTRY_OPTIONS
                     } else if(opt == "generate-main") {
                         generate_main = true;
                     } else {
@@ -713,7 +724,6 @@ public:
     }
 
     bool parse_directive(const std::string &in) {
-        // so far there's only one directive ("produces"), so:
         std::regex  re("produces\\s*=?\\s*(.+)\\s*$");
         std::cmatch matched;
         if(std::regex_search(in.c_str(), matched, re)) {
@@ -918,7 +928,8 @@ public:
     }
 
     void shift_reduce_conflict(int r1, int r2) {
-        // XXX fill in
+        // XXX fill in; use
+        warn("OH HAI SHIFT REDUCE CONFLICT YESSSSSSS\n");
     }
 
     // reports what is probably a shift/shift conflict,
@@ -946,14 +957,22 @@ public:
 
         // let's think about conflicts, shall we?
         // We should:
-        //   - if there's more than one reduce, report a reduce/reduce conflict
+        //   x if there's more than one reduce, report a reduce/reduce conflict
+        //     (but fail open and blat out some code anyway.  actually, would be
+        //     nice to annotate the generated code...)
         //   - if there's an existing symbol id -> next state for this symbol
-        //     - if the next state is the same, skip this transition because
+        //     x if the next state is the same, skip this transition because
         //       it's redundant (can we eliminate this earlier than here? yes.)
         //     - else there's either a shift/shift conflict, which makes no
         //       sense, or it's a shift/reduce conflict (assuming one of the
         //       states we're going to is just a reduce).  either way, report
         //       it.
+        //   NOTE:  if there's a shift/reduce conflict, we will resolve it:
+        //      - first by longest match (i.e. shift instead of reducing).
+        //        example:  if() ...  vs if() ... else ...;
+        //        if() .. else is longer so we shift.
+        //      - next by operator precedence.. XXX implement
+        //   ... I think we still want to report it.  or do we?
         //       
         //   - record symbol id -> next state
         //
@@ -991,7 +1010,6 @@ public:
                 }
 
                 const GrammarElement::Type type = right_of_dot->type();
-// XXX maybe this can be an item method:
                 switch(type) {
                     // shifts
                     case GrammarElement::TERM_EXACT:
@@ -1186,39 +1204,29 @@ public:
     }
 
     void generate_states(const Options &opts) {
+        std::list<std::string> wanted = opts.entry_points;
 
-#ifdef ENTRY_OPTIONS
-        if(opts.entry_points.empty()) {
-            // if no entry products have been specified, just
-            // consider the first rule (rule 0) to be the starting
-            // point
-#endif // ENTRY_OPTIONS
-            add_state(lr_closure(lr_item(0, 0)));
-#ifdef ENTRY_OPTIONS
-        } else {
-            // XXX fail implementation:  1) adding these here doesn't
-            // actually add them as starting points and 2) that's
-            // not what I think we want anyway.  What we'd need
-            // is a map of production->starting state and make it
-            // so users of the parser can specify what they are
-            // trying to produce.
-            for(auto entry_prod : opts.entry_points) {
-                auto strl  = rules_for_product.lower_bound(entry_prod);
-                auto endrl = rules_for_product.upper_bound(entry_prod);
+        if(rules.empty()) {
+            fail("No rules found");
+        }
 
-                if(strl == endrl) {
-                    fail(
-                        "Can't find entry rule for '%s'\n",
-                        entry_prod.c_str()
-                    );
-                }
+        if(wanted.empty()) {
+            wanted.push_back(rules[0].product());
+        }
 
-                for(auto rit = strl; rit != endrl; ++rit) {
-                    add_state(lr_closure(lr_item(rit->second, 0)));
-                }
+        lr_set entry_set;
+        for(auto entry_prod : wanted) {
+            auto strl  = rules_for_product.lower_bound(entry_prod);
+            auto endrl = rules_for_product.upper_bound(entry_prod);
+            if(strl == endrl) {
+                fail("Can't find entry rule for '%s'\n", entry_prod.c_str());
+            }
+            for(auto rit = strl; rit != endrl; ++rit) {
+                entry_set.items.insert(lr_item(rit->second, 0));
             }
         }
-#endif // ENTRY_OPTIONS
+        add_state(lr_closure(entry_set));
+
 
         // Aho, Sethi, and Ullman page 224... uhh, modified.
         const auto no_set = state_index.end();
