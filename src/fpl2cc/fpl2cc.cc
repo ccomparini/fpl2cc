@@ -1554,6 +1554,10 @@ int main(int argc, const char** argv) {
         fpl2cc(opts);
     }
 
+    if(num_warnings > 0) {
+        fprintf(stderr, "%i warnings\n", num_warnings);
+    }
+
     exit(0);
 }
 
