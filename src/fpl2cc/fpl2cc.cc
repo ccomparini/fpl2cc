@@ -80,6 +80,8 @@ void warn(const char *fmt...) {
 
 /*
  TODO
+  - multi-pass for comments etc. HOW!?  you thought about this
+    before and perhaps had a plan.
   - sort out termination.
   - sort out specifying entry rules:
     - allow specifying within the fpl
@@ -335,6 +337,10 @@ struct ProdExpr { // or step?
         return gexpr.is_terminal();
     }
 
+    inline bool is_optional() const {
+        return min_times == 0;
+    }
+
     inline std::string production_name() const {
         if(gexpr.type == GrammarElement::NONTERM_PRODUCTION) {
             return gexpr.expr;
@@ -421,7 +427,8 @@ public:
         //  - if more than one arg, return aggregate XXX do this part
         // .. or have the fpl author specify somehow.
 // FIXME this only makes sense if there's only one argument
-// and it's already reduced.
+// and it's already reduced.  and it's not optional or aggregate.
+// but, it does work nicely for aliases, so maybe keep some variant.
         out += "return arg[0].val();\n";
 
         return out;
@@ -454,12 +461,6 @@ public:
 
         return out;
     }
-
-/*
-    const &std::vector<ProdExpr> steps() const {
-        return steps;
-    }
- */
 };
 
 class Productions {
@@ -555,8 +556,10 @@ class Productions {
     // an lr_set is a set of lr items.
     // each state is represented by an lr_set.
     struct lr_set {
+private:
         mutable std::string _id_cache;
         std::set<lr_item> items;
+public:
 
         lr_set() { }
 
@@ -585,6 +588,14 @@ class Productions {
                 _id_cache = std::string(buf);
             }
             return _id_cache;
+        }
+
+        const std::set<lr_item> &iterable_items() const {
+            return items;
+        }
+
+        int size() const {
+            return items.size();
         }
 
         void add(const lr_set &set) {
@@ -643,7 +654,7 @@ class Productions {
 
             for(auto rit = strl; rit != endrl; ++rit) {
                 // (these are always position 0)
-                set.items.insert(lr_item(rit->second, 0));
+                set.add(lr_item(rit->second, 0));
             }
         }
     }
@@ -651,14 +662,27 @@ class Productions {
     // based on the closure algorithm on page 222 of Aho, Sethi, Ullman
     // (1988), but with the addition of support for the *+?! operators
     // in fpl.
+    //  http://www.cs.ecu.edu/karl/5220/spr16/Notes/Bottom-up/lr0item.html
+    //   1) All members of S are in the closure(S).
+    //   2) Suppose closure(S) contains item A → α⋅Bβ, where B is a nonterminal.
+    //      Find all productions B → γ1, …, B → γn with B on the left-hand side.
+    //      Add LR(0) items B → ⋅γ1, … B → ⋅γn to closure(S).
+    //  What is the point of the closure? LR(0) item E → E + ⋅ T indicates that the
+    //  parser has just finished reading an expression followed by a + sign. In
+    //  fact, E + are the top two symbols on the stack.
+    //  Now, the parser is looking to see if there is a T next. (It does not
+    //  predict that there is a T next. It is just considering that as a
+    //  possibility.) But that means it should be looking for something that
+    //  is the right-hand side of a production for T. So we add items for T
+    //  with the dot at the beginning.
     lr_set lr_closure(const lr_set &in) {
         lr_set set = in;
         int last_size;
         do {
-            last_size = set.items.size();
+            last_size = set.size();
             // NOTE this could be a lot more efficient if we started
             // at element (last_size - 1)...
-            for(auto &item: set.items) {
+            for(auto &item: set.iterable_items()) {
                 // support for *+?!
                 //   - the "+" case is no different from the default
                 //     here - we'll do the more-than-one case in the
@@ -685,7 +709,7 @@ class Productions {
                     pos++;
                 }
             }
-        } while(set.items.size() > last_size); // i.e. until we add no more
+        } while(set.size() > last_size); // i.e. until we add no more
 
         return set;
     }
@@ -695,7 +719,7 @@ class Productions {
     // the next state.
     lr_set lr_goto(const lr_set &in, const GrammarElement &sym) {
         lr_set set;
-        for(auto item : in.items) {
+        for(auto item : in.iterable_items()) {
             const ProdExpr *step = rules[item.rule].step(item.position);
             if(step && step->matches(sym)) {
                 set.add(lr_item(item.rule, item.position + 1));
@@ -989,7 +1013,7 @@ public:
         lr_item reduce_item;
         std::map<int, int> transition; // grammar element id -> state number
         std::map<int, lr_item> item_for_el_id;
-        for(lr_item item : state.items) {
+        for(lr_item item : state.iterable_items()) {
             const ProductionRule &rule = rules[item.rule];
             const ProdExpr *right_of_dot = rule.step(item.position);
             if(!right_of_dot) {
@@ -1232,7 +1256,7 @@ public:
                 fail("Can't find entry rule for '%s'\n", entry_prod.c_str());
             }
             for(auto rit = strl; rit != endrl; ++rit) {
-                entry_set.items.insert(lr_item(rit->second, 0));
+                entry_set.add(lr_item(rit->second, 0));
             }
         }
         add_state(lr_closure(entry_set));
@@ -1246,7 +1270,7 @@ public:
 
             for(auto elem : elements) {
                 lr_set state = lr_goto(set, elem);
-                if(state.items.size() > 0) {
+                if(state.size() > 0) {
                     if(state_index.find(state.id()) == no_set) {
                         add_state(state);
                     }
@@ -1325,7 +1349,7 @@ public:
             used[rind] = false;
         }
         for(lr_set state : states) {
-            for(lr_item item : state.items) {
+            for(lr_item item : state.iterable_items()) {
                 used[item.rule] = true;
             }
         }
