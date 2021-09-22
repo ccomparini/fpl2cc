@@ -192,6 +192,10 @@ public:
         return calc_line_number((const utf8_byte *)(NULL));
     }
 
+    inline const std::string &filename() const {
+        return input_filename;
+    }
+
     std::string base_name() const {
 
         std::string infn = fs::path(input_filename).filename();
