@@ -563,8 +563,10 @@ public:
 
         lr_set() { }
 
-        // 1-item set:
-        lr_set(const lr_item &in) { items.insert(in); }
+        // an lr_item is a 1-item set:
+        lr_set(const lr_item &in) {
+            items.insert(in);
+        }
 
         // The id of the set is a string generated from the
         // content of the items which can be compared to determine
@@ -598,9 +600,18 @@ public:
             return items.size();
         }
 
+        void add(const lr_item &it) {
+            // repetition/optional magic here:
+            //  - if the expression at the start of the item... gar
+            //    OK maybe we need adding expressions?  but not that's
+            //    how it works.  does not.  not works thus.
+            items.insert(it);
+        }
+
         void add(const lr_set &set) {
             for(auto it : set.items) {
-                items.insert(it);
+                //items.insert(it);
+                add(it);
             }
         }
 
