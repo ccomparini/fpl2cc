@@ -189,6 +189,31 @@ struct Options {
     }
 };
 
+struct CodeBlock {
+    std::string source_file;
+    int line;
+    std::string code;
+
+    CodeBlock() : line(0) { }
+
+    CodeBlock(const std::string &file, int ln, const std::string &cd) :
+        source_file(file),
+        line(ln),
+        code(cd) {
+    }
+
+    operator bool() const { 
+        return code.length();
+    }
+
+    std::string format() const {
+        std::string out;
+        out += "\n#line " + std::to_string(line) + " \"" + source_file + "\"\n";
+        out += code;
+        out += "\n";
+        return out;
+    }
+};
 
 
 /*
@@ -380,7 +405,7 @@ struct ProdExpr { // or step?
 class ProductionRule {
     std::string prod;
     std::vector<ProdExpr> steps;
-    std::string code_str;
+    CodeBlock code_for_rule;
     size_t start_of_text;
 
 public:
@@ -419,29 +444,27 @@ public:
         return inp.line_number(start_of_text);
     }
 
-    std::string default_code() const {
-        std::string out;
+    CodeBlock default_code() const {
+        return CodeBlock(std::string(__FILE__), __LINE__, std::string(
 
-        // perhaps default could be:
-        //  - if one arg, just return that arg.  this allows aliasing.
-        //  - if more than one arg, return aggregate XXX do this part
-        // .. or have the fpl author specify somehow.
+            // perhaps default could be:
+            //  - if one arg, just return that arg.  this allows aliasing.
+            //  - if more than one arg, return aggregate XXX do this part
+            // .. or have the fpl author specify somehow.
 // FIXME this only makes sense if there's only one argument
 // and it's already reduced.  and it's not optional or aggregate.
 // but, it does work nicely for aliases, so maybe keep some variant.
-        out += "return arg[0].val();\n";
-
-        return out;
+            "return arg[0].val();\n"
+        ));
     }
 
-    std::string code(const std::string &src) {
-        code_str = src;
-        return code();
+    void code(const CodeBlock &cd) {
+        code_for_rule = cd;
     }
 
-    std::string code() const {
-        if(code_str.length() > 0) {
-            return code_str;
+    CodeBlock code() const {
+        if(code_for_rule) {
+            return code_for_rule;
         }
         return default_code();
     }
@@ -763,13 +786,16 @@ public:
     // returns the code for an inline to_string function for...
     // things which are already strings!  yay!
     // this is effectively c++ compiler appeasement.
-    std::string to_string_identity() {
-        return "\ninline std::string to_string(const std::string &in) {\n"
-               "    return in;\n"
-               "}\n";
+    CodeBlock to_string_identity() {
+        return CodeBlock(std::string(__FILE__), __LINE__,
+            "\ninline std::string to_string(const std::string &in) {\n"
+            "    return in;\n"
+            "}\n"
+        );
     }
 
     bool parse_directive(const std::string &in) {
+        // "produces" is the only directive so far...
         std::regex  re("produces\\s*=?\\s*(.+)\\s*$");
         std::cmatch matched;
         if(std::regex_search(in.c_str(), matched, re)) {
@@ -793,9 +819,8 @@ public:
         rules_for_product.insert(std::make_pair(rule.product(), rule_num));
     }
 
-    void add_preamble(const std::string &code) {
-        preamble += "\n";
-        preamble += code;
+    void add_preamble(const CodeBlock &code) {
+        preamble += code.format();
     }
 
     // returns the name of the function to use for the
@@ -876,7 +901,7 @@ public:
                 out += ", " + reduce_type + " " + arg_name;
             }
         }
-        out += ") {\n" + rule.code();
+        out += ") {\n" + rule.code().format();
         out += "\n}\n";
         return out;
     }
@@ -1305,6 +1330,7 @@ public:
         // declared before the template (not just before
         // template instantiation.. ?) (did I miss something?)
         out += preamble;
+        out += "#line " + std::to_string(__LINE__) + " \"" + __FILE__ + "\"\n";
         out += "#include \"fpl2cc/fpl_reader.h\"\n";
         out += "#include \"fpl2cc/fpl_base_parser.h\"\n";
         out += "\n";
@@ -1481,35 +1507,38 @@ int read_expressions(fpl_reader &src, ProductionRule &rule) {
     return num_read;
 }
 
-std::string read_code(fpl_reader &src) {
+CodeBlock read_code(fpl_reader &src) {
      // code is within "+{" "}+" brackets.
      // this is done simplistically, which means you will
      // derail it if you put +{ or }+ in a comment or
      // string or whatever.  so try not to do that.
      src.eat_space();
-     const utf8_byte *start = NULL;
-     const utf8_byte *end   = NULL;
-     if(src.read_byte_equalling(';')) {
-         return ""; // default code generated on the fly
-     } else if(src.read_byte_equalling('+') && src.read_byte_equalling('{')) {
-         start = src.inpp();
+     size_t start = -1;
+     size_t end   = -1;
+
+     if(src.read_byte_equalling('+') && src.read_byte_equalling('{')) {
+         start = src.current_position();
          while(char byte_in = src.read_byte()) {
              if(byte_in == '}') {
                  if(src.read_byte() == '+') {
-                     end = src.inpp() - 2;
+                     end = src.current_position() - 2;
                      break;
                  }
              }
          }
      }
 
-     if(start && end) {
-         return to_std_string(start, end - start);
+     if((start >= 0) && (end > 0)) {
+         return CodeBlock(
+             src.filename(),
+             src.line_number(start),
+             src.read_range(start, end)
+         );
      }
 
      // else error - no start of code or ';'
      src.error("expected start of code (\"+{\") or \";\"");
-     return "";
+     return CodeBlock();
 }
 
 /*
@@ -1533,8 +1562,8 @@ void fpl2cc(const Options &opts) {
         } else if(*inp.inpp() == '+') {
             // inlined/general code - goes at the top of the generated
             // code.  Use to define types or whatever.
-            std::string code = read_code(inp);
-            if(code.length() > 0) {
+            CodeBlock code(read_code(inp));
+            if(code) {
                 productions.add_preamble(code);
             }
         } else if(inp.read_byte_equalling('@')) {
@@ -1558,8 +1587,13 @@ void fpl2cc(const Options &opts) {
                     );
                 }
 
-                // read the code for the production
-                rule.code(read_code(inp));
+                inp.eat_space();
+
+                // next we expect either ';' or a code block.
+                // if it's ';' we read it and move on;  otherwise
+                // it's a code block for the rule.
+                if(!inp.read_byte_equalling(';'))
+                    rule.code(read_code(inp));
 
                 // add it to the set of productions
                 productions.push_rule(rule);
