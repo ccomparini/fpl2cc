@@ -121,20 +121,36 @@ void warn(const char *fmt...) {
 
 struct Options {
     std::string src_fpl;
+    FILE *out;
+    std::string output_fn;
     bool generate_main;
     bool debug;
     bool single_step;
     std::list<std::string> entry_points;
 
+    std::list<std::string> errors;
+    inline void error(const std::string &errst) {
+        errors.push_back(errst);
+    }
+
     // janky, but good enough:
-    std::string _fail;
     Options(int argc, const char* const* argv) :
+        out(stdout),
+        output_fn("«stdout»"),
         generate_main(false),
         debug(false),
         single_step(false)
     {
 
-        _fail = "";
+        // c++ -- :P
+        #define VALIFY() \
+            if(val.empty()) { \
+                argi++; \
+                if(argi < argc) { \
+                    val = std::string(argv[argi]); \
+                } \
+            }
+
         for(int argi = 1; argi < argc; argi++) {
             const char *arg = argv[argi];
 
@@ -151,6 +167,7 @@ struct Options {
                         val = opt.substr(pos + 1);
                         opt = opt.substr(0, pos);
                     }
+
                     if(opt == "debug") {
                         debug = true;
                     } else if(opt == "debug-single-step") {
@@ -159,28 +176,34 @@ struct Options {
                     } else if(opt == "entry") {
                         // specifies an entry rule (i.e. a parsing
                         // starting point)
-                        if(val.empty()) {
-                            argi++;
-                            if(argi < argc) {
-                                val = std::string(argv[argi]);
-                            }
-                        }
-                        if(val.empty()) {
-                            _fail = "--generate-main requires a value.";
-                        }
+                        VALIFY();
+                        if(val.empty())
+                            errors.push_back("--generate-main requires a value.");
                         entry_points.push_back(std::string(val));
                     } else if(opt == "generate-main") {
                         generate_main = true;
+                    } else if(opt == "out") {
+                        VALIFY();
+                        if(val.empty())
+                            error("--generate-main requires a value.");
+                        output_fn = val;
+                        out = fopen(output_fn.c_str(), "w");
+                        if(!out) {
+                            error(
+                                "can't open '" + output_fn + "' for write: " +
+                                strerror(errno)
+                            );
+                        }
                     } else {
-                        _fail = "Unknown option: "; _fail += opt;
+                        error("Unknown option: --" + opt);
                     }
                 } else {
                     // single-dash arg:
-                    _fail = "Unknown option: "; _fail += arg;
+                    error("Unknown option: " + std::string(arg));
                 }
             } else {
-                if(src_fpl.length() != 0) {
-                    _fail = "only one source fpl is supported at present";
+                if(src_fpl.size() != 0) {
+                    error("only one source fpl is supported at present");
                 } else {
                     src_fpl = arg;
                 }
@@ -1315,7 +1338,7 @@ public:
         }
     }
 
-    void generate_code(const Options &opts) {
+    std::string generate_code(const Options &opts) {
         const std::string parser_class = parser_class_name();
         // "base" is probably the wrong term.. XXX
         const std::string base_parser_class = "FPLBaseParser<" + parser_class + ">";
@@ -1323,7 +1346,7 @@ public:
         generate_states(opts);
 
         std::string out;
-        out += "#include <iostream>\n"; // XXX needed?
+        out += "#include <string>\n";
         // preamble has to come before the fpl headers
         // because (to my surpise) things like to_string
         // functions (called by the template) have to be
@@ -1375,9 +1398,9 @@ public:
             out += code_for_main(parser_class);
         }
 
-        printf("%s\n", reformat_code(out).c_str());
-
         report_unused_rules();
+
+        return reformat_code(out);
     }
 
     void report_unused_rules() {
@@ -1601,8 +1624,14 @@ void fpl2cc(const Options &opts) {
         }
     } while(!inp.eof());
 
-    productions.generate_code(opts);
+    std::string output = productions.generate_code(opts);
 
+    // uhh... this is easy, if hokey:
+    if(opts.out) {
+        fprintf(opts.out, "%s", output.c_str());
+    } else {
+        fail("no open output - fail\n");
+    }
 }
 
 void usage() {
@@ -1615,8 +1644,10 @@ void usage() {
 int main(int argc, const char** argv) {
     Options opts(argc, argv);
 
-    if(opts._fail.length()) {
-        fprintf(stderr, "%s\n", opts._fail.c_str());
+    if(opts.errors.size()) {
+        for(auto fail : opts.errors) {
+            fprintf(stderr, "%s\n", fail.c_str());
+        }
         usage();
         exit(1);
     } else {
