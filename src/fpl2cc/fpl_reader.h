@@ -230,7 +230,8 @@ public:
         const char *inp = eof()?"<EOF>":inpp_as_char();
 
         snprintf(msg_fmt, buf_size,
-            "Error line %i near \"%.12s\": %s\n", line_number(), inp, fmt
+            "Error %s:%i near \"%.12s\": %s\n",
+            filename().c_str(), line_number(), inp, fmt
         );
 
         char full_msg[buf_size];
@@ -451,6 +452,10 @@ public:
 
     inline std::string read_to_byte(utf8_byte end_char) {
         return read_to_match('\0', end_char);
+    }
+
+    inline std::string read_range(size_t start, size_t end) const {
+        return to_std_string(buffer.data() + start, end - start);
     }
 
     // reads until we pass the next newline.
