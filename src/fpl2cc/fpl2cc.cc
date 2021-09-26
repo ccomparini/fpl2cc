@@ -647,18 +647,14 @@ public:
             return items.size();
         }
 
-        void add(const lr_item &it) {
-            // repetition/optional magic here:
-            //  - if the expression at the start of the item... gar
-            //    OK maybe we need adding expressions?  but not that's
-            //    how it works.  does not.  not works thus.
+        void add_item(const lr_item &it) {
             items.insert(it);
         }
 
-        void add(const lr_set &set) {
+        void add_set(const lr_set &set) {
             for(auto it : set.items) {
                 //items.insert(it);
-                add(it);
+                add_item(it);
             }
         }
 
@@ -712,7 +708,7 @@ public:
 
             for(auto rit = strl; rit != endrl; ++rit) {
                 // (these are always position 0)
-                set.add(lr_item(rit->second, 0));
+                set.add_item(lr_item(rit->second, 0));
             }
         }
     }
@@ -780,7 +776,7 @@ public:
         for(auto item : in.iterable_items()) {
             const ProdExpr *step = rules[item.rule].step(item.position);
             if(step && step->matches(sym)) {
-                set.add(lr_item(item.rule, item.position + 1));
+                set.add_item(lr_item(item.rule, item.position + 1));
             }
         }
         return lr_closure(set);
@@ -1314,7 +1310,7 @@ public:
                 fail("Can't find entry rule for '%s'\n", entry_prod.c_str());
             }
             for(auto rit = strl; rit != endrl; ++rit) {
-                entry_set.add(lr_item(rit->second, 0));
+                entry_set.add_item(lr_item(rit->second, 0));
             }
         }
         add_state(lr_closure(entry_set));
