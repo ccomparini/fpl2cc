@@ -888,7 +888,7 @@ public:
             out += "fprintf(stderr, \"%p entering " + sfn + ":\\n\", this);\n";
             out += "fprintf(stderr, \"%s\", base_parser.to_str().c_str());\n";
             if(op.single_step) {
-                out += "getchar();";
+                out += "getchar();\n";
             }
         }
         return out;
