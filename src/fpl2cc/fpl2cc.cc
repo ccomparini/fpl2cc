@@ -708,7 +708,8 @@ public:
 
             for(auto rit = strl; rit != endrl; ++rit) {
                 // (these are always position 0)
-                set.add_item(lr_item(rit->second, 0));
+                //set.add_item(lr_item(rit->second, 0));
+                add_expanded(set, lr_item(rit->second, 0));
             }
         }
     }
@@ -768,15 +769,40 @@ public:
         return set;
     }
 
+    // adds the given lr_item to the lr_set, plus any other
+    // related items to cover optionalness/repetition
+    // XXX OK so perhaps:
+    //   - code generation deals with optionals and repeats
+    //   - modify goto such that it can understand to enter
+    //     states beginning with optionals
+    void add_expanded(lr_set &set, const lr_item &it) {
+set.add_item(it);
+return;
+
+        const ProductionRule &rule = rules[it.rule];
+        for(int pos = it.position; pos <= rule.num_steps(); pos++) {
+            set.add_item(lr_item(it.rule, pos));
+            const ProdExpr *expr = rule.step(pos);
+            if(!expr || !expr->is_optional()) {
+                // end of rule or the items is not optional so we
+                // don't need to look after:
+                break;
+            }
+        }
+        
+    }
+
     // "goto" operation from page 224 Aho, Sethi and Ullman.
     // given a current state and a lookahead item, returns
-    // the next state.
+    // the next state (i.e. the set of items which might appear
+    // next)
     lr_set lr_goto(const lr_set &in, const GrammarElement &sym) {
         lr_set set;
         for(auto item : in.iterable_items()) {
             const ProdExpr *step = rules[item.rule].step(item.position);
             if(step && step->matches(sym)) {
-                set.add_item(lr_item(item.rule, item.position + 1));
+                //set.add_item(lr_item(item.rule, item.position + 1));
+                add_expanded(set, lr_item(item.rule, item.position + 1));
             }
         }
         return lr_closure(set);
@@ -1031,6 +1057,44 @@ public:
         );
     }
 
+    std::string code_for_shift(const lr_set &state, const ProdExpr *right_of_dot) {
+        std::string out;
+
+        // new way, handling repetition/optionals:
+// XXX what if there's more than one optional item to the right of the dot?
+        // - if right_of_dot is optional:
+        //   - .... 
+
+        const GrammarElement::Type type = right_of_dot->type();
+        switch(type) {
+            // shifts
+            case GrammarElement::TERM_EXACT:
+                out += "} else if(base_parser.shift_exact(";
+                break;
+            case GrammarElement::TERM_REGEX:
+                out += "} else if(base_parser.shift_re(";
+                break;
+            case GrammarElement::NONTERM_PRODUCTION:
+                out += "} else if(base_parser.shift_nonterm(";
+                break;
+            case GrammarElement::NONE:
+                // .. this pretty much implies a bug in fpl2cc:
+                fail(
+                    "Missing/unknown grammar element (id: %i %s)",
+                    type, right_of_dot->to_str().c_str()
+                );
+                break;
+        }
+        // XXX redundant goto and other calculations here. restructure.
+        out += args_for_shift(state, *right_of_dot) + ")) {\n";
+
+        out += "    // transition ID: " + transition_id(
+            *right_of_dot, lr_goto(state, right_of_dot->gexpr)
+        ) + "\n";
+
+        return out;
+    }
+
     std::string code_for_state(const Options &opts, const lr_set &state) {
         std::string out;
         std::string sfn = state_fn(state);
@@ -1084,44 +1148,20 @@ public:
                 if(existing != transition.end()) {
                     if(existing->second == state_index[next_state.id()]) {
                         // already have a case for this transition.
-                        // no problem, no need to generate another copy;
-                        // just move on to the next item.
+                        // no problem, no need to generate another copy
+                        // of the same case - just move on to the next item.
                         continue;
                     } else {
-                        // ... shift/shift conflict - probably can't happen.
+                        // ... shift/shift conflict, which makes no sense,
+                        // and afaict means there's a bug someplace:
                         other_conflict(item, item_for_el_id[existing->first]);
                     }
                 }
 
-                const GrammarElement::Type type = right_of_dot->type();
-                switch(type) {
-                    // shifts
-                    case GrammarElement::TERM_EXACT:
-                        out += "} else if(base_parser.shift_exact(";
-                        break;
-                    case GrammarElement::TERM_REGEX:
-                        out += "} else if(base_parser.shift_re(";
-                        break;
-                    case GrammarElement::NONTERM_PRODUCTION:
-                        out += "} else if(base_parser.shift_nonterm(";
-                        break;
-                    case GrammarElement::NONE:
-                        // .. this pretty much implies a bug in fpl2cc:
-                        fail(
-                            "Missing/unknown grammar element (id: %i %s)",
-                            type, right_of_dot->to_str().c_str()
-                        );
-                        break;
-                }
-                // XXX redundant goto and other calculations here. restructure.
-                out += args_for_shift(state, *right_of_dot) + ")) {\n";
+                out += code_for_shift(state, right_of_dot);
 
                 transition[el_id] = state_index[next_state.id()];
                 item_for_el_id[el_id] = item;
-
-                out += "    // transition ID: " + transition_id(
-                    *right_of_dot, lr_goto(state, right_of_dot->gexpr)
-                ) + "\n";
             }
         }
 
@@ -1310,7 +1350,8 @@ public:
                 fail("Can't find entry rule for '%s'\n", entry_prod.c_str());
             }
             for(auto rit = strl; rit != endrl; ++rit) {
-                entry_set.add_item(lr_item(rit->second, 0));
+                // entry_set.add_item(lr_item(rit->second, 0));
+                add_expanded(entry_set, lr_item(rit->second, 0));
             }
         }
         add_state(lr_closure(entry_set));
