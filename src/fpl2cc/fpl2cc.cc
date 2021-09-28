@@ -1131,6 +1131,7 @@ public:
         lr_item reduce_item;
         std::map<int, int> transition; // grammar element id -> state number
         std::map<int, lr_item> item_for_el_id;
+        std::vector<lr_item> optionals;
         for(lr_item item : state.iterable_items()) {
             const ProductionRule &rule = rules[item.rule];
             const ProdExpr *right_of_dot = rule.step(item.position);
@@ -1160,9 +1161,25 @@ public:
 
                 out += code_for_shift(state, right_of_dot);
 
+                if(right_of_dot->is_optional())
+                    optionals.push_back(item);
+
                 transition[el_id] = state_index[next_state.id()];
                 item_for_el_id[el_id] = item;
             }
+        }
+
+        // at this point, we can't really handle grammars where there's
+        // more than one possible optional thing in a given state.  in
+        // theory, I think we could determine which optional thing to
+        // shift based on lookahead or some other hints, but for now,
+        // if this happens, we just give a warning and plow on.
+        if(optionals.size() > 1) {
+            std::string which;
+            for(auto opt : optionals) {
+                which += "    " + opt.to_str(this) + "\n";
+            }
+            warn("Ambiguity in %s:\n%s\n", sfn.c_str(), which.c_str());
         }
 
         out += "} else {\n";
