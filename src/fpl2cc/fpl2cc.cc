@@ -80,8 +80,9 @@ void warn(const char *fmt...) {
 
 /*
  TODO
+  - repetition/optionals
   - multi-pass for comments etc. HOW!?  you thought about this
-    before and perhaps had a plan.
+    before and perhaps had a plan. Also for things like "#" modifier.
   - sort out termination.
   - sort out specifying entry rules:
     - allow specifying within the fpl
@@ -97,14 +98,14 @@ void warn(const char *fmt...) {
       - have later rules take precedence. (or earlier?)
         How to do it without creating too many states?
         Group precedences within (say) parens?
-  x detect orphaned items
-  x sort out the whole thing where states are returning useless
-    products.   I guess state functions should just manipulate
-    the .... parser state directly...?  that's what's actually being
-    used, anyway.
+      - OR somehow within a rule specify the order
+        of precedence.  preferably in some relative fashion...
+        @precedecence( ... )?  multi line, same prec grouped
+        by being on the same line?
   - the "new Product" thing is going to leak memory.  fix that.
     (pass on to the fpl author somehow?  or just don't declare it
-    and don't worry about copies?)
+    and don't worry about copies?).  Probably can delete when the
+    stack is popped (or after)
   - repetition:  optional counts perhaps already work;  max_times
     is not implemented.  do them by boiling any foo* or foo+ or
     whatever down to a single item (with subitems).  this makes
@@ -1052,10 +1053,10 @@ public:
         //   x if there's more than one reduce, report a reduce/reduce conflict
         //     (but fail open and blat out some code anyway.  actually, would be
         //     nice to annotate the generated code...)
-        //   - if there's an existing symbol id -> next state for this symbol
+        //   x if there's an existing symbol id -> next state for this symbol
         //     x if the next state is the same, skip this transition because
         //       it's redundant (can we eliminate this earlier than here? yes.)
-        //     - else there's either a shift/shift conflict, which makes no
+        //     x else there's either a shift/shift conflict, which makes no
         //       sense, or it's a shift/reduce conflict (assuming one of the
         //       states we're going to is just a reduce).  either way, report
         //       it.
@@ -1065,8 +1066,6 @@ public:
         //        if() .. else is longer so we shift.
         //      - next by operator precedence.. XXX implement
         //   ... I think we still want to report it.  or do we?
-        //       
-        //   - record symbol id -> next state
         //
 
         lr_item reduce_item;
