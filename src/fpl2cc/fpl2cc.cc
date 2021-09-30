@@ -1582,7 +1582,7 @@ int read_expressions(fpl_reader &src, ProductionRule &rule) {
                 // should be the name of a production.
                 // production names must start with a letter, and
                 // thereafter may contain letters, digits, or underscores.
-                expr_str = src.read_re("[A-Za-z][A-Za-z0-9_]+")[0];
+                expr_str = src.read_re("[A-Za-z][A-Za-z0-9_]*")[0];
                 type     = GrammarElement::Type::NONTERM_PRODUCTION;
                 break;
         }
