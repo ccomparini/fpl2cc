@@ -83,6 +83,10 @@ void warn(const char *fmt...) {
   - repetition/optionals
   - multi-pass for comments etc. HOW!?  you thought about this
     before and perhaps had a plan. Also for things like "#" modifier.
+    how about filters on fpl reader or whatever.  layered.  each layer
+    is the input to the one above.  so the "passes" happen simultaneously.
+    BUT you have to be able to examine the state of lower layers (eg
+    to find the current comment or whatever).  that's the key notion.
   - sort out termination.
   - sort out specifying entry rules:
     - allow specifying within the fpl
