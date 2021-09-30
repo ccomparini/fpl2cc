@@ -478,6 +478,9 @@ public:
 // FIXME this only makes sense if there's only one argument
 // and it's already reduced.  and it's not optional or aggregate.
 // but, it does work nicely for aliases, so maybe keep some variant.
+// XXX AND AT LEAST warn if someone makes an fpl with default_code
+// for a terminal, because it's confusing.  or have some default
+// to_fplresult(const std::string &in) type thing.
             "return arg[0].val();\n"
         ));
     }
@@ -776,8 +779,6 @@ public:
     //   - modify goto such that it can understand to enter
     //     states beginning with optionals
     void add_expanded(lr_set &set, const lr_item &it) {
-set.add_item(it);
-return;
 
         const ProductionRule &rule = rules[it.rule];
         for(int pos = it.position; pos <= rule.num_steps(); pos++) {
@@ -1010,6 +1011,10 @@ public:
             }
         }
         out +=     ");\n";
+        if(opts.debug) {
+            out += "    using namespace std;\n";
+            out += "    fprintf(stderr, \"" + rule_fn(rule_ind) + " reducing " + ns_str + " items to " + reduce_type + " \\\"%s\\\"\\n\", to_string(result).c_str());\n";
+        }
         // XXX what deletes the product?  this is awful.
         out += "    base_parser.set_product(new Product(result, "
              + rule.product_element().nonterm_id_str()
@@ -1028,10 +1033,14 @@ public:
         std::string el_id(std::to_string(element_index[expr.gexpr]));
         if(expr.is_terminal()) {
             return "\"" + expr.terminal_string() + "\""
-                 + ", " + el_id
+                   ", " + el_id
+                 + ", " + std::to_string(expr.min_times)
+                 + ", " + std::to_string(expr.max_times)
                  + ", &" + state_fn(next_state, true);
         } else {
             return expr.gexpr.nonterm_id_str()
+                 + ", " + std::to_string(expr.min_times)
+                 + ", " + std::to_string(expr.max_times)
                  + ", &" + state_fn(next_state, true);
         }
     }
@@ -1103,7 +1112,6 @@ public:
         out += state.to_str(this, "// ");
         out += "//\n";
         out += "void " + sfn + "() {\n";
-        out += "    Product prd;\n";
         out += debug_single_step_code(opts, state);
 
         out += "    if(0) {\n"; // now everything past this can be "else if"
@@ -1352,7 +1360,7 @@ public:
         std::list<std::string> wanted = opts.entry_points;
 
         if(rules.empty()) {
-            fail("No rules found");
+            fail("No rules found\n");
         }
 
         if(wanted.empty()) {
@@ -1393,7 +1401,7 @@ public:
 
     std::string generate_code(const Options &opts) {
         const std::string parser_class = parser_class_name();
-        // "base" is probably the wrong term.. XXX
+        // "base" is probably the wrong term..
         const std::string base_parser_class = "FPLBaseParser<" + parser_class + ">";
 
         generate_states(opts);
