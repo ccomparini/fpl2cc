@@ -559,10 +559,18 @@ class Productions {
         static const uint16_t no_rule = 0xffff;
 
         // this allows lr_items to be used as keys
-        // in things like std::map
+        // in things like std::map.
+        // it also determines the order of the items
+        // such that earlier items
+        // are ordered earlier here.
         friend bool operator<(const lr_item& left, const lr_item& right) {
+            
+            // same rule?  earlier position in the rule
+            // comes first.
             if(left.rule == right.rule)
                 return left.position < right.position;
+
+            // otherwise items from earlier rules come earlier.
             return left.rule < right.rule;
         }
 
