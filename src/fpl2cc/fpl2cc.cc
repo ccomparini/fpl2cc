@@ -920,8 +920,6 @@ public:
     std::string debug_single_step_code(const Options &op, const lr_set &st) {
         std::string out;
         if(op.debug) {
-            std::string sfn = state_fn(st);
-            out += "fprintf(stderr, \"%p entering " + sfn + ":\\n\", this);\n";
             out += "fprintf(stderr, \"%s\", base_parser.to_str().c_str());\n";
             if(op.single_step) {
                 out += "getchar();\n";
@@ -1206,6 +1204,11 @@ public:
         if(!reduce_item) {
             // XXX cooler would be to reduce this to an error
             // also much cooler would be to have a comprehensible message
+            // errf so state.to_str can of course have all kinds of embedded
+            // quotes and stuff which breaks source code strings.
+            //out += "    base_parser.error(\"unexpected input.  here's where we think we were:\\n\"\n";
+            //out += "    " + state.to_str(this, "    \"        ", "\"\n") + "\n";
+            //out += "    \"\\n\");\n";
             out += "    base_parser.error(\"unexpected input in " + sfn + "\\n\");\n";
         } else {
             out += production_code(opts, state, reduce_item.rule);
