@@ -1303,8 +1303,8 @@ public:
             } else {
                 // prefix with underscore as a hack to avoid keyword
                 // collisions:
-                std::string name("_" + elements[el_id].to_str());
-                out += name;
+                std::string name(elements[el_id].to_str());
+                out += "_" + name;
                 nonterm_str_guts += "case " + std::to_string(el_id);
                 nonterm_str_guts += ": return \"" + name + "\";\n";
             }
