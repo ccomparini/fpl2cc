@@ -1341,7 +1341,19 @@ public:
     }
 
     std::string parser_class_name() {
-        return inp.base_name() + "_parser";
+        std::string base;
+        for(auto chr : inp.base_name()) {
+            switch(chr) {
+                case '-':
+                    base += '_';
+                    break;
+                default:
+                    base += chr;
+                    break;
+            }
+        }
+
+        return base + "_parser";
     }
 
     // returns fully-qualified name of a member of the parser class
