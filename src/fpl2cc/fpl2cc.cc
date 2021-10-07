@@ -146,17 +146,16 @@ struct Options {
         debug(false),
         single_step(false)
     {
-
-        // c++ -- :P
-        #define VALIFY() \
-            if(val.empty()) { \
-                argi++; \
-                if(argi < argc) { \
-                    val = std::string(argv[argi]); \
-                } \
-            }
-
         for(int argi = 1; argi < argc; argi++) {
+            // c++ -- :P
+            #define SCAN_VALUE() \
+                if(val.empty()) { \
+                    argi++; \
+                    if(argi < argc) { \
+                        val = std::string(argv[argi]); \
+                    } \
+                }
+
             const char *arg = argv[argi];
 
             if(!arg)    continue; // should not be able to happen, but...
@@ -181,16 +180,16 @@ struct Options {
                     } else if(opt == "entry") {
                         // specifies an entry rule (i.e. a parsing
                         // starting point)
-                        VALIFY();
+                        SCAN_VALUE();
                         if(val.empty())
                             errors.push_back("--generate-main requires a value.");
                         entry_points.push_back(std::string(val));
                     } else if(opt == "generate-main") {
                         generate_main = true;
                     } else if(opt == "out") {
-                        VALIFY();
+                        SCAN_VALUE();
                         if(val.empty())
-                            error("--generate-main requires a value.");
+                            errors.push_back("--out requires a value.");
                         output_fn = val;
                         out = fopen(output_fn.c_str(), "w");
                         if(!out) {
@@ -213,6 +212,7 @@ struct Options {
                     src_fpl = arg;
                 }
             }
+            #undef SCAN_VALUE
         }
     }
 };
@@ -480,7 +480,7 @@ public:
             //  - if more than one arg, return aggregate XXX do this part
             // .. or have the fpl author specify somehow.
 // FIXME this only makes sense if there's only one argument
-// and it's already reduced.  and it's not optional or aggregate.
+// and it's already reduced (i.e. not a terminal).  and it's not optional or aggregate.
 // but, it does work nicely for aliases, so maybe keep some variant.
 // XXX AND AT LEAST warn if someone makes an fpl with default_code
 // for a terminal, because it's confusing.  or have some default
@@ -958,7 +958,9 @@ public:
                 out += ", " + reduce_type + " " + arg_name;
             }
         }
-        out += ") {\n" + rule.code().format();
+        out += ") {\n";
+        out += "// " + rule.to_str() + "\n";
+        out += rule.code().format();
         out += "\n}\n";
         return out;
     }
@@ -1107,9 +1109,11 @@ public:
         // XXX redundant goto and other calculations here. restructure.
         out += args_for_shift(state, *right_of_dot) + ")) {\n";
 
+/*
         out += "    // transition ID: " + transition_id(
             *right_of_dot, lr_goto(state, right_of_dot->gexpr)
         ) + "\n";
+ */
 
         return out;
     }
