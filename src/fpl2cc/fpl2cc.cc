@@ -1295,22 +1295,31 @@ public:
     std::string nonterm_enum() {
         std::string out;
         std::string nonterm_str_guts;
+        std::string is_terminal_guts;
 
         out += "typedef enum {\n";
         for(int el_id = 0; el_id < elements.size(); ++el_id) {
-            if(elements[el_id].type != GrammarElement::NONTERM_PRODUCTION) {
+            is_terminal_guts += "case " + std::to_string(el_id);
+            if(elements[el_id].type == GrammarElement::NONTERM_PRODUCTION) {
+                std::string name(elements[el_id].to_str());
+                // prefix with underscore as a hack to avoid keyword
+                // collisions:
+                out += "_" + name;
+                nonterm_str_guts += "case " + std::to_string(el_id);
+                nonterm_str_guts += ": return \"" + name + "\";\n";
+                if(el_id == 0) {
+                    // element ID 0 is a special case and counts as terminal:
+                    is_terminal_guts += ": return true;\n";
+                } else {
+                    is_terminal_guts += ": return false;\n";
+                }
+            } else {
                 // include terminals as comments.  we don't need them
                 // in the enum (and how would they be named, anyway?),
                 // but it's nice to be able to see all the grammar
                 // elements in one place:
                 out += "// " + elements[el_id].to_str();
-            } else {
-                // prefix with underscore as a hack to avoid keyword
-                // collisions:
-                std::string name(elements[el_id].to_str());
-                out += "_" + name;
-                nonterm_str_guts += "case " + std::to_string(el_id);
-                nonterm_str_guts += ": return \"" + name + "\";\n";
+                is_terminal_guts += ": return true;\n";
             }
 
             out += " = ";
@@ -1327,7 +1336,15 @@ public:
         out += "    switch(id) {\n";
         out += nonterm_str_guts;
         out += "    }\n";
-        out += "    return \"not a nonterm .. err XXX \";\n";
+        out += "    return std::to_string(id) + \" is not a nonterm.\";\n";
+        out += "}\n\n";
+
+        out += "static bool is_terminal(int id) {\n";
+        out += "    switch(id) {\n";
+        out += is_terminal_guts;
+        out += "    }\n";
+        out += "    fprintf(stderr, \"invalid terminal id: %i\\n\", id);\n";
+        out += "    return false;\n";
         out += "}\n\n";
         return out;
     }
