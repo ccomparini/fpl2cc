@@ -496,6 +496,9 @@ public:
         // match_continuous is so that it will start the
         // match at exactly at the inpp (and ideally won't
         // try to keep matching the rest of the input)
+        // XXX this doesn't support utf-8 or unicode in any
+        // reasonable way.  btw:
+        //  https://stackoverflow.com/questions/37989081/how-to-use-unicode-range-in-c-regex
         auto opts = std::regex_constants::match_continuous;
         if(const char *in = inpp_as_char()) {
             if(std::regex_search(in, matched, std::regex(re), opts))
