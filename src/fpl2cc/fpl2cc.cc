@@ -66,7 +66,7 @@ void warn(const char *fmt...) {
 
   Code blocks access their corresponding expressions via pseudo-positional
   argument variables named arg[0..x] (so the first is called arg0, second
-  arg1, etc).  The type of each argument variable depends on the types 
+  arg1, etc).  The type of each argument variable depends on the types
   and (possible) repetitions of the expressions:
     - quoted string      -> std::string
     - regular expression -> std::smatch
@@ -83,7 +83,9 @@ void warn(const char *fmt...) {
 /*
  TODO
   - way to do specialized scans. ~scan_function_name maybe?
-  - ^ 
+  - "^" to refer to prior rules?  think it over. Also note in general the
+    lower precedent rules are earlier in the file so maybe another symbol.
+    and one would scope it to the file, I guess?
   - sub-fpls to implement particular constructs, from another file?
     maybe `sub_fpl.fpl` -> name_of_target_from_sub ;
     Then you can (eg) rip from c;
@@ -95,15 +97,12 @@ void warn(const char *fmt...) {
     is the input to the one above.  so the "passes" happen simultaneously.
     BUT you have to be able to examine the state of lower layers (eg
     to find the current comment or whatever).  that's the key notion.
-  - sort out termination.
-  - sort out specifying entry rules:
-    - allow specifying within the fpl
-    x fix the implementation - need to first generate a set
-      for all the possible entries
+  - sort out termination.  possibly go back to recursive ascent, which
+    would
   - make it so that if you forget the "return" in a rule, it at
     least returns something. Maybe have the generated code print
     a warning, too?
-  - detect conflicts (again)
+  o detect conflicts (again)
   - operator precedence:  it's a PITA to do the whole intermediate
     productions precedence thing.  So, make it part of FPL.
     Ideas:
@@ -238,7 +237,7 @@ struct CodeBlock {
         code(cd) {
     }
 
-    operator bool() const { 
+    operator bool() const {
         return code.length();
     }
 
@@ -302,7 +301,7 @@ Anyway, given a certain position in the text,
    - if a complete rule matches, we call the sub whose body is
      in the "code" part of the rule, with arguments derived from
      the matches.
- 
+
  */
 
 struct GrammarElement {
@@ -350,7 +349,7 @@ struct GrammarElement {
         const char *lb = "";
         const char *rb = "";
         switch(type) {
-            case TERM_EXACT: 
+            case TERM_EXACT:
                 lb = "'";
                 rb = "'";
                 break;
@@ -667,7 +666,7 @@ class Productions {
         // such that earlier items
         // are ordered earlier here.
         friend bool operator<(const lr_item& left, const lr_item& right) {
-            
+
             // same rule?  earlier position in the rule
             // comes first.
             if(left.rule == right.rule)
@@ -678,7 +677,7 @@ class Productions {
         }
 
         // "false" indicates an invalid or non-item.
-        operator bool() const { 
+        operator bool() const {
             return rule != no_rule;
         }
 
@@ -737,7 +736,7 @@ public:
         // content of the items which can be compared to determine
         // if 2 sets are identical or not.
         std::string id() const {
-            if(_id_cache.length() == 0) { 
+            if(_id_cache.length() == 0) {
                 // I hate assert but it's been bugging me that the size of
                 // the rule/position could change and cause this to break, so:
                 const int len_each = 2*(sizeof(lr_item::rule) + sizeof(lr_item::position));
@@ -905,7 +904,6 @@ public:
                 break;
             }
         }
-        
     }
 
     // "goto" operation from page 224 Aho, Sethi and Ullman.
@@ -917,7 +915,6 @@ public:
         for(auto item : in.iterable_items()) {
             const ProdExpr *step = rules[item.rule].step(item.position);
             if(step && step->matches(sym)) {
-                //set.add_item(lr_item(item.rule, item.position + 1));
                 add_expanded(set, lr_item(item.rule, item.position + 1));
             }
         }
@@ -943,6 +940,8 @@ public:
         record_element(
             GrammarElement("_fpl_null", GrammarElement::NONTERM_PRODUCTION)
         );
+
+        parse_fpl();
     }
 
     // returns the code for an inline to_string function for...
@@ -983,6 +982,205 @@ public:
 
     void add_preamble(const CodeBlock &code) {
         preamble += code.format();
+    }
+
+    static void read_quantifiers(fpl_reader &src, ProdExpr &expr) {
+        const utf8_byte *inp = src.inpp();
+
+        switch(*inp) {
+            case '*':
+                expr.min_times = 0;
+                expr.max_times = INT_MAX;
+                src.skip_bytes(1);
+                break;
+            case '+':
+                expr.min_times = 1;
+                expr.max_times = INT_MAX;
+                src.skip_bytes(1);
+                break;
+            case '?':
+                expr.min_times = 0;
+                expr.max_times = 1;
+                src.skip_bytes(1);
+                break;
+            default:
+                expr.min_times = 1;
+                expr.max_times = 1;
+                break;
+        }
+    }
+
+    // production names must start with a letter, and
+    // thereafter may contain letters, digits, or underscores.
+    static inline std::string read_production_name(fpl_reader &src) {
+        return src.read_re("[A-Za-z][A-Za-z0-9_]*")[0];
+    }
+
+    static int read_expressions(fpl_reader &src, ProductionRule &rule) {
+        int num_read = 0;
+        bool done = false;
+        do {
+            src.eat_space();
+
+            const utf8_byte *inp = src.inpp();
+
+            if(!*inp)
+                break;
+
+            std::string expr_str;
+            GrammarElement::Type type = GrammarElement::Type::NONE;
+
+            switch(*inp) {
+                case '\0':
+                    done = true;
+                    break; // EOF
+                case '#':
+                    // line comment - just skip
+                    src.read_line();
+                    break;
+                case '"':
+                case '\'':
+                    expr_str = src.read_to_byte(*inp);
+                    type     = GrammarElement::Type::TERM_EXACT;
+                    break;
+                case '/':
+                    expr_str = src.read_to_byte('/');
+                    type     = GrammarElement::Type::TERM_REGEX;
+                    break;
+                case '-':
+                    src.read_byte();
+                    if(src.read_byte_equalling('>')) {
+                        // just scanned "->", so we're done:
+                        done = true;
+                    } else {
+                        src.error("read unexpected '-'");
+                    }
+                    break;
+/*
+                case '`': {
+                        // importing another fpl source.
+                        // syntax: '`' filename /`(:production_to_import)?/
+                        // what it needs to do:
+                        //  - create a sub-parser for the production. how to fold
+                        //    that into states?  possibly just fold the whole
+                        //    sub-parse in, which would be easiest.
+
+                        std::string filename(src.read_to_byte('`'));
+                        fpl_reader inp(filename, fail);
+                        if(src.read_byte_equalling(':')) {
+                            expr_str = read_production_name(src);
+                        }
+// XXX ask yourself, if, deep in your heart, you want a top down parser.
+// or how about both?  
+                        Productions subs(inp);
+//fprintf(stderr, "OK SUB CODE for %s:\n%s\n", filename.c_str(), subs.generate_code(Options(0, NULL)).c_str());
+// What does this need to fit into the greater productions?
+// 
+                    }
+                    break;
+ */
+                default:
+                    // should be the name of a production.
+                    expr_str = read_production_name(src);
+                    type     = GrammarElement::Type::NONTERM_PRODUCTION;
+                    break;
+            }
+
+            if(type != GrammarElement::Type::NONE) {
+                if(expr_str.length() >= 1) {
+                    ProdExpr expr(expr_str, type);
+                    read_quantifiers(src, expr);
+                    rule.add_step(expr);
+                    num_read++;
+                } else {
+                    // sigh c++ enums
+                    src.error("expected type %i but got .. nothing?", type);
+                }
+            }
+        } while(!(done || src.eof()));
+
+        return num_read;
+    }
+
+    static CodeBlock read_code(fpl_reader &src) {
+         // code is within "+{" "}+" brackets.
+         // this is done simplistically, which means you will
+         // derail it if you put +{ or }+ in a comment or
+         // string or whatever.  so try not to do that.
+         src.eat_space();
+         size_t start = -1;
+         size_t end   = -1;
+
+         if(src.read_byte_equalling('+') && src.read_byte_equalling('{')) {
+             start = src.current_position();
+             while(char byte_in = src.read_byte()) {
+                 if(byte_in == '}') {
+                     if(src.read_byte() == '+') {
+                         end = src.current_position() - 2;
+                         break;
+                     }
+                 }
+             }
+         }
+
+         if((start >= 0) && (end > 0)) {
+             return CodeBlock(
+                 src.filename(),
+                 src.line_number(start),
+                 src.read_range(start, end)
+             );
+         }
+
+         // else error - no start of code or ';'
+         src.error("expected start of code (\"+{\") or \";\"");
+         return CodeBlock();
+    }
+
+    void parse_fpl() {
+        do {
+            inp.eat_space();
+            if(*inp.inpp() == '#') {
+                inp.read_line();
+            } else if(*inp.inpp() == '+') {
+                // inlined/general code - goes at the top of the generated
+                // code.  Use to define types or whatever.
+                CodeBlock code(read_code(inp));
+                if(code) {
+                    add_preamble(code);
+                }
+            } else if(inp.read_byte_equalling('@')) {
+                std::string line = inp.read_line();
+                if(!parse_directive(line)) {
+                    fail("Unknown directive: %s\n", line.c_str());
+                }
+            } else {
+                ProductionRule rule(inp.current_position());
+                if(read_expressions(inp, rule)) {
+                    // .. we've read the expressions/steps leading to
+                    // the production (including the "->").
+                    // read what the expressions above produce:
+                    inp.eat_space();
+                    const utf8_byte *start = inp.inpp();
+                    rule.product(inp.read_to_space());
+                    if(rule.product().length() <= 0) {
+                        fail(
+                            "missing production name on line %i near %.12s\n",
+                            rule.line_number(inp), start
+                        );
+                    }
+
+                    inp.eat_space();
+
+                    // next we expect either ';' or a code block.
+                    // if it's ';' we read it and move on;  otherwise
+                    // it's a code block for the rule.
+                    if(!inp.read_byte_equalling(';'))
+                        rule.code(read_code(inp));
+
+                    push_rule(rule);
+                }
+            }
+        } while(!inp.eof());
     }
 
     // returns the name of the function to use for the
@@ -1187,7 +1385,7 @@ public:
         // new way, handling repetition/optionals:
 // XXX what if there's more than one optional item to the right of the dot?
         // - if right_of_dot is optional:
-        //   - .... 
+        //   - ....
 
         const GrammarElement::Type type = right_of_dot->type();
         switch(type) {
@@ -1233,18 +1431,6 @@ public:
 
         out += "    if(0) {\n"; // now everything past this can be "else if"
 
-        // let's think about conflicts, shall we?
-        // We should:
-        //   x if there's more than one reduce, report a reduce/reduce conflict
-        //     (but fail open and blat out some code anyway.  actually, would be
-        //     nice to annotate the generated code...)
-        //   x if there's an existing symbol id -> next state for this symbol
-        //     x if the next state is the same, skip this transition because
-        //       it's redundant (can we eliminate this earlier than here? yes.)
-        //     x else there's either a shift/shift conflict, which makes no
-        //       sense, or it's a shift/reduce conflict (assuming one of the
-        //       states we're going to is just a reduce).  either way, report
-        //       it.
         //   NOTE:  if there's a shift/reduce conflict, we will resolve it:
         //      - first by longest match (i.e. shift instead of reducing).
         //        example:  if() ...  vs if() ... else ...;
@@ -1320,7 +1506,6 @@ public:
         } else {
             out += production_code(opts, state, reduce_item.rule);
         }
-
         out += "}\n";
 
         out += "}\n"; // end of state_ function
@@ -1429,7 +1614,7 @@ public:
             out += std::to_string(el_id);
 
             // sigh.. languages which don't allow trailing comma..
-            if(el_id + 1 < elements.size()) 
+            if(el_id + 1 < elements.size())
                 out += ",\n";
             else
                 out += "\n";
@@ -1507,8 +1692,8 @@ public:
         return out;
     }
 
-    void generate_states(const Options &opts) {
-        std::list<std::string> wanted = opts.entry_points;
+    void generate_states(const std::list<std::string> &entry_points) {
+        std::list<std::string> wanted = entry_points;
 
         if(rules.empty()) {
             fail("No rules found\n");
@@ -1532,7 +1717,6 @@ public:
         }
         add_state(lr_closure(entry_set));
 
-
         // Aho, Sethi, and Ullman page 224... uhh, modified.
         const auto no_set = state_index.end();
         int latest_set = 0;
@@ -1555,7 +1739,7 @@ public:
         // "base" is probably the wrong term..
         const std::string base_parser_class = "FPLBaseParser<" + parser_class + ">";
 
-        generate_states(opts);
+        generate_states(opts.entry_points);
 
         std::string out;
         out += "#include <string>\n";
@@ -1637,144 +1821,6 @@ public:
     }
 };
 
-void read_quantifiers(fpl_reader &src, ProdExpr &expr) {
-    const utf8_byte *inp = src.inpp();
-
-    switch(*inp) {
-        case '*':
-            expr.min_times = 0;
-            expr.max_times = INT_MAX;
-            src.skip_bytes(1);
-            break;
-        case '+':
-            expr.min_times = 1;
-            expr.max_times = INT_MAX;
-            src.skip_bytes(1);
-            break;
-        case '?':
-            expr.min_times = 0;
-            expr.max_times = 1;
-            src.skip_bytes(1);
-            break;
-      /*
-         don't need this and it's a PITA to implement in LR
-         because you have to invalidate prefixes:
-        case '!':
-            // "!" means don't match this item.
-            // it's a suffix because that's
-            // easier for me to parse.
-            expr.min_times = 0;
-            expr.max_times = 0;
-            read_pos++;
-            break;
-       */
-        default:
-            expr.min_times = 1;
-            expr.max_times = 1;
-            break;
-    }
-}
-
-
-
-int read_expressions(fpl_reader &src, ProductionRule &rule) {
-    int num_read = 0;
-    bool done = false;
-    do {
-        src.eat_space();
-
-        const utf8_byte *inp = src.inpp();
-
-        if(!*inp)
-            break;
-
-        std::string expr_str;
-        GrammarElement::Type type = GrammarElement::Type::NONE;
-
-        switch(*inp) {
-            case '\0':
-                done = true;
-                break; // EOF
-            case '#':
-                // line comment - just skip
-                src.read_line();
-                break;
-            case '"':
-            case '\'':
-                expr_str = src.read_to_byte(*inp);
-                type     = GrammarElement::Type::TERM_EXACT;
-                break;
-            case '/':
-                expr_str = src.read_to_byte('/');
-                type     = GrammarElement::Type::TERM_REGEX;
-                break;
-            case '-':
-                src.read_byte();
-                if(src.read_byte_equalling('>')) {
-                    // just scanned "->", so we're done:
-                    done = true;
-                } else {
-                    src.error("read unexpected '-'");
-                }
-                break;
-            default:
-                // should be the name of a production.
-                // production names must start with a letter, and
-                // thereafter may contain letters, digits, or underscores.
-                expr_str = src.read_re("[A-Za-z][A-Za-z0-9_]*")[0];
-                type     = GrammarElement::Type::NONTERM_PRODUCTION;
-                break;
-        }
-
-        if(type != GrammarElement::Type::NONE) {
-            if(expr_str.length() >= 1) {
-                ProdExpr expr(expr_str, type);
-                read_quantifiers(src, expr);
-                rule.add_step(expr);
-                num_read++;
-            } else {
-                // sigh c++ enums
-                src.error("expected type %i but got .. nothing?", type);
-            }
-        }
-    } while(!(done || src.eof()));
-
-    return num_read;
-}
-
-CodeBlock read_code(fpl_reader &src) {
-     // code is within "+{" "}+" brackets.
-     // this is done simplistically, which means you will
-     // derail it if you put +{ or }+ in a comment or
-     // string or whatever.  so try not to do that.
-     src.eat_space();
-     size_t start = -1;
-     size_t end   = -1;
-
-     if(src.read_byte_equalling('+') && src.read_byte_equalling('{')) {
-         start = src.current_position();
-         while(char byte_in = src.read_byte()) {
-             if(byte_in == '}') {
-                 if(src.read_byte() == '+') {
-                     end = src.current_position() - 2;
-                     break;
-                 }
-             }
-         }
-     }
-
-     if((start >= 0) && (end > 0)) {
-         return CodeBlock(
-             src.filename(),
-             src.line_number(start),
-             src.read_range(start, end)
-         );
-     }
-
-     // else error - no start of code or ';'
-     src.error("expected start of code (\"+{\") or \";\"");
-     return CodeBlock();
-}
 
 /*
  Input is:
@@ -1786,61 +1832,20 @@ CodeBlock read_code(fpl_reader &src) {
 Also, comments.  Let's use # just cuz.
 
  */
+// XXX Coment above is outdated and probably in the wrong place
+
 void fpl2cc(const Options &opts) {
     fpl_reader inp(opts.src_fpl, fail);
 
+    // parse the input file into a set of productions:
     Productions productions(inp);
-    do {
-        inp.eat_space();
-        if(*inp.inpp() == '#') {
-            inp.read_line();
-        } else if(*inp.inpp() == '+') {
-            // inlined/general code - goes at the top of the generated
-            // code.  Use to define types or whatever.
-            CodeBlock code(read_code(inp));
-            if(code) {
-                productions.add_preamble(code);
-            }
-        } else if(inp.read_byte_equalling('@')) {
-            std::string line = inp.read_line();
-            if(!productions.parse_directive(line)) {
-                fail("Unknown directive: %s\n", line.c_str());
-            }
-        } else {
-            ProductionRule rule(inp.current_position());
-            if(read_expressions(inp, rule)) {
-                // .. we've read the expressions/steps leading to
-                // the production (including the "->").
-                // read what the expressions above produce:
-                inp.eat_space();
-                const utf8_byte *start = inp.inpp();
-                rule.product(inp.read_to_space());
-                if(rule.product().length() <= 0) {
-                    fail(
-                        "missing production name on line %i near %.12s\n",
-                        rule.line_number(inp), start
-                    );
-                }
-
-                inp.eat_space();
-
-                // next we expect either ';' or a code block.
-                // if it's ';' we read it and move on;  otherwise
-                // it's a code block for the rule.
-                if(!inp.read_byte_equalling(';'))
-                    rule.code(read_code(inp));
-
-                // add it to the set of productions
-                productions.push_rule(rule);
-            }
-        }
-    } while(!inp.eof());
 
     std::string output = productions.generate_code(opts);
 
     // uhh... this is easy, if hokey:
     if(opts.out) {
-        fprintf(opts.out, "%s", output.c_str());
+        // XXX expand #line stuff here?
+        fprintf(opts.out, "%s\n", output.c_str());
     } else {
         fail("no open output - fail\n");
     }
