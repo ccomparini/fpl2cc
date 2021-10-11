@@ -33,6 +33,8 @@ void warn(const char *fmt...) {
     num_warnings++;
 }
 
+#define CODE_BLOCK(str) CodeBlock(std::string(__FILE__), __LINE__, str)
+
 /*
 
   fpl grammar:
@@ -80,6 +82,12 @@ void warn(const char *fmt...) {
 
 /*
  TODO
+  - way to do specialized scans. ~scan_function_name maybe?
+  - ^ 
+  - sub-fpls to implement particular constructs, from another file?
+    maybe `sub_fpl.fpl` -> name_of_target_from_sub ;
+    Then you can (eg) rip from c;
+    OR implement stuff like embedding formatting in strings.
   - repetition/optionals
   - multi-pass for comments etc. HOW!?  you thought about this
     before and perhaps had a plan. Also for things like "#" modifier.
@@ -232,6 +240,10 @@ struct CodeBlock {
 
     operator bool() const { 
         return code.length();
+    }
+
+    void append(const std::string &str) {
+        code += str;
     }
 
     std::string format() const {
@@ -473,20 +485,111 @@ public:
     }
 
     CodeBlock default_code() const {
-        return CodeBlock(std::string(__FILE__), __LINE__, std::string(
+        std::string code;
+
+        int first_nonterm = -1;
+        int num_nonterms = 0;
+        for(int sti = 0; sti < steps.size(); sti++) {
+            if(!steps[sti].is_terminal()) {
+                num_nonterms++;
+                if(first_nonterm < 0)
+                    first_nonterm = sti;
+            }
+        }
+
+        if(num_nonterms >= 1) {
+            if(num_nonterms != 1) {
+                warn(
+                    "default code for nontrivial rule %s probaby won't dtrt\n",
+                    to_str().c_str()
+                );
+            }
+
+            // if there's exactly one nonterminal, I think returning it
+            // is a sane-enough default.  this allows for aliasing
+            // (where you have just foo -> bar) as well as doing the
+            // right thing in some simple cases like parenthesized
+            // expressions.
+            // If there's more than one nonterm, we still need to return
+            // something, so:
+            code = "return arg_" + std::to_string(first_nonterm) + ";";
+        } else {
+            // this rule has terminals only.  maybe the reduce_type has
+            // a constructor which can do something sane (i.e. convert
+            // from a string or set of strings).  if not, there will
+            // be a compile error which, hopefully, the fpl author can
+            // figure out.
+            code = "return reduce_type(";
+            for(int sti = 0; sti < steps.size(); sti++) {
+                code += "arg_" + std::to_string(sti);
+                if(sti < steps.size() - 1)
+                    code += ", ";
+            }
+            code += ");";
+        }
+
+
+        return CodeBlock(std::string(__FILE__), __LINE__, code);
+
+/*
+        This was a fun attempt but doesn't dtrt except in trivial
+        cases, and is hard to debug in cases where it doesn't work
+        (i.e. doesn't compile) because of deceptive line numbers
+        being reported etc.  So let's not do this this way.
+
+        An alternate would be to allow to supply default code in
+        an @ directive or such.  Or make this kind of thing optional
+        in some other way.
+
+        // XXX the file and line here needs to be the generated file/line, or
+        // it's too hard to figure out where we're messed up.  we should
+        // add a comment, though, telling where in this file generated the code.
+        // ... actually maybe giving the fpl source location is the next best thing.
+        // but errf this has no access to the source.
+        CodeBlock block = CODE_BLOCK("return ");
+        std::string code;
+        for(int argi = 0; argi < steps.size(); argi++) {
+            // XXX how to deal with repetition?
+            // this will definitely dtwt with repetition on terminals
+            const ProdExpr &arg = steps[argi];
+            const std::string argvar("arg_" + std::to_string(argi));
+            switch(arg.gexpr.type) {
+                case GrammarElement::TERM_EXACT:
+                    // let's guess it might be a straight up operator,
+                    // and also one which is valid in our target language!
+                    code += arg.gexpr.expr;
+                    break;
+                case GrammarElement::TERM_REGEX:
+                    // possibly this is something like a constant or
+                    // variable name or something.
+                    // possibly the reduce type knows what to do?
+                    code += "reduce_type(" + argvar + ")";
+                    break;
+                case GrammarElement::NONTERM_PRODUCTION:
+                    // this is already reduced, so try just using/returning it
+                    code += argvar;
+                    break;
+                default:
+                    // XXX maybe warn here?
+                    break;
+            }
+
+            if(argi < steps.size() - 1) {
+                code += " ";
+            } else {
+                code += ";\n";
+            }
+        }
+        block.append(code);
+        return block;
 
             // perhaps default could be:
-            //  - if one arg, just return that arg.  this allows aliasing.
+            //  - if one nonterminal, return that one nonterminal.  this allows
+            //    aliasing and stuff like '(' foo ')' to do what's intuitive.
+            //  - if two nonterminals separated by a terminal, return
             //  - if more than one arg, return aggregate XXX do this part
             // .. or have the fpl author specify somehow.
-// FIXME this only makes sense if there's only one argument
-// and it's already reduced (i.e. not a terminal).  and it's not optional or aggregate.
-// but, it does work nicely for aliases, so maybe keep some variant.
-// XXX AND AT LEAST warn if someone makes an fpl with default_code
-// for a terminal, because it's confusing.  or have some default
-// to_fplresult(const std::string &in) type thing.
-            "return arg[0].val();\n"
-        ));
+ */
     }
 
     void code(const CodeBlock &cd) {
@@ -846,7 +949,7 @@ public:
     // things which are already strings!  yay!
     // this is effectively c++ compiler appeasement.
     CodeBlock to_string_identity() {
-        return CodeBlock(std::string(__FILE__), __LINE__,
+        return CODE_BLOCK(
             "\ninline std::string to_string(const std::string &in) {\n"
             "    return in;\n"
             "}\n"
