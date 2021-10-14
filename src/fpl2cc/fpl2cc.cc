@@ -732,9 +732,9 @@ public:
             items.insert(in);
         }
 
-        // The id of the set is a string generated from the
-        // content of the items which can be compared to determine
-        // if 2 sets are identical or not.
+        // The id of the set is a string generated from the content
+        // of the items which can be compared to determine if 2 sets
+        // are identical (within these Productions) or not.
         std::string id() const {
             if(_id_cache.length() == 0) {
                 // I hate assert but it's been bugging me that the size of
@@ -949,9 +949,12 @@ public:
     // this is effectively c++ compiler appeasement.
     CodeBlock to_string_identity() {
         return CODE_BLOCK(
+            "\n#ifndef TO_STRING_HACK\n"
+            "\n#define TO_STRING_HACK\n"
             "\ninline std::string to_string(const std::string &in) {\n"
             "    return in;\n"
             "}\n"
+            "\n#endif // TO_STRING_HACK\n"
         );
     }
 
@@ -961,7 +964,9 @@ public:
         std::cmatch matched;
         if(std::regex_search(in.c_str(), matched, re)) {
             reduce_type = matched[1];
-            add_preamble(to_string_identity());
+            if(reduce_type == "std::string") {
+                add_preamble(to_string_identity());
+            }
             return true;
         }
 
@@ -1016,7 +1021,31 @@ public:
         return src.read_re("[A-Za-z][A-Za-z0-9_]*")[0];
     }
 
-    static int read_expressions(fpl_reader &src, ProductionRule &rule) {
+    // .. imports relevant rules into this and returns the name of
+    // the top level production created
+    std::string parse_import(fpl_reader &src, ProductionRule &rule) {
+        // importing another fpl source.
+        // syntax: '`' filename /`(:production_to_import)?/
+        // what it needs to do:
+        //  - create a sub-parser for the production. how to fold
+        //    that into states?  possibly just fold the whole
+        //    sub-parse in, which would be easiest.
+
+        std::string filename(src.read_to_byte('`'));
+        fpl_reader inp(filename, fail);
+        std::string prod_name;
+        if(src.read_byte_equalling(':')) {
+            prod_name = read_production_name(src);
+        }
+
+        // consider keeping this around so we don't have to re-read it
+        // if something else wants to import from the same fpl
+        Productions subs(inp);
+
+        return import_rules(subs, prod_name);
+    }
+
+    int read_expressions(fpl_reader &src, ProductionRule &rule) {
         int num_read = 0;
         bool done = false;
         do {
@@ -1056,29 +1085,11 @@ public:
                         src.error("read unexpected '-'");
                     }
                     break;
-/*
-                case '`': {
-                        // importing another fpl source.
-                        // syntax: '`' filename /`(:production_to_import)?/
-                        // what it needs to do:
-                        //  - create a sub-parser for the production. how to fold
-                        //    that into states?  possibly just fold the whole
-                        //    sub-parse in, which would be easiest.
-
-                        std::string filename(src.read_to_byte('`'));
-                        fpl_reader inp(filename, fail);
-                        if(src.read_byte_equalling(':')) {
-                            expr_str = read_production_name(src);
-                        }
-// XXX ask yourself, if, deep in your heart, you want a top down parser.
-// or how about both?  
-                        Productions subs(inp);
-//fprintf(stderr, "OK SUB CODE for %s:\n%s\n", filename.c_str(), subs.generate_code(Options(0, NULL)).c_str());
-// What does this need to fit into the greater productions?
-// 
-                    }
+                case '`':
+                    // parse/import the sub-fpl, and use whatever it produces:
+                    expr_str = parse_import(src, rule);
+                    type     = GrammarElement::Type::NONTERM_PRODUCTION;
                     break;
- */
                 default:
                     // should be the name of a production.
                     expr_str = read_production_name(src);
@@ -1181,6 +1192,74 @@ public:
                 }
             }
         } while(!inp.eof());
+    }
+
+    std::string import_rules(const Productions &from, const std::string &pname) {
+        std::string src_fn = from.inp.filename();
+        if(from.reduce_type != reduce_type) {
+            fail("Incompatible reduce type '%s' in %s (expected %s)\n",
+                from.reduce_type.c_str(), src_fn.c_str(),
+                reduce_type.c_str()
+            );
+        }
+
+        // import any preamble as well, as it may be necessary for the rules.
+        // hmm.. too bad we can't scope this and/or figure out if it's necessary
+        // to import in the first place... (can we scope?)
+        preamble += "\n" + from.preamble;
+
+        // these are the names of the products whose rules (and elements)
+        // we need to import:
+        std::list<std::string> all_wanted;
+        std::set<std::string> already_wanted;
+        std::string import_as;
+        if(pname.length()) {
+            import_as = pname;
+            all_wanted.push_back(pname);
+            already_wanted.insert(pname);
+        } else {
+            // no particular production specified.  import the
+            // default production, but use the base name of the
+            // fpl file to refer to it
+            import_as = from.inp.base_name();
+            std::string def_prd(rules[0].product());
+            all_wanted.push_back(def_prd);
+            already_wanted.insert(def_prd);
+        }
+
+        // NOTE we're assuming here that we can append to a list
+        // while iterating it and have things dtrt.  I believe
+        // this is a reasonable thing to ask from std::list,
+        // but have no documentation/spec saying it's ok.
+        for(auto wanted : all_wanted) {
+            // NOTE:  no scoping currently.  so rule names can
+            // collide and cause mayhem... hmm
+            auto strl  = from.rules_for_product.lower_bound(wanted);
+            auto endrl = from.rules_for_product.upper_bound(wanted);
+            if(strl == endrl) {
+                fail("No rule for '%s' in %s\n",
+                    wanted.c_str(), src_fn.c_str()
+                );
+            }
+            for(auto rit = strl; rit != endrl; ++rit) {
+                ProductionRule rule = from.rules[rit->second];
+                push_rule(rule);
+
+                // any rules needed to generate the rule we just pushed are
+                // also relevant:
+                for(int stepi = 0; stepi < rule.num_steps(); ++stepi) {
+                     const ProdExpr *step = rule.step(stepi);
+                     if(step && !step->is_terminal()) {
+                         if(!already_wanted.count(step->production_name())) {
+                             all_wanted.push_back(step->production_name());
+                             already_wanted.insert(step->production_name());
+                         }
+                     }
+                }
+            }
+        }
+
+        return import_as;
     }
 
     // returns the name of the function to use for the
@@ -1502,6 +1581,8 @@ public:
             //out += "    base_parser.error(\"unexpected input.  here's where we think we were:\\n\"\n";
             //out += "    " + state.to_str(this, "    \"        ", "\"\n") + "\n";
             //out += "    \"\\n\");\n";
+            // XXX bug - we can end up looping forever here because
+            // we eat no input
             out += "    base_parser.error(\"unexpected input in " + sfn + "\\n\");\n";
         } else {
             out += production_code(opts, state, reduce_item.rule);
