@@ -1720,6 +1720,7 @@ public:
 
     std::string state_to_string() {
         std::string out("static std::string state_to_str(State st) {\n");
+        out += "if(!st) return \"NULL\";";
         for(auto st: states) {
             out += "if(&" + state_fn(st, true) + " == st) ";
             out += "return \"" + state_fn(st) + "\";\n";
