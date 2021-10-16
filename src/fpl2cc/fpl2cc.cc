@@ -1405,7 +1405,6 @@ public:
         out +=     ");\n";
         if(opts.debug) {
             out += "    using namespace std;\n";
-            out += "    fprintf(stderr, \"" + rule_fn(rule_ind) + " reducing " + ns_str + " items to " + reduce_type + " \\\"%s\\\"\\n\", to_string(result).c_str());\n";
         }
         // XXX what deletes the product?  this is awful.
         out += "    base_parser.set_product(new Product(result, "
