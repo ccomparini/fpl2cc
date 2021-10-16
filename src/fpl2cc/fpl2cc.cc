@@ -950,11 +950,11 @@ public:
     CodeBlock to_string_identity() {
         return CODE_BLOCK(
             "\n#ifndef TO_STRING_HACK\n"
-            "\n#define TO_STRING_HACK\n"
-            "\ninline std::string to_string(const std::string &in) {\n"
+            "#define TO_STRING_HACK\n"
+            "inline std::string to_string(const std::string &in) {\n"
             "    return in;\n"
             "}\n"
-            "\n#endif // TO_STRING_HACK\n"
+            "#endif // TO_STRING_HACK\n"
         );
     }
 
@@ -1573,21 +1573,22 @@ public:
         }
 
         out += "} else {\n";
-        if(!reduce_item) {
-            // XXX cooler would be to reduce this to an error
-            // also much cooler would be to have a comprehensible message
+
+        if(reduce_item) {
+            out += production_code(opts, state, reduce_item.rule);
+        } else {
+            // XXX cooler would be to reduce this to an error.
+            // also much cooler would be to have a comprehensible message.
             // errf so state.to_str can of course have all kinds of embedded
             // quotes and stuff which breaks source code strings.
             //out += "    base_parser.error(\"unexpected input.  here's where we think we were:\\n\"\n";
             //out += "    " + state.to_str(this, "    \"        ", "\"\n") + "\n";
             //out += "    \"\\n\");\n";
             // XXX bug - we can end up looping forever here because
-            // we eat no input
+            // we eat no input.....
             out += "    base_parser.error(\"unexpected input in " + sfn + "\\n\");\n";
-        } else {
-            out += production_code(opts, state, reduce_item.rule);
         }
-        out += "}\n";
+        out += "}\n"; // end of reduce section
 
         out += "}\n"; // end of state_ function
 
