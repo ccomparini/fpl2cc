@@ -327,6 +327,7 @@ struct GrammarElement {
         }
         return cmp;
     }
+
     friend bool operator<(const GrammarElement& left, const GrammarElement& right) {
         return left.compare(right) < 0;
     }
@@ -624,6 +625,7 @@ class Productions {
 
     std::string reduce_type;
     std::string preamble;
+    std::list<std::string> goal; // goal is any of these
 
     std::vector<ProductionRule>     rules;
     std::multimap<std::string, int> rules_for_product; // product -> rule ind
@@ -1574,7 +1576,10 @@ public:
         out += "} else {\n";
 
         if(reduce_item) {
+            out += "    fprintf(stderr, \"" + sfn + " is going to reduce to a %s\\n\", \"" + c_str_escape(reduce_item.to_str(this)) + "\");\n";
             out += production_code(opts, state, reduce_item.rule);
+            out += "    fprintf(stderr, \"%i items on stack after reduce\\n\", base_parser.lr_stack_size());\n";
+//        } else if(state.id() != states[0].id()) { 
         } else {
             // XXX cooler would be to reduce this to an error.
             // also much cooler would be to have a comprehensible message.
@@ -1586,8 +1591,25 @@ public:
             // XXX bug - we can end up looping forever here because
             // we eat no input.....
             out += "    base_parser.error(\"unexpected input in " + sfn + "\\n\");\n";
+/*
+out += "    exit(1);\n";
+        } else {
+// XXX this doesn't quite work, because 
+            // state 0 is the entry point, so it'll be at the bottom of the
+            // stack (and possibly elsewhere).  in fpl, we don't necessarily
+            // parse to end of file.  therefore, for fpl, this is where we'll
+            // handle accepting.
+            out += "    const Product *res = base_parser.result();\n";
+            for(auto gl : goal) {
+                out += "    if(res && res->grammar_element_id() == _" + gl + ") {\n";
+                out += "        fprintf(stderr, \"accepting with stack size %i and a " + gl + " for a result\\n\", base_parser.lr_stack_size());\n";
+                out += "        base_parser.lr_accept();\n";
+                out += "    }\n";
+            }
+ */
         }
-        out += "}\n"; // end of reduce section
+
+        out += "}\n"; // end of reduce/accept section
 
         out += "}\n"; // end of state_ function
 
@@ -1774,16 +1796,12 @@ public:
         return out;
     }
 
-    void generate_states(const std::list<std::string> &entry_points) {
-        std::list<std::string> wanted = entry_points;
+    void generate_states(const std::list<std::string> &wanted) {
 
         if(rules.empty()) {
             fail("No rules found\n");
         }
 
-        if(wanted.empty()) {
-            wanted.push_back(rules[0].product());
-        }
 
         lr_set entry_set;
         for(auto entry_prod : wanted) {
@@ -1821,7 +1839,15 @@ public:
         // "base" is probably the wrong term..
         const std::string base_parser_class = "FPLBaseParser<" + parser_class + ">";
 
-        generate_states(opts.entry_points);
+        goal = opts.entry_points;
+        if(goal.empty()) {
+            // no particular goal products specified, so we default
+            // to whatever the first rule produces:
+            goal.push_back(rules[0].product());
+        }
+
+        //generate_states(opts.entry_points);
+        generate_states(goal);
 
         std::string out;
         out += "#include <string>\n";
