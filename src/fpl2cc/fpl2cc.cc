@@ -249,7 +249,7 @@ struct CodeBlock {
         std::string out;
         out += "\n#line " + std::to_string(line) + " \"" + source_file + "\"\n";
         out += code;
-        out += "\n";
+        out += "\n#$LINE\n"; // restore compiler's idea of source file/pos
         return out;
     }
 };
@@ -1619,10 +1619,12 @@ out += "    exit(1);\n";
     // reformats the generated code to fix indents and what have you.
     // this is fairly rough but does result in more or less readable
     // code for most cases.
-    std::string reformat_code(const std::string code) {
+    std::string reformat_code(const std::string &code, const std::string &fn) {
         const int chars_per_indent = 4;
         int indent = 0;
         int newlines = 0;
+        int cur_line = 1;
+        bool preprocessor_mode = false;
 
         std::string output;
 
@@ -1655,12 +1657,39 @@ out += "    exit(1);\n";
                 // to the correct indent later.
                 while(inp < code_length && isspace(code[inp])) {
                     // (.. but preserve newlines)
-                    if(code[inp] == '\n') newlines++;
+                    if(code[inp] == '\n') {
+                        newlines++;
+                        // (.. and track the current line number)
+                        cur_line++;
+                    }
                     inp++;
                 }
                 if(inp < code_length)
                     inp--;
+                preprocessor_mode = false;
                 continue;
+            } else if(code[inp] == '#') {
+                preprocessor_mode = true;
+            } else if(code[inp] == '$' && preprocessor_mode) {
+                // if we see $LINE in anything which looks like
+                // a preprocessor directive, expand it out into
+                // a #line directive with the current file and line.
+                // this lets the code generator reset the line number
+                // after issuing its own #line directives, which it
+                // does for code imported into the fpl etc.
+                // (as with everything here, it's not perfect and can
+                // be broken by (eg) a '#' embedded in a string or
+                // whatever, but for the moment I'm not worrying)
+                // (IRL if this ever generates jest code we'll have
+                // a jest directive to restore the line/file position
+                // or such.  probably actually track both actual line/file
+                // position, and "original" line/position..)
+                if(code.compare(inp + 1, 4, "LINE") == 0) {
+                    output += "line " + std::to_string(cur_line + 1) 
+                            + " \"" + fn + "\"";
+                    inp += 5;
+                    continue;
+                }
             }
 
             if(newlines > 0) {
@@ -1904,7 +1933,7 @@ out += "    exit(1);\n";
 
         report_unused_rules();
 
-        return reformat_code(out);
+        return reformat_code(out, opts.output_fn);
     }
 
     void report_unused_rules() {
@@ -1952,7 +1981,6 @@ void fpl2cc(const Options &opts) {
 
     // uhh... this is easy, if hokey:
     if(opts.out) {
-        // XXX expand #line stuff here?
         fprintf(opts.out, "%s\n", output.c_str());
     } else {
         fail("no open output - fail\n");
