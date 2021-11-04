@@ -33,6 +33,11 @@ void warn(const char *fmt...) {
     num_warnings++;
 }
 
+inline std::string to_str(bool b) {
+    if(b) return "true";
+    return "false";
+}
+
 #define CODE_BLOCK(str) CodeBlock(std::string(__FILE__), __LINE__, str)
 
 /*
@@ -82,6 +87,7 @@ void warn(const char *fmt...) {
 
 /*
  TODO
+  - fix termination/accept
   - way to do specialized scans. ~scan_function_name maybe?
     or scan classes.
   - "^" to refer to prior rules?  think it over. Also note in general the
@@ -91,7 +97,6 @@ void warn(const char *fmt...) {
     maybe `sub_fpl.fpl` -> name_of_target_from_sub ;
     Then you can (eg) rip from c;
     OR implement stuff like embedding formatting in strings.
-  - repetition/optionals
   - multi-pass for comments etc. HOW!?  you thought about this
     before and perhaps had a plan. Also for things like "#" modifier.
     how about filters on fpl reader or whatever.  layered.  each layer
@@ -99,7 +104,6 @@ void warn(const char *fmt...) {
     BUT you have to be able to examine the state of lower layers (eg
     to find the current comment or whatever).  that's the key notion.
     (uhh, see above: "specialized scans")
-  o detect conflicts (again)
   - operator precedence:  it's a PITA to do the whole intermediate
     productions precedence thing.  So, make it part of FPL.
     Ideas:
@@ -110,11 +114,10 @@ void warn(const char *fmt...) {
         of precedence.  preferably in some relative fashion...
         @precedecence( ... )?  multi line, same prec grouped
         by being on the same line?
-  - repetition:  optional counts perhaps already work;  max_times
-    is not implemented.  do them by boiling any foo* or foo+ or
-    whatever down to a single item (with subitems).  this makes
-    passing them to reduce code much saner.
-  x eliminate duplicate state transitions
+  - repetition/optionals:  optional counts perhaps already work;
+    max_times is not implemented.  do them by boiling any foo*
+    or foo+ or whatever down to a single item (with subitems).
+    this makes passing them to reduce code much saner.
   - buffering the entire input is busted for things like stdin.
     stream instead;  but possibly fix that via chicken/egging it
     and generate the new parser with this.
@@ -214,6 +217,24 @@ struct Options {
             }
             #undef SCAN_VALUE
         }
+    }
+
+    std::string to_str() const {
+        std::string out;
+
+        out += "    src: " + src_fpl + "\n";
+        out += "    output: " + output_fn + "\n";
+        out += "    generate_main: " + ::to_str(generate_main) + "\n";
+        out += "    debug: " + ::to_str(debug) + "\n";
+        out += "    single_step: " + ::to_str(single_step) + "\n";
+        if(entry_points.size() > 0) {
+            out += "    entry points:\n";
+            for(auto entry : entry_points) {
+                out += "        " + entry + "\n";
+            }
+        }
+
+        return out;
     }
 };
 
@@ -1639,6 +1660,7 @@ out += "    exit(1);\n";
         int indent = 0;
         int newlines = 0;
         int cur_line = 1;
+        bool comment_mode = false;
         bool preprocessor_mode = false;
 
         std::string output;
@@ -1654,6 +1676,25 @@ out += "    exit(1);\n";
 
         const std::string::size_type code_length = code.size();
         for(std::string::size_type inp = 0; inp < code_length; inp++) {
+
+            // (ok to check inp + 1 because there's a terminal '\0')
+            if(code[inp] == '*' && code[inp + 1] == '/' ) {
+                comment_mode = false;
+                output += "*/";
+                inp += 2;
+            } else if(code[inp] == '/' && code[inp + 1] == '*' ) {
+                comment_mode = true;
+                output += "/*";
+                inp += 2;
+            } 
+
+            if(comment_mode) {
+                // this grows more spaghetti-eqsue.  soon, if I jackass
+                // the indent,it'll be good enough for a gnu project!
+                output += code[inp];
+                continue;
+            }
+
             if(code[inp] == '{') {
                 // only count '{' at end of line, which is a
                 // good-enough hack to avoid issues with
@@ -1849,7 +1890,6 @@ out += "    exit(1);\n";
             fail("No rules found\n");
         }
 
-
         lr_set entry_set;
         for(auto entry_prod : wanted) {
             auto strl  = rules_for_product.lower_bound(entry_prod);
@@ -1886,17 +1926,20 @@ out += "    exit(1);\n";
         // "base" is probably the wrong term..
         const std::string base_parser_class = "FPLBaseParser<" + parser_class + ">";
 
+        std::string out("/*\n");
+        out += opts.to_str();
+
         goal = opts.entry_points;
         if(goal.empty()) {
             // no particular goal products specified, so we default
             // to whatever the first rule produces:
             goal.push_back(rules[0].product());
+            out += "default entry point: " + rules[0].product() + "\n";
         }
+        out += " */\n\n";
 
-        //generate_states(opts.entry_points);
         generate_states(goal);
 
-        std::string out;
         out += "#include <string>\n";
         // preamble has to come before the fpl headers
         // because (to my surpise) things like to_string
