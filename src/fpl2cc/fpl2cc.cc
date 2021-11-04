@@ -110,10 +110,6 @@ void warn(const char *fmt...) {
         of precedence.  preferably in some relative fashion...
         @precedecence( ... )?  multi line, same prec grouped
         by being on the same line?
-  - the "new Product" thing is going to leak memory.  fix that.
-    (pass on to the fpl author somehow?  or just don't declare it
-    and don't worry about copies?).  Probably can delete when the
-    stack is popped (or after)
   - repetition:  optional counts perhaps already work;  max_times
     is not implemented.  do them by boiling any foo* or foo+ or
     whatever down to a single item (with subitems).  this makes
@@ -1428,8 +1424,7 @@ public:
         if(opts.debug) {
             out += "    using namespace std;\n";
         }
-        // XXX what deletes the product?  this is awful.
-        out += "    base_parser.set_product(new Product(result, "
+        out += "    base_parser.set_product(Product(result, "
              + rule.product_element().nonterm_id_str()
              + "));\n";
 
