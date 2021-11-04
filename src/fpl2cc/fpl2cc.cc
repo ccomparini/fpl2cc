@@ -83,6 +83,7 @@ void warn(const char *fmt...) {
 /*
  TODO
   - way to do specialized scans. ~scan_function_name maybe?
+    or scan classes.
   - "^" to refer to prior rules?  think it over. Also note in general the
     lower precedent rules are earlier in the file so maybe another symbol.
     and one would scope it to the file, I guess?
@@ -97,11 +98,7 @@ void warn(const char *fmt...) {
     is the input to the one above.  so the "passes" happen simultaneously.
     BUT you have to be able to examine the state of lower layers (eg
     to find the current comment or whatever).  that's the key notion.
-  - sort out termination.  possibly go back to recursive ascent, which
-    would
-  - make it so that if you forget the "return" in a rule, it at
-    least returns something. Maybe have the generated code print
-    a warning, too?
+    (uhh, see above: "specialized scans")
   o detect conflicts (again)
   - operator precedence:  it's a PITA to do the whole intermediate
     productions precedence thing.  So, make it part of FPL.
@@ -245,11 +242,13 @@ struct CodeBlock {
         code += str;
     }
 
-    std::string format() const {
+    std::string format(bool restore_line = true) const {
         std::string out;
         out += "\n#line " + std::to_string(line) + " \"" + source_file + "\"\n";
         out += code;
-        out += "\n#$LINE\n"; // restore compiler's idea of source file/pos
+        if(restore_line) {
+            out += "\n#$LINE\n"; // restore compiler's idea of source file/pos
+        }
         return out;
     }
 };
@@ -1342,8 +1341,15 @@ public:
         }
         out += ") {\n";
         out += "// " + rule.to_str() + "\n";
-        out += rule.code().format();
+        out += rule.code().format(false);
         out += "\n}\n";
+        // restore line number after end of function so that
+        // compiler warnings about stuff like lack of return
+        // value show the line in the fpl source (which is
+        // where the fpl author has to fix it).
+        // (actually, it'll show the line after... calling it
+        // good enough for now)
+        out += "\n#$LINE\n";
         return out;
     }
 
@@ -1688,6 +1694,9 @@ out += "    exit(1);\n";
                     output += "line " + std::to_string(cur_line + 1) 
                             + " \"" + fn + "\"";
                     inp += 5;
+                    // add newline after in a way which won't mess up
+                    // the count:
+                    newlines++;
                     continue;
                 }
             }
