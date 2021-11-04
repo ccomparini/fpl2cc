@@ -664,8 +664,8 @@ class Productions {
         // this allows lr_items to be used as keys
         // in things like std::map.
         // it also determines the order of the items
-        // such that earlier items
-        // are ordered earlier here.
+        // such that earlier items (in the fpl source)
+        // are ordered earlier.
         friend bool operator<(const lr_item& left, const lr_item& right) {
 
             // same rule?  earlier position in the rule
@@ -787,6 +787,20 @@ public:
                 }
             }
             return lr_item(); // no reduction here
+        }
+
+        // returns true if this state only reduces
+        bool reduce_only(const Productions *prods) const {
+            for(lr_item item : iterable_items()) {
+                const ProductionRule &rule = prods->rules[item.rule];
+                if(rule.step(item.position)) {
+                    // this item is not at the end of the rule,
+                    // so it's some kind of shift, so this is
+                    // not pure reduce.
+                    return false;
+                }
+            }
+            return true;
         }
 
         std::string to_str(
