@@ -87,16 +87,27 @@ inline std::string to_str(bool b) {
 
 /*
  TODO
-  - fix termination/accept
+  - instead of these 2;
+    - fix termination/accept.  Just add the implied rule.  it'll work.
+    - fix infinite loop on bad input!  hah!
+    "fix" both, by:
+      - log/store the error for the caller somehow, but:
+      - make it return all the way back to the top on any unexpected
+        input
+      - let callers (of the whole parser) decide if the parse was
+        successful or not.
+    Possible downside to this: it does not consider reporting multiple
+    errors/recovering.  do we care?  maybe change again later?
   - way to do specialized scans. ~scan_function_name maybe?
     or scan classes.
   - "^" to refer to prior rules?  think it over. Also note in general the
     lower precedent rules are earlier in the file so maybe another symbol.
     and one would scope it to the file, I guess?
-  - sub-fpls to implement particular constructs, from another file?
+  x sub-fpls to implement particular constructs, from another file?
     maybe `sub_fpl.fpl` -> name_of_target_from_sub ;
     Then you can (eg) rip from c;
-    OR implement stuff like embedding formatting in strings.
+    or implement stuff like embedding formatting in strings. (kinda)
+  - document the fpl
   - multi-pass for comments etc. HOW!?  you thought about this
     before and perhaps had a plan. Also for things like "#" modifier.
     how about filters on fpl reader or whatever.  layered.  each layer
@@ -1870,8 +1881,8 @@ out += "    exit(1);\n";
         out += "int main(int argc, const char **argv) {\n";
         out += "    if(argc < 2) {\n";
         // XXX this is weak;  make the reader able to read stdin
-        out += "        fpl_reader::default_fail(";
-        out += "            \"Please provide a source file name.\\n\"";
+        out += "        fpl_reader::default_fail(\n";
+        out += "            \"Please provide a source file name.\\n\"\n";
         out += "        );\n";
         out += "    }\n";
         // XXX this is also weak; handle more than one source
