@@ -67,7 +67,7 @@ inline std::string to_str(bool b) {
 
   Code blocks:
 
-  Code blocks are enclosed in { }.
+  Code blocks are enclosed in +{ }+.
 
   Code blocks access their corresponding expressions via pseudo-positional
   argument variables named arg[0..x] (so the first is called arg0, second
