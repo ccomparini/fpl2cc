@@ -93,8 +93,6 @@ class fpl_reader {
         if(!*start) return std::string("");
 
         size_t total_size = 0;
-        // XXX how did passing '\0' as start of match work before, when this
-        // started at depth 0?  test this whole thing.  the escaping is also suspect.
         int depth = 1; // assume we're starting on a match
         do {
             size_t size;
@@ -399,6 +397,10 @@ public:
         // can't get here.
     }
 
+    inline void go_to(size_t position) {
+        read_pos = position;
+    }
+
     inline void skip_bytes(int skip) {
         read_pos += skip;
     }
@@ -511,14 +513,20 @@ public:
         return matched;
     }
 
-    // num chars is utf8 chars to look ahead.
+    // pos is the position in the input at which to look; < 0
+    // means use the current read position (the default).
+    // num_chars is the maximum number of utf8 chars to 
+    // look at.
     // since we translate things like newlines (to "\n")
-    // and eof, the output length might be more than 12
-    // printable chars. (but is that how it should be?)
-    inline std::string debug_peek(int num_chars = 12) const {
+    // and eof, the output length might be more characters
+    // than the num_chars passed.
+    inline std::string debug_peek(int pos = -1, int num_chars = 12) const {
         if(!buffer.data()) return "<NO INPUT>";
+
+        if(pos < 0) pos = read_pos;
+
         std::string out;
-        const utf8_byte *inp = buffer.data() + read_pos;
+        const utf8_byte *inp = buffer.data() + pos;
         for(int chp = 0; chp < num_chars; ++chp) {
             if(eof(inp)) {
                 out += "<EOF>";

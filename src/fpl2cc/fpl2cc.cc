@@ -1626,34 +1626,16 @@ public:
             out += "    fprintf(stderr, \"" + sfn + " is going to reduce to a %s\\n\", \"" + c_str_escape(reduce_item.to_str(this)) + "\");\n";
             out += production_code(opts, state, reduce_item.rule);
             out += "    fprintf(stderr, \"%i items on stack after reduce\\n\", base_parser.lr_stack_size());\n";
-//        } else if(state.id() != states[0].id()) { 
         } else {
-            // XXX cooler would be to reduce this to an error.
-            // also much cooler would be to have a comprehensible message.
-            // errf so state.to_str can of course have all kinds of embedded
-            // quotes and stuff which breaks source code strings.
-            //out += "    base_parser.error(\"unexpected input.  here's where we think we were:\\n\"\n";
-            //out += "    " + state.to_str(this, "    \"        ", "\"\n") + "\n";
-            //out += "    \"\\n\");\n";
-            // XXX bug - we can end up looping forever here because
-            // we eat no input.....
-            out += "    base_parser.error(\"unexpected input in " + sfn + "\\n\");\n";
-/*
-out += "    exit(1);\n";
-        } else {
-// XXX this doesn't quite work, because 
-            // state 0 is the entry point, so it'll be at the bottom of the
-            // stack (and possibly elsewhere).  in fpl, we don't necessarily
-            // parse to end of file.  therefore, for fpl, this is where we'll
-            // handle accepting.
-            out += "    const Product *res = base_parser.result();\n";
-            for(auto gl : goal) {
-                out += "    if(res && res->grammar_element_id() == _" + gl + ") {\n";
-                out += "        fprintf(stderr, \"accepting with stack size %i and a " + gl + " for a result\\n\", base_parser.lr_stack_size());\n";
-                out += "        base_parser.lr_accept();\n";
-                out += "    }\n";
-            }
- */
+            // since we want to be able to do partial parses, if we
+            // don't see input we expect, it's not necessarily
+            // an error - we might have parsed whatever was wanted
+            // (potentially somewhere back in the stack) and would
+            // just need to rewind the input to jsut after whatever
+            // we wanted.  Of course, it still might be an error!
+            // So the strategy is:  terminate parsing and let the 
+            // caller (of the parser) decide what to do.
+            out += "    base_parser.terminate();\n";
         }
 
         out += "}\n"; // end of reduce/accept section
@@ -1852,6 +1834,18 @@ out += "    exit(1);\n";
         return out;
     }
 
+    std::string is_goal() {
+        std::string out("static bool is_goal(int id) {\n");
+        out += "    switch(id) {\n";
+        for(auto gstr : goal) {
+            out += "        case NontermID::_" + gstr + ": return true;\n";
+        }
+        out += "        default: return false;\n";
+        out += "    }\n";
+        out += "}\n";
+        return out;
+    }
+
     std::string parser_class_name() {
         std::string base;
         for(auto chr : inp.base_name()) {
@@ -1890,7 +1884,7 @@ out += "    exit(1);\n";
         out +=      parser_class + " parser(inp);\n";
         out += "    using namespace std;\n";
         out += "    printf(\"result: %s\\n\", to_string(parser.parse()).c_str());\n";
-        out += "}\n";
+        out += "}\n\n";
 
         return out;
     }
@@ -1981,12 +1975,13 @@ out += "    exit(1);\n";
         out += "public:\n";
 
         out += nonterm_enum();
+        out += state_to_string();
+        out += is_goal();
 
         for(int rnum = 0; rnum < rules.size(); rnum++) {
             out += code_for_rule(opts, rnum);
         }
 
-        out += state_to_string();
 
         for(lr_set state : states) {
             out += code_for_state(opts, state).c_str();
