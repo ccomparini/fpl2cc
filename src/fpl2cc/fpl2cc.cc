@@ -87,12 +87,13 @@ inline std::string to_str(bool b) {
 
 /*
  TODO
-  - instead of these 2;
-    - fix termination/accept.  Just add the implied rule.  it'll work.
-    - fix infinite loop on bad input!  hah!
+  - timings, so we can see if this or that is faster.
+  o instead of these 2:
+    x fix termination/accept.  Just add the implied rule.  it'll work.
+    x fix infinite loop on bad input!  hah!
     "fix" both, by:
       - log/store the error for the caller somehow, but:
-      - make it return all the way back to the top on any unexpected
+      x make it return all the way back to the top on any unexpected
         input
       - let callers (of the whole parser) decide if the parse was
         successful or not.
@@ -1623,9 +1624,9 @@ public:
         out += "} else {\n";
 
         if(reduce_item) {
-            out += "    fprintf(stderr, \"" + sfn + " is going to reduce to a %s\\n\", \"" + c_str_escape(reduce_item.to_str(this)) + "\");\n";
+            //out += "    fprintf(stderr, \"" + sfn + " is going to reduce to a %s\\n\", \"" + c_str_escape(reduce_item.to_str(this)) + "\");\n";
             out += production_code(opts, state, reduce_item.rule);
-            out += "    fprintf(stderr, \"%i items on stack after reduce\\n\", base_parser.lr_stack_size());\n";
+            //out += "    fprintf(stderr, \"%i items on stack after reduce\\n\", base_parser.lr_stack_size());\n";
         } else {
             // since we want to be able to do partial parses, if we
             // don't see input we expect, it's not necessarily
@@ -1823,7 +1824,7 @@ public:
 
     std::string state_to_string() {
         std::string out("static std::string state_to_str(State st) {\n");
-        out += "if(!st) return \"NULL\";";
+        out += "if(!st) return \"NULL\";\n";
         for(auto st: states) {
             out += "if(&" + state_fn(st, true) + " == st) ";
             out += "return \"" + state_fn(st) + "\";\n";
@@ -1842,6 +1843,7 @@ public:
         }
         out += "        default: return false;\n";
         out += "    }\n";
+        out += "    return false;\n";
         out += "}\n";
         return out;
     }
