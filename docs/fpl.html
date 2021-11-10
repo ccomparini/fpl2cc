@@ -68,9 +68,23 @@
       <span class="subhead">Directives</span>
       <p>Valid directives are:
       <ul>
-        <ul><code>@produces</code> (required) - tells the parser generator
-        the type to be returned from code generation rules and from the
-        generated parser itself.  See <a href=#examples">examples</a>.
+        <ul><code>@produces</code> <b>required</b> - tells the parser
+        generator what type is to be returned from code generation
+        rules and from the generated parser itself.  For c++, the
+        type must be to_string compatible - if it's not already
+        (and I'm really sorry about this), you must specify a
+        <code>to_string()</code> function in a
+        <a href="code_block">code block</a> prior to any rules.
+        <p>For example:
+        <pre>
+          <code>
+          +{
+              std::string to_string(const &amp;my_type x) {
+                  return x.convert_to_string_or_whatever();
+              }
+          }+</code>
+        </pre>
+        <br>See <a href=#examples">examples</a>.
       </ul>
     </div>
     <div id="rules">
