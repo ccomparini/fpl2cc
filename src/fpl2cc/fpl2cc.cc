@@ -87,6 +87,10 @@ inline std::string to_str(bool b) {
 
 /*
  TODO
+  - repetition/optionals:  optional counts perhaps already work;
+    max_times is not implemented.  do them by boiling any foo*
+    or foo+ or whatever down to a single item (with subitems).
+    this makes passing them to reduce code much saner.
   - timings, so we can see if this or that is faster.
   o instead of these 2:
     x fix termination/accept.  Just add the implied rule.  it'll work.
@@ -108,7 +112,7 @@ inline std::string to_str(bool b) {
     maybe `sub_fpl.fpl` -> name_of_target_from_sub ;
     Then you can (eg) rip from c;
     or implement stuff like embedding formatting in strings. (kinda)
-  - document the fpl
+  o document the fpl (see docs dir)
   - multi-pass for comments etc. HOW!?  you thought about this
     before and perhaps had a plan. Also for things like "#" modifier.
     how about filters on fpl reader or whatever.  layered.  each layer
@@ -126,17 +130,9 @@ inline std::string to_str(bool b) {
         of precedence.  preferably in some relative fashion...
         @precedecence( ... )?  multi line, same prec grouped
         by being on the same line?
-  - repetition/optionals:  optional counts perhaps already work;
-    max_times is not implemented.  do them by boiling any foo*
-    or foo+ or whatever down to a single item (with subitems).
-    this makes passing them to reduce code much saner.
   - buffering the entire input is busted for things like stdin.
     stream instead;  but possibly fix that via chicken/egging it
     and generate the new parser with this.
-  - Document:
-    - the fact that you must supply "produces" (or have a default?)
-    - the fact that the "produces" type must be to_string compatible;
-      you can make it so by creating such a function in +{ }+.
  */
 
 struct Options {
