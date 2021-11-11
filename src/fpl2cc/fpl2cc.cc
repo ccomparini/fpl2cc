@@ -13,6 +13,12 @@
 
 #include "fpl_reader.h"
 
+enum ExitVal {
+    OK = 0,
+    FAIL = 1,
+    BAD_ARGS = 2
+};
+
 
 void fail(const char *fmt...) {
     va_list args;
@@ -139,10 +145,12 @@ struct Options {
     std::string src_fpl;
     FILE *out;
     std::string output_fn;
-    bool generate_main;
+
     bool debug;
-    bool single_step;
     std::list<std::string> entry_points;
+    bool generate_main;
+    bool help;
+    bool single_step;
 
     std::list<std::string> errors;
     inline void error(const std::string &errst) {
@@ -153,8 +161,9 @@ struct Options {
     Options(int argc, const char* const* argv) :
         out(stdout),
         output_fn("«stdout»"),
-        generate_main(false),
         debug(false),
+        generate_main(false),
+        help(false),
         single_step(false)
     {
         for(int argi = 1; argi < argc; argi++) {
@@ -197,6 +206,8 @@ struct Options {
                         entry_points.push_back(std::string(val));
                     } else if(opt == "generate-main") {
                         generate_main = true;
+                    } else if(opt == "help") {
+                        help = true;
                     } else if(opt == "out") {
                         SCAN_VALUE();
                         if(val.empty())
@@ -2023,20 +2034,8 @@ public:
     }
 };
 
-
-/*
- Input is:
-
-   <exprs or productions to match> -> <production name> +{ <code> }+
-                    or
-   <exprs to match> -> <production name> ;
-
-Also, comments.  Let's use # just cuz.
-
- */
-// XXX Coment above is outdated and probably in the wrong place
-
-void fpl2cc(const Options &opts) {
+// returns an exit()-appropriate status (i.e. 0 on success)
+ExitVal fpl2cc(const Options &opts) {
     fpl_reader inp(opts.src_fpl, fail);
 
     // parse the input file into a set of productions:
@@ -2049,34 +2048,48 @@ void fpl2cc(const Options &opts) {
         fprintf(opts.out, "%s\n", output.c_str());
     } else {
         fail("no open output - fail\n");
+        return ExitVal::BAD_ARGS;
     }
+
+    return ExitVal::OK;
 }
 
 void usage() {
     fprintf(stderr,
         "\nUsage:    fpl2cc [options] <source> [target]\n\n"
         "If no [target] is specified, prints to stdout.\n\n"
+        "Options:\n"
     );
+    // .. these decriptions suck...
+    fprintf(stderr, "        --debug - emebed debug blather in target code\n");
+    fprintf(stderr, "        --debug-single-step - as above plus pauses\n");
+    fprintf(stderr, "        --entry=<product> - specify a target production\n");
+    fprintf(stderr, "        --generate-main - generate main() function\n");
+    fprintf(stderr, "        --help - show this page\n");
 }
 
 int main(int argc, const char** argv) {
     Options opts(argc, argv);
+    ExitVal status = ExitVal::FAIL;
 
     if(opts.errors.size()) {
         for(auto fail : opts.errors) {
             fprintf(stderr, "%s\n", fail.c_str());
         }
         usage();
-        exit(1);
+        status = ExitVal::BAD_ARGS;
     } else {
-        fpl2cc(opts);
+        if(opts.help)
+            usage();
+
+        status = fpl2cc(opts);
     }
 
     if(num_warnings > 0) {
         fprintf(stderr, "%i warnings\n", num_warnings);
     }
 
-    exit(0);
+    exit(status);
 }
 
 
