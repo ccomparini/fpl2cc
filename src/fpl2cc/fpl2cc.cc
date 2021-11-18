@@ -2056,7 +2056,7 @@ ExitVal fpl2cc(const Options &opts) {
 
 void usage() {
     fprintf(stderr,
-        "\nUsage:    fpl2cc [options] <source> [target]\n\n"
+        "\nUsage:    fpl2cc [options] <source>\n\n"
         "If no [target] is specified, prints to stdout.\n\n"
         "Options:\n"
     );
@@ -2066,6 +2066,7 @@ void usage() {
     fprintf(stderr, "        --entry=<product> - specify a target production\n");
     fprintf(stderr, "        --generate-main - generate main() function\n");
     fprintf(stderr, "        --help - show this page\n");
+    fprintf(stderr, "        --out=<fn> - write to fn instead of stdout\n");
 }
 
 int main(int argc, const char** argv) {
@@ -2086,7 +2087,7 @@ int main(int argc, const char** argv) {
     }
 
     if(num_warnings > 0) {
-        fprintf(stderr, "%i warnings\n", num_warnings);
+        fprintf(stderr, "fpl2cc: %i warnings\n", num_warnings);
     }
 
     exit(status);
