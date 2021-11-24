@@ -31,6 +31,7 @@ void fail(const char *fmt...) {
 
 static int num_warnings = 0;
 void warn(const char *fmt...) {
+    fprintf(stderr, "       "); // indent warnings to make errors stand out
     va_list args;
     va_start(args, fmt);
     vfprintf(stderr, fmt, args);
@@ -111,6 +112,13 @@ inline std::string to_str(bool b) {
     errors/recovering.  do we care?  maybe change again later?
   - way to do specialized scans. ~scan_function_name maybe?
     or scan classes.
+  - multi-pass for comments etc. HOW!?  you thought about this
+    before and perhaps had a plan. Also for things like "#" modifier.
+    how about filters on fpl reader or whatever.  layered.  each layer
+    is the input to the one above.  so the "passes" happen simultaneously.
+    BUT you have to be able to examine the state of lower layers (eg
+    to find the current comment or whatever).  that's the key notion.
+    (uhh, see above: "specialized scans")
   - "^" to refer to prior rules?  think it over. Also note in general the
     lower precedent rules are earlier in the file so maybe another symbol.
     and one would scope it to the file, I guess?
@@ -119,13 +127,6 @@ inline std::string to_str(bool b) {
     Then you can (eg) rip from c;
     or implement stuff like embedding formatting in strings. (kinda)
   o document the fpl (see docs dir)
-  - multi-pass for comments etc. HOW!?  you thought about this
-    before and perhaps had a plan. Also for things like "#" modifier.
-    how about filters on fpl reader or whatever.  layered.  each layer
-    is the input to the one above.  so the "passes" happen simultaneously.
-    BUT you have to be able to examine the state of lower layers (eg
-    to find the current comment or whatever).  that's the key notion.
-    (uhh, see above: "specialized scans")
   - operator precedence:  it's a PITA to do the whole intermediate
     productions precedence thing.  So, make it part of FPL.
     Ideas:
@@ -378,7 +379,7 @@ struct GrammarElement {
         // the ID passed isn't a nonterminal.
         // returning a string like this should
         // at least give something to grep for:
-        return "Error: " + expr + " is not a nonterminal";
+        return "error: " + expr + " is not a nonterminal";
     }
 
     inline std::string to_str() const {
@@ -517,6 +518,10 @@ public:
 
     int line_number(const fpl_reader &inp) const {
         return inp.line_number(start_of_text);
+    }
+
+    std::string location(const fpl_reader &inp) const {
+        return inp.filename() + " line " + std::to_string(line_number(inp));
     }
 
     CodeBlock default_code() const {
@@ -869,8 +874,8 @@ public:
 
             if(strl == endrl) {
                 fail(
-                    "Error at line %i: Nothing produces «%s»\n",
-                    rule.line_number(inp), pname.c_str()
+                    "error in %s: Nothing produces «%s»\n",
+                    rule.location(inp).c_str(), pname.c_str()
                 );
             }
 
