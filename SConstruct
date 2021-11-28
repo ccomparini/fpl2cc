@@ -14,6 +14,8 @@ env = Environment(
         '#src',
         '#src/util',
     ],
+    LIBPATH=[ '#lib' ],
+    LIBS='jest_util',
 )
 
 # fake "Scanner" to make it so that cc files generated
