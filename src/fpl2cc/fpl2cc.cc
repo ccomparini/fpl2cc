@@ -636,10 +636,14 @@ public:
         code_for_rule = cd;
     }
 
-    CodeBlock code() const {
+    CodeBlock code(const CodeBlock &def) const {
         if(code_for_rule) {
             return code_for_rule;
+        } else if(def) {
+            // (caller provided a default, so return that)
+            return def;
         }
+
         return default_code();
     }
 
@@ -664,6 +668,7 @@ class Productions {
     fpl_reader inp;
 
     std::string reduce_type;
+    CodeBlock default_code;
     std::string preamble;
     std::list<std::string> goal; // goal is any of these
 
@@ -1014,19 +1019,20 @@ public:
         );
     }
 
-    bool parse_directive(const std::string &in) {
-        // "produces" is the only directive so far...
-        std::regex  re("produces\\s*=?\\s*(.+)\\s*$");
-        std::cmatch matched;
-        if(std::regex_search(in.c_str(), matched, re)) {
-            reduce_type = matched[1];
+    void parse_directive(const std::string &dir) {
+        if(dir == "produces") {
+            reduce_type = inp.read_re("\\s*(.+)\\s*")[1];
             if(reduce_type == "std::string") {
                 add_preamble(to_string_identity());
             }
-            return true;
+        } else if(dir == "default") {
+            default_code = read_code(inp);
+            if(!default_code) {
+                fail("expected a code block for @default\n");
+            }
+        } else {
+            fail("Unknown directive: '%s'\n", dir.c_str());
         }
-
-        return false;
     }
 
     void push_rule(const ProductionRule &rule) {
@@ -1075,6 +1081,10 @@ public:
     // thereafter may contain letters, digits, or underscores.
     static inline std::string read_production_name(fpl_reader &src) {
         return src.read_re("[A-Za-z][A-Za-z0-9_]*")[0];
+    }
+
+    static inline std::string read_directive(fpl_reader &src) {
+        return src.read_re("([A-Za-z][A-Za-z0-9_]+)\\s*")[1];
     }
 
     // .. imports relevant rules into this and returns the name of
@@ -1216,10 +1226,8 @@ public:
                     add_preamble(code);
                 }
             } else if(inp.read_byte_equalling('@')) {
-                std::string line = inp.read_line();
-                if(!parse_directive(line)) {
-                    fail("Unknown directive: %s\n", line.c_str());
-                }
+                std::string directive = read_directive(inp);
+                parse_directive(directive);
             } else {
                 ProductionRule rule(inp.current_position());
                 if(read_expressions(inp, rule)) {
@@ -1396,7 +1404,7 @@ public:
         }
         out += ") {\n";
         out += "// " + rule.to_str() + "\n";
-        out += rule.code().format(false);
+        out += rule.code(default_code).format(false);
         out += "\n}\n";
         // restore line number after end of function so that
         // compiler warnings about stuff like lack of return
