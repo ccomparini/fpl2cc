@@ -1,6 +1,5 @@
 from pprint import pprint
 
-env = Environment(
 #    PLATFORM=platform,
 #    BINDIR="#export/foo/bin",
 #    INCDIR=include,
@@ -8,42 +7,38 @@ env = Environment(
 #    CPPPATH=[include],
 #    LIBPATH=[lib],
 #    LIBS='..whatever',
-    # CPPPATH = [ 'src/compiler', 'src/util', ],
+env = Environment(
+    CCFLAGS = '-O2 -std=c++11 -Wno-parentheses',
+    CPPPATH = [
+        '.',
+        '#src',
+        '#src/util',
+    ],
 )
 
-#env.Repository("#src")
+# fake "Scanner" to make it so that cc files generated
+# by fpl files implicitly depend on fpl2cc:
+def depend_on_fpl2cc(node, env, path) :
+    # print(f'sub faking a depend for node: {node} env: {env} path: {path}')
+    return [ '#bin/fpl2cc' ]
+
+env.Append(
+    SCANNERS = Scanner(
+        function = depend_on_fpl2cc,
+        skeys = ['.fpl']
+    )
+)
+
+# fpl -> cc builder:
+env.Append(BUILDERS =
+    { 'Fpl2CC' : Builder(action = 'bin/fpl2cc $SOURCE --out $TARGET',
+	         suffix = '.cc',
+	         src_suffix = '.fpl') } )
 
 
-#pprint(vars(env))
 
-# .... seems like this needs to exist only (?) in the subdir.
-# env not shared.  hmmm.
-## fake "Scanner" to make it so that cc files generated
-## by fpl files implicitly depend on fpl2cc:
-#def depend_on_fpl2cc(node, env, path, arg) :
-#    print(f'faking a depend for node: {node} env: {env} path: {path} arg: {arg}')
-#    return [ 'bin/fpl2cc' ],
-#
-#env.Append(
-#    SCANNERS = Scanner(
-#        function = depend_on_fpl2cc,
-#        skeys = ['.fpl']
-#    )
-#)
-#
-#env.Append(BUILDERS =
-#    { 'Fpl2CC' : Builder(action = 'bin/fpl2cc $sources --out $target',
-#	         suffix = '.cc',
-#	         src_suffix = '.fpl') } )
-#
-#                      suffix='.cc', src_suffix='.fpl')})
-#
-#  from sample:
-#env.Copy1('test.bar') # produces test.h from test.bar. 
-#env.Program('app','main.cpp') # indirectly depends on test.bar
 
-# SConscript('src/util/SConstruct', variant_dir='scb',  duplicate=0)
-#SConscript('src/fpl2cc/SConstruct', variant_dir='#obj',  duplicate=False)
-SConscript('src/fpl2cc/SConstruct');
-SConscript('src/compiler/SConstruct');
+SConscript('src/util/SConstruct', 'env');
+SConscript('src/fpl2cc/SConstruct', 'env');
+SConscript('src/compiler/SConstruct', 'env');
 
