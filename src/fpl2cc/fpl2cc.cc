@@ -668,7 +668,7 @@ class Productions {
     fpl_reader inp;
 
     std::string reduce_type;
-    CodeBlock default_code;
+    CodeBlock default_action;
     std::string preamble;
     std::list<std::string> goal; // goal is any of these
 
@@ -1025,10 +1025,10 @@ public:
             if(reduce_type == "std::string") {
                 add_preamble(to_string_identity());
             }
-        } else if(dir == "default") {
-            default_code = read_code(inp);
-            if(!default_code) {
-                fail("expected a code block for @default\n");
+        } else if(dir == "default_action") {
+            default_action = read_code(inp);
+            if(!default_action) {
+                fail("expected a code block for @default_action\n");
             }
         } else {
             fail("Unknown directive: '%s'\n", dir.c_str());
@@ -1404,7 +1404,7 @@ public:
         }
         out += ") {\n";
         out += "// " + rule.to_str() + "\n";
-        out += rule.code(default_code).format(false);
+        out += rule.code(default_action).format(false);
         out += "\n}\n";
         // restore line number after end of function so that
         // compiler warnings about stuff like lack of return
