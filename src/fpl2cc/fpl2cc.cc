@@ -524,6 +524,7 @@ public:
         return inp.filename() + " line " + std::to_string(line_number(inp));
     }
 
+    // XXX maybe rename "code" to "action"
     CodeBlock default_code() const {
         std::string code;
 
@@ -669,6 +670,7 @@ class Productions {
 
     std::string reduce_type;
     CodeBlock default_action;
+    bool default_main;
     std::string preamble;
     std::list<std::string> goal; // goal is any of these
 
@@ -993,7 +995,7 @@ public:
 
 public:
 
-    Productions(fpl_reader &src) : inp(src) {
+    Productions(fpl_reader &src) : inp(src), default_main(false) {
         // element 0 is a null element and can be used to
         // indicate missing/uninitialized elements or such.
         // we count it as a nonterminal so that it can be
@@ -1020,15 +1022,17 @@ public:
     }
 
     void parse_directive(const std::string &dir) {
-        if(dir == "produces") {
-            reduce_type = inp.read_re("\\s*(.+)\\s*")[1];
-            if(reduce_type == "std::string") {
-                add_preamble(to_string_identity());
-            }
-        } else if(dir == "default_action") {
+        if(dir == "default_action") {
             default_action = read_code(inp);
             if(!default_action) {
                 fail("expected a code block for @default_action\n");
+            }
+        } else if(dir == "default_main") {
+            default_main = true;
+        } else if(dir == "produces") {
+            reduce_type = inp.read_re("\\s*(.+)\\s*")[1];
+            if(reduce_type == "std::string") {
+                add_preamble(to_string_identity());
             }
         } else {
             fail("Unknown directive: '%s'\n", dir.c_str());
@@ -2018,7 +2022,7 @@ public:
 
         out += "};\n"; // end of class
 
-        if(opts.generate_main) {
+        if(opts.generate_main || default_main) {
             out += code_for_main(parser_class);
         }
 
