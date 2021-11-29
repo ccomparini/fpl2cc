@@ -203,7 +203,7 @@ struct Options {
                         // starting point)
                         SCAN_VALUE();
                         if(val.empty())
-                            errors.push_back("--generate-main requires a value.");
+                            errors.push_back("--entry requires a value.");
                         entry_points.push_back(std::string(val));
                     } else if(opt == "generate-main") {
                         generate_main = true;
