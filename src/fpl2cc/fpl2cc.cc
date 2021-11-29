@@ -109,7 +109,7 @@ inline std::string to_str(bool b) {
       - let callers (of the whole parser) decide if the parse was
         successful or not.
     Possible downside to this: it does not consider reporting multiple
-    errors/recovering.  do we care?  maybe change again later?
+    errors/recovering.  Can the caller attempt the recovery?
   - way to do specialized scans. ~scan_function_name maybe?
     or scan classes.
   - multi-pass for comments etc. HOW!?  you thought about this
