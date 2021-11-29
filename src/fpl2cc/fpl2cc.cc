@@ -670,6 +670,7 @@ class Productions {
 
     std::string reduce_type;
     CodeBlock default_action;
+    CodeBlock post_parse;
     bool default_main;
     std::string preamble;
     std::list<std::string> goal; // goal is any of these
@@ -1021,13 +1022,23 @@ public:
         );
     }
 
+    inline CodeBlock code_for_directive(const std::string &dir) {
+        CodeBlock code = read_code(inp);
+        if(!code) {
+            fail("expected a code block for @%s\n", dir.c_str());
+        }
+        return code;
+    }
+
     void parse_directive(const std::string &dir) {
         if(dir == "default_action") {
-            default_action = read_code(inp);
-            if(!default_action) {
-                fail("expected a code block for @default_action\n");
-            }
+            default_action = code_for_directive(dir);
         } else if(dir == "default_main") {
+            default_main = true;
+        } else if(dir == "post_parse") {
+            post_parse = code_for_directive(dir);
+            // since the hook is called from the default main,
+            // let's make this imply generating the default main:
             default_main = true;
         } else if(dir == "produces") {
             reduce_type = inp.read_re("\\s*(.+)\\s*")[1];
@@ -1909,8 +1920,13 @@ public:
         out += "    fpl_reader inp(argv[1]);\n";
         out +=      parser_class + " parser(inp);\n";
         out += "    using namespace std;\n";
-        out += "    printf(\"result: %s\\n\", to_string(parser.parse()).c_str());\n";
-        out += "    printf(\"parser state:\\n%s\\n\", parser.to_str().c_str());\n";
+        out += "    auto result = parser.parse();\n";
+        if(post_parse) {
+            out += post_parse.format();
+        } else { 
+            out += "    printf(\"result: %s\\n\", to_string(result).c_str());\n";
+            out += "    printf(\"parser state:\\n%s\\n\", parser.to_str().c_str());\n";
+        }
         out += "}\n\n";
 
         return out;
