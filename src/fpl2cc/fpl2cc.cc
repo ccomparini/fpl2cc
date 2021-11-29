@@ -1906,6 +1906,7 @@ public:
         out +=      parser_class + " parser(inp);\n";
         out += "    using namespace std;\n";
         out += "    printf(\"result: %s\\n\", to_string(parser.parse()).c_str());\n";
+        out += "    printf(\"parser state:\\n%s\\n\", parser.to_str().c_str());\n";
         out += "}\n\n";
 
         return out;
@@ -2010,6 +2011,7 @@ public:
         }
 
         out += "    " + parser_class + "(fpl_reader &src) : base_parser(src) { }\n";
+        out += "    std::string to_str() { return base_parser.to_str(); }\n";
         out += "    inline " + reduce_type + " parse() {\n";
         out += "        return base_parser.parse(*this);\n";
         out += "    };\n";
