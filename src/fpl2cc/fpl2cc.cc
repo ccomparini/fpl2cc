@@ -98,6 +98,11 @@ inline std::string to_str(bool b) {
     max_times is not implemented.  do them by boiling any foo*
     or foo+ or whatever down to a single item (with subitems).
     this makes passing them to reduce code much saner.
+    this means either looping in a state to handle the repetition
+    (can that work?) or somehow making the push code know to add
+    to the thing at the top of the stack instead of pushing new.
+    x optionals: I think we need the states to understand optionals
+      (optionals parse correctly)
   - timings, so we can see if this or that is faster.
   o instead of these 2:
     x fix termination/accept.  Just add the implied rule.  it'll work.
@@ -152,6 +157,7 @@ struct Options {
     bool generate_main;
     bool help;
     bool single_step;
+    bool dump_states;
 
     std::list<std::string> errors;
     inline void error(const std::string &errst) {
@@ -165,7 +171,8 @@ struct Options {
         debug(false),
         generate_main(false),
         help(false),
-        single_step(false)
+        single_step(false),
+        dump_states(false)
     {
         for(int argi = 1; argi < argc; argi++) {
             // c++ -- :P
@@ -198,6 +205,8 @@ struct Options {
                     } else if(opt == "debug-single-step") {
                         debug = true;
                         single_step = true;
+                    } else if(opt == "debug-dump-states") {
+                        dump_states = true;
                     } else if(opt == "entry") {
                         // specifies an entry rule (i.e. a parsing
                         // starting point)
@@ -854,8 +863,8 @@ public:
 
         std::string to_str(
             const Productions *prds,
-            const char *line_prefix = "",
-            const char *line_suffix = "\n"
+            const std::string &line_prefix = "",
+            const std::string &line_suffix = "\n"
         ) const {
             // efficient? probably not. do I care?
             std::string out;
@@ -951,11 +960,8 @@ public:
     }
 
     // adds the given lr_item to the lr_set, plus any other
-    // related items to cover optionalness/repetition
-    // XXX OK so perhaps:
-    //   - code generation deals with optionals and repeats
-    //   - modify goto such that it can understand to enter
-    //     states beginning with optionals
+    // related items to cover optionalness.
+    // (repetition is handled in the goto)
     void add_expanded(lr_set &set, const lr_item &it) {
 
         const ProductionRule &rule = rules[it.rule];
@@ -979,7 +985,12 @@ public:
         for(auto item : in.iterable_items()) {
             const ProdExpr *step = rules[item.rule].step(item.position);
             if(step && step->matches(sym)) {
+
                 add_expanded(set, lr_item(item.rule, item.position + 1));
+                if(step->max_times > 1) {
+                    // ...if it can be repeated:
+                    add_expanded(set, lr_item(item.rule, item.position));
+                }
             }
         }
         return lr_closure(set);
@@ -1391,14 +1402,17 @@ public:
         const ProductionRule &rule = rules[rule_ind];
         std::string out;
 
-        // parameters (this may be too complicated):
-        //  - the rule itself
-        //  - the current parser state
-        //  x arg[] array.  callers figure out length based on rule.
-        //  x uhh... argX for each arg, with the appropriate type
-        //    so that fpl authors don't have to convert each Product arg..
-        out += reduce_type + " " + rule_fn(rule_ind) + "(";
-        out += "Product arg[]";
+        std::string rule_name = rule_fn(rule_ind);
+        out += reduce_type + " " + rule_name + "(";
+
+        // parameters:
+        // If the expression for the step has a min/max times of
+        // anything other than exactly 1 (is_single()), we pass
+        // it as a stack slice.
+        // Otherwise, if it's a terminal, pass it as a string,
+        // or (the main general case) as whatever the reduce
+        // type is.  This is complicated for the code generator,
+        // but simplifies life for the fpl author. I think.
         for(int stind = 0; stind < rule.num_steps(); stind++) {
             std::string arg_name = "arg_" + std::to_string(stind);
             const ProdExpr *expr = rule.step(stind);
@@ -1408,17 +1422,24 @@ public:
                 );
             } else if(!expr->is_single()) {
                 // the argument is either optional or can repeat or
-                // both, so we can't pass it simply.  so, instead,
-                // pass it as a product:
-                out += ", Product " + arg_name;
+                // both, so we can't pass it simply.  so pass it
+                // as a slice:
+                out += "const FPLBP::StackSlice &";
             } else if(expr->is_terminal()) {
-                out += ", std::string " + arg_name;
+                out += "std::string ";
             } else {
-                out += ", " + reduce_type + " " + arg_name;
+                out += reduce_type + " ";
+            }
+            out += arg_name;
+            if(stind + 1 < rule.num_steps()) {
+                out += ", ";
             }
         }
         out += ") {\n";
         out += "// " + rule.to_str() + "\n";
+        if(opts.debug) {
+            out += "fprintf(stderr, \"reducing by " + rule_name + "\\n\");\n";
+        }
         out += rule.code(default_action).format(false);
         out += "\n}\n";
         // restore line number after end of function so that
@@ -1440,9 +1461,6 @@ public:
         std::string out;
         const ProductionRule &rule = rules[rule_ind];
 
-        //   In what form should the production code be provided?
-        // What should we provide for the author of the production
-        // code?
         //   For the moment, production code will need to be written
         // in c++.  Authors of the production code should provide
         // a matching header which defines their product type,
@@ -1452,46 +1470,57 @@ public:
         // need to pass in the generated products.  Can we show the
         // whole stack?
         // pass, named:
-        //  - const &parser (with stack popped or not?)
+        //  - const &parser (do this?)
         //  - arguments from the stack:
+        //    - one argument per element (step) in the rule.
+        //      each such argument is a slice of the stack,
+        //      holding where in the stack the relevant entries
+        //      are, and how many there are.
 
-        //  - one argument per element (step) in the rule.
-        //    to handle repetition, boil any foo+ or foo*
-        //    down to a single item containing an array of
-        //    other items.  it's the only sane way.
-        //    implement by making wildcard things implicitly
-        //    make their own elements. (i.e. if there's foo+
-        //    or foo*, those each get their own nonterminals).
-        std::string ns_str = std::to_string(rule.num_steps());
-        out += "\n";
-        out += "    State next_state;\n";
-        out += "    Product args[" + ns_str + "];\n";
-        out += "    for(int aind = " + ns_str + " - 1; aind >= 0; --aind) {\n";
-        out += "        StackEntry ste = base_parser.lr_pop();\n";
-        out += "        next_state = ste.state;\n";
-        out += "        args[aind] = ste.product;\n";
-        out += "    }\n";
-        out += "    " + reduce_type + " result = " + rule_fn(rule_ind);
-        out +=     "(args";
-        for(int stind = 0; stind < rule.num_steps(); stind++) {
-            std::string arg = ", args[" + std::to_string(stind) + "]";
+        // in c++ the order in which arguments for a function are
+        // evaluated is not deterministic, so we need to make some
+        // temps for the arguments.  We go backward because the item
+        // at the top of the stack will be the last argument, and
+        // the item one down from the top of the stack the second
+        // to last, etc.
+        out += "int pos = base_parser.lr_top();\n";
+        for(int stind = rule.num_steps() - 1; stind >= 0; --stind) {
             const ProdExpr *expr = rule.step(stind);
+            std::string argname = "arg_" + std::to_string(stind);
             if(!expr) {
                 fail("Bug: no expression for step %i in %s",
                     stind, rule.to_str().c_str()
                 );
-            } else if(!expr->is_single()) {
-                out += arg;
-            } else if(expr->is_terminal()) {
-                out += arg + ".term_str()";
             } else {
-                out += arg + ".val()";
+                std::string eid_str = std::to_string(element_index[expr->gexpr]);
+                std::string max_str = std::to_string(expr->max_times);
+                out += "FPLBP::StackSlice " + argname
+                     + "(base_parser, " + eid_str + ", " + max_str + ", pos);\n";
             }
         }
-        out +=     ");\n";
-        if(opts.debug) {
-            out += "    using namespace std;\n";
+
+        out += "    " + reduce_type + " result = " + rule_fn(rule_ind) + "(";
+        for(int stind = 0; stind < rule.num_steps(); stind++) {
+            const ProdExpr *expr = rule.step(stind);
+            std::string argname = "arg_" + std::to_string(stind);
+            out += argname;
+            if(expr->is_single()) {
+                if(expr->is_terminal()) {
+                    out += ".term_str()";
+                } else {
+                    out += ".val()";
+                }
+            }
+            if(stind + 1 < rule.num_steps())
+                out += ", ";
         }
+        out += ");\n";
+        out += "base_parser.lr_top(pos);\n";
+
+        if(opts.debug) {
+            out += "fprintf(stderr, \"... finished reducing\\n\");\n";
+        }
+
         out += "    base_parser.set_product(Product(result, "
              + rule.product_element().nonterm_id_str()
              + "));\n";
@@ -2025,7 +2054,6 @@ public:
             out += code_for_rule(opts, rnum);
         }
 
-
         for(lr_set state : states) {
             out += code_for_state(opts, state).c_str();
         }
@@ -2045,6 +2073,16 @@ public:
         report_unused_rules();
 
         return reformat_code(out, opts.output_fn);
+    }
+
+    // debugging:
+    void dump_states() {
+        //for(lr_set state : states) {
+        for(int stind = 0; stind < states.size(); stind++) {
+            printf("state %i:\n%s\n",
+                stind, states[stind].to_str(this, "    ").c_str()
+            );
+        }
     }
 
     void report_unused_rules() {
@@ -2078,6 +2116,12 @@ ExitVal fpl2cc(const Options &opts) {
 
     std::string output = productions.generate_code(opts);
 
+    // states are generated as a side effect of generate_code,
+    // which is not great, but I'm not going to fix it right now,
+    // so dump_states has to go after generate_code():
+    if(opts.dump_states)
+        productions.dump_states();
+
     // uhh... this is easy, if hokey:
     if(opts.out) {
         fprintf(opts.out, "%s\n", output.c_str());
@@ -2098,6 +2142,7 @@ void usage() {
     // .. these decriptions suck...
     fprintf(stderr, "        --debug - emebed debug blather in target code\n");
     fprintf(stderr, "        --debug-single-step - as above plus pauses\n");
+    fprintf(stderr, "        --debug-dump-states - print generated states\n");
     fprintf(stderr, "        --entry=<product> - specify a target production\n");
     fprintf(stderr, "        --generate-main - generate main() function\n");
     fprintf(stderr, "        --help - show this page\n");
