@@ -1048,9 +1048,6 @@ public:
             default_main = true;
         } else if(dir == "post_parse") {
             post_parse = code_for_directive(dir);
-            // since the hook is called from the default main,
-            // let's make this imply generating the default main:
-            default_main = true;
         } else if(dir == "produces") {
             reduce_type = inp.read_re("\\s*(.+)\\s*")[1];
             if(reduce_type == "std::string") {
@@ -1950,12 +1947,8 @@ public:
         out +=      parser_class + " parser(inp);\n";
         out += "    using namespace std;\n";
         out += "    auto result = parser.parse();\n";
-        if(post_parse) {
-            out += post_parse.format();
-        } else { 
-            out += "    printf(\"result: %s\\n\", to_string(result).c_str());\n";
-            out += "    printf(\"parser state:\\n%s\\n\", parser.to_str().c_str());\n";
-        }
+        out += "    printf(\"result: %s\\n\", to_string(result).c_str());\n";
+        out += "    printf(\"parser state:\\n%s\\n\", parser.to_str().c_str());\n";
         out += "}\n\n";
 
         return out;
@@ -2061,7 +2054,11 @@ public:
         out += "    " + parser_class + "(fpl_reader &src) : base_parser(src) { }\n";
         out += "    std::string to_str() { return base_parser.to_str(); }\n";
         out += "    inline " + reduce_type + " parse() {\n";
-        out += "        return base_parser.parse(*this);\n";
+        out += "        auto result = base_parser.parse(*this);\n";
+        if(post_parse) {
+            out += post_parse.format();
+        }
+        out += "        return result;\n";
         out += "    };\n";
 
         out += "};\n"; // end of class
