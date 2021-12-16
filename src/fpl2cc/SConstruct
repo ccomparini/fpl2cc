@@ -1,7 +1,7 @@
 
-env = Environment(
-    CCFLAGS = '-O2 -std=c++11 -Wno-parentheses',
-)
+Import('env')
+env = env.Clone()
+
 
 env.Program('#bin/fpl2cc', [ 'fpl2cc.cc', ])
 
