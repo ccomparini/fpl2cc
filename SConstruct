@@ -1,5 +1,13 @@
 from pprint import pprint
 
+debugger = ''
+#debugger = 'TERM=xterm-256color /usr/bin/lldb --one-line "b debug_hook" -- '
+
+ccflags = ''
+if debugger : ccflags += " -g"
+else        : ccflags += " -O2"
+ccflags += " -std=c++11 -Wno-parentheses"
+
 #    PLATFORM=platform,
 #    BINDIR="#export/foo/bin",
 #    INCDIR=include,
@@ -8,7 +16,7 @@ from pprint import pprint
 #    LIBPATH=[lib],
 #    LIBS='..whatever',
 env = Environment(
-    CCFLAGS = '-O2 -std=c++11 -Wno-parentheses',
+    CCFLAGS = ccflags,
     CPPPATH = [
         '.',
         '#src',
@@ -16,7 +24,9 @@ env = Environment(
     ],
     LIBPATH=[ '#lib' ],
     LIBS='jest_util',
+    tools = [ 'default', 'clangxx', ],
 )
+
 
 # fake "Scanner" to make it so that cc files generated
 # by fpl files implicitly depend on fpl2cc:
@@ -37,6 +47,11 @@ env.Append(BUILDERS =
 	         suffix = '.cc',
 	         src_suffix = '.fpl') } )
 
+# fpl -> h builder:
+env.Append(BUILDERS =
+    { 'Fpl2h' : Builder(action = debugger + 'bin/fpl2cc $SOURCE --out $TARGET',
+	         suffix = '.h',
+	         src_suffix = '.fpl') } )
 
 
 
