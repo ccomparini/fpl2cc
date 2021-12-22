@@ -1,7 +1,7 @@
 from pprint import pprint
 
-debugger = ''
-#debugger = 'TERM=xterm-256color /usr/bin/lldb --one-line "b debug_hook" -- '
+#debugger = ''
+debugger = 'TERM=xterm-256color /usr/bin/lldb --one-line "b debug_hook" -- '
 
 ccflags = ''
 if debugger : ccflags += " -g"
@@ -44,7 +44,7 @@ env.Append(
 # fpl -> cc builder:
 # at this point this is for testing fpl
 env.Append(BUILDERS =
-    { 'Fpl2CC' : Builder(action = 'bin/fpl2cc $SOURCE --out $TARGET',
+    { 'Fpl2CC' : Builder(action = debugger + 'bin/fpl2cc $SOURCE --out $TARGET',
 	         suffix = '.cc',
 	         src_suffix = '.fpl') } )
 
