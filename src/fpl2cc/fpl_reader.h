@@ -214,11 +214,17 @@ public:
         return read_pos >= buffer.length() - 1;
     }
 
+private:
     // returns a pointer to the next byte of the input
     // buffer.
-    // XXX make private
     inline const utf8_byte *inpp() const {
         return buffer.data() + read_pos;
+    }
+public:
+
+    inline utf8_byte peek() const {
+        const utf8_byte *byte = inpp();
+        return byte?*byte:'\0';
     }
 
     // why do I not instead make a std::string formatter? .. anywayzzzz

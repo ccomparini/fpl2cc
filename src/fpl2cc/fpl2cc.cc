@@ -1075,9 +1075,7 @@ public:
     }
 
     static void read_quantifiers(fpl_reader &src, ProdExpr &expr) {
-        const utf8_byte *inp = src.inpp();
-
-        switch(*inp) {
+        switch(src.peek()) {
             case '*':
                 expr.min_times = 0;
                 expr.max_times = INT_MAX;
@@ -1140,15 +1138,12 @@ public:
         do {
             src.eat_space();
 
-            const utf8_byte *inp = src.inpp();
-
-            if(!*inp)
-                break;
+            const utf8_byte inch = src.peek();
 
             std::string expr_str;
             GrammarElement::Type type = GrammarElement::Type::NONE;
 
-            switch(*inp) {
+            switch(inch) {
                 case '\0':
                     done = true;
                     break; // EOF
@@ -1158,7 +1153,7 @@ public:
                     break;
                 case '"':
                 case '\'':
-                    expr_str = src.read_to_byte(*inp);
+                    expr_str = src.read_to_byte(inch);
                     type     = GrammarElement::Type::TERM_EXACT;
                     break;
                 case '/':
@@ -1208,40 +1203,33 @@ public:
          // derail it if you put +{ or }+ in a comment or
          // string or whatever.  so try not to do that.
          src.eat_space();
-         size_t start = -1;
-         size_t end   = -1;
 
-         if(src.read_byte_equalling('+') && src.read_byte_equalling('{')) {
-             start = src.current_position();
-             while(char byte_in = src.read_byte()) {
-                 if(byte_in == '}') {
-                     if(src.read_byte() == '+') {
-                         end = src.current_position() - 2;
-                         break;
-                     }
+         size_t start = src.current_position();
+         if(!src.read_exact_match("+{")) {
+             src.error("expected start of code (\"+{\") but got «%s»", src.debug_peek().c_str());
+             return CodeBlock();
+         }
+
+         std::string code_str;
+         while(char byte_in = src.read_byte()) {
+             if(byte_in == '}') {
+                 if(src.peek() == '+') {
+                     src.read_byte();
+                     break;
                  }
              }
+             code_str += byte_in;
          }
 
-         if((start >= 0) && (end > 0)) {
-             return CodeBlock(
-                 src.filename(),
-                 src.line_number(start),
-                 src.read_range(start, end)
-             );
-         }
-
-         // else error - no start of code or ';'
-         src.error("expected start of code (\"+{\") or \";\"");
-         return CodeBlock();
+         return CodeBlock(src.filename(), src.line_number(start), code_str);
     }
 
     void parse_fpl() {
         do {
             inp.eat_space();
-            if(*inp.inpp() == '#') {
+            if(inp.peek() == '#') {
                 inp.read_line();
-            } else if(*inp.inpp() == '+') {
+            } else if(inp.peek() == '+') {
                 // inlined/general code - goes at the top of the generated
                 // code.  Use to define types or whatever.
                 CodeBlock code(read_code(inp));
@@ -1258,12 +1246,11 @@ public:
                     // the production (including the "->").
                     // read what the expressions above produce:
                     inp.eat_space();
-                    const utf8_byte *start = inp.inpp();
                     rule.product(inp.read_to_space());
                     if(rule.product().length() <= 0) {
                         fail(
-                            "missing production name on line %i near %.12s\n",
-                            rule.line_number(inp), start
+                            "missing production name on line %i\n",
+                            rule.line_number(inp)
                         );
                     }
 
