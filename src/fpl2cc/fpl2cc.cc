@@ -1138,11 +1138,11 @@ public:
         do {
             src.eat_space();
 
-            const utf8_byte inch = src.peek();
 
             std::string expr_str;
             GrammarElement::Type type = GrammarElement::Type::NONE;
 
+            const utf8_byte inch = src.peek();
             switch(inch) {
                 case '\0':
                     done = true;
@@ -1211,14 +1211,24 @@ public:
          }
 
          std::string code_str;
-         while(char byte_in = src.read_byte()) {
+         bool found_terminator = false;
+         char byte_in;
+         while(byte_in = src.read_byte()) {
              if(byte_in == '}') {
                  if(src.peek() == '+') {
                      src.read_byte();
+                     found_terminator = true;
                      break;
                  }
              }
              code_str += byte_in;
+         }
+
+         if(!found_terminator) {
+             src.error(
+                 "Expected code block terminator ('}+') but got byte 0x%x",
+                 byte_in
+             );
          }
 
          return CodeBlock(src.filename(), src.line_number(start), code_str);
