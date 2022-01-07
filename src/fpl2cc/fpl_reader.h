@@ -1,21 +1,12 @@
 #ifndef FPL_READER_H
 #define FPL_READER_H
 
-#include <filesystem>
 #include <fstream>
 #include <regex>
 #include <string>
 
-#if __cplusplus <= 199711L
-  #error because it uses <filesystem>, fpl_reader.h needs c++11 or better
-#endif
+#include "util/fs.h"
 
-#ifdef __APPLE__
-// sigh thanks apple
-namespace fs = std::__fs::filesystem;
-#else
-namespace fs = std::filesystem;
-#endif
 
 
 typedef uint32_t unich; // 4 byte unicode char; for realz, unlike wchar_t
