@@ -680,6 +680,7 @@ class Productions {
     std::string reduce_type;
     CodeBlock default_action;
     CodeBlock post_parse;
+    CodeBlock separator_code;
     bool default_main;
     std::string preamble;
     std::list<std::string> goal; // goal is any of these
@@ -1053,6 +1054,8 @@ public:
             if(reduce_type == "std::string") {
                 add_preamble(to_string_identity());
             }
+        } else if(dir == "separator") {
+            separator_code = code_for_directive(dir);
         } else {
             fail("Unknown directive: '%s'\n", dir.c_str());
         }
@@ -1136,8 +1139,7 @@ public:
         int num_read = 0;
         bool done = false;
         do {
-            src.eat_space();
-
+            src.eat_separator();
 
             std::string expr_str;
             GrammarElement::Type type = GrammarElement::Type::NONE;
@@ -1202,7 +1204,7 @@ public:
          // this is done simplistically, which means you will
          // derail it if you put +{ or }+ in a comment or
          // string or whatever.  so try not to do that.
-         src.eat_space();
+         src.eat_separator();
 
          size_t start = src.current_position();
          if(!src.read_exact_match("+{")) {
@@ -1236,7 +1238,7 @@ public:
 
     void parse_fpl() {
         do {
-            inp.eat_space();
+            inp.eat_separator();
             if(inp.peek() == '#') {
                 inp.read_line();
             } else if(inp.peek() == '+') {
@@ -1255,8 +1257,8 @@ public:
                     // .. we've read the expressions/steps leading to
                     // the production (including the "->").
                     // read what the expressions above produce:
-                    inp.eat_space();
-                    rule.product(inp.read_to_space());
+                    inp.eat_separator();
+                    rule.product(inp.read_to_separator());
                     if(rule.product().length() <= 0) {
                         fail(
                             "missing production name on line %i\n",
@@ -1264,7 +1266,7 @@ public:
                         );
                     }
 
-                    inp.eat_space();
+                    inp.eat_separator();
 
                     // next we expect either ';' or a code block.
                     // if it's ';' we read it and move on;  otherwise
@@ -1577,10 +1579,10 @@ public:
         switch(type) {
             // shifts
             case GrammarElement::TERM_EXACT:
-                out += "} else if(base_parser.shift_exact(";
+                out += "} else if(base_parser.shift_exact(separator_length,";
                 break;
             case GrammarElement::TERM_REGEX:
-                out += "} else if(base_parser.shift_re(";
+                out += "} else if(base_parser.shift_re(separator_length,";
                 break;
             case GrammarElement::NONTERM_PRODUCTION:
                 out += "} else if(base_parser.shift_nonterm(";
@@ -1906,6 +1908,28 @@ public:
         return out;
     }
 
+    /*
+        separator_method returns a method which should return
+        the number of bytes (possibly 0) to skip in order to
+        elide whatever token separator(s) are at the *inp pointer
+        passed.  Default is space separation.
+     */
+    std::string separator_method() {
+        std::string out(
+            "static size_t separator_length(const utf8_byte *inp) {\n"
+        );
+
+        if(separator_code) {
+            out += separator_code.format();
+        } else {
+            out += "    return space_length(inp);\n";
+        }
+
+        out += "}\n";
+        
+        return out;
+    }
+
     std::string parser_class_name() {
         std::string base;
         for(auto chr : inp.base_name()) {
@@ -1935,12 +1959,14 @@ public:
         out += "int main(int argc, const char **argv) {\n";
         out += "    if(argc < 2) {\n";
         // XXX this is weak;  make the reader able to read stdin
+        // XXX oh I think we can now.  yay.
         out += "        fpl_reader::default_fail(\n";
         out += "            \"Please provide a source file name.\\n\"\n";
         out += "        );\n";
         out += "    }\n";
         // XXX this is also weak; handle more than one source
         out += "    fpl_reader inp(argv[1]);\n";
+        //out +=      parser_class + " parser(inp, NULL);\n";
         out +=      parser_class + " parser(inp);\n";
         out += "    using namespace std;\n";
         out += "    auto result = parser.parse();\n";
@@ -2008,16 +2034,22 @@ public:
         generate_states(goal);
 
         out += "#include <string>\n";
+
+        // XXX make a separate @to_string so it doesn't have
+        //  to be preamble. or predeclare it?
         // preamble has to come before the fpl headers
         // because (to my surpise) things like to_string
         // functions (called by the template) have to be
         // declared before the template (not just before
         // template instantiation.. ?) (did I miss something?)
+        out += "\n// preamble:\n";
         out += preamble;
+        out += "// end preamble\n\n";
         out += "#line " + std::to_string(__LINE__) + " \"" + __FILE__ + "\"\n";
         out += "#include \"fpl2cc/fpl_reader.h\"\n";
         out += "#include \"fpl2cc/fpl_base_parser.h\"\n";
-        out += "\n";
+        out += "\n\n";
+
         // parser_class is now really parser_impl_class or such...
         out += "class " + parser_class + " {\n";
         // Can't do the private declarations first because the
@@ -2039,6 +2071,8 @@ public:
         out += nonterm_enum();
         out += state_to_string();
         out += is_goal();
+
+        out += separator_method();
 
         for(int rnum = 0; rnum < rules.size(); rnum++) {
             out += code_for_rule(opts, rnum);

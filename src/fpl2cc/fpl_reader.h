@@ -19,15 +19,82 @@ namespace fs = std::filesystem;
 
 
 typedef uint32_t unich; // 4 byte unicode char; for realz, unlike wchar_t
-typedef void (ErrorCallback)(const char *fmt...); // printf format
-
 typedef unsigned char utf8_byte;
 typedef std::basic_string<utf8_byte> utf8_buffer;
+
+typedef void (ErrorCallback)(const char *fmt...); // printf format
+typedef size_t (LengthCallback)(const utf8_byte *inp);
 
 inline std::string to_std_string(const utf8_byte *str, int len) {
     return std::string(reinterpret_cast<const char *>(str), len);
 }
 
+// Returns the length in bytes of the utf-8 character at *at,
+// or 0 if that character isn't a space.
+//inline size_t space_length(const utf8_byte *at) {
+size_t space_length(const utf8_byte *at) {
+    if(at == NULL) return 0;
+
+    switch(*at) {
+        // ascii ones are simple and common:
+        case 0x09:    // character tabulation (aka "tab")
+        case 0x0A:    // line feed
+        case 0x0B:    // line tabulation
+        case 0x0C:    // form feed
+        case 0x0D:    // carriage return
+        case 0x20:    // space
+            return 1;
+        case 0xc2:
+            if(at[1] == 0x85) return 2; // U+0085 = next line
+            if(at[1] == 0xa0) return 2; // U+00A0 = no-break space
+            return 0;
+        case 0xe1:
+            if(at[1] == 0x9a && at[2] == 0x80)
+                return 3; // 0xe1,0x9a,0x80 = U+1680 = ogham space mark
+            return 0;
+        case 0xe2:
+            if(at[1] == 0x80) {
+                if(at[2] >= 0x80 && at[2] <= 0x8a) {
+                    // 0xe2,0x80,0x80 -> U+2000 = en quad
+                    // 0xe2,0x80,0x81 -> U+2001 = em quad
+                    // 0xe2,0x80,0x82 -> U+2002 = en space
+                    // 0xe2,0x80,0x83 -> U+2003 = em space
+                    // 0xe2,0x80,0x84 -> U+2004 = three-per-em space
+                    // 0xe2,0x80,0x85 -> U+2005 = four-per-em space
+                    // 0xe2,0x80,0x86 -> U+2006 = six-per-em space
+                    // 0xe2,0x80,0x87 -> U+2007 = figure space
+                    // 0xe2,0x80,0x88 -> U+2008 = punctuation space
+                    // 0xe2,0x80,0x89 -> U+2009 = thin space
+                    // 0xe2,0x80,0x8a -> U+200A = hair space         
+                    return 3;
+                }
+
+                if(at[2] == 0xa8)
+                    return 3; // 0xe2,0x80,0xa8 -> U+2028 = line separator
+
+                if(at[2] == 0xa9)
+                    return 3; // 0xe2,0x80,0xa9 -> U+2029 = paragraph separator
+
+                if(at[2] == 0xaf)
+                    return 3; // 0xe2,0x80,0xaf -> U+202F = narrow no-break sp.
+
+            } else if(at[1] == 0x81 && at[2] == 0x9f) {
+                return 3; // 0xe2,0x81,0x9f -> 205F = medium mathematical space
+            }
+            return 0;
+
+        case 0xe3:
+            if(at[1] == 0x80 && at[2] == 0x80)
+                return 3; // 0xe3,0x80,0x80 = U+3000 ideographic space
+            return 0;
+
+        default:
+            // not space
+            return 0;
+    }
+
+    // can't get here.
+}
 
 class fpl_reader {
 
@@ -337,72 +404,6 @@ public:
         return out;
     }
 
-    // Returns the length in bytes of the utf-8 character at *at,
-    // or 0 if that character isn't a space.
-    inline size_t space_length(const utf8_byte *at) {
-        if(at == NULL) return 0;
-
-        switch(*at) {
-            // ascii ones are simple and common:
-            case 0x09:    // character tabulation (aka "tab")
-            case 0x0A:    // line feed
-            case 0x0B:    // line tabulation
-            case 0x0C:    // form feed
-            case 0x0D:    // carriage return
-            case 0x20:    // space
-                return 1;
-            case 0xc2:
-                if(at[1] == 0x85) return 2; // U+0085 = next line
-                if(at[1] == 0xa0) return 2; // U+00A0 = no-break space
-                return 0;
-            case 0xe1:
-                if(at[1] == 0x9a && at[2] == 0x80)
-                    return 3; // 0xe1,0x9a,0x80 = U+1680 = ogham space mark
-                return 0;
-            case 0xe2:
-                if(at[1] == 0x80) {
-                    if(at[2] >= 0x80 && at[2] <= 0x8a) {
-                        // 0xe2,0x80,0x80 -> U+2000 = en quad
-                        // 0xe2,0x80,0x81 -> U+2001 = em quad
-                        // 0xe2,0x80,0x82 -> U+2002 = en space
-                        // 0xe2,0x80,0x83 -> U+2003 = em space
-                        // 0xe2,0x80,0x84 -> U+2004 = three-per-em space
-                        // 0xe2,0x80,0x85 -> U+2005 = four-per-em space
-                        // 0xe2,0x80,0x86 -> U+2006 = six-per-em space
-                        // 0xe2,0x80,0x87 -> U+2007 = figure space
-                        // 0xe2,0x80,0x88 -> U+2008 = punctuation space
-                        // 0xe2,0x80,0x89 -> U+2009 = thin space
-                        // 0xe2,0x80,0x8a -> U+200A = hair space         
-                        return 3;
-                    }
-
-                    if(at[2] == 0xa8)
-                        return 3; // 0xe2,0x80,0xa8 -> U+2028 = line separator
-
-                    if(at[2] == 0xa9)
-                        return 3; // 0xe2,0x80,0xa9 -> U+2029 = paragraph separator
-
-                    if(at[2] == 0xaf)
-                        return 3; // 0xe2,0x80,0xaf -> U+202F = narrow no-break sp.
-
-                } else if(at[1] == 0x81 && at[2] == 0x9f) {
-                    return 3; // 0xe2,0x81,0x9f -> 205F = medium mathematical space
-                }
-                return 0;
-
-            case 0xe3:
-                if(at[1] == 0x80 && at[2] == 0x80)
-                    return 3; // 0xe3,0x80,0x80 = U+3000 ideographic space
-                return 0;
-
-            default:
-                // not space
-                return 0;
-        }
-
-        // can't get here.
-    }
-
     inline void go_to(size_t position) {
         read_pos = position;
     }
@@ -415,13 +416,13 @@ public:
         read_pos += char_length(inpp());
     }
 
-    void eat_space() {
-        while(size_t adv = space_length(inpp())) {
+    void eat_separator(LengthCallback *separator_cb = space_length) {
+        while(size_t adv = separator_cb(inpp())) {
             skip_bytes(adv);
         }
     }
 
-    std::string read_to_space() {
+    std::string read_to_separator(LengthCallback *sep_cb = space_length) {
         const utf8_byte *start = inpp();
 
         if(!start)
@@ -429,7 +430,7 @@ public:
 
         size_t length = 0;
         while(const utf8_byte *in = inpp()) {
-            if(space_length(in))
+            if(sep_cb(in))
                 break;
 
             size_t len = char_length(in);

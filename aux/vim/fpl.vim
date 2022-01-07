@@ -19,6 +19,7 @@ syn match	fplAtDirective	"@default_action"
 syn match	fplAtDirective	"@default_main"
 syn match	fplAtDirective	"@post_parse"
 syn match	fplAtDirective	"@produces"
+syn match	fplAtDirective	"@separator"
 
 " operators (such as they are):
 syn match	fplOperator	"->"
