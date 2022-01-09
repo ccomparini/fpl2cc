@@ -1,7 +1,7 @@
 from pprint import pprint
 
-#debugger = ''
-debugger = 'TERM=xterm-256color /usr/bin/lldb --one-line "b debug_hook" -- '
+debugger = ''
+#debugger = 'TERM=xterm-256color /usr/bin/lldb --one-line "b debug_hook" -- '
 
 ccflags = ''
 if debugger : ccflags += " -g"

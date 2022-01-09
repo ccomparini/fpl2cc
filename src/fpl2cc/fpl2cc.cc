@@ -2080,6 +2080,11 @@ public:
     }
 
     std::string generate_code(const Options &opts) {
+
+        if(rules.size() <= 0) {
+            fail("No rules found\n");
+        }
+
         const std::string parser_class = parser_class_name();
         // "base" is probably the wrong term..
         const std::string base_parser_class = "FPLBaseParser<" + parser_class + ">";
