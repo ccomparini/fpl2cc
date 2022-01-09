@@ -297,6 +297,14 @@ struct CodeBlock {
         }
         return out;
     }
+
+    // As format() but wrapped in { } so that if the code is
+    // declares a local variable or such, that variable will
+    // be scoped.
+    // This will probably only work with code fragments.
+    std::string format_scoped() const {
+        return "\n{\n" + format() + "\n}\n";
+    }
 };
 
 
@@ -681,6 +689,7 @@ class Productions {
     CodeBlock default_action;
     CodeBlock post_parse;
     CodeBlock separator_code;
+    std::list<CodeBlock> comment_code;
     bool default_main;
     std::string preamble;
     std::list<std::string> goal; // goal is any of these
@@ -1042,8 +1051,23 @@ public:
         return code;
     }
 
+    void add_comment_style(const std::string &style) {
+        // comment style files are relative to this source:
+        fs::path fn(__FILE__);
+        fn.replace_filename("comment/" + style + ".inc");
+
+        comment_code.push_back(CodeBlock(fn, 1, load_file(fn)));
+    }
+
     void parse_directive(const std::string &dir) {
-        if(dir == "default_action") {
+        if(dir == "comment_style") {
+            std::string style = inp.read_re("\\s*(.+)\\s*")[1];
+            if(!style.length()) {
+                warn("no comment style specified");
+            } else {
+                add_comment_style(style);
+            }
+        } else if(dir == "default_action") {
             default_action = code_for_directive(dir);
         } else if(dir == "default_main") {
             default_main = true;
@@ -1055,6 +1079,8 @@ public:
                 add_preamble(to_string_identity());
             }
         } else if(dir == "separator") {
+            if(separator_code)
+                warn("@separator overrides existing separator code\n");
             separator_code = code_for_directive(dir);
         } else {
             fail("Unknown directive: '%s'\n", dir.c_str());
@@ -1109,6 +1135,32 @@ public:
 
     static inline std::string read_directive(fpl_reader &src) {
         return src.read_re("([A-Za-z][A-Za-z0-9_]+)\\s*")[1];
+    }
+
+    // reads the specified file and returns its contents as a string.
+    // calls fail() (and returns enpty string) on error.
+    // this should be some kind of standard library thingo.
+    static std::string load_file(const std::string &infn) {
+
+        // blatant copypasta from fpl_reader
+        std::ifstream in(infn);
+        if(!in.is_open()) {
+            fail("can't open '%s': %s\n", infn.c_str(), strerror(errno));
+            return "";
+        } 
+
+        in.seekg(0, std::ios::end);   
+        size_t filesize = in.tellg();
+        in.seekg(0, std::ios::beg);
+
+        // .. except... apparently the appended '\0' in the fpl_reader
+        // version ends up being spurous and extra end makes an
+        // embedded newline in the string.  d'oh.
+        char buf[filesize];
+        in.read(buf, filesize);
+        std::string out(buf, filesize);
+
+        return out;
     }
 
     // .. imports relevant rules into this and returns the name of
@@ -1911,18 +1963,31 @@ public:
     /*
         separator_method returns a method which should return
         the number of bytes (possibly 0) to skip in order to
-        elide whatever token separator(s) are at the *inp pointer
-        passed.  Default is space separation.
+        elide whatever token separator(s) (such as spaces or
+        comments) are at the *inp pointer passed.  The method
+        will be composed from whatever's in @comment_style and
+        @separator directives.  If no such directives are specified,
+        default is space separation.
      */
+    // "separator" might be a misnomer in all this.  it's more like
+    // anything to elide before the tokenization code sees the input.
+    // rename all the "separator" to "elide"?  (including directives)
     std::string separator_method() {
         std::string out(
             "static size_t separator_length(const utf8_byte *inp) {\n"
         );
 
         if(separator_code) {
-            out += separator_code.format();
+            out += separator_code.format_scoped();
         } else {
-            out += "    return space_length(inp);\n";
+            // default is space separation:
+            out += "if(size_t len = space_length(inp)) { return len; }\n";
+        }
+
+        // Comments are effectively separators so code for them
+        // gets tacked on here:
+        for(auto comc : comment_code) {
+            out += comc.format_scoped();
         }
 
         out += "}\n";
