@@ -1,0 +1,14 @@
+
+// oh hai this is a line comment
+{ }
+{
+    bar/**/;
+    bat;
+    bell;
+}
+
+/*
+   Also hi there this is a block comment
+ */
+
+// this should have no newline at the end
