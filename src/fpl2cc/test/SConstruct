@@ -1,0 +1,94 @@
+
+import glob
+import os
+
+Import('env')
+env = env.Clone()
+
+#
+# dependencies:
+#   [src language] : [src language].cc
+#   [src language].cc : [src language].fpl
+#   [src language].test/[test name].out: [src language].test/[test name].[src language] [src language]
+#   [src language].test/[test name].success: [src language].test/[test name].expect [src language].test/[test name].out
+#
+# So each test language is defined by an .fpl file,
+# and then each test consists of a source file for that language and
+# a .expect file with the corresponding expected output.
+# This lets us black-box test the fpl compiler for various cases.
+#
+# references (these were hard to find):
+#   scons' idea of a target:
+#     https://scons.org/doc/latest/HTML/scons-api/SCons.Node/#
+#   action variables:
+#     https://scons.org/doc/production/HTML/scons-user.html#app-variables
+#
+
+# CompareOut is a "builder" which compares the source files
+# and creates the target file (typically .success) and returns
+# success if they match, or reports failure otherwise.
+env.Append(BUILDERS =
+    { 'CompareOut' : Builder(
+        #action = 'if cmp -s $SOURCES ; then touch $TARGET; else echo expected does not match result: $SOURCES; rm $TARGET 2> /dev/null; fi',
+        # action = 'check_output $SOURCES || rm -f $TARGET ;',
+        action = 'diff $SOURCES && touch $TARGET || rm -f $TARGET ;',
+        suffix = '.success',
+        src_suffix = '.out') } )
+
+# each language we might be using to test will have an fpl,
+# so the set of fpl files determines the set of languages
+# we're going to use:
+fpls = Glob('*.fpl')
+
+# this sets up:
+#   [lang] : [lang].cc
+#   [lang].cc : [lang].fpl
+# for each language we're testing, and makes the builder for:
+#   [x].out : [x].[lang] [lang]
+for fpl in fpls :
+    # langprog, foo = os.path.splitext(fpl.get_path())
+    langprog, foo = os.path.splitext(fpl.get_abspath())
+    language = os.path.basename(langprog)
+
+    # running anything written in the given language requires
+    # that language to exist, so we want this dependency:
+    env.Append(
+        SCANNERS = Scanner(
+            function = lambda node, env, path : [ langprog ],
+            skeys = [ language ]
+        )
+    )
+
+    # .. and now create a builder for the language program:
+    env.Append(BUILDERS =
+        { 'FPLTestLang_' + language : Builder(
+            action = langprog + ' $SOURCE > $TARGET',
+            suffix = '.out',
+            src_suffix = language) } )
+
+    # .. and tell scons how to generate the language program:
+    env.Fpl2CC(langprog + '.fpl')
+    compiler = env.Program(langprog, [ langprog + '.cc' ])
+
+
+test_dirs = Glob('*.test')
+
+# sets up:
+#   [lang].test/[t].success: [lang].test/[t].expect [lang].test/[t].out
+# and invokes:
+#   [x].out : [x].[lang] [lang]
+# for each "expect" file.
+for test_dir in test_dirs :
+    language, foo = os.path.splitext(test_dir.name)
+
+    expecteds = Glob(test_dir.name + '/*.expect')
+    for expected in expecteds :
+        test_name, foo = os.path.splitext(expected.get_path())
+        src_file = test_name + '.' + language
+        success_file = test_name + '.success'
+        out_file  = test_name + '.out'
+        getattr(env, 'FPLTestLang_' + language)(out_file, [ src_file ])
+        env.CompareOut(success_file, [ expected, out_file ])
+
+
+

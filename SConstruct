@@ -31,7 +31,8 @@ env = Environment(
 # fake "Scanner" to make it so that cc files generated
 # by fpl files implicitly depend on fpl2cc:
 def depend_on_fpl2cc(node, env, path) :
-    # print(f'sub faking a depend for node: {node} env: {env} path: {path}')
+    # print('sub faking a depend for node: {node} env: {env} path: {path}')
+    # print('node ' + str(node) + ' depends on fpl2cc so it\'s probably fpl')
     return [ '#bin/fpl2cc' ]
 
 env.Append(

@@ -2031,12 +2031,12 @@ public:
         out += "    }\n";
         // XXX this is also weak; handle more than one source
         out += "    fpl_reader inp(argv[1]);\n";
-        //out +=      parser_class + " parser(inp, NULL);\n";
         out +=      parser_class + " parser(inp);\n";
         out += "    using namespace std;\n";
         out += "    auto result = parser.parse();\n";
         out += "    printf(\"result: %s\\n\", to_string(result).c_str());\n";
-        out += "    printf(\"parser state:\\n%s\\n\", parser.to_str().c_str());\n";
+        // stderr this if you're going to do it:
+        // out += "    printf(\"parser state:\\n%s\\n\", parser.to_str().c_str());\n";
         out += "}\n\n";
 
         return out;

@@ -5,4 +5,7 @@ env = env.Clone()
 
 env.Program('#bin/fpl2cc', [ 'fpl2cc.cc', ])
 
+# test subdir:
+SConscript('test/SConstruct', 'env');
+
 
