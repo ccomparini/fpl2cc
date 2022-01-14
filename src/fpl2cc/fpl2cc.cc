@@ -93,8 +93,31 @@ inline std::string to_str(bool b) {
  */
 
 /*
+   Weird feature idea: reverse parser.  i.e. say you have a grammar
+   for json or whatever.  you can parse json from that, but can you
+   encode it?   how would this work?  you'd need to make it traverse
+   whatever data structure you want to encode, and know what rule
+   to use (in reverse).  it would be magic if you could do this.
+ */
+
+/*
  TODO
-  - repetition/optionals:  optional counts perhaps already work;
+
+  - ~scan_function.  regexes suck for quoted strings and the like
+    (need non-greedy match, escaped quotes, etc).  maybe have a
+    standard lib of scan functions for things like quoted strings
+    with escaping or whatever.
+  - way to join tokens for purposes of repetition, so as to easily
+    support old-style languages which don't allow trailing commas
+    and such.  eg allow:
+       foo ','.foo* ->  foo_list ;
+    so that if there's a comma, it expects another foo, but can do
+    that an arbitrary number of times
+  - try an invert separator/elider function for doc extraction
+  - precedence.  maybe an @prec (... )?
+
+ye olde:
+  o repetition/optionals:  optional counts perhaps already work;
     max_times is not implemented.  do them by boiling any foo*
     or foo+ or whatever down to a single item (with subitems).
     this makes passing them to reduce code much saner.
@@ -117,34 +140,12 @@ inline std::string to_str(bool b) {
     errors/recovering.  Can the caller attempt the recovery?
   - way to do specialized scans. ~scan_function_name maybe?
     or scan classes.
-  - multi-pass for comments etc. HOW!?  you thought about this
-    before and perhaps had a plan. Also for things like "#" modifier.
-    how about filters on fpl reader or whatever.  layered.  each layer
-    is the input to the one above.  so the "passes" happen simultaneously.
-    BUT you have to be able to examine the state of lower layers (eg
-    to find the current comment or whatever).  that's the key notion.
-    (uhh, see above: "specialized scans")
   - "^" to refer to prior rules?  think it over. Also note in general the
     lower precedent rules are earlier in the file so maybe another symbol.
     and one would scope it to the file, I guess?
-  x sub-fpls to implement particular constructs, from another file?
-    maybe `sub_fpl.fpl` -> name_of_target_from_sub ;
-    Then you can (eg) rip from c;
-    or implement stuff like embedding formatting in strings. (kinda)
   o document the fpl (see docs dir)
   - operator precedence:  it's a PITA to do the whole intermediate
     productions precedence thing.  So, make it part of FPL.
-    Ideas:
-      - have later rules take precedence. (or earlier?)
-        How to do it without creating too many states?
-        Group precedences within (say) parens?
-      - OR somehow within a rule specify the order
-        of precedence.  preferably in some relative fashion...
-        @precedecence( ... )?  multi line, same prec grouped
-        by being on the same line?
-  - buffering the entire input is busted for things like stdin.
-    stream instead;  but possibly fix that via chicken/egging it
-    and generate the new parser with this.
  */
 
 struct Options {
@@ -2016,7 +2017,7 @@ public:
         return parser_class_name() + "::" + mem;
     }
 
-    std::string code_for_main(const std::string &parser_class) {
+    std::string default_main_code(const std::string &parser_class) {
         std::string out("\n\n");
 
         // the main() generated here is pretty much just a test stub.
@@ -2034,7 +2035,7 @@ public:
         out +=      parser_class + " parser(inp);\n";
         out += "    using namespace std;\n";
         out += "    auto result = parser.parse();\n";
-        out += "    printf(\"result: %s\\n\", to_string(result).c_str());\n";
+        // out += "    printf(\"result: %s\\n\", to_string(result).c_str());\n";
         // stderr this if you're going to do it:
         // out += "    printf(\"parser state:\\n%s\\n\", parser.to_str().c_str());\n";
         out += "}\n\n";
@@ -2165,7 +2166,7 @@ public:
         out += "};\n"; // end of class
 
         if(opts.generate_main || default_main) {
-            out += code_for_main(parser_class);
+            out += default_main_code(parser_class);
         }
 
         report_unused_rules();
