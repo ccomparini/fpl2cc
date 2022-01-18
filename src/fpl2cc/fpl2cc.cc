@@ -103,6 +103,14 @@ inline std::string to_str(bool b) {
 /*
  TODO
 
+  - bug (for all intents and purposes):  if a generated fpl
+    encounters an unexpected anything, it stops parsing (by
+    design).  Is this a misdesign?  maybe;  maybe the whole
+    embedding thing is crap.  ANYWAY even if it isn't, there
+    needs to be some kind of handler which can report unexpected
+    input as an error.  Otherwise the poor user can't tell what
+    is going on
+
   - ~scan_function.  regexes suck for quoted strings and the like
     (need non-greedy match, escaped quotes, etc).  maybe have a
     standard lib of scan functions for things like quoted strings

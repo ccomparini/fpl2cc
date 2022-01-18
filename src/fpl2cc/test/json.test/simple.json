@@ -1,0 +1,6 @@
+{
+    "this is a key" : "I think a string is considered legit JSON",
+    "this is another key" : [
+        "this string has a '\"' in it"
+    ]
+}
