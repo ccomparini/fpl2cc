@@ -99,6 +99,7 @@ for test_dir in test_dirs :
         src_file = test_name + '.' + language
         success_file = test_name + '.success'
         out_file  = test_name + '.out'
+        env.Depends(out_file, [ language ])
         getattr(env, 'FPLTestLang_' + language)(out_file, [ src_file ])
         env.CompareOut(success_file, [ expected, out_file ])
 
