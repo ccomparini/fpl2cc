@@ -24,13 +24,12 @@ env = env.Clone()
 #     https://scons.org/doc/production/HTML/scons-user.html#app-variables
 #
 
-# CompareOut is a "builder" which compares the source files
-# and creates the target file (typically .success) and returns
-# success if they match, or reports failure otherwise.
+# CompareOut is a "builder" which compares the source files (actually
+# 2 test output files - one with whatever was generated and one with
+# what we expected it to generate) and creates the target file (.success)
+# and returns success if they match, or reports failure otherwise.
 env.Append(BUILDERS =
     { 'CompareOut' : Builder(
-        #action = 'if cmp -s $SOURCES ; then touch $TARGET; else echo expected does not match result: $SOURCES; rm $TARGET 2> /dev/null; fi',
-        # action = 'check_output $SOURCES || rm -f $TARGET ;',
         action = 'diff $SOURCES && touch $TARGET || rm -f $TARGET ;',
         suffix = '.success',
         src_suffix = '.out') } )
@@ -39,6 +38,19 @@ env.Append(BUILDERS =
 # so the set of fpl files determines the set of languages
 # we're going to use:
 fpls = Glob('*.fpl')
+
+def build_default(lprog) :
+    return env.Program(lprog, [ lprog + '.cc' ])
+    
+def build_json_exe(lprog) :
+    return env.Program(lprog, [ lprog + '.cc' ], LIBS = 'jest')
+    
+
+# if a given language executable needs particular libraries
+# or whatever, put 
+build_lang_exe = {
+    "json" : build_json_exe,
+}
 
 # this sets up:
 #   [lang] : [lang].cc
@@ -59,7 +71,7 @@ for fpl in fpls :
         )
     )
 
-    # .. and now create a builder for the language program:
+    # .. and now create a builder for running the language program:
     env.Append(BUILDERS =
         { 'FPLTestLang_' + language : Builder(
             action = langprog + ' $SOURCE > $TARGET',
@@ -68,7 +80,7 @@ for fpl in fpls :
 
     # .. and tell scons how to generate the language program:
     env.Fpl2CC(langprog + '.fpl')
-    compiler = env.Program(langprog, [ langprog + '.cc' ])
+    compiler = build_lang_exe.get(language, build_default)(langprog)
 
 
 test_dirs = Glob('*.test')
