@@ -173,6 +173,9 @@ class fpl_reader {
         return to_std_string(start, total_size - 1);
     }
 
+    // returns the line number for the position passed,
+    // or -1 if the position is past the end of the buffer,
+    // or -2 of the position is before the start of the buffer
     inline int calc_line_number(const utf8_byte *pos) const {
         const utf8_byte *buf = buffer.data();
 
