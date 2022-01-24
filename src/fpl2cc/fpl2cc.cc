@@ -1054,22 +1054,15 @@ public:
             GrammarElement("_fpl_null", GrammarElement::NONTERM_PRODUCTION)
         );
 
+        // default the reduce type to string.
+        // this will (mostly?) work with defaults if
+        // you just want to sketch out a grammar and
+        // not have to specify any particular code.
+        reduce_type = "std::string";
+
         parse_fpl();
     }
 
-    // returns the code for an inline to_string function for...
-    // things which are already strings!  yay!
-    // this is effectively c++ compiler appeasement.
-    CodeBlock to_string_identity() {
-        return CODE_BLOCK(
-            "\n#ifndef TO_STRING_HACK\n"
-            "#define TO_STRING_HACK\n"
-            "inline std::string to_string(const std::string &in) {\n"
-            "    return in;\n"
-            "}\n"
-            "#endif // TO_STRING_HACK\n"
-        );
-    }
 
     // expects/scans a +{ }+ code block for the named directive.
     // the named directive is essentially for error reporting.
@@ -1113,9 +1106,6 @@ public:
             post_parse = code_for_directive(dir);
         } else if(dir == "produces") {
             reduce_type = inp.read_re("\\s*(.+)\\s*")[1];
-            if(reduce_type == "std::string") {
-                add_preamble(to_string_identity());
-            }
         } else if(dir == "separator") {
             if(separator_code)
                 warn("@separator overrides existing separator code\n");
@@ -2114,9 +2104,8 @@ public:
         out +=      parser_class + " parser(inp);\n";
         out += "    using namespace std;\n";
         out += "    auto result = parser.parse();\n";
-        // out += "    printf(\"result: %s\\n\", to_string(result).c_str());\n";
-        // stderr this if you're going to do it:
-        // out += "    printf(\"parser state:\\n%s\\n\", parser.to_str().c_str());\n";
+        //out += "    printf(\" %s\\n\", to_string(result).c_str());\n";
+        //out += "    fprintf(stderr, \"parser state:\\n%s\\n\", parser.to_str().c_str());\n";
         out += "}\n\n";
 
         return out;
