@@ -45,6 +45,8 @@ inline std::string to_str(bool b) {
     return "false";
 }
 
+#define CLUDGE_TO_STR(x) #x
+#define THIS_LINE __FILE__ " line " CLUDGE_TO_STR(__LINE__)
 #define CODE_BLOCK(str) CodeBlock(std::string(__FILE__), __LINE__, str)
 
 /*
@@ -508,11 +510,15 @@ class ProductionRule {
     std::string prod;
     std::vector<ProdExpr> steps;
     CodeBlock code_for_rule;
+    const fpl_reader &reader;
     size_t start_of_text;
 
 public:
 
-    ProductionRule(size_t at_byte) : start_of_text(at_byte) {
+    ProductionRule(const fpl_reader &rdr, size_t at_byte) :
+        reader(rdr),
+        start_of_text(at_byte)
+    {
     }
 
     void add_step(ProdExpr step) {
@@ -542,17 +548,24 @@ public:
         return GrammarElement(product(), GrammarElement::NONTERM_PRODUCTION);
     }
 
-    int line_number(const fpl_reader &inp) const {
-        return inp.line_number(start_of_text);
+    int line_number() const {
+        return reader.line_number(start_of_text);
     }
 
-    std::string location(const fpl_reader &inp) const {
-        return inp.filename() + " line " + std::to_string(line_number(inp));
+    std::string filename() const {
+        return reader.filename();
+    }
+
+    std::string location() const {
+        return reader.filename() + " line " + std::to_string(line_number());
     }
 
     // XXX maybe rename "code" to "action"
     CodeBlock default_code() const {
-        std::string code;
+        // start the code block with a comment referring to this
+        // line in this source file (fpl2cc.cc), to reduce puzzlement
+        // about where this mixed-generated code comes from:
+        std::string code("// " THIS_LINE);
 
         int first_nonterm = -1;
         int num_nonterms = 0;
@@ -567,7 +580,7 @@ public:
         if(num_nonterms >= 1) {
             if(num_nonterms != 1) {
                 warn(
-                    "default code for nontrivial rule %s probaby won't dtrt\n",
+                    "default for nontrivial rule %s probably won't dtrt\n",
                     to_str().c_str()
                 );
             }
@@ -595,7 +608,7 @@ public:
             code += ");";
         }
 
-        return CodeBlock(std::string(__FILE__), __LINE__, code);
+        return CodeBlock(reader.filename(), line_number(), code);
 
 /*
         This was a fun attempt but doesn't dtrt except in trivial
@@ -911,7 +924,7 @@ public:
             if(strl == endrl) {
                 fail(
                     "error in %s: Nothing produces «%s»\n",
-                    rule.location(inp).c_str(), pname.c_str()
+                    rule.location().c_str(), pname.c_str()
                 );
             }
 
@@ -1326,7 +1339,7 @@ public:
                 std::string directive = read_directive(inp);
                 parse_directive(directive);
             } else {
-                ProductionRule rule(inp.current_position());
+                ProductionRule rule(inp, inp.current_position());
                 if(read_expressions(inp, rule)) {
                     // .. we've read the expressions/steps leading to
                     // the production (including the "->").
@@ -1335,8 +1348,8 @@ public:
                     rule.product(inp.read_to_separator());
                     if(rule.product().length() <= 0) {
                         fail(
-                            "missing production name on line %i\n",
-                            rule.line_number(inp)
+                            "missing production name at %s\n",
+                            rule.location().c_str()
                         );
                     }
 
@@ -1468,6 +1481,28 @@ public:
         return out;
     }
 
+    #define rule_meta_str(mem) \
+        std::string("static std::string " #mem "() {\n") +\
+            "return \"" + rule.mem() + "\";\n" \
+        "}\n"
+    #define rule_meta_int(mem) \
+        std::string("static int " #mem "() {\n") +\
+            "return " + std::to_string(rule.mem()) + ";\n" \
+        "}\n"
+    std::string rule_metadata(int rule_ind) {
+        const ProductionRule &rule = rules[rule_ind];
+        std::string out;
+        out += "struct {\n";
+        out += rule_meta_str(product);
+        out += rule_meta_int(num_steps);
+        out += rule_meta_int(line_number);
+        out += rule_meta_str(location);
+        out += "} rule;\n";
+        return out;
+    }
+    #undef rule_meta_int
+    #undef rule_meta_str
+
     std::string code_for_rule(const Options &opts, int rule_ind) {
         const ProductionRule &rule = rules[rule_ind];
         std::string out;
@@ -1516,7 +1551,7 @@ public:
 
         out += ") {\n";
         out += "// " + rule.to_str() + "\n";
-        out += "const std::string rule_name(\"" + rule_name + "\");\n";
+        out += rule_metadata(rule_ind);
         if(opts.debug) {
             out += "fprintf(stderr, \"reducing by " + rule_name + "\\n\");\n";
         }
@@ -1638,14 +1673,14 @@ public:
     }
 
     void reduce_reduce_conflict(int r1, int r2) {
-        warn("reduce/reduce conflict:\n    %s line %i\n vs %s line %i\n",
-            rules[r1].to_str().c_str(), rules[r1].line_number(inp),
-            rules[r2].to_str().c_str(), rules[r2].line_number(inp)
+        warn("reduce/reduce conflict:\n    %s line %i\n vs %s at %s\n",
+            rules[r1].to_str().c_str(), rules[r1].location().c_str(),
+            rules[r2].to_str().c_str(), rules[r2].location().c_str()
         );
     }
 
     void shift_reduce_conflict(int r1, int r2) {
-        // XXX fill in; use
+        // XXX operator precedence;  use
         warn("OH HAI SHIFT REDUCE CONFLICT YESSSSSSS\n");
     }
 
@@ -2240,7 +2275,7 @@ public:
                 const ProductionRule &rule = rules[rind];
                 warn(
                     "Rule producing %s on line %i is unused\n",
-                    rule.product().c_str(), rule.line_number(inp)
+                    rule.product().c_str(), rule.line_number()
                 );
             }
         }
