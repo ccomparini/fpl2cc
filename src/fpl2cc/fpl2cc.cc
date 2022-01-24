@@ -667,7 +667,7 @@ public:
         if(code_for_rule) {
             return code_for_rule;
         } else if(def) {
-            // (caller provided a default, so return that)
+            // (caller provided code, so return that)
             return def;
         }
 
@@ -1052,6 +1052,8 @@ public:
         );
     }
 
+    // expects/scans a +{ }+ code block for the named directive.
+    // the named directive is essentially for error reporting.
     inline CodeBlock code_for_directive(const std::string &dir) {
         CodeBlock code = read_code(inp);
         if(!code) {
@@ -1462,14 +1464,15 @@ public:
         std::string rule_name = rule_fn(rule_ind);
         out += reduce_type + " " + rule_name + "(";
 
-        // parameters:
+        // "simple" parameters:
         // If the expression for the step has a min/max times of
         // anything other than exactly 1 (is_single()), we pass
         // it as a stack slice.
         // Otherwise, if it's a terminal, pass it as a string,
-        // or (the main general case) as whatever the reduce
+        // or (if it's the result of a reduce) as whatever the reduce
         // type is.  This is complicated for the code generator,
-        // but simplifies life for the fpl author. I think.
+        // but simplifies life for the fpl author, especially
+        // for trivial cases.
         for(int stind = 0; stind < rule.num_steps(); stind++) {
             std::string arg_name = "arg_" + std::to_string(stind);
             const ProdExpr *expr = rule.step(stind);
@@ -1488,12 +1491,21 @@ public:
                 out += reduce_type + " ";
             }
             out += arg_name;
-            if(stind + 1 < rule.num_steps()) {
-                out += ", ";
-            }
+            out += ", ";
         }
+
+        // last parameter is the slice of the stack with
+        // everything we're popping.  this lets the fpl author
+        // get things like the line number for a given argument
+        // or whatever.  (actully, the "simple" positional
+        // parameters below can be implemented via this,
+        // and in the jest version might be).  It's last only
+        // because that simplifies the generating code
+        out += "const FPLBP::StackSlice &args";
+
         out += ") {\n";
         out += "// " + rule.to_str() + "\n";
+        out += "const std::string rule_name(\"" + rule_name + "\");\n";
         if(opts.debug) {
             out += "fprintf(stderr, \"reducing by " + rule_name + "\\n\");\n";
         }
@@ -1535,12 +1547,13 @@ public:
         //      are, and how many there are.
 
         // in c++ the order in which arguments for a function are
-        // evaluated is not deterministic, so we need to make some
+        // evaluated is not deterministic (?!), so we need to make some
         // temps for the arguments.  We go backward because the item
         // at the top of the stack will be the last argument, and
         // the item one down from the top of the stack the second
         // to last, etc.
-        out += "int pos = base_parser.lr_top();\n";
+        out += "int frame_start = base_parser.lr_top();\n";
+        out += "int pos = frame_start;\n"; // (pos gets updated as we go)
         for(int stind = rule.num_steps() - 1; stind >= 0; --stind) {
             const ProdExpr *expr = rule.step(stind);
             std::string argname = "arg_" + std::to_string(stind);
@@ -1556,6 +1569,9 @@ public:
             }
         }
 
+        // now one slice for all the arguments.  to rule them all.
+        out += "FPLBP::StackSlice args(base_parser, frame_start, pos);\n";
+
         out += "    " + reduce_type + " result = " + rule_fn(rule_ind) + "(";
         for(int stind = 0; stind < rule.num_steps(); stind++) {
             const ProdExpr *expr = rule.step(stind);
@@ -1568,10 +1584,13 @@ public:
                     out += ".val()";
                 }
             }
-            if(stind + 1 < rule.num_steps())
-                out += ", ";
+            out += ", ";
         }
-        out += ");\n";
+        out += " args);\n";
+
+        // this is what actually pops the stack. note we pop after
+        // the reduce (mainly to minimize moves, but also so the
+        // stack is more intact for error/bug analysis)
         out += "base_parser.lr_top(pos);\n";
 
         if(opts.debug) {
