@@ -595,7 +595,6 @@ public:
             code += ");";
         }
 
-
         return CodeBlock(std::string(__FILE__), __LINE__, code);
 
 /*
@@ -701,6 +700,7 @@ class Productions {
     std::list<CodeBlock> comment_code;
     bool default_main;
     std::string preamble;
+    std::list<CodeBlock> parser_members;
     std::list<std::string> goal; // goal is any of these
 
     std::vector<ProductionRule>     rules;
@@ -1082,6 +1082,14 @@ public:
             default_action = code_for_directive(dir);
         } else if(dir == "default_main") {
             default_main = true;
+        } else if(dir == "internal") {
+            // a code block which goes in the "private" part
+            // of the parser class itself.
+            // XXX wtb better name?  in the jest version of this,
+            // it won't necessarily be internal
+            if(CodeBlock mem = code_for_directive(dir)) {
+                parser_members.push_back(mem);
+            }
         } else if(dir == "post_parse") {
             post_parse = code_for_directive(dir);
         } else if(dir == "produces") {
@@ -1271,7 +1279,10 @@ public:
 
          size_t start = src.current_position();
          if(!src.read_exact_match("+{")) {
-             src.error("expected start of code (\"+{\") but got «%s»", src.debug_peek().c_str());
+             src.error(
+                 "expected start of code (\"+{\") but got «%s»",
+                 src.debug_peek().c_str()
+             );
              return CodeBlock();
          }
 
@@ -2164,6 +2175,9 @@ public:
         out += "    using Product = FPLBP::Product;\n";
         out += "    using StackEntry = FPLBP::StackEntry;\n";
         out += "    FPLBP base_parser;\n";
+        for(auto mem : parser_members) {
+            out += mem.format();
+        }
         out += "public:\n";
 
         out += nonterm_enum();
