@@ -46,7 +46,8 @@ inline std::string to_str(bool b) {
 }
 
 #define CLUDGE_TO_STR(x) #x
-#define THIS_LINE __FILE__ " line " CLUDGE_TO_STR(__LINE__)
+#define CLUDGE_STR(x) CLUDGE_TO_STR(x)
+#define THIS_LINE __FILE__ " line " CLUDGE_STR(__LINE__)
 #define CODE_BLOCK(str) CodeBlock(std::string(__FILE__), __LINE__, str)
 
 /*
@@ -565,20 +566,20 @@ public:
         // start the code block with a comment referring to this
         // line in this source file (fpl2cc.cc), to reduce puzzlement
         // about where this mixed-generated code comes from:
-        std::string code("// " THIS_LINE);
+        std::string code("// " THIS_LINE "\n");
 
-        int first_nonterm = -1;
-        int num_nonterms = 0;
+        int first_single_nonterm = -1;
+        int num_single_nonterms = 0;
         for(int sti = 0; sti < steps.size(); sti++) {
-            if(!steps[sti].is_terminal()) {
-                num_nonterms++;
-                if(first_nonterm < 0)
-                    first_nonterm = sti;
+            if(!steps[sti].is_terminal() && steps[sti].is_single()) {
+                num_single_nonterms++;
+                if(first_single_nonterm < 0)
+                    first_single_nonterm = sti;
             }
         }
 
-        if(num_nonterms >= 1) {
-            if(num_nonterms != 1) {
+        if(num_single_nonterms >= 1) {
+            if(num_single_nonterms != 1) {
                 warn(
                     "default for nontrivial rule %s probably won't dtrt\n",
                     to_str().c_str()
@@ -591,21 +592,26 @@ public:
             // right thing in some simple cases like parenthesized
             // expressions.
             // If there's more than one nonterm, we still need to return
-            // something, so:
-            code = "return arg_" + std::to_string(first_nonterm) + ";";
+            // something, so just do the first one (we warned in this case,
+            // above).
+            code = "return arg_" + std::to_string(first_single_nonterm) + ";";
         } else {
-            // this rule has terminals only.  maybe the reduce_type has
-            // a constructor which can do something sane (i.e. convert
-            // from a string or set of strings).  if not, there will
-            // be a compile error which, hopefully, the fpl author can
-            // figure out.
-            code = "return reduce_type(";
-            for(int sti = 0; sti < steps.size(); sti++) {
-                code += "arg_" + std::to_string(sti);
-                if(sti < steps.size() - 1)
-                    code += ", ";
+            // this rule has terminals only so they'll come in as strings
+            // or stack slices full of strings.
+            // maybe the reduce type has a constructor which can do
+            // something sane with a string?
+            if(steps.size() > 1) {
+                warn(
+                    "default for rule %s probably won't dtrt\n",
+                    to_str().c_str()
+                );
             }
-            code += ");";
+            code += "std::string out;\n";
+            code += "for(int ind = 0; ind < args.num_args; ++ind) {\n";
+            code += "    out += args[ind].product.term_str();\n";
+            code += "    if(ind < args.num_args - 1) out += \" \";\n";
+            code += "}\n";
+            code += "return out;";
         }
 
         return CodeBlock(reader.filename(), line_number(), code);
