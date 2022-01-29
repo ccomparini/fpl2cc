@@ -290,7 +290,7 @@ public:
         return byte?*byte:'\0';
     }
 
-    void error(const std::string &msg) {
+    void error(const std::string &msg) const {
         const char *nl = "";
         if(msg[msg.length() - 1] != '\n')
             nl = "\n";
@@ -547,7 +547,7 @@ public:
         }
         return out;
     }
-    inline std::string pf_debug_peek(int pos = -1, int num_chars = 12) {
+    inline std::string pf_debug_peek(int pos = -1, int num_chars = 12) const {
         return debug_peek(pos, num_chars, true);
     }
 
