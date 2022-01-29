@@ -21,7 +21,11 @@ enum ExitVal {
 
 
 void fail(const std::string &msg) {
-    fprintf(stderr, "%s", msg.c_str());
+    if(msg[msg.length() - 1] != '\n') {
+        fprintf(stderr, "%s\n", msg.c_str());
+    } else {
+        fprintf(stderr, "%s", msg.c_str());
+    }
 
     exit(1);
 }
@@ -29,7 +33,11 @@ void fail(const std::string &msg) {
 static int num_warnings = 0;
 void warn(const std::string &msg) {
     // indent warnings so that errors stand out:
-    fprintf(stderr, "       %s", msg.c_str());
+    if(msg[msg.length() - 1] != '\n') {
+        fprintf(stderr, "       %s\n", msg.c_str());
+    } else {
+        fprintf(stderr, "       %s", msg.c_str());
+    }
 
     num_warnings++;
 }
@@ -372,6 +380,19 @@ struct GrammarElement {
         NONTERM_PRODUCTION,
     } Type;
     Type type;
+
+    static const char *Type_to_str(Type t) {
+        static const char *strs[] = {
+            "NONE",
+            "TERM_EXACT",
+            "TERM_REGEX",
+            "NONTERM_PRODUCTION",
+        };
+        if(t > NONE && t <= NONTERM_PRODUCTION) {
+            return strs[t];
+        }
+        return "invalid GrammarElement::Type";
+    }
 
     GrammarElement(const std::string &str, Type tp)
         : expr(str), type(tp) { }
@@ -1250,9 +1271,24 @@ public:
                     expr_str = parse_import(src, rule);
                     type     = GrammarElement::Type::NONTERM_PRODUCTION;
                     break;
+                case '}':
+                    // this can happen, especially if there's a '}+'
+                    // embedded in a code block.
+                    if(src.read_byte_equalling('+'))
+                        src.error("stray '}+'.  perhaps there's }+ embedded in a code block");
+                    else
+                        src.error("unmatched '}'");
+                    break;
                 default:
                     // should be the name of a production.
                     expr_str = read_production_name(src);
+                    if(!expr_str.length()) {
+                        src.error(stringformat(
+                            "expected production name for rule '{}'\n"
+                            " starting at {}",
+                            rule.to_str(), rule.location()
+                        ));
+                    }
                     type     = GrammarElement::Type::NONTERM_PRODUCTION;
                     break;
             }
@@ -1264,16 +1300,11 @@ public:
                     rule.add_step(expr);
                     num_read++;
                 } else {
-fprintf(stderr, "oh hai we're about to crash.\n");
-fprintf(stderr, " src: %p\n", &src);
-fprintf(stderr, " type: %i\n", type);
-fprintf(stderr, " on line %i..\n", src.line_number());
-fprintf(stderr, " we should read next:\n%s\n", src.pf_debug_peek().c_str());
                     // XXX show the type in some non-numeric way here
                     src.error(stringformat(
-                        "expected type {} but got .. nothing?", type
+                        "expected type {} = {} but got .. nothing?\n",
+                        GrammarElement::Type_to_str(type), type
                     ));
-fprintf(stderr, " huh ok\n");
                 }
             }
         } while(!(done || src.eof()));
@@ -1283,9 +1314,11 @@ fprintf(stderr, " huh ok\n");
 
     static CodeBlock read_code(fpl_reader &src) {
          // code is within "+{" "}+" brackets.
-         // this is done simplistically, which means you will
-         // derail it if you put +{ or }+ in a comment or
-         // string or whatever.  so try not to do that.
+         // we don't know anything about the grammar of the code
+         // within the brackets (presently), so you will derail
+         // it if you put unmatched +{ or }+ in a comment or
+         // string or whatever.  sorry.  try not to do that.
+         // matched +{ }+ it will handle ok.
          src.eat_separator();
 
          size_t start = src.current_position();
@@ -1336,6 +1369,11 @@ fprintf(stderr, " huh ok\n");
             } else if(inp.read_byte_equalling('@')) {
                 std::string directive = read_directive(inp);
                 parse_directive(directive);
+            } else if(inp.read_byte_equalling('}')) {
+                // likely what happened is someone put a }+ inside
+                // a code block.  anyway a floating end brace is 
+                // wrong..
+                inp.error("unmatched '}'\n");
             } else {
                 ProductionRule rule(inp, inp.current_position());
                 if(read_expressions(inp, rule)) {

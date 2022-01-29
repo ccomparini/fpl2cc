@@ -291,16 +291,20 @@ public:
     }
 
     void error(const std::string &msg) {
+        const char *nl = "";
+        if(msg[msg.length() - 1] != '\n')
+            nl = "\n";
+
         std::string full_msg(
-            stringformat("Error {} near «{}»: {}",
-                location(), pf_debug_peek(), msg
+            stringformat("Error {} near «{}»: {}{}",
+                location(), pf_debug_peek(), msg, nl
             )
         );
 
         if(on_error) {
             on_error(full_msg);
         } else {
-            fprintf(stderr, "%s", full_msg.c_str());
+            fprintf(stderr, "%s\n", full_msg.c_str());
         }
     }
 
