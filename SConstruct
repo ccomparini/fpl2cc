@@ -6,7 +6,7 @@ debugger = ''
 ccflags = ''
 if debugger : ccflags += " -g"
 else        : ccflags += " -O2"
-ccflags += " -std=c++11 -Wno-parentheses"
+ccflags += " -std=c++20 -Wno-parentheses"
 
 #    PLATFORM=platform,
 #    BINDIR="#export/foo/bin",

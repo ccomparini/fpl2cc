@@ -1,3 +1,61 @@
+Fri Jan 28 10:15:14 PST 2022
+
+Yammering about ways to do string formatting:
+
+// what do we want?  I think the jest way is going to be like:
+//  "Hello {adjective} {noun}!".format()
+//    or
+//  "Hello {adjective} {noun}!".format(adjective = "cruel", noun = "world")
+//
+// (and we need some way to escape '{', should we wish to write one)
+// (maybe use % instead of {}.  then %% can be the escape. maybe formatting
+// params can be like printf as well?  only kinda)
+//
+// OK so in jest, ideally I'd actually like string interoplation to be an
+// operator and not a library function (maybe '~~' or '<-'? perhaps better
+// to just have it be "foo %bar%".format(bar = 23)).  If it's an operator,
+// we don't variadic function support for string interpolation.  That said,
+// we probably want it for other things.  One possible jest-ish variadic
+// function solution would be to basically generate a different function
+// for each variadic invocation.  The main problem there is that you can't
+// have a pointer to such a function...
+//
+// actually, how's this syntax?
+//    "foo %bar%"(bar = 23)?
+// .. which potentially could be done in c++ as well with a ()
+// overload.  might be an abuse of overloading.  On the other hand,
+// if you look at a format string as a program to generate a string
+// (which it essentially is), then that's not really wrong.  And
+// it goes well with the jest implied-accessor-method thing. 
+// ^^ YES this ^^ though actually don't you want to imitate
+// perl/sh and have soething like double quote strings format,
+// and single quote not?  in which case the parens would even
+// be optional or maybe only used to override or add a param..
+//
+// ... in jest, can closures be used for vararg situtaions? 
+// 
+// possibly better syntax:
+//  '%%' -> '%'
+//  '.' fmt_function -> fmt ;  // actually can't use '.' since that's a selector char
+//  [:selector chars:]* -> variable ;
+//  variable fmt? -> varfmt ;
+//  '{' variable fmt? '}'-> varfmt ; // for grouping (allow expressions here?)
+//  '%' varfmt? -> subst; // empty varfmt means nth variable default fmt
+// so eg "the price of %sym changed by %%%"
+//       "%num is 0x%num.x in hex"
+//       "this is the %{num}th entry"
+// or even "this is the %{num.th}" if you have a "th" formatter, which
+// could handle 1st, 2nd, 3rd (etc) as well
+// you positively need a roman numerals numeric formatter.
+// OK one problem with this is that variable should be really a jest
+// selector, and selectors can include a '.'... use something else. ~?
+// also how to specify field width?  need that.  but let's try this anyway.
+
+CONCLUSION:  make string formatting an operator; get variables from
+context (as in perl, actually) BUT do have formatting options (eg hex).
+At least minimal time formatting should be built in.  Probably go with "%"
+syntax.  Possibly fpl the string formatting.
+
 Sat Aug  7 17:26:46 PDT 2021
 
 OK so here's how it has to work.  in order:

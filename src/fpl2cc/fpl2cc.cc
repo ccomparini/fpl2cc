@@ -20,22 +20,16 @@ enum ExitVal {
 };
 
 
-void fail(const char *fmt...) {
-    va_list args;
-    va_start(args, fmt);
-    vfprintf(stderr, fmt, args);
-    va_end(args);
+void fail(const std::string &msg) {
+    fprintf(stderr, "%s", msg.c_str());
 
     exit(1);
 }
 
 static int num_warnings = 0;
-void warn(const char *fmt...) {
-    fprintf(stderr, "       "); // indent warnings to make errors stand out
-    va_list args;
-    va_start(args, fmt);
-    vfprintf(stderr, fmt, args);
-    va_end(args);
+void warn(const std::string &msg) {
+    // indent warnings so that errors stand out:
+    fprintf(stderr, "       %s", msg.c_str());
 
     num_warnings++;
 }
@@ -64,7 +58,7 @@ inline std::string to_str(bool b) {
   everything on the left evaluates to a string.
 
   Expressions may be any of:
-   - double-quoted string ("xxx") - match text + optional trailing whitespace
+   - double-quoted string ("xxx") - match text
    - regular expression within slashes (eg /0x[0-9a-fA-F]+/)
    - names of other productions as plain text (no spaces)
 
@@ -580,10 +574,10 @@ public:
 
         if(num_single_nonterms >= 1) {
             if(num_single_nonterms != 1) {
-                warn(
-                    "default for nontrivial rule %s probably won't dtrt\n",
-                    to_str().c_str()
-                );
+                warn(stringformat(
+                    "default for nontrivial rule {} probably won't dtrt\n",
+                    to_str()
+                ));
             }
 
             // if there's exactly one nonterminal, I think returning it
@@ -601,10 +595,10 @@ public:
             // maybe the reduce type has a constructor which can do
             // something sane with a string?
             if(steps.size() > 1) {
-                warn(
-                    "default for rule %s probably won't dtrt\n",
-                    to_str().c_str()
-                );
+                warn(stringformat(
+                    "default for rule {} probably won't dtrt\n",
+                    to_str()
+                ));
             }
             code += "std::string out;\n";
             code += "for(int ind = 0; ind < args.num_args; ++ind) {\n";
@@ -928,10 +922,10 @@ public:
             auto endrl = rules_for_product.upper_bound(pname);
 
             if(strl == endrl) {
-                fail(
-                    "error in %s: Nothing produces «%s»\n",
-                    rule.location().c_str(), pname.c_str()
-                );
+                fail(stringformat(
+                    "error in {}: Nothing produces «{}»\n",
+                    rule.location(), pname
+                ));
             }
 
             for(auto rit = strl; rit != endrl; ++rit) {
@@ -1069,7 +1063,7 @@ public:
     inline CodeBlock code_for_directive(const std::string &dir) {
         CodeBlock code = read_code(inp);
         if(!code) {
-            fail("expected a code block for @%s\n", dir.c_str());
+            fail(stringformat("expected a code block for @{}\n", dir));
         }
         return code;
     }
@@ -1111,7 +1105,7 @@ public:
                 warn("@separator overrides existing separator code\n");
             separator_code = code_for_directive(dir);
         } else {
-            fail("Unknown directive: '%s'\n", dir.c_str());
+            fail(stringformat("Unknown directive: '{}'\n", dir));
         }
     }
 
@@ -1173,7 +1167,7 @@ public:
         // blatant copypasta from fpl_reader
         std::ifstream in(infn);
         if(!in.is_open()) {
-            fail("can't open '%s': %s\n", infn.c_str(), strerror(errno));
+            fail(stringformat("can't open '{}': {}\n", infn, strerror(errno)));
             return "";
         } 
 
@@ -1270,8 +1264,16 @@ public:
                     rule.add_step(expr);
                     num_read++;
                 } else {
-                    // sigh c++ enums
-                    src.error("expected type %i but got .. nothing?", type);
+fprintf(stderr, "oh hai we're about to crash.\n");
+fprintf(stderr, " src: %p\n", &src);
+fprintf(stderr, " type: %i\n", type);
+fprintf(stderr, " on line %i..\n", src.line_number());
+fprintf(stderr, " we should read next:\n%s\n", src.pf_debug_peek().c_str());
+                    // XXX show the type in some non-numeric way here
+                    src.error(stringformat(
+                        "expected type {} but got .. nothing?", type
+                    ));
+fprintf(stderr, " huh ok\n");
                 }
             }
         } while(!(done || src.eof()));
@@ -1288,10 +1290,10 @@ public:
 
          size_t start = src.current_position();
          if(!src.read_exact_match("+{")) {
-             src.error(
-                 "expected start of code (\"+{\") but got «%s»",
-                 src.debug_peek().c_str()
-             );
+             src.error(stringformat(
+                 "expected start of code (\"+{{\") but got «{}»",
+                 src.debug_peek()
+             ));
              return CodeBlock();
          }
 
@@ -1310,10 +1312,10 @@ public:
          }
 
          if(!found_terminator) {
-             src.error(
-                 "Expected code block terminator ('}+') but got byte 0x%x",
-                 byte_in
-             );
+             src.error(stringformat(
+                 "Expected code block terminator ('}}+') but got byte 0x{}",
+                 to_hex(byte_in)
+             ));
          }
 
          return CodeBlock(src.filename(), src.line_number(start), code_str);
@@ -1343,10 +1345,10 @@ public:
                     inp.eat_separator();
                     rule.product(inp.read_to_separator());
                     if(rule.product().length() <= 0) {
-                        fail(
-                            "missing production name at %s\n",
-                            rule.location().c_str()
-                        );
+                        fail(stringformat(
+                            "missing production name at {}\n",
+                            rule.location()
+                        ));
                     }
 
                     inp.eat_separator();
@@ -1366,10 +1368,10 @@ public:
     std::string import_rules(const Productions &from, const std::string &pname) {
         std::string src_fn = from.inp.filename();
         if(from.reduce_type != reduce_type) {
-            fail("Incompatible reduce type '%s' in %s (expected %s)\n",
-                from.reduce_type.c_str(), src_fn.c_str(),
-                reduce_type.c_str()
-            );
+            fail(stringformat(
+                "Incompatible reduce type '{}' in {} (expected {})\n",
+                from.reduce_type, src_fn, reduce_type
+            ));
         }
 
         // import any preamble as well, as it may be necessary for the rules.
@@ -1406,9 +1408,7 @@ public:
             auto strl  = from.rules_for_product.lower_bound(wanted);
             auto endrl = from.rules_for_product.upper_bound(wanted);
             if(strl == endrl) {
-                fail("No rule for '%s' in %s\n",
-                    wanted.c_str(), src_fn.c_str()
-                );
+                fail(stringformat("No rule for '{}' in {}\n", wanted, src_fn));
             }
             for(auto rit = strl; rit != endrl; ++rit) {
                 ProductionRule rule = from.rules[rit->second];
@@ -1519,9 +1519,9 @@ public:
             std::string arg_name = "arg_" + std::to_string(stind);
             const ProdExpr *expr = rule.step(stind);
             if(!expr) {
-                fail("Bug: no expression for %s in %s",
-                    arg_name.c_str(), rule.to_str().c_str()
-                );
+                fail(stringformat("Bug: no expression for {} in {}",
+                    arg_name, rule.to_str()
+                ));
             } else if(!expr->is_single()) {
                 // the argument is either optional or can repeat or
                 // both, so we can't pass it simply.  so pass it
@@ -1600,9 +1600,10 @@ public:
             const ProdExpr *expr = rule.step(stind);
             std::string argname = "arg_" + std::to_string(stind);
             if(!expr) {
-                fail("Bug: no expression for step %i in %s",
-                    stind, rule.to_str().c_str()
-                );
+                fail(stringformat(
+                    "Bug: no expression for step {} in {}",
+                    stind, rule.to_str()
+                ));
             } else {
                 std::string eid_str = std::to_string(element_index[expr->gexpr]);
                 std::string max_str = std::to_string(expr->max_times);
@@ -1669,10 +1670,11 @@ public:
     }
 
     void reduce_reduce_conflict(int r1, int r2) {
-        warn("reduce/reduce conflict:\n    %s line %i\n vs %s at %s\n",
+        warn(stringformat(
+            "reduce/reduce conflict:\n    {} line {}\n vs {} at {}\n",
             rules[r1].to_str().c_str(), rules[r1].location().c_str(),
             rules[r2].to_str().c_str(), rules[r2].location().c_str()
-        );
+        ));
     }
 
     void shift_reduce_conflict(int r1, int r2) {
@@ -1684,9 +1686,10 @@ public:
     // which would probably only happen due to a bug in
     // this program...
     void other_conflict(lr_item item1, lr_item item2) {
-        warn("conflict:\n    %s\n vs %s\n",
+        warn(stringformat(
+           "conflict:\n    {}\n vs {}\n",
            item1.to_str(this).c_str(), item2.to_str(this).c_str()
-        );
+        ));
     }
 
     std::string code_for_shift(const lr_set &state, const ProdExpr *right_of_dot) {
@@ -1711,10 +1714,10 @@ public:
                 break;
             case GrammarElement::NONE:
                 // .. this pretty much implies a bug in fpl2cc:
-                fail(
-                    "Missing/unknown grammar element (id: %i %s)",
-                    type, right_of_dot->to_str().c_str()
-                );
+                fail(stringformat(
+                    "Missing/unknown grammar element (id: {} {})",
+                    type, right_of_dot->to_str()
+                ));
                 break;
         }
         // XXX redundant goto and other calculations here. restructure.
@@ -1800,7 +1803,7 @@ public:
             for(auto opt : optionals) {
                 which += "    " + opt.to_str(this) + "\n";
             }
-            warn("Ambiguity in %s:\n%s\n", sfn.c_str(), which.c_str());
+            warn(stringformat("Ambiguity in {}:\n{}\n", sfn, which));
         }
 
         out += "} else {\n";
@@ -2051,6 +2054,7 @@ public:
             out += separator_code.format_scoped();
         } else {
             // default is space separation:
+            // (maybe make this explicit?)
             out += "if(size_t len = space_length(inp)) { return len; }\n";
         }
 
@@ -2122,7 +2126,9 @@ public:
             auto strl  = rules_for_product.lower_bound(entry_prod);
             auto endrl = rules_for_product.upper_bound(entry_prod);
             if(strl == endrl) {
-                fail("Can't find entry rule for '%s'\n", entry_prod.c_str());
+                fail(stringformat(
+                    "Can't find entry rule for '{}'\n", entry_prod
+                ));
             }
             for(auto rit = strl; rit != endrl; ++rit) {
                 // entry_set.add_item(lr_item(rit->second, 0));
@@ -2268,10 +2274,10 @@ public:
         for(int rind = 0; rind < rules.size(); rind++) {
             if(!used[rind]) {
                 const ProductionRule &rule = rules[rind];
-                warn(
-                    "Rule producing %s on line %i is unused\n",
-                    rule.product().c_str(), rule.line_number()
-                );
+                warn(stringformat(
+                    "Rule producing {} on line {} is unused\n",
+                    rule.product(), rule.line_number()
+                ));
             }
         }
     }

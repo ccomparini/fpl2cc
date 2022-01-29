@@ -6,14 +6,14 @@
 #include <string>
 
 #include "util/fs.h"
-
-
+#include "util/stringformat.h"
+#include "util/to_hex.h"
 
 typedef uint32_t unich; // 4 byte unicode char; for realz, unlike wchar_t
 typedef unsigned char utf8_byte;
 typedef std::basic_string<utf8_byte> utf8_buffer;
 
-typedef void (ErrorCallback)(const char *fmt...); // printf format
+typedef void (ErrorCallback)(const std::string &error);
 typedef size_t (LengthCallback)(const utf8_byte *inp);
 
 inline std::string to_std_string(const utf8_byte *str, int len) {
@@ -125,10 +125,10 @@ class fpl_reader {
 
             // call the on_error callback directly, since the
             // line number is going to be invalid anyway:
-            on_error(
-                "test for eof at invalid position: %p in buffer %p",
-                pos, buffer.data()
-            );
+            on_error(stringformat(
+                "test for eof at invalid position: {} in buffer {}",
+                to_hex(pos), to_hex(buffer.data())
+            ));
         } else {
             // else it's eof if we're at the last byte of the file
             is_eof = off == buffer.length() - 1;
@@ -207,12 +207,8 @@ class fpl_reader {
 public:
 
     // default error callback/handler:
-    static void default_fail(const char *fmt...) {
-        va_list args;
-        va_start(args, fmt);
-        vfprintf(stderr, fmt, args);
-        va_end(args);
-
+    static void default_fail(const std::string &msg) {
+        fprintf(stderr, "%s\n", msg.c_str());
         exit(1);
     }
 
@@ -223,7 +219,9 @@ public:
     {
         std::ifstream in(infn);
         if(!in.is_open()) {
-            on_error("can't open '%s': %s\n", infn.c_str(), strerror(errno));
+            on_error(stringformat(
+                "can't open '{}': {}\n", infn, std::string(strerror(errno))
+            ));
         }
 
         in.seekg(0, std::ios::end);   
@@ -253,6 +251,10 @@ public:
 
     inline const std::string &filename() const {
         return input_filename;
+    }
+
+    inline std::string location() const {
+        return filename() + ":" + std::to_string(line_number());
     }
 
     std::string base_name() const {
@@ -288,24 +290,18 @@ public:
         return byte?*byte:'\0';
     }
 
-    // why do I not instead make a std::string formatter? .. anywayzzzz
-    void error(const char *fmt...) {
-        const int buf_size = 2048;
-        char msg_fmt[buf_size];
-        const char *inp = eof()?"<EOF>":inpp_as_char();
-
-        snprintf(msg_fmt, buf_size,
-            "Error %s:%i near \"%.12s\": %s\n",
-            filename().c_str(), line_number(), inp, fmt
+    void error(const std::string &msg) {
+        std::string full_msg(
+            stringformat("Error {} near «{}»: {}",
+                location(), pf_debug_peek(), msg
+            )
         );
 
-        char full_msg[buf_size];
-        va_list args;
-        va_start(args, fmt);
-        vsnprintf(full_msg, buf_size, msg_fmt, args);
-        va_end(args);
-
-        on_error(full_msg);
+        if(on_error) {
+            on_error(full_msg);
+        } else {
+            fprintf(stderr, "%s", full_msg.c_str());
+        }
     }
 
     // Returns the length in bytes of the newline "character" at *at.
@@ -521,7 +517,11 @@ public:
     // since we translate things like newlines (to "\n")
     // and eof, the output length might be more characters
     // than the num_chars passed.
-    inline std::string debug_peek(int pos = -1, int num_chars = 12) const {
+    // if pf_esc is set, we attempt to make the string safe
+    // to pass to printf() family functions.
+    inline std::string debug_peek(
+        int pos = -1, int num_chars = 12, bool pf_esc = true
+    ) const {
         if(!buffer.data()) return "<NO INPUT>";
 
         if(pos < 0) pos = read_pos;
@@ -534,12 +534,17 @@ public:
                 break;
             } else if(newline_length(inp) > 0) {
                 out += "\\n";
+            } else if(pf_esc && *inp == '%') {
+                out += "%%";
             } else {
                 out += *inp;
             }
             inp += char_length(inp);
         }
         return out;
+    }
+    inline std::string pf_debug_peek(int pos = -1, int num_chars = 12) {
+        return debug_peek(pos, num_chars, true);
     }
 
 };
