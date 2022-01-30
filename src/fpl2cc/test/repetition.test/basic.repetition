@@ -11,4 +11,6 @@
    Also hi there this is a block comment
  */
 
+a_statement;
+
 // this should have no newline at the end

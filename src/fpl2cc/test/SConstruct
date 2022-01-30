@@ -30,7 +30,7 @@ env = env.Clone()
 # and returns success if they match, or reports failure otherwise.
 env.Append(BUILDERS =
     { 'CompareOut' : Builder(
-        action = 'diff $SOURCES && touch $TARGET || rm -f $TARGET ;',
+        action = 'diff $SOURCES && touch $TARGET || { echo "$SOURCES did not meet expectations" ; rm -f $TARGET ; false; }',
         suffix = '.success',
         src_suffix = '.out') } )
 
@@ -80,6 +80,7 @@ for fpl in fpls :
 
     # .. and tell scons how to generate the language program:
     env.Fpl2CC(langprog + '.fpl')
+    #env.Fpl2jest(langprog + '.fpl')
     compiler = build_lang_exe.get(language, build_default)(langprog)
 
 
