@@ -86,11 +86,8 @@ inline std::string to_str(bool b) {
   arg1, etc).  The type of each argument variable depends on the types
   and (possible) repetitions of the expressions:
     - quoted string      -> std::string
-    - regular expression -> std::smatch
+    - regular expression -> std::smatch  XXX this is lies presently
     - production name    -> Jest::Member
-
-  If there's any repetition,... XXX handle repetition,
-  possibly in the state code itself.
 
   Code blocks should use a normal "return" statement to return a pointer
   to a Jest::Member.
@@ -98,67 +95,40 @@ inline std::string to_str(bool b) {
  */
 
 /*
-   Weird feature idea: reverse parser.  i.e. say you have a grammar
-   for json or whatever.  you can parse json from that, but can you
-   encode it?   how would this work?  you'd need to make it traverse
-   whatever data structure you want to encode, and know what rule
-   to use (in reverse).  it would be magic if you could do this.
- */
+ TODO/fix
 
-/*
- TODO
-
-  - bug (for all intents and purposes):  if a generated fpl
-    encounters an unexpected anything, it stops parsing (by
-    design).  Is this a misdesign?  maybe;  maybe the whole
-    embedding thing is crap.  ANYWAY even if it isn't, there
-    needs to be some kind of handler which can report unexpected
-    input as an error.  Otherwise the poor user can't tell what
-    is going on
+  - error handling and messaging is _terrible_ right now (with
+    the default, anyway)
+  - bug:  if everything in your fpl grammar is optional, it generates
+    some kind of infinite loop, I guess looking for nothing.
+    eg:
+      foo* -> done ;
+      'a' -> foo ;
+  - get jest in here :D
+  - lots of stuff is misnamed:
+    - "num_args" should be count or size or something sensible
+    - @comment_style and @separator - maybe just have @elider and
+      allow multiple?  default also doesn't have to be space.
+      lots of modern stuff puts space in the grammar.
+  - if a generated fpl encounters an unexpected anything, it stops
+    parsing (by design).  this could be used for incremental parsing
+    in cases where you are parsing a buffer as it's being filled
+    (such as parsing network input or even just from the command line).
+    the current buffering framework doesn't allow that, though.
 
   - ~scan_function.  regexes suck for quoted strings and the like
     (need non-greedy match, escaped quotes, etc).  maybe have a
     standard lib of scan functions for things like quoted strings
     with escaping or whatever.
-  - way to join tokens for purposes of repetition, so as to easily
+  - parens to join steps for purposes of repetition, so as to easily
     support old-style languages which don't allow trailing commas
     and such.  eg allow:
-       foo ','.foo* ->  foo_list ;
-    so that if there's a comma, it expects another foo, but can do
-    that an arbitrary number of times
-  - try an invert separator/elider function for doc extraction
-  - precedence.  maybe an @prec (... )?
+       foo (',' foo)* ->  foo_list ;
+  - precedence.  maybe an @prec (... )? or ^other_rule?
 
-ye olde:
-  o repetition/optionals:  optional counts perhaps already work;
-    max_times is not implemented.  do them by boiling any foo*
-    or foo+ or whatever down to a single item (with subitems).
-    this makes passing them to reduce code much saner.
-    this means either looping in a state to handle the repetition
-    (can that work?) or somehow making the push code know to add
-    to the thing at the top of the stack instead of pushing new.
-    x optionals: I think we need the states to understand optionals
-      (optionals parse correctly)
   - timings, so we can see if this or that is faster.
-  o instead of these 2:
-    x fix termination/accept.  Just add the implied rule.  it'll work.
-    x fix infinite loop on bad input!  hah!
-    "fix" both, by:
-      - log/store the error for the caller somehow, but:
-      x make it return all the way back to the top on any unexpected
-        input
-      - let callers (of the whole parser) decide if the parse was
-        successful or not.
-    Possible downside to this: it does not consider reporting multiple
-    errors/recovering.  Can the caller attempt the recovery?
-  - way to do specialized scans. ~scan_function_name maybe?
-    or scan classes.
-  - "^" to refer to prior rules?  think it over. Also note in general the
-    lower precedent rules are earlier in the file so maybe another symbol.
-    and one would scope it to the file, I guess?
   o document the fpl (see docs dir)
-  - operator precedence:  it's a PITA to do the whole intermediate
-    productions precedence thing.  So, make it part of FPL.
+
  */
 
 struct Options {
