@@ -1501,7 +1501,7 @@ public:
         out += rule_meta_int(num_steps);
         out += rule_meta_int(line_number);
         out += rule_meta_str(location);
-        out += "} rule;\n";
+        out += "} this_rule;\n";
         return out;
     }
     #undef rule_meta_int
