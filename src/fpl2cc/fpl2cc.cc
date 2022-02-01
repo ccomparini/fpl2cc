@@ -27,7 +27,7 @@ void fail(const std::string &msg) {
         fprintf(stderr, "%s", msg.c_str());
     }
 
-    exit(1);
+    exit(ExitVal::FAIL);
 }
 
 static int num_warnings = 0;
@@ -952,12 +952,12 @@ public:
             // at element (last_size - 1)...
             for(auto &item: set.iterable_items()) {
                 // support for *+?!
-                //   - the "+" case is no different from the default
-                //     here - we'll do the more-than-one case in the
-                //     generated code (by not advancing the state)
                 //   - the "*" and "?" cases:  since the expression is
                 //     optional, we do need to consider what's after
                 //     it as another possible start to a given match.
+                //   - the "+" case is no different from the default
+                //     here, since this deals only with the first
+                //     successor symbol.
                 //   x "!" is complicated, so I got rid of it
                 const ProductionRule &rule = rules[item.rule];
                 int pos = item.position;
@@ -999,7 +999,8 @@ public:
         }
     }
 
-    // "goto" operation from page 224 Aho, Sethi and Ullman.
+    // "goto" operation from page 224 Aho, Sethi and Ullman,
+    // augmented to allow repetition (eg from * and + operators).
     // given a current state and a lookahead item, returns
     // the next state (i.e. the set of items which might appear
     // next)
