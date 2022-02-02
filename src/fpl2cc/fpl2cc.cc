@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "fpl_reader.h"
+#include "util/src_location.h"
 
 enum ExitVal {
     OK = 0,
@@ -47,9 +48,6 @@ inline std::string to_str(bool b) {
     return "false";
 }
 
-#define CLUDGE_TO_STR(x) #x
-#define CLUDGE_STR(x) CLUDGE_TO_STR(x)
-#define THIS_LINE __FILE__ " line " CLUDGE_STR(__LINE__)
 #define CODE_BLOCK(str) CodeBlock(std::string(__FILE__), __LINE__, str)
 
 /*
