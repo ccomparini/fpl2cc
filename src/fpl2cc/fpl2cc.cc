@@ -1620,7 +1620,7 @@ public:
         }
 
         // now one slice for all the arguments.  to rule them all.
-        out += "FPLBP::StackSlice args(base_parser, frame_start, pos);\n";
+        out += "FPLBP::StackSlice args(base_parser, pos + 1, frame_start - pos);\n";
 
         out += "    " + reduce_type + " result = " + rule_fn(rule_ind) + "(";
         for(int stind = 0; stind < rule.num_steps(); stind++) {
