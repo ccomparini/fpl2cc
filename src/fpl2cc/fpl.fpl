@@ -15,10 +15,10 @@
 typedef const std::string &Terminal;
 typedef const FPLBP::StackSlice &Prods;
 
-inline fplp_directive directive(Terminal nm, Prods args) {
+inline fplp_directive directive(Terminal nm, Prods all_args) {
     return {
-        .name = nm,
-        .arg  = (args.count() > 0)?args[0].product.term_str():"",
+        .name = nm.substr(1, nm.size()),
+        .arg  = (all_args.count() > 1)?all_args[1].product.term_str():"",
     };
 }
 
@@ -37,6 +37,8 @@ inline fplp_rule_step rule_step(Terminal match_in, Prods opt_quant) {
     if(match[0] == '\'' || match[0] == '"' || match[0] == '/') {
         type  = match_in[0];
         match = match_in.substr(1, match_in.size() - 2);
+    } else {
+        match = match_in;
     }
 
     fplp_quantifier quant = { .min = 1, .max = 1 };
