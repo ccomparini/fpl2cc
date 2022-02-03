@@ -31,7 +31,7 @@ inline fplp_quantifier quantifier(Terminal qt) {
     }
 }
 
-inline fplp_rule_step rule_step(Terminal match_in, Prods quant) {
+inline fplp_rule_step rule_step(Terminal match_in, Prods opt_quant) {
     char type = ' ';
     std::string match;
     if(match[0] == '\'' || match[0] == '"' || match[0] == '/') {
@@ -39,33 +39,20 @@ inline fplp_rule_step rule_step(Terminal match_in, Prods quant) {
         match = match_in.substr(1, match_in.size() - 2);
     }
 
+    fplp_quantifier quant = { .min = 1, .max = 1 };
+    if(opt_quant.count()) quant = std::get<fplp_quantifier>(opt_quant.val(0));
+
     return {
         .type  = type,
         .match = match,
-        .quant = { .min = 1, .max = 1 } // XXX FIXME get quantity
+        .quant = quant
     };
-
-/*
-    fplp_element result;
-    fplp_rule_step    &st = result.rule_step;
-
-    if(quant.count() > 0) {
-        // XXX this .product thing continutes to suck
-        st.quant = quant[0].product;
-    } else {
-        st.quant.min = 1;
-        st.quant.max = 1;
-    }
-
-    return result;
- */
 }
 
 inline fplp_rule rule(Prods stin, Terminal pn, const fplp_element &code) {
     std::list<fplp_rule_step> steps;
     for(int sti = 0; sti < stin.count(); ++sti) {
-        // XXX ok this is super awkward.  make arguments better.
-        steps.push_back(std::get<fplp_rule_step>(stin[sti].product.val()));
+        steps.push_back(std::get<fplp_rule_step>(stin.val(sti)));
     }
     return {
         .product     = pn,
@@ -93,17 +80,13 @@ inline fplp_rule rule(Prods stin, Terminal pn, const fplp_element &code) {
 
 item+ -> items +{
     fprintf(stderr, "got %i items in general in %s.\n", args.count(), base_parser.filename().c_str());
-    //for(int itemi = 0; itemi < args.count(); ++itemi) { // fail? off by one?  it's the damn stack slices again. redo
-    for(int itemi = 0; itemi < arg_0.count(); ++itemi) {
+    for(int itemi = 0; itemi < args.count(); ++itemi) { // fail? off by one?  it's the damn stack slices again. redo
         // TODO:  change so that we pass products, not stack entries.
         // stack entries contain a state pointer which I'm not sure
         // we can or should care about.  What we do want is the thing
         // itself and I guess the line number/source....
-        //fprintf(stderr, "  %i:   %s\n", itemi, args[itemi].to_str().c_str());
-        fprintf(stderr, "  %i:   %s\n", itemi, arg_0[itemi].to_str().c_str());
+        fprintf(stderr, "  %i:   %s\n", itemi, args[itemi].to_str().c_str());
     }
-    // fprintf(stderr, "OH HAI\n");
-    // fprintf(stderr, "going to ask for a value of %s\nin %s\n", arg_0[0].product.to_str().c_str(), arg_0[0].to_str().c_str());
     return arg_0[0].product.val(); // XXX FIXME
 }+
 
