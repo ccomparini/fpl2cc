@@ -182,7 +182,7 @@ class fpl_reader {
         // default is to get the line number for the current read position:
         if(!pos) pos = buf + read_pos;
 
-        if(pos > buf + buffer.length()) return -1;
+        if(pos > buf + buffer.length()) return -1; // XXX return last line really
         if(pos < buf)                   return -2;
 
         if(eof(pos)) pos = buf + buffer.length();
@@ -495,17 +495,36 @@ public:
     }
 
     inline std::cmatch read_re(const std::string &re) {
+        // XXX this doesn't support utf-8 or unicode in any
+        // reasonable way.  btw:
+        //  https://stackoverflow.com/questions/37989081/how-to-use-unicode-range-in-c-regex
+
         std::cmatch matched;
         // match_continuous is so that it will start the
         // match at exactly at the inpp (and ideally won't
         // try to keep matching the rest of the input)
-        // XXX this doesn't support utf-8 or unicode in any
-        // reasonable way.  btw:
-        //  https://stackoverflow.com/questions/37989081/how-to-use-unicode-range-in-c-regex
+        // https://en.cppreference.com/w/cpp/regex/match_flag_type
         auto opts = std::regex_constants::match_continuous;
         if(const char *in = inpp_as_char()) {
-            if(std::regex_search(in, matched, std::regex(re), opts))
+
+            // OK SO
+            // https://en.cppreference.com/w/cpp/regex/syntax_option_type
+            //   icase, multiline, nosubs
+            // in theory, we can and should make these be options.
+            // a reasonable way to do that might be to have callers
+            // pass in a constructed re already (might want that so
+            // that we're not constantly recompiling regexes anyway).
+            // but, in the context of fully buffered files, I'm not
+            // sure when you would _not_ want multiline - regexes here
+            // already match past newlines, and $ is just going to match
+            // the end of the buffer (which in theory could be anywhere,
+            // and in practice is end of file - not useful).
+            // SO I'm just going to turn on multiline always.
+            const std::regex cre(re, std::regex::multiline);
+            if(std::regex_search(in, matched, cre, opts))
                 read_pos += matched.length();
+// XXX wait what?  we _can _ get here on matches of "0 bytes".  we don't want to return true in such cases. investigate.
+// fprintf(stderr, "/%s/ matched %li bytes!  specifically: (%s)\n", re.c_str(), matched.length(), matched.str().c_str());
             // (matched is now set to whatever was matched, if anything)
         } else {
             // (we are at eof - no match)

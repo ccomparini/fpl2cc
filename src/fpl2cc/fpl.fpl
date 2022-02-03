@@ -1,0 +1,172 @@
+#
+#  fpl for fpl2cc and hopefully at some point fpl2jest
+#
+
+@comment_style sh
+
++{
+#include <stdio.h>
+#include "fplp.h"
+}+
+
+@internal +{
+
+// shortcuts for rule arguments:
+typedef const std::string &Terminal;
+typedef const FPLBP::StackSlice &Prods;
+
+inline fplp_directive directive(Terminal nm, Prods args) {
+    return {
+        .name = nm,
+        .arg  = (args.count() > 0)?args[0].product.term_str():"",
+    };
+}
+
+inline fplp_quantifier quantifier(Terminal qt) {
+    switch(qt[0]) {
+        case '*': return { .min = 0, .max = INT_MAX };
+        case '+': return { .min = 1, .max = INT_MAX };
+        case '?': return { .min = 0, .max =       1 };
+        default : return { .min = 1, .max =       1 };
+    }
+}
+
+inline fplp_rule_step rule_step(Terminal match_in, Prods quant) {
+    char type = ' ';
+    std::string match;
+    if(match[0] == '\'' || match[0] == '"' || match[0] == '/') {
+        type  = match_in[0];
+        match = match_in.substr(1, match_in.size() - 2);
+    }
+
+    return {
+        .type  = type,
+        .match = match,
+        .quant = { .min = 1, .max = 1 } // XXX FIXME get quantity
+    };
+
+/*
+    fplp_element result;
+    fplp_rule_step    &st = result.rule_step;
+
+    if(quant.count() > 0) {
+        // XXX this .product thing continutes to suck
+        st.quant = quant[0].product;
+    } else {
+        st.quant.min = 1;
+        st.quant.max = 1;
+    }
+
+    return result;
+ */
+}
+
+inline fplp_rule rule(Prods stin, Terminal pn, const fplp_element &code) {
+    std::list<fplp_rule_step> steps;
+    for(int sti = 0; sti < stin.count(); ++sti) {
+        // XXX ok this is super awkward.  make arguments better.
+        steps.push_back(std::get<fplp_rule_step>(stin[sti].product.val()));
+    }
+    return {
+        .product     = pn,
+        .steps       = steps,
+        .reduce_code = std::get<fplp_code_block>(code)
+    };
+
+/*
+    fplp_element  result;
+    fplp_rule          &rl = result.rule;
+
+    for(int sti = 0; sti < args.count(); ++sti) {
+        rl.steps.push_back(steps[sti].product);
+    }
+    rl.product = pn;
+    rl.code = code;
+
+    return result;
+ */
+}
+
+}+
+
+@produces fplp_element
+
+item+ -> items +{
+    fprintf(stderr, "got %i items in general in %s.\n", args.count(), base_parser.filename().c_str());
+    //for(int itemi = 0; itemi < args.count(); ++itemi) { // fail? off by one?  it's the damn stack slices again. redo
+    for(int itemi = 0; itemi < arg_0.count(); ++itemi) {
+        // TODO:  change so that we pass products, not stack entries.
+        // stack entries contain a state pointer which I'm not sure
+        // we can or should care about.  What we do want is the thing
+        // itself and I guess the line number/source....
+        //fprintf(stderr, "  %i:   %s\n", itemi, args[itemi].to_str().c_str());
+        fprintf(stderr, "  %i:   %s\n", itemi, arg_0[itemi].to_str().c_str());
+    }
+    // fprintf(stderr, "OH HAI\n");
+    // fprintf(stderr, "going to ask for a value of %s\nin %s\n", arg_0[0].product.to_str().c_str(), arg_0[0].to_str().c_str());
+    return arg_0[0].product.val(); // XXX FIXME
+}+
+
+code_block -> item ;
+directive  -> item ;
+import     -> item ;
+rule       -> item ;
+
+# +{ }+ code blocks.
+# the regex here is:
+#   begin with '+{'
+#   match 0 or more of either:
+#     '}' followed by anything not a '+', or
+#     anything not a '}'
+#   terminated with '}+
+# this has to be one regex - if you do (eg) '+{'
+# as a token and then some regex to read the guts,
+# it'll read the +{ correctly then promptly strip
+# all your #includes as comments.  ask me how I know!
+/\+\{(?:(?:\}[^+])|[^}])*\}\+/ -> code_block +{
+    return fplp_code_block(arg_0.substr(2, arg_0.size() - 3));
+}+
+
+# or do we want to spell out directives here, so we have the list?
+# I think yes.
+# /@[a-z_]*/ -> directive_name ;
+'@comment_style'  /(\S+)/    -> directive +{ return directive(arg_0, args); }+
+'@default_action' code_block -> directive +{ return directive(arg_0, args); }+
+'@default_main'              -> directive +{ return directive(arg_0, args); }+
+'@internal'       code_block -> directive +{ return directive(arg_0, args); }+
+'@post_parse'     code_block -> directive +{ return directive(arg_0, args); }+
+'@produces'       /(\S+)/    -> directive +{ return directive(arg_0, args); }+
+'@separator'      code_block -> directive +{ return directive(arg_0, args); }+
+# /@\S*/                       -> directive +{ error("invalid directive: {}", arg_0) }+ XXX support this
+
+/`[^`]*`/ -> import +{
+    fplp_imp out = {
+        .filename = arg_0.substr(1, arg_0.size() - 2)
+    };
+    return out;
+}+
+
+'*' -> quantifier +{ return quantifier(arg_0); }+
+'+' -> quantifier +{ return quantifier(arg_0); }+
+'?' -> quantifier +{ return quantifier(arg_0); }+
+
+/"(?:[^"\\]|\\.)*"/        quantifier? -> step +{ return rule_step(arg_0, arg_1); }+
+/'(?:[^'\\]|\\.)*'/        quantifier? -> step +{ return rule_step(arg_0, arg_1); }+
+/\/(?:[^\/\\]|\\.)*\/[m]?/ quantifier? -> step +{ return rule_step(arg_0, arg_1); }+
+production_name            quantifier? -> step +{
+    return rule_step(std::get<std::string>(arg_0), arg_1);
+}+
+
+step+ '->' production_name code_block -> rule +{ return rule(arg_0, std::get<std::string>(arg_2), arg_3); }+
+step+ '->' production_name ';'        -> rule +{ return rule(arg_0, std::get<std::string>(arg_2), fplp_code_block(""));    }+
+
+/[A-Za-z][A-Za-z0-9_]+/ -> production_name ;
+
+@default_main
+
+@post_parse +{
+    fprintf(stderr, "finished parsing at line %i\n", base_parser.line_number());
+    fprintf(stderr, "state of parser:\n%s\n--------\n", to_str().c_str());
+}+
+
+

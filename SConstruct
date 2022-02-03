@@ -37,6 +37,8 @@ def depend_on_fpl2cc(node, env, path) :
 
 env.Append(
     SCANNERS = Scanner(
+        # this is wrong for the fpl to jest one.  sigh.
+        # can't I force the dependency in the builder?
         function = depend_on_fpl2cc,
         skeys = ['.fpl']
     )
@@ -45,6 +47,7 @@ env.Append(
 # fpl -> cc builder:
 # at this point this is for testing fpl
 env.Append(BUILDERS =
+    #{ 'Fpl2CC' : Builder(action = debugger + 'bin/fpl2cc --debug-single-step $SOURCE --out $TARGET',
     { 'Fpl2CC' : Builder(action = debugger + 'bin/fpl2cc $SOURCE --out $TARGET',
 	         suffix = '.cc',
 	         src_suffix = '.fpl') } )
@@ -55,6 +58,11 @@ env.Append(BUILDERS =
 	         suffix = '.h',
 	         src_suffix = '.fpl') } )
 
+# fpl -> jest builder:
+env.Append(BUILDERS =
+    { 'Fpl2jest' : Builder(action = debugger + 'bin/fpl $SOURCE --out $TARGET',
+	         suffix = '.jest',
+	         src_suffix = '.fpl') } )
 
 
 SConscript('src/util/SConstruct', 'env');
