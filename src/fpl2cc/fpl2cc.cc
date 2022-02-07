@@ -1485,7 +1485,7 @@ public:
     }
 
     #define rule_meta_str(mem) \
-        std::string("static std::string " #mem "() {\n") +\
+        std::string("static const char *" #mem "() {\n") +\
             "return \"" + rule.mem() + "\";\n" \
         "}\n"
     #define rule_meta_int(mem) \
