@@ -1499,6 +1499,7 @@ public:
         out += rule_meta_str(product);
         out += rule_meta_int(num_steps);
         out += rule_meta_int(line_number);
+        out += rule_meta_str(filename);
         out += rule_meta_str(location);
         out += "} this_rule;\n";
         return out;
