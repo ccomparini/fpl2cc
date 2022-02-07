@@ -34,7 +34,7 @@ inline fplp_quantifier quantifier(Terminal qt) {
 inline fplp_rule_step rule_step(Terminal match_in, Prods opt_quant) {
     char type = ' ';
     std::string match;
-    if(match[0] == '\'' || match[0] == '"' || match[0] == '/') {
+    if(match_in[0] == '\'' || match_in[0] == '"' || match_in[0] == '/') {
         type  = match_in[0];
         match = match_in.substr(1, match_in.size() - 2);
     } else {
