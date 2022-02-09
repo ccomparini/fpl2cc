@@ -698,6 +698,7 @@ class Productions {
     std::string reduce_type;
     CodeBlock default_action;
     CodeBlock post_parse;
+    CodeBlock post_reduce;
     CodeBlock separator_code;
     std::list<CodeBlock> comment_code;
     bool default_main;
@@ -1088,6 +1089,8 @@ public:
             }
         } else if(dir == "post_parse") {
             post_parse = code_for_directive(dir);
+        } else if(dir == "post_reduce") {
+            post_reduce = code_for_directive(dir);
         } else if(dir == "produces") {
             reduce_type = inp.read_re("\\s*(.+)\\s*")[1];
         } else if(dir == "separator") {
@@ -1623,6 +1626,7 @@ public:
         // now one slice for all the arguments.  to rule them all.
         out += "FPLBP::StackSlice args(base_parser, pos + 1, frame_start - pos);\n";
 
+        // generates the call to the reduction rule:
         out += "    " + reduce_type + " result = " + rule_fn(rule_ind) + "(";
         for(int stind = 0; stind < rule.num_steps(); stind++) {
             const ProdExpr *expr = rule.step(stind);
@@ -1638,6 +1642,12 @@ public:
             out += ", ";
         }
         out += " args);\n";
+
+        // we've called the reduction rule.  There might be something
+        // we're supposed to do with the result:
+        if(post_reduce) {
+            out += "\n{\n" + post_reduce.format() + "\n}\n";
+        }
 
         // this is what actually pops the stack. note we pop after
         // the reduce (mainly to minimize moves, but also so the
