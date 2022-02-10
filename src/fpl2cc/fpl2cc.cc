@@ -1852,13 +1852,11 @@ public:
     // reformats the generated code to fix indents and what have you.
     // this is fairly rough but does result in more or less readable
     // code for most cases.
+    // ... this should also be done in fpl.
     std::string reformat_code(const std::string &code, const std::string &fn) {
-        const int chars_per_indent = 4;
-        int indent = 0;
-        int newlines = 0;
-        int cur_line = 1;
+        int indent_lev = 0;
+        int line_no = 1;
         bool comment_mode = false;
-        bool preprocessor_mode = false;
 
         std::string output;
 
@@ -1872,94 +1870,69 @@ public:
         // a full line, and only then indent/copy it..
 
         const std::string::size_type code_length = code.size();
-        for(std::string::size_type inp = 0; inp < code_length; inp++) {
+        std::string::size_type inp = 0;
+        while(inp < code_length) {
 
-            // (ok to check inp + 1 because there's a terminal '\0')
-            if(code[inp] == '*' && code[inp + 1] == '/' ) {
-                comment_mode = false;
-                output += "*/";
-                inp += 2;
-            } else if(code[inp] == '/' && code[inp + 1] == '*' ) {
-                comment_mode = true;
-                output += "/*";
-                inp += 2;
-            } 
-
-            if(comment_mode) {
-                // this grows more spaghetti-eqsue.  soon, if I jackass
-                // the indent,it'll be good enough for a gnu project!
-                output += code[inp];
-                continue;
-            }
-
-            if(code[inp] == '{') {
+            if(code[inp] == '/' && code[inp + 1] == '*' ) {
+                // block comment - copy verbatim:
+                output += "/"; output += "*";
+                for(inp += 2; inp < code_length; inp++) {
+                    if(code[inp] == '*' && code[inp + 1] == '/' ) {
+                        output += "*"; output += "/";
+                        inp += 2;
+                        break;
+                    } else {
+                        output += code[inp];
+                        if(code[inp] == '\n') {
+                            line_no++;
+                            // indent comments as well:
+                            for(int ind = 0; ind < indent_lev; ind++)
+                                output += "    ";
+                        }
+                    }
+                }
+            } else if(code.compare(inp, 2, "//") == 0) {
+                // line comment - also copy verbatim:
+                while(code[inp] != '\n') {
+                    output += code[inp++];
+                }
+            } else if(code.compare(inp, 7, "#$LINE\n") == 0) {
+                inp += 6;
+                // this is a pseudo-macro we generated to restore
+                // the actual current output line after embeddding
+                // some code from another file/place:
+                output += "#line " + std::to_string(line_no) 
+                        + " \"" + fn + "\"";
+            } else if(code.compare(inp, 2, "{\n") == 0) {
                 // only count '{' at end of line, which is a
                 // good-enough hack to avoid issues with
                 // quoted { or comments with { or whatever.
-                if(code[inp + 1] == '\n') {
-                    indent += chars_per_indent;
-                }
-            } else if(code[inp] == '}') {
-                // counterpart to the above good-enough hack:
-                // only count '}' if it's the start of a
-                // new line:
-                if(newlines > 0)
-                    indent -= chars_per_indent;
+                indent_lev++;
+                inp++; // (only "eat" the '{' - '\n' is handled next loop)
+                output += "{";
             } else if(code[inp] == '\n') {
-                // skip spaces at start of line - we'll convert them
-                // to the correct indent later.
+                // skip spaces at start of line (since we're reindenting)
                 while(inp < code_length && isspace(code[inp])) {
                     // (.. but preserve newlines)
-                    if(code[inp] == '\n') {
-                        newlines++;
-                        // (.. and track the current line number)
-                        cur_line++;
+                    if(code[inp++] == '\n') {
+                        output += "\n";
+                        line_no++;
                     }
-                    inp++;
                 }
-                if(inp < code_length)
-                    inp--;
-                preprocessor_mode = false;
-                continue;
-            } else if(code[inp] == '#') {
-                preprocessor_mode = true;
-            } else if(code[inp] == '$' && preprocessor_mode) {
-                // if we see $LINE in anything which looks like
-                // a preprocessor directive, expand it out into
-                // a #line directive with the current file and line.
-                // this lets the code generator reset the line number
-                // after issuing its own #line directives, which it
-                // does for code imported into the fpl etc.
-                // (as with everything here, it's not perfect and can
-                // be broken by (eg) a '#' embedded in a string or
-                // whatever, but for the moment I'm not worrying)
-                // (IRL if this ever generates jest code we'll have
-                // a jest directive to restore the line/file position
-                // or such.  probably actually track both actual line/file
-                // position, and "original" line/position..)
-                if(code.compare(inp + 1, 4, "LINE") == 0) {
-                    output += "line " + std::to_string(cur_line + 1) 
-                            + " \"" + fn + "\"";
-                    inp += 5;
-                    // add newline after in a way which won't mess up
-                    // the count:
-                    newlines++;
-                    continue;
+
+                if(code[inp] == '}') {
+                    // this is in here as a counterpart to the
+                    // "only count '{' at end of line thing:
+                    // only count '}' if it's the start of a
+                    // new line (excluding spaces):
+                    indent_lev--;
                 }
+                // now do the indent:
+                for(int ind = 0; ind < indent_lev; ind++)
+                    output += "    ";
+            } else {
+                output += code[inp++];
             }
-
-            if(newlines > 0) {
-                while(newlines > 0) {
-                    output.push_back('\n');
-                    --newlines;
-                }
-
-                for(int ind = 0; ind < indent; ind++)
-                    output.push_back(' ');
-            }
-
-            output.push_back(code[inp]);
-
         }
         return output;
     }
