@@ -41,12 +41,6 @@ std::string stringformat(std::string_view fmt, Args&&... args) {
     // in fact it might be worth warning if there are extra
     // (or not enough) arguments.
     const int num_args = sizeof...(args);
-    // this next 2 seem to repeatedly splat the first element
-    // in the array, and leave the rest of the elements unconstructed(!).
-    // wacky.  I guess a fold expression is a reduce, not a map.
-    // perhaps hence the term "fold".  ohhh
-    //const std::string str_arg[] = { (_stringformat(args), ...) };
-    //const std::string str_arg[] = { (..., _stringformat(args)) };
     const std::string str_arg[] = { _stringformat(args) ... };
 
     // possibly better syntax.  see the notes file.
@@ -65,7 +59,7 @@ std::string stringformat(std::string_view fmt, Args&&... args) {
 
     int argi = 0;
     size_t ind;
-    for(ind = 0; ind < inlen - 1; ++ind) {
+    for(ind = 0; ind < inlen; ++ind) {
         if(fmt[ind] == '{') {
             if(fmt[ind + 1] == '{') {
                 ++ind;
@@ -97,8 +91,6 @@ std::string stringformat(std::string_view fmt, Args&&... args) {
             out += fmt[ind];
         }
     }
-    // last char:
-    out += fmt[ind];
 
     return out;
 }
