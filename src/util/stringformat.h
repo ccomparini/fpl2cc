@@ -2,7 +2,7 @@
 #define STRINGFORMAT_H
 
 #include "to_hex.h"
-#include <vector>
+#include <list>
 
 // OK SO #include<format> doen't seem to exist on my machine.
 // let the reinvention commence.
@@ -27,8 +27,19 @@ std::string _stringformat(T in, const std::string &opts = "") {
     if(opts == "x")
         return to_hex(in);
  */
-
     return std::to_string(in);
+}
+
+template<typename T>
+std::string _stringformat(const std::list<T> &list, const char *j = ", ") {
+    std::string out;
+    for(auto el = list.begin(); el != list.end(); ++el) {
+        if(std::next(el) == list.end())
+            out += _stringformat(*el);
+        else
+            out += _stringformat(*el) + j;
+    }
+    return out;
 }
 
 template <typename... Args>
