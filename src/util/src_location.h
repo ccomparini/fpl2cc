@@ -4,6 +4,7 @@
 #include<string>
 
 // we don't have <source_location>.  hence this reinvention.
+typedef const std::string src_location;
 
 #define _CLUDGE_TO_STR(x) #x
 #define _CLUDGE_STR(x) _CLUDGE_TO_STR(x)

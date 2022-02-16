@@ -6,9 +6,13 @@
 #include <string>
 
 #include "util/fs.h"
+#include "util/src_location.h"
 #include "util/stringformat.h"
 #include "util/to_hex.h"
 
+// XXX actually all official utf-8 fits in 4 bytes
+// unich is a unicode codepoint but probably want to only use utf-8.
+// XXX axe unich anyway
 typedef uint32_t unich; // 4 byte unicode char; for realz, unlike wchar_t
 typedef unsigned char utf8_byte;
 typedef std::basic_string<utf8_byte> utf8_buffer;
@@ -22,7 +26,6 @@ inline std::string to_std_string(const utf8_byte *str, int len) {
 
 // Returns the length in bytes of the utf-8 character at *at,
 // or 0 if that character isn't a space.
-//inline size_t space_length(const utf8_byte *at) {
 size_t space_length(const utf8_byte *at) {
     if(at == NULL) return 0;
 
@@ -92,7 +95,8 @@ class fpl_reader {
     std::string input_filename;
     utf8_buffer buffer;
 
-    ErrorCallback *on_error;
+    ErrorCallback *on_error; // XXX move;  no need to throw from inside here
+                             // (but we could keep an error string)
     size_t read_pos;
 
     // ... surely there's a better way to get an empty match set..?
@@ -114,7 +118,7 @@ class fpl_reader {
     // throws an error (and returns true) if the position
     // is entirely outside the buffer
     // see also the simpler eof() in the public section
-    inline bool eof(const utf8_byte *pos) const {
+    inline bool eof(const utf8_byte *pos, src_location caller = CALLER()) const {
         long int off = pos - buffer.data();
         bool is_eof = false;
         if((off < 0) || (off >= buffer.length())) {
@@ -126,8 +130,8 @@ class fpl_reader {
             // call the on_error callback directly, since the
             // line number is going to be invalid anyway:
             on_error(stringformat(
-                "test for eof at invalid position: {} in buffer {}",
-                to_hex(pos), to_hex(buffer.data())
+                "{}: test for eof at invalid pos {} (offset {}) in buffer {}",
+                caller, to_hex(pos), pos - buffer.data(), to_hex(buffer.data())
             ));
         } else {
             // else it's eof if we're at the last byte of the file
@@ -144,6 +148,8 @@ class fpl_reader {
 
     // returns the string inside the matching chars.
     // returns empty string if no match.  yeah, it's ambiguous.. hmm
+    // XXX this is barely used anymore.  only used for "read_to_byte".
+    // kill it.
     std::string read_to_match(unich start_match, unich end_match) {
         skip_bytes(1); // XXX convert this whole thing to utf-8
         const utf8_byte *start = inpp();
@@ -174,18 +180,19 @@ class fpl_reader {
     }
 
     // returns the line number for the position passed,
-    // or -1 if the position is past the end of the buffer,
-    // or -2 of the position is before the start of the buffer
-    inline int calc_line_number(const utf8_byte *pos) const {
-        const utf8_byte *buf = buffer.data();
+    // or 0 if pos is before the start of the buffer
+    // or the number of the last line in the file if pos
+    // is past the end of the buffer.
+    inline int calc_line_number(size_t at, const std::string &caller = CALLER()) const {
 
-        // default is to get the line number for the current read position:
-        if(!pos) pos = buf + read_pos;
-
-        if(pos > buf + buffer.length()) return -1; // XXX return last line really
-        if(pos < buf)                   return -2;
-
-        if(eof(pos)) pos = buf + buffer.length();
+        if(at >= buffer.length()) {
+            fprintf(stderr,
+                "warning: (%s): "
+                "position %lu is outside file (len %li) by %li\n",
+                caller.c_str(), at, buffer.length(), at - buffer.length()
+            );
+            at = buffer.length() - 1;
+        }
 
         // we rescan for line numbers instead of keeping a counter
         // because (1) it's easier than checking every read, which
@@ -194,10 +201,11 @@ class fpl_reader {
         // care about the line number, it's going to be either fast
         // enough, or (with luck) net faster than keeping a line
         // counter and updating it on every read.
+        // (if it turns out not to be fast enough, make an index)
         int line_no = 1;
-        const utf8_byte *rd;
-        for(rd = buf; rd < pos; rd += char_length(rd)) {
-            if(newline_length(rd)) {
+        size_t pos;
+        for(pos = 0; pos < at; pos += char_length(pos)) {
+            if(newline_length(pos)) {
                 line_no++;
             }
         }
@@ -239,14 +247,15 @@ public:
     }
 
     // returns the 1-based line number for the position passed.
-    // returns 0 if the position passed is outside the buffer entirely.
-    inline int line_number(size_t offset) const {
-        return calc_line_number(buffer.data() + offset);
+    // positions past the end of the file evaluate to the last
+    // line in the file.
+    inline int line_number(size_t pos, src_location &caller = CALLER()) const {
+        return calc_line_number(pos, caller);
     }
 
     // as above, but returns the current input line number
-    inline int line_number() const {
-        return calc_line_number((const utf8_byte *)(NULL));
+    inline int line_number(src_location &caller = CALLER()) const {
+        return line_number(read_pos, caller);
     }
 
     inline const std::string &filename() const {
@@ -274,6 +283,7 @@ public:
 
     inline bool eof() const {
         // -1 is because we stuff a '\0' at the end of the buffer
+        // XXX buffer might or does already?
         return read_pos >= buffer.length() - 1;
     }
 
@@ -297,7 +307,7 @@ public:
 
         std::string full_msg(
             stringformat("Error {} near «{}»: {}{}",
-                location(), pf_debug_peek(), msg, nl
+                location(), debug_peek(), msg, nl
             )
         );
 
@@ -308,27 +318,39 @@ public:
         }
     }
 
-    // Returns the length in bytes of the newline "character" at *at.
+    // Returns the length in bytes of the newline "character" at the
+    // position passed.
     // Any 2 bytes in a row with one each of 0x0a and 0x0d counts as
     // a single newline (which covers Microsoft newlines and some
     // old-fashioned newlines).  Also, either of 0x0d or 0x0a alone
     // counts as a newline (which covers unix newlines and some other
     // old fashioned newlines).
     // If at isn't pointing to a newline, returns 0.
-    static inline size_t newline_length(const utf8_byte *at) {
-        if(at == NULL) return 0;
+private:
+    inline size_t newline_length(size_t at) const {
+        if(at >= buffer.length())
+            return 0;
 
-        if(*at == 0x0d) {
-            if((*at + 1) == 0x0a) return 2; // Microsoft newline
+        if(buffer[at] == 0x0d) {
+            if(buffer[at + 1] == 0x0a) return 2; // Microsoft newline
             return 1; // OS-9 style newline (heh)
         }
 
-        if(*at == 0x0a) {
-            if((*at + 1) == 0x0d) return 2; // weirdo old British newline
+        if(buffer[at] == 0x0a) {
+            if(buffer[at + 1] == 0x0d) return 2; // weirdo old British newline
             return 1; // normal unix newline
         }
 
         return 0;
+    }
+
+    inline size_t newline_length(
+        const utf8_byte *at, src_location caller = CALLER()
+    ) const {
+        fprintf(stderr,
+            "call to deprecated newline_length(ptr) at %s\n", caller.c_str()
+        );
+        return newline_length(at - buffer.data());
     }
 
     // Returns the length of the encoding of the character at *in, in bytes.
@@ -338,36 +360,39 @@ public:
     // If the pointer passed points to the middle of a character, returns
     // the length of the remaining bytes (or tries to - GIGO, at this point).
     // Returns 0 if given a NULL pointer.
-    static size_t char_length(const utf8_byte *in) {
-        if(!in) return 0;
-
-        if(size_t nll = newline_length(in)) {
+    size_t char_length(size_t pos) const {
+        if(size_t nll = newline_length(pos))
             return nll;
-        }
 
         // https://en.wikipedia.org/wiki/UTF-8#Encoding
         // if the high bit isn't set, it's a single byte:
-        if((*in & 0x80) == 0) return 1;
+        if((buffer[pos] & 0x80) == 0) return 1;
 
         // otherwise, if we're at the start of the character,
         // the top 2 bits will be set, and bits following
         // specify the size.  so if the top 2 bits are set,
         // we'll assume we're at the start of a char and take
         // that byte's word for it on the size:
-        if((*in & 0xe0) == 0xc0) return 2;  // 0b110x xxxx
-        if((*in & 0xf0) == 0xe0) return 3;  // 0b1110 xxxx
-        if((*in & 0xf8) == 0xf0) return 4;  // 0b1111 0xxx
+        if((buffer[pos] & 0xe0) == 0xc0) return 2;  // 0b110x xxxx
+        if((buffer[pos] & 0xf0) == 0xe0) return 3;  // 0b1110 xxxx
+        if((buffer[pos] & 0xf8) == 0xf0) return 4;  // 0b1111 0xxx
 
         // looks like we're in the middle of a character.
         // count bytes until the start of a new character,
-        // which we can identify by either the top bit being 0
-        // or the top 2 bits being 1:
-        const utf8_byte *rd = in;
-        for(rd = in; *rd & 0x80; rd++) {
-            if((*in & 0xc0) == 0xc0) break; // start of char w/ cp > 127
+        // which we can identify by the top 2 bits being
+        // anything other than 0b10:
+// XXX test this case
+        size_t len = 0;
+        for( ; pos + len < buffer.length(); ++len) {
+            // 0xc0 = 0b11000000
+            if((buffer[pos + len] & 0xc0) != 0xc0)
+                break;
         }
-        return rd - in + 1;
+
+        return len;
     }
+
+public:
 
     // XXX kill this and/or rename to unicode_codepoint or such...
     // or something.  and move it.
@@ -406,8 +431,9 @@ public:
         read_pos += skip;
     }
 
+    // XXX redundant;  kill
     inline void skip_char() {
-        read_pos += char_length(inpp());
+        read_pos += char_length(read_pos);
     }
 
     void eat_separator(LengthCallback *separator_cb = space_length) {
@@ -416,6 +442,7 @@ public:
         }
     }
 
+    // XXX kill
     std::string read_to_separator(LengthCallback *sep_cb = space_length) {
         const utf8_byte *start = inpp();
 
@@ -427,7 +454,7 @@ public:
             if(sep_cb(in))
                 break;
 
-            size_t len = char_length(in);
+            size_t len = char_length(read_pos);
             length += len;
             skip_bytes(len);
         }
@@ -453,6 +480,7 @@ public:
         return false;
     }
 
+    // XXX only used by fpl2cc - move it there
     inline std::string read_to_byte(utf8_byte end_char) {
         return read_to_match('\0', end_char);
     }
@@ -469,15 +497,17 @@ public:
 
         const utf8_byte *start = inpp();
         const utf8_byte *end   = inpp();
-        while(!(nll = newline_length(inpp()))) {
+        while(!(nll = newline_length(read_pos))) {
             skip_char();
-            end = inpp();
         }
+        end = inpp();
         skip_bytes(nll);
 
         return std::string((char *)start, end - start);
     }
 
+    // XXX this is only ever used in boolean context, so don't return a ptr
+    // the caller knows what it matched anyway, since the caller passed it.
     inline const utf8_byte *read_exact_match(const std::string &match) {
         const utf8_byte *result = NULL;
 
@@ -543,35 +573,31 @@ public:
     // if pf_esc is set, we attempt to make the string safe
     // to pass to printf() family functions.
     inline std::string debug_peek(
-        int pos = -1, int num_chars = 12, bool pf_esc = true
+        size_t pos = size_t(-1), int num_chars = 12
     ) const {
         if(!buffer.data()) return "<NO INPUT>";
 
-        if(pos < 0) pos = read_pos;
+        if(pos == size_t(-1)) pos = read_pos;
 
         std::string out;
-        const utf8_byte *inp = buffer.data() + pos;
         for(int chp = 0; chp < num_chars; ++chp) {
-            if(eof(inp)) {
+            if(pos >= buffer.length()) {
                 out += "<EOF>";
                 break;
-            } else if(newline_length(inp) > 0) {
+            } else if(buffer[pos] == '\0') {
+                out += "\\0";
+            } else if(int nl = newline_length(pos)) {
+                pos += nl;
                 out += "\\n";
-            } else if(pf_esc && *inp == '%') {
-                out += "%%";
             } else {
-                out += *inp;
+                out += buffer[pos++];
             }
-            inp += char_length(inp);
         }
         return out;
     }
-    inline std::string pf_debug_peek(int pos = -1, int num_chars = 12) const {
-        return debug_peek(pos, num_chars, true);
-    }
-
 };
 
 
 #endif // FPL_READER_H
+
 
