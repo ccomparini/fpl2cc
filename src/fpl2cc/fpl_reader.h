@@ -525,8 +525,8 @@ public:
     }
 
     inline std::cmatch read_re(const std::string &re) {
-        // XXX this doesn't support utf-8 or unicode in any
-        // reasonable way.  btw:
+        // this doesn't support utf-8 in any reasonable way.
+        // btw:
         //  https://stackoverflow.com/questions/37989081/how-to-use-unicode-range-in-c-regex
 
         std::cmatch matched;
@@ -585,6 +585,7 @@ public:
                 out += "<EOF>";
                 break;
             } else if(buffer[pos] == '\0') {
+                pos++;
                 out += "\\0";
             } else if(int nl = newline_length(pos)) {
                 pos += nl;
