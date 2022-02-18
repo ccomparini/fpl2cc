@@ -118,10 +118,9 @@ class fpl_reader {
     // throws an error (and returns true) if the position
     // is entirely outside the buffer
     // see also the simpler eof() in the public section
-    inline bool eof(const utf8_byte *pos, src_location caller = CALLER()) const {
-        long int off = pos - buffer.data();
+    inline bool eof(size_t off, src_location caller = CALLER()) const {
         bool is_eof = false;
-        if((off < 0) || (off >= buffer.length())) {
+        if(off >= buffer.length()) {
             // we're completely outside the buffer. count it as
             // eof; in any case callers should not expect reads
             // from that position to work
@@ -130,8 +129,8 @@ class fpl_reader {
             // call the on_error callback directly, since the
             // line number is going to be invalid anyway:
             on_error(stringformat(
-                "{}: test for eof at invalid pos {} (offset {}) in buffer {}",
-                caller, to_hex(pos), pos - buffer.data(), to_hex(buffer.data())
+                "{}: test for eof at invalid offset {} (0x{})",
+                caller, off, to_hex(off)
             ));
         } else {
             // else it's eof if we're at the last byte of the file
@@ -282,9 +281,7 @@ public:
     }
 
     inline bool eof() const {
-        // -1 is because we stuff a '\0' at the end of the buffer
-        // XXX buffer might or does already?
-        return read_pos >= buffer.length() - 1;
+        return eof(read_pos);
     }
 
 private:
