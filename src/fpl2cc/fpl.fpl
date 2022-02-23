@@ -17,7 +17,7 @@ typedef const FPLBP::StackSlice &Prods;
 
 inline fplp_directive directive(Terminal nm, Prods all_args) {
     return {
-        .name = nm.substr(1, nm.size()),
+        .name = all_args[0].capgroup(0),
         .arg  = (all_args.count() > 1)?all_args[1].product.term_str():"",
     };
 }
@@ -108,8 +108,17 @@ rule       -> item ;
 # as a token and then some regex to read the guts,
 # it'll read the +{ correctly then promptly strip
 # all your #includes as comments.  ask me how I know!
-/\+\{(?:(?:\}[^+])|[^}])*\}\+/ -> code_block +{
-    return fplp_code_block(arg_0.substr(2, arg_0.size() - 3));
+# XXX meta discussion - arguments to code blocks (or in general).
+#   need/want to support:
+#    - multiple items in a given arg
+#    - capture groups (terminals only)
+#    - type determined by production (productions only)
+#    - easy access to line number etc
+#   ideally it's simple and .. maybe even portable?
+# possibly all of them are some sort of array like container
+# 
+/\+\{((?:(?:\}[^+])|[^}])*)\}\+/ -> code_block +{
+    return fplp_code_block(args[0].capgroup(0));
 }+
 
 # or do we want to spell out directives here, so we have the list?
@@ -124,9 +133,9 @@ rule       -> item ;
 '@separator'      code_block -> directive +{ return directive(arg_0, args); }+
 # /@\S*/                       -> directive +{ error("invalid directive: {}", arg_0) }+ XXX support this
 
-/`[^`]*`/ -> import +{
+/`([^`]*)`/ -> import +{
     fplp_imp out = {
-        .filename = arg_0.substr(1, arg_0.size() - 2)
+        .filename = args[0].capgroup(0)
     };
     return out;
 }+
