@@ -920,7 +920,6 @@ public:
 
             for(auto rit = strl; rit != endrl; ++rit) {
                 // (these are always position 0)
-                //set.add_item(lr_item(rit->second, 0));
                 add_expanded(set, lr_item(rit->second, 0));
             }
         }
@@ -1695,11 +1694,6 @@ public:
         ));
     }
 
-    void shift_reduce_conflict(int r1, int r2) {
-        // XXX operator precedence;  use
-        warn("OH HAI SHIFT REDUCE CONFLICT YESSSSSSS\n");
-    }
-
     // reports what is probably a shift/shift conflict,
     // which would probably only happen due to a bug in
     // this program...
@@ -1712,11 +1706,6 @@ public:
 
     std::string code_for_shift(const lr_set &state, const ProdExpr *right_of_dot) {
         std::string out;
-
-        // new way, handling repetition/optionals:
-// XXX what if there's more than one optional item to the right of the dot?
-        // - if right_of_dot is optional:
-        //   - ....
 
         const GrammarElement::Type type = right_of_dot->type();
         switch(type) {
