@@ -48,8 +48,6 @@ inline std::string to_str(bool b) {
     return "false";
 }
 
-#define CODE_BLOCK(str) CodeBlock(std::string(__FILE__), __LINE__, str)
-
 /*
 
   fpl grammar:
@@ -256,7 +254,11 @@ struct CodeBlock {
 
     CodeBlock() : line(0) { }
 
-    CodeBlock(const std::string &file, int ln, const std::string &cd) :
+    CodeBlock(
+        const std::string &cd,
+        const std::string &file = CALLER_FILE(),
+        int ln = CALLER_LINE()
+    ) : 
         source_file(file),
         line(ln),
         code(cd) {
@@ -264,6 +266,17 @@ struct CodeBlock {
 
     operator bool() const {
         return code.length();
+    }
+
+    // for backward compatibility so I can just swap CodeBlocks
+    // in where I used to use std::string
+    CodeBlock &operator += (const std::string &more_code) {
+        code += more_code;
+        return *this;
+    }
+
+    CodeBlock &operator += (const CodeBlock &more_code) {
+        return *this += more_code.format();
     }
 
     void append(const std::string &str) {
@@ -597,7 +610,7 @@ public:
             code += "return out;";
         }
 
-        return CodeBlock(reader.filename(), line_number(), code);
+        return CodeBlock(code, reader.filename(), line_number());
 
 /*
         This was a fun attempt but doesn't dtrt except in trivial
@@ -1063,7 +1076,7 @@ public:
         fs::path fn(__FILE__);
         fn.replace_filename("comment/" + style + ".inc");
 
-        comment_code.push_back(CodeBlock(fn, 1, load_file(fn)));
+        comment_code.push_back(CodeBlock(load_file(fn), fn, 1));
     }
 
     void parse_directive(const std::string &dir) {
@@ -1322,7 +1335,7 @@ public:
              ));
          }
 
-         return CodeBlock(src.filename(), src.line_number(start), code_str);
+         return CodeBlock(code_str, src.filename(), src.line_number(start));
     }
 
     void parse_fpl() {
@@ -2025,8 +2038,8 @@ public:
     // "separator" might be a misnomer in all this.  it's more like
     // anything to elide before the tokenization code sees the input.
     // rename all the "separator" to "elide"?  (including directives)
-    std::string separator_method() {
-        std::string out(
+    CodeBlock separator_method() {
+        CodeBlock out(
             "static size_t separator_length(const utf8_byte *inp) {\n"
         );
 
@@ -2035,7 +2048,9 @@ public:
         } else {
             // default is space separation:
             // (maybe make this explicit?)
-            out += "if(size_t len = space_length(inp)) { return len; }\n";
+            out += CodeBlock(
+                "if(size_t len = space_length(inp)) {\nreturn len;\n}\n"
+            );
         }
 
         // Comments are effectively separators so code for them
@@ -2044,6 +2059,8 @@ public:
             out += comc.format_scoped();
         }
 
+        // if nothing returned a length yet, no separator
+        out += "    return 0;";
         out += "}\n";
         
         return out;
@@ -2200,7 +2217,7 @@ public:
         out += state_to_string();
         out += is_goal();
 
-        out += separator_method();
+        out += separator_method().format();
 
         for(int rnum = 0; rnum < rules.size(); rnum++) {
             out += code_for_rule(opts, rnum);

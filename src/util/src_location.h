@@ -15,9 +15,15 @@ typedef const std::string src_location;
 #endif
 
 #if __has_builtin(__builtin_FILE) && __has_builtin(__builtin_LINE)
+    #define CALLER_FILE() (std::string(__builtin_FILE()))
+    #define CALLER_LINE() (            __builtin_LINE() )
+
+    // CALLER() returns a file/line string
     #define CALLER() \
         (std::string(__builtin_FILE()) + " line " + std::to_string(__builtin_LINE()))
 #else
+    #define CALLER_FILE() ("(file unavailable)")
+    #define CALLER_LINE() (0)
     #define CALLER() "(caller unavailable)"
 #endif
 
