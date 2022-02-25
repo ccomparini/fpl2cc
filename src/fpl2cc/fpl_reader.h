@@ -547,7 +547,12 @@ public:
             // the end of the buffer (which in theory could be anywhere,
             // and in practice is end of file - not useful).
             // SO I'm just going to turn on multiline always.
-            const std::regex cre(re, std::regex::multiline);
+            // cmc - turning it back off again because gnu doesn't
+            // support it (thus, I guess it's non-portable).
+            // keeping it out of both versions because we wouldn't
+            // want regexes to work differently on different platforms.
+            // const std::regex cre(re, std::regex::multiline);
+            const std::regex cre(re);
             if(std::regex_search(in, matched, cre, opts))
                 read_pos += matched.length();
 // XXX wait what?  we _can _ get here on matches of "0 bytes".  we don't want to return true in such cases. investigate.
