@@ -1,3 +1,4 @@
+#include <cassert>
 #include <climits>
 #include <list>
 #include <map>
@@ -722,12 +723,12 @@ class Productions {
     std::vector<ProductionRule>     rules;
     std::multimap<std::string, int> rules_for_product; // product -> rule ind
 
-    std::vector<const GrammarElement>     elements;
-    std::map<const GrammarElement, int>   element_index;
+    std::vector<GrammarElement>     elements;
+    std::map<GrammarElement, int>   element_index;
 
     struct lr_set;
     std::vector<lr_set> states;
-    std::map<const std::string, int> state_index; // keyed by set id
+    std::map<std::string, int> state_index; // keyed by set id
 
     void add_state(const lr_set &st) {
         state_index.insert(
