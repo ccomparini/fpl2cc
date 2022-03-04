@@ -2108,6 +2108,7 @@ public:
         out += "    auto result = parser.parse();\n";
         //out += "    printf(\" %s\\n\", to_string(result).c_str());\n";
         //out += "    fprintf(stderr, \"parser state:\\n%s\\n\", parser.to_str().c_str());\n";
+        out += "    return parser.error_count()?-1:0;\n";
         out += "}\n\n";
 
         return out;
@@ -2202,6 +2203,7 @@ public:
         out += "public:\n";
         out += "    // state() and reduce_type tell FPLBaseParser what types to use\n";
         out += "    void state();\n"; // this must match state_x methods; XXX document/typedef?
+        out += "    int error_count() { return base_parser.error_count(); }\n";
         out += "    static " + reduce_type + " reduce_type;\n"; // for telling the FPLBaseParser.. as above XXX document
         out += "private:\n";
         out += "    using FPLBP = " + base_parser_class + ";\n";
