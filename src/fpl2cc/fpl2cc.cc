@@ -53,14 +53,41 @@ inline std::string to_str(bool b) {
 
   fpl grammar:
 
-   <exprs to match> -> <production name> { <code> }
-                   or
    <exprs to match> -> <production name> ;
+                   or
+   <exprs to match> -> <production name> ~implementation_func[(args...)]
+                   or
+   <exprs to match> -> <production name> <code_block>
+                   or
 
-  In the first case, the <code> block returns a member (see below).
-  In the second case, the ; tells it to return the string matching
-  whatever's on the left of the ->.  ";" is only valid if
-  everything on the left evaluates to a string.
+  In the first case, the ; tells it to reduce using a default/stub
+  
+  In the second case, reduce using the implementation function specified.
+  The implementation function is expected to be linked or otherwise
+  made available to the generated code after the fpl pass, and will
+  be language specific.  We assume here that the generated language
+  has functions in some form.  (args...) is optional.  If no argument
+  list is specified, it's the same as specifying each element on the
+  left, in order.  Otherwise, arguments are 0-based numeric references
+  to the expressions on the left.  Note that an empty argument list will
+  be parsed as exactly that - no arguments.  So, omit the () entirely
+  if you want everything.
+  ... XXX how to pass?  need at least:
+    - terminal:  at least a string for the entire thing, but
+      if it's a regex it can be some sort of array of strings
+    - production:  whatever the thing produces
+
+  .. XXX fpl will need to infer the argument types and somehow
+  make sure fpl authors don't mix and match.
+
+TODO to support this:
+  - parse it at all
+  - generate (for now, c++ only) parser class member functions
+    for each ~function found. for now, don't allow overloads.
+  - ... profits?
+
+  In the third case, reduce using the inline code block specified.
+  This is obviously less portable.
 
   Expressions may be any of:
    - double-quoted string ("xxx") - match text
@@ -726,6 +753,8 @@ class Productions {
     std::vector<GrammarElement>     elements;
     std::map<GrammarElement, int>   element_index;
 
+    std::map<std::string, int> reduce_implementations; // errf naming
+
     struct lr_set;
     std::vector<lr_set> states;
     std::map<std::string, int> state_index; // keyed by set id
@@ -1080,6 +1109,10 @@ public:
         comment_code.push_back(CodeBlock(load_file(fn), fn, 1));
     }
 
+    // TODO perhaps mark the ones of these which are inherently
+    // non-portable with respect to generated language.
+    // (perhaps can be done with a counter on the number of
+    // +{ }+ code blocks parsed?)
     void parse_directive(const std::string &dir) {
         if(dir == "comment_style") {
             std::string style = inp.read_re("\\s*(.+)\\s*")[1];
@@ -1094,9 +1127,10 @@ public:
             default_main = true;
         } else if(dir == "internal") {
             // a code block which goes in the "private" part
-            // of the parser class itself.
-            // XXX wtb better name?  in the jest version of this,
-            // it won't necessarily be internal
+            // of the parser class itself.  This is either
+            // convenience for the fpl author, or a hack around
+            // c++, depending on how you want to look at it.
+            // use of this renders the fpl non-portable.
             if(CodeBlock mem = code_for_directive(dir)) {
                 parser_members.push_back(mem);
             }
@@ -1339,6 +1373,100 @@ public:
          return CodeBlock(code_str, src.filename(), src.line_number(start));
     }
 
+    CodeBlock code_for_impl(
+        fpl_reader &src, const std::string &name, std::list<std::string> &args
+    ) {
+        int num_args = args.size();
+        auto existing = reduce_implementations.find(name);
+        if(existing == reduce_implementations.end()) {
+            reduce_implementations[name] = num_args;
+        } else if(existing->second != num_args) {
+            // this may be unnessessary.  possibly the implementation
+            // is in a language which can do varargs or whatever.. XXX
+            src.error(stringformat(
+                "{} previously defined with {} parameters (not {})",
+                name, existing->second, num_args
+            ));
+        }
+
+        CodeBlock code(name + "(", src.filename(), src.line_number());
+        int aleft = num_args;
+        for(const std::string &arg : args) {
+            code += "args[" + arg + "]";
+            if(--aleft > 0) code += ", ";
+        }
+        code += ");";
+
+        return code;
+    }
+
+    void parse_implementation_function(fpl_reader &src, ProductionRule &rule) {
+        std::cmatch fnm = inp.read_re("~([a-zA-Z_0-9]+)");
+        std::string funcname = fnm[1];
+        if(!funcname.length()) {
+             src.error(stringformat(
+                 "expected ~implementation_func but got {}",
+                 src.debug_peek()
+             ));
+             return;
+        }
+
+        std::list<std::string> arg_ind;
+
+        // so we expect this to accept a list of numeric arguments
+        // representing the positions of the things to pass, separated
+        // by an arbitrary number of spaces or commas.  it's sloppy
+        // but should work.  no space is allowed before the initial '(',
+        // btw. (for now anyway).
+        if(!inp.read_byte_equalling('(')) {
+            // no specific argument list means pass everything
+            for(int sti = 0; sti < rule.num_steps(); sti++) {
+                arg_ind.push_back(std::to_string(sti));
+            }
+        } else {
+            while(!inp.read_byte_equalling(')')) {
+                std::cmatch arg = inp.read_re("[0-9]+");
+                if(!arg.length()) {
+                    // ... what's a better way to put this?
+                    src.error("expected integer expression index");
+                    break;
+                }
+
+                arg_ind.push_back(arg[0]);
+
+                // accept any number of spaces or commas to
+                // separate arguments.  this is sloppy but
+                // who cares - it's easy and will work.
+                inp.read_re("[\\s,]*");
+            }
+        }
+        rule.code(code_for_impl(src, funcname, arg_ind));
+    }
+
+    // parses whatever's after the '->' in a rule:
+    void parse_reduction(fpl_reader &src, ProductionRule &rule) {
+        switch(inp.peek()) {
+            case ';':
+                // if it's ';', just read it and move on.  rule will
+                // get default code.
+                inp.read_byte_equalling(';');
+                break;
+            case '~':
+                // ~ specifies name of implementation function
+                parse_implementation_function(src, rule);
+                break;
+            case '+':
+                // + implies code block coming:
+                rule.code(read_code(inp));
+                break;
+            default:
+                inp.error(stringformat(
+                    "expected ';', '~', or '+' but got '{}'", inp.debug_peek()
+                ));
+                break;
+        }
+    }
+
     void parse_fpl() {
         do {
             inp.eat_separator();
@@ -1376,11 +1504,7 @@ public:
 
                     inp.eat_separator();
 
-                    // next we expect either ';' or a code block.
-                    // if it's ';' we read it and move on;  otherwise
-                    // it's a code block for the rule.
-                    if(!inp.read_byte_equalling(';'))
-                        rule.code(read_code(inp));
+                    parse_reduction(inp, rule);
 
                     push_rule(rule);
                 }
