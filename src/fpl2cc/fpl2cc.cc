@@ -55,14 +55,16 @@ inline std::string to_str(bool b) {
 
    <exprs to match> -> <production name> ;
                    or
-   <exprs to match> -> <production name> ~implementation_func[(args...)]
-                   or
    <exprs to match> -> <production name> <code_block>
                    or
 
   In the first case, the ; tells it to reduce using a default/stub
+  function, OR if an implementation file has been specified, to call
+  a reduce function specified in that file.
   
-  In the second case, reduce using the implementation function specified.
+  In the second case, reduce using the code_block specified.
+
+XXX not this, exactly:
   The implementation function is expected to be linked or otherwise
   made available to the generated code after the fpl pass, and will
   be language specific.  We assume here that the generated language
@@ -72,22 +74,8 @@ inline std::string to_str(bool b) {
   to the expressions on the left.  Note that an empty argument list will
   be parsed as exactly that - no arguments.  So, omit the () entirely
   if you want everything.
-  ... XXX how to pass?  need at least:
-    - terminal:  at least a string for the entire thing, but
-      if it's a regex it can be some sort of array of strings
-    - production:  whatever the thing produces
+end XXX
 
-  .. XXX fpl will need to infer the argument types and somehow
-  make sure fpl authors don't mix and match.
-
-TODO to support this:
-  - parse it at all
-  - generate (for now, c++ only) parser class member functions
-    for each ~function found. for now, don't allow overloads.
-  - ... profits?
-
-  In the third case, reduce using the inline code block specified.
-  This is obviously less portable.
 
   Expressions may be any of:
    - double-quoted string ("xxx") - match text
@@ -538,6 +526,11 @@ class ProductionRule {
     const fpl_reader &reader;
     size_t start_of_text;
 
+    // argmap maps the indexes of the steps for this rule
+    // to argument numbers.  optional - if empty, the reduce
+    // code gets one argument per rule step
+    std::list<int> argmap;
+
 public:
 
     ProductionRule(const fpl_reader &rdr, size_t at_byte) :
@@ -585,7 +578,6 @@ public:
         return reader.filename() + " line " + std::to_string(line_number());
     }
 
-    // XXX maybe rename "code" to "action"
     CodeBlock default_code() const {
         // start the code block with a comment referring to this
         // line in this source file (fpl2cc.cc), to reduce puzzlement
@@ -639,66 +631,6 @@ public:
         }
 
         return CodeBlock(code, reader.filename(), line_number());
-
-/*
-        This was a fun attempt but doesn't dtrt except in trivial
-        cases, and is hard to debug in cases where it doesn't work
-        (i.e. doesn't compile) because of deceptive line numbers
-        being reported etc.  So let's not do this this way.
-
-        An alternate would be to allow to supply default code in
-        an @ directive or such.  Or make this kind of thing optional
-        in some other way.
-
-        // XXX the file and line here needs to be the generated file/line, or
-        // it's too hard to figure out where we're messed up.  we should
-        // add a comment, though, telling where in this file generated the code.
-        // ... actually maybe giving the fpl source location is the next best thing.
-        // but errf this has no access to the source.
-        CodeBlock block = CODE_BLOCK("return ");
-        std::string code;
-        for(int argi = 0; argi < steps.size(); argi++) {
-            // XXX how to deal with repetition?
-            // this will definitely dtwt with repetition on terminals
-            const ProdExpr &arg = steps[argi];
-            const std::string argvar("arg_" + std::to_string(argi));
-            switch(arg.gexpr.type) {
-                case GrammarElement::TERM_EXACT:
-                    // let's guess it might be a straight up operator,
-                    // and also one which is valid in our target language!
-                    code += arg.gexpr.expr;
-                    break;
-                case GrammarElement::TERM_REGEX:
-                    // possibly this is something like a constant or
-                    // variable name or something.
-                    // possibly the reduce type knows what to do?
-                    code += "reduce_type(" + argvar + ")";
-                    break;
-                case GrammarElement::NONTERM_PRODUCTION:
-                    // this is already reduced, so try just using/returning it
-                    code += argvar;
-                    break;
-                default:
-                    // XXX maybe warn here?
-                    break;
-            }
-
-            if(argi < steps.size() - 1) {
-                code += " ";
-            } else {
-                code += ";\n";
-            }
-        }
-        block.append(code);
-        return block;
-
-            // perhaps default could be:
-            //  - if one nonterminal, return that one nonterminal.  this allows
-            //    aliasing and stuff like '(' foo ')' to do what's intuitive.
-            //  - if two nonterminals separated by a terminal, return
-            //  - if more than one arg, return aggregate XXX do this part
-            // .. or have the fpl author specify somehow.
- */
     }
 
     void code(const CodeBlock &cd) {
@@ -752,8 +684,6 @@ class Productions {
 
     std::vector<GrammarElement>     elements;
     std::map<GrammarElement, int>   element_index;
-
-    std::map<std::string, int> reduce_implementations; // errf naming
 
     struct lr_set;
     std::vector<lr_set> states;
@@ -1373,6 +1303,7 @@ public:
          return CodeBlock(code_str, src.filename(), src.line_number(start));
     }
 
+/*
     CodeBlock code_for_impl(
         fpl_reader &src, const std::string &name, std::list<std::string> &args
     ) {
@@ -1399,7 +1330,29 @@ public:
 
         return code;
     }
+ */
 
+/*
+    void parse_argmap(ProductionRule &rule) {
+        while(!inp.read_byte_equalling(')')) {
+            std::cmatch arg = inp.read_re("[0-9]+");
+            if(!arg.length()) {
+                // ... what's a better way to put this?
+                src.error("expected integer expression index");
+                break;
+            }
+
+            //arg_ind.push_back(arg[0]);
+            
+
+            // accept any number of spaces or commas to
+            // separate arguments.  this is sloppy but
+            // who cares - it's easy and will work.
+            inp.read_re("[\\s,]*");
+        }
+    }
+ */
+/*
     void parse_implementation_function(fpl_reader &src, ProductionRule &rule) {
         std::cmatch fnm = inp.read_re("~([a-zA-Z_0-9]+)");
         std::string funcname = fnm[1];
@@ -1442,18 +1395,24 @@ public:
         }
         rule.code(code_for_impl(src, funcname, arg_ind));
     }
+ */
 
-    // parses whatever's after the '->' in a rule:
-    void parse_reduction(fpl_reader &src, ProductionRule &rule) {
+/*
+    // parses whatever's after -> [production name] in the rule
+// XXX uhh... src unused;  we use inp. heh.
+    //void parse_reduction(fpl_reader &src, ProductionRule &rule) {
+    void parse_reduction(ProductionRule &rule) {
+        if(inp.peek() == '(') {
+            parse_argmap(rule);
+        }
+
+        inp.eat_separator();
+
         switch(inp.peek()) {
             case ';':
                 // if it's ';', just read it and move on.  rule will
                 // get default code.
                 inp.read_byte_equalling(';');
-                break;
-            case '~':
-                // ~ specifies name of implementation function
-                parse_implementation_function(src, rule);
                 break;
             case '+':
                 // + implies code block coming:
@@ -1466,6 +1425,7 @@ public:
                 break;
         }
     }
+ */
 
     void parse_fpl() {
         do {
@@ -1504,7 +1464,11 @@ public:
 
                     inp.eat_separator();
 
-                    parse_reduction(inp, rule);
+                    // next we expect either ';' or a code block.
+                    // if it's ';' we read it and move on;  otherwise
+                    // it's a code block for the rule.
+                    if(!inp.read_byte_equalling(';'))
+                        rule.code(read_code(inp));
 
                     push_rule(rule);
                 }
