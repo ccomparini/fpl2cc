@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "fpl_reader.h"
+#include "util/fs.h"
 #include "util/src_location.h"
 
 enum ExitVal {
@@ -75,7 +76,6 @@ XXX not this, exactly:
   be parsed as exactly that - no arguments.  So, omit the () entirely
   if you want everything.
 end XXX
-
 
   Expressions may be any of:
    - double-quoted string ("xxx") - match text
@@ -160,6 +160,21 @@ struct Options {
         errors.push_back(errst);
     }
 
+    std::list<std::string> impl_sources;
+
+    void add_source(const std::string &fn) {
+        std::string ext(fs::path(fn).extension());
+        if(ext != ".fpl") {
+            impl_sources.push_back(fn);
+        } else {
+            if(src_fpl.size() != 0) {
+                error("only one source fpl is supported at present");
+            } else {
+                src_fpl = fn;
+            }
+        }
+    }
+
     // janky, but good enough:
     Options(int argc, const char* const* argv) :
         out(stdout),
@@ -222,7 +237,7 @@ struct Options {
                         out = fopen(output_fn.c_str(), "w");
                         if(!out) {
                             error(
-                                "can't open '" + output_fn + "' for write: " +
+                                "--out: can't open '" + output_fn + "' for write: " +
                                 strerror(errno)
                             );
                         }
@@ -234,11 +249,7 @@ struct Options {
                     error("Unknown option: " + std::string(arg));
                 }
             } else {
-                if(src_fpl.size() != 0) {
-                    error("only one source fpl is supported at present");
-                } else {
-                    src_fpl = arg;
-                }
+                add_source(arg);
             }
             #undef SCAN_VALUE
         }
@@ -257,6 +268,13 @@ struct Options {
             for(auto entry : entry_points) {
                 out += "        " + entry + "\n";
             }
+        }
+        if(impl_sources.size()) {
+            out += "    impl: ";
+            for(auto impl : impl_sources) {
+                out += impl + " ";
+            }
+            out += "\n";
         }
 
         return out;
@@ -279,6 +297,34 @@ struct CodeBlock {
         line(ln),
         code(cd) {
     }
+
+    /*
+      constructs and returns a code block whose contents are that of the file
+      specified by "filename".
+      on error, the CodeBlock returned will contain a #error directive
+      describing what went wrong.
+     */
+    static CodeBlock from_file(
+        const std::string &filename,
+        const std::string &context_fn, int context_ln
+    ) {
+        std::ifstream in(filename);
+        if(!in.is_open()) {
+            return CodeBlock(
+                stringformat(
+                    "#line {} \"{}\"\n"
+                    "#error \"unable to open '{}' for reading: {}\n",
+                    context_ln, context_fn,
+                    filename, std::string(strerror(errno))
+                ), filename, 1
+            );
+        }
+
+        using BufIt = std::istreambuf_iterator<char>;
+        return CodeBlock(
+            std::string(BufIt(in.rdbuf()), BufIt()), filename, 1
+        );
+    } 
 
     operator bool() const {
         return code.length();
@@ -1031,12 +1077,16 @@ public:
         return code;
     }
 
-    void add_comment_style(const std::string &style) {
+    void add_comment_style(const std::string &style,
+        const std::string &context_fn, int context_ln
+   ) {
         // comment style files are relative to this source:
         fs::path fn(__FILE__);
         fn.replace_filename("comment/" + style + ".inc");
 
-        comment_code.push_back(CodeBlock(load_file(fn), fn, 1));
+        comment_code.push_back(
+            CodeBlock::from_file(fn, context_fn, context_ln)
+        );
     }
 
     // TODO perhaps mark the ones of these which are inherently
@@ -1045,11 +1095,12 @@ public:
     // +{ }+ code blocks parsed?)
     void parse_directive(const std::string &dir) {
         if(dir == "comment_style") {
+            int line_num = inp.line_number();
             std::string style = inp.read_re("\\s*(.+)\\s*")[1];
             if(!style.length()) {
                 warn("no comment style specified");
             } else {
-                add_comment_style(style);
+                add_comment_style(style, inp.filename(), line_num);
             }
         } else if(dir == "default_action") {
             default_action = code_for_directive(dir);
@@ -1129,6 +1180,7 @@ public:
         return src.read_re("([A-Za-z][A-Za-z0-9_]+)\\s*")[1];
     }
 
+/*
     // reads the specified file and returns its contents as a string.
     // calls fail() (and returns enpty string) on error.
     // this should be some kind of standard library thingo.
@@ -1146,7 +1198,7 @@ public:
         in.seekg(0, std::ios::beg);
 
         // .. except... apparently the appended '\0' in the fpl_reader
-        // version ends up being spurous and extra end makes an
+        // version ends up being spurious and extra and makes an
         // embedded newline in the string.  d'oh.
         char buf[filesize];
         in.read(buf, filesize);
@@ -1154,6 +1206,7 @@ public:
 
         return out;
     }
+ */
 
     // .. imports relevant rules into this and returns the name of
     // the top level production created
@@ -2263,7 +2316,11 @@ public:
         }
         out += " */\n\n";
 
-        generate_states(goal);
+        for(auto fn : opts.impl_sources) {
+            out += CodeBlock::from_file(fn, "(command line)", 1).format();
+        }
+
+        generate_states(goal); // XXX move me.
 
         out += "#include <string>\n";
 
@@ -2373,6 +2430,9 @@ public:
 
 // returns an exit()-appropriate status (i.e. 0 on success)
 ExitVal fpl2cc(const Options &opts) {
+    if(opts.src_fpl.size() == 0)
+        fail("Error:  no source fpl specified");
+
     fpl_reader inp(opts.src_fpl, fail);
 
     // parse the input file into a set of productions:
@@ -2399,11 +2459,13 @@ ExitVal fpl2cc(const Options &opts) {
 
 void usage() {
     fprintf(stderr,
-        "\nUsage:    fpl2cc [options] <source>\n\n"
-        "If no [target] is specified, prints to stdout.\n\n"
+        "\nUsage:    fpl2cc [options] <fpl source> [sources]\n\n"
+        "If no [target] is specified, prints to stdout.\n"
+        "[sources] is 0 or more non-fpl source files to integrate\n"
+        "into the target file.\n\n"
         "Options:\n"
     );
-    // .. these decriptions suck...
+    // .. these descriptions suck...
     fprintf(stderr, "        --debug - emebed debug blather in target code\n");
     fprintf(stderr, "        --debug-single-step - as above plus pauses\n");
     fprintf(stderr, "        --debug-dump-states - print generated states\n");
