@@ -79,7 +79,7 @@ for fpl in fpls :
             src_suffix = language) } )
 
     # .. and tell scons how to generate the language program:
-    env.Fpl2CC(langprog + '.fpl')
+    env.Fpl2CC(langprog + '.fpl', FPLOPTS="--generate-main")
     #env.Fpl2jest(langprog + '.fpl')
     compiler = build_lang_exe.get(language, build_default)(langprog)
 

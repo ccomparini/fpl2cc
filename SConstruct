@@ -1,5 +1,9 @@
 from pprint import pprint
 
+# TODO you _can_ get the target files to not be slapped into
+# the source tree!  Maybe?
+# https://scons.org/doc/4.3.0/HTML/scons-user.html#chap-separate
+
 debugger = ''
 #debugger = 'TERM=xterm-256color /usr/bin/lldb --one-line "b debug_hook" -- '
 
@@ -37,7 +41,7 @@ def depend_on_fpl2cc(node, env, path) :
 
 env.Append(
     SCANNERS = Scanner(
-        # this is wrong for the fpl to jest one.  sigh.
+        # this is wrong for Fpl2jest.  sigh.
         # can't I force the dependency in the builder?
         function = depend_on_fpl2cc,
         skeys = ['.fpl']
@@ -47,21 +51,19 @@ env.Append(
 # fpl -> cc builder:
 # at this point this is for testing fpl
 env.Append(BUILDERS =
-    #{ 'Fpl2CC' : Builder(action = debugger + 'bin/fpl2cc --debug-single-step $SOURCE --out $TARGET',
-    #{ 'Fpl2CC' : Builder(action = debugger + 'bin/fpl2cc --debug $SOURCE --out $TARGET',
-    { 'Fpl2CC' : Builder(action = debugger + 'bin/fpl2cc $SOURCE --out $TARGET',
+    { 'Fpl2CC' : Builder(action = debugger + 'bin/fpl2cc $FPLOPTS $SOURCE --out $TARGET',
 	         suffix = '.cc',
 	         src_suffix = '.fpl') } )
 
 # fpl -> h builder:
 env.Append(BUILDERS =
-    { 'Fpl2h' : Builder(action = debugger + 'bin/fpl2cc $SOURCE --out $TARGET',
+    { 'Fpl2h' : Builder(action = debugger + 'bin/fpl2cc $FPLOPTS $SOURCE --out $TARGET',
 	         suffix = '.h',
 	         src_suffix = '.fpl') } )
 
 # fpl -> jest builder:
 env.Append(BUILDERS =
-    { 'Fpl2jest' : Builder(action = debugger + 'bin/fpl $SOURCE --out $TARGET',
+    { 'Fpl2jest' : Builder(action = debugger + 'bin/fpl $FPLOPTS $SOURCE --out $TARGET',
 	         suffix = '.jest',
 	         src_suffix = '.fpl') } )
 
