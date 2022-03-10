@@ -1,8 +1,6 @@
 #ifndef FPL_READER_H
 #define FPL_READER_H
 
-#include <cassert> // XXX kill this
-
 #include <fstream>
 #include <functional>
 #include <regex>
@@ -20,7 +18,6 @@ typedef uint32_t unich; // 4 byte unicode char; for realz, unlike wchar_t
 typedef unsigned char utf8_byte;
 typedef std::basic_string<utf8_byte> utf8_buffer;
 
-<<<<<<< HEAD
 using ErrorCallback = std::function<void(const std::string &error)>;
 
 // returns a utf8 buffer containing the contents
@@ -119,7 +116,6 @@ size_t space_length(const utf8_byte *at) {
     // can't get here.
 }
 
-template<typename ErrorCallback>
 class fpl_reader {
 
     std::string input_filename;
@@ -155,7 +151,6 @@ class fpl_reader {
             // from that position to work
             is_eof = true;
 
-// XXX convert to warning
             // call the on_error callback directly, since the
             // line number is going to be invalid anyway:
             on_error(stringformat(
