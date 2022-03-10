@@ -249,21 +249,15 @@ public:
         exit(1);
     }
 
-<<<<<<< HEAD
     fpl_reader(
         utf8_buffer &input,
         const std::string &infn,
         ErrorCallback ecb = &default_fail
     ) :
-=======
-    fpl_reader(const std::string &infn, ErrorCallback *ecb = default_fail) :
-    // fpl_reader(const std::string &infn, std::function<bool(const std::string &)> ecb = &default_fail) :
->>>>>>> a5d4b73 (INTERIM not working)
         input_filename(infn),
         buffer(input),
         on_error(ecb),
         read_pos(0)
-<<<<<<< HEAD
     { }
 
     fpl_reader(const std::string &infn, ErrorCallback ecb = &default_fail) :
@@ -272,27 +266,6 @@ public:
         on_error(ecb),
         read_pos(0)
     {
-=======
-    {
-        std::ifstream in(infn);
-        if(!in.is_open()) {
-// convert to .... factory method?  pushing to list of errors?
-            on_error(stringformat(
-                "can't open '{}': {}\n", infn, std::string(strerror(errno))
-            ));
-        
-        } else {
-
-            in.seekg(0, std::ios::end);   
-            size_t filesize = in.tellg();
-            in.seekg(0, std::ios::beg);
-
-            utf8_byte buf[filesize + 1];
-            in.read(reinterpret_cast<char *>(buf), filesize + 1);
-            buf[filesize] = '\0';
-            buffer.assign(buf, filesize + 1);
-        }
->>>>>>> a5d4b73 (INTERIM not working)
     }
 
     inline int current_position() const {
@@ -351,11 +324,7 @@ public:
         return byte?*byte:'\0';
     }
 
-<<<<<<< HEAD
     std::string format_error_message(const std::string &msg) const {
-=======
-    void format_error_message(const std::string &msg) const {
->>>>>>> a5d4b73 (INTERIM not working)
         const char *nl = "";
         if(msg[msg.length() - 1] != '\n')
             nl = "\n";
@@ -366,10 +335,6 @@ public:
     }
 
     void error(const std::string &msg) const {
-<<<<<<< HEAD
-=======
-assert(on_error);
->>>>>>> a5d4b73 (INTERIM not working)
         on_error(format_error_message(msg));
     }
 
