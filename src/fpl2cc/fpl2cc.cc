@@ -65,18 +65,6 @@ inline std::string to_str(bool b) {
   
   In the second case, reduce using the code_block specified.
 
-XXX not this, exactly:
-  The implementation function is expected to be linked or otherwise
-  made available to the generated code after the fpl pass, and will
-  be language specific.  We assume here that the generated language
-  has functions in some form.  (args...) is optional.  If no argument
-  list is specified, it's the same as specifying each element on the
-  left, in order.  Otherwise, arguments are 0-based numeric references
-  to the expressions on the left.  Note that an empty argument list will
-  be parsed as exactly that - no arguments.  So, omit the () entirely
-  if you want everything.
-end XXX
-
   Expressions may be any of:
    - double-quoted string ("xxx") - match text
    - regular expression within slashes (eg /0x[0-9a-fA-F]+/)
@@ -683,12 +671,14 @@ public:
         code_for_rule = cd;
     }
 
-    CodeBlock code(const CodeBlock &def) const {
+    CodeBlock code_or(const CodeBlock &alternative) const {
         if(code_for_rule) {
             return code_for_rule;
-        } else if(def) {
-            // (caller provided code, so return that)
-            return def;
+        } else if(alternative) {
+            // caller provided code, so return that.
+            // this is just a way to make the calling code
+            // not have to do if/else or ?:
+            return alternative;
         }
 
         return default_code();
@@ -1179,34 +1169,6 @@ public:
     static inline std::string read_directive(fpl_reader &src) {
         return src.read_re("([A-Za-z][A-Za-z0-9_]+)\\s*")[1];
     }
-
-/*
-    // reads the specified file and returns its contents as a string.
-    // calls fail() (and returns enpty string) on error.
-    // this should be some kind of standard library thingo.
-    static std::string load_file(const std::string &infn) {
-
-        // blatant copypasta from fpl_reader
-        std::ifstream in(infn);
-        if(!in.is_open()) {
-            fail(stringformat("can't open '{}': {}\n", infn, strerror(errno)));
-            return "";
-        } 
-
-        in.seekg(0, std::ios::end);   
-        size_t filesize = in.tellg();
-        in.seekg(0, std::ios::beg);
-
-        // .. except... apparently the appended '\0' in the fpl_reader
-        // version ends up being spurious and extra and makes an
-        // embedded newline in the string.  d'oh.
-        char buf[filesize];
-        in.read(buf, filesize);
-        std::string out(buf, filesize);
-
-        return out;
-    }
- */
 
     // .. imports relevant rules into this and returns the name of
     // the top level production created
@@ -1716,7 +1678,7 @@ public:
         if(opts.debug) {
             out += "fprintf(stderr, \"reducing by " + rule_name + "\\n\");\n";
         }
-        out += rule.code(default_action).format(false);
+        out += rule.code_or(default_action).format(false);
         out += "\n}\n";
         // restore line number after end of function so that
         // compiler warnings about stuff like lack of return
