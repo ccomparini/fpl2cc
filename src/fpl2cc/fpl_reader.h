@@ -17,6 +17,31 @@ typedef uint32_t unich; // 4 byte unicode char; for realz, unlike wchar_t
 typedef unsigned char utf8_byte;
 typedef std::basic_string<utf8_byte> utf8_buffer;
 
+// returns a utf8 buffer containing the contents
+// of the file indicated by the filename passed.
+template<typename ERR_CB>
+utf8_buffer slurp_file(const std::string &fn, ERR_CB err) {
+    // I hope that this is inlined and doesn't end up making
+    // extra copies of dest...
+    utf8_buffer dest;
+    std::ifstream in(fn);
+    if(!in.is_open()) {
+        err(stringformat(
+            "can't open '{}': {}\n", fn, std::string(strerror(errno))
+        ));
+    }
+    
+    in.seekg(0, std::ios::end);   
+    size_t filesize = in.tellg();
+    in.seekg(0, std::ios::beg);
+    
+    utf8_byte buf[filesize + 1];
+    in.read(reinterpret_cast<char *>(buf), filesize + 1);
+    buf[filesize] = '\0';
+    dest.assign(buf, filesize + 1);
+    return dest;
+}
+
 typedef void (ErrorCallback)(const std::string &error);
 typedef size_t (LengthCallback)(const utf8_byte *inp);
 
@@ -219,8 +244,20 @@ public:
         exit(1);
     }
 
+    fpl_reader(
+        utf8_buffer &input,
+        const std::string &infn,
+        ErrorCallback *ecb = default_fail
+    ) :
+        input_filename(infn),
+        buffer(input),
+        on_error(ecb),
+        read_pos(0)
+    { }
+
     fpl_reader(const std::string &infn, ErrorCallback *ecb = default_fail) :
         input_filename(infn),
+        buffer(slurp_file(infn, ecb)),
         on_error(ecb),
         read_pos(0)
     {
