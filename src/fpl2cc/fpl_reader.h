@@ -2,6 +2,7 @@
 #define FPL_READER_H
 
 #include <fstream>
+#include <functional>
 #include <regex>
 #include <string>
 
@@ -17,10 +18,11 @@ typedef uint32_t unich; // 4 byte unicode char; for realz, unlike wchar_t
 typedef unsigned char utf8_byte;
 typedef std::basic_string<utf8_byte> utf8_buffer;
 
+using ErrorCallback = std::function<void(const std::string &error)>;
+
 // returns a utf8 buffer containing the contents
 // of the file indicated by the filename passed.
-template<typename ERR_CB>
-utf8_buffer slurp_file(const std::string &fn, ERR_CB err) {
+utf8_buffer slurp_file(const std::string &fn, ErrorCallback err) {
     // I hope that this is inlined and doesn't end up making
     // extra copies of dest...
     utf8_buffer dest;
@@ -42,8 +44,7 @@ utf8_buffer slurp_file(const std::string &fn, ERR_CB err) {
     return dest;
 }
 
-typedef void (ErrorCallback)(const std::string &error);
-typedef size_t (LengthCallback)(const utf8_byte *inp);
+using LengthCallback = std::function<size_t(const utf8_byte *inp)>;
 
 inline std::string to_std_string(const utf8_byte *str, int len) {
     return std::string(reinterpret_cast<const char *>(str), len);
@@ -120,8 +121,7 @@ class fpl_reader {
     std::string input_filename;
     utf8_buffer buffer;
 
-    ErrorCallback *on_error; // XXX move;  no need to throw from inside here
-                             // (but we could keep an error string)
+    ErrorCallback on_error;
     size_t read_pos;
 
     // ... surely there's a better way to get an empty match set..?
@@ -247,7 +247,7 @@ public:
     fpl_reader(
         utf8_buffer &input,
         const std::string &infn,
-        ErrorCallback *ecb = default_fail
+        ErrorCallback ecb = &default_fail
     ) :
         input_filename(infn),
         buffer(input),
@@ -255,27 +255,12 @@ public:
         read_pos(0)
     { }
 
-    fpl_reader(const std::string &infn, ErrorCallback *ecb = default_fail) :
+    fpl_reader(const std::string &infn, ErrorCallback ecb = &default_fail) :
         input_filename(infn),
         buffer(slurp_file(infn, ecb)),
         on_error(ecb),
         read_pos(0)
     {
-        std::ifstream in(infn);
-        if(!in.is_open()) {
-            on_error(stringformat(
-                "can't open '{}': {}\n", infn, std::string(strerror(errno))
-            ));
-        }
-
-        in.seekg(0, std::ios::end);   
-        size_t filesize = in.tellg();
-        in.seekg(0, std::ios::beg);
-
-        utf8_byte buf[filesize + 1];
-        in.read(reinterpret_cast<char *>(buf), filesize + 1);
-        buf[filesize] = '\0';
-        buffer.assign(buf, filesize + 1);
     }
 
     inline int current_position() const {
@@ -334,22 +319,18 @@ public:
         return byte?*byte:'\0';
     }
 
-    void error(const std::string &msg) const {
+    std::string format_error_message(const std::string &msg) const {
         const char *nl = "";
         if(msg[msg.length() - 1] != '\n')
             nl = "\n";
 
-        std::string full_msg(
-            stringformat("Error {} near «{}»: {}{}",
-                location(), debug_peek(), msg, nl
-            )
+        return stringformat("Error {} near «{}»: {}{}",
+            location(), debug_peek(), msg, nl
         );
+    }
 
-        if(on_error) {
-            on_error(full_msg);
-        } else {
-            fprintf(stderr, "%s\n", full_msg.c_str());
-        }
+    void error(const std::string &msg) const {
+        on_error(format_error_message(msg));
     }
 
     // Returns the length in bytes of the newline "character" at the
@@ -470,14 +451,14 @@ public:
         read_pos += char_length(read_pos);
     }
 
-    void eat_separator(LengthCallback *separator_cb = space_length) {
+    void eat_separator(LengthCallback separator_cb = &space_length) {
         while(size_t adv = separator_cb(inpp())) {
             skip_bytes(adv);
         }
     }
 
     // XXX kill
-    std::string read_to_separator(LengthCallback *sep_cb = space_length) {
+    std::string read_to_separator(LengthCallback sep_cb = &space_length) {
         const utf8_byte *start = inpp();
 
         if(!start)
