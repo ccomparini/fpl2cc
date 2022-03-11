@@ -210,11 +210,12 @@ class fpl_reader {
     inline int calc_line_number(size_t at, const std::string &caller = CALLER()) const {
 
         if(at >= buffer.length()) {
-            fprintf(stderr,
-                "warning: (%s): "
-                "position %lu is outside file (len %li) by %li\n",
-                caller.c_str(), at, buffer.length(), at - buffer.length()
-            );
+            fprintf(stderr, "%s", stringformat(
+                "warning {}: position {} is outside file '{}' (len {})"
+                " by {} bytes\n",
+                caller, at, filename(), buffer.length(),
+                at - buffer.length()
+            ).c_str());
             at = buffer.length() - 1;
         }
 
