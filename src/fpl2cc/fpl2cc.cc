@@ -22,6 +22,10 @@ enum ExitVal {
     BAD_ARGS = 2
 };
 
+int debug_hook() {
+    fprintf(stderr, "hoooked on debugics\n");
+    return 23;
+}
 
 void fail(const std::string &msg) {
     if(msg[msg.length() - 1] != '\n') {
@@ -97,11 +101,12 @@ inline std::string to_str(bool b) {
 /*
  TODO/fix
 
-  Abstracting the target language/application:
+  Abstract the target language/application:
     - default rule action is to call a handler named after the rule.
       instantiators of the parser can install the handler
     - add param maps to normalize across handlers
     - probably have to add grouping?
+    - path search for grammars
   - error handling and messaging is _terrible_ right now (with
     the default, anyway)
   - bug:  if everything in your fpl grammar is optional, it generates
@@ -1056,11 +1061,10 @@ public:
         // this will (mostly?) work with defaults if
         // you just want to sketch out a grammar and
         // not have to specify any particular code.
-        reduce_type = "std::string";
+        //reduce_type = "std::string";
 
         parse_fpl();
     }
-
 
     // expects/scans a +{ }+ code block for the named directive.
     // the named directive is essentially for error reporting.
@@ -1200,6 +1204,12 @@ public:
         }
 
         Productions subs(inp);
+        if(!subs.reduce_type.length()) {
+            // the imported fpl doesn't specify that it produces any
+            // particular type, so we tell it to produce what we want:
+            subs.reduce_type = reduce_type;
+fprintf(stderr, "synchronizing reduce types\n");
+        }
 
         return import_rules(subs, prod_name);
     }
@@ -1504,13 +1514,15 @@ public:
         } while(!inp.eof());
     }
 
+    // returns the name of the production which this import will produce,
+    // or 
     std::string import_rules(const Productions &from, const std::string &pname) {
         std::string src_fn = from.inp.filename();
         if(from.reduce_type != reduce_type) {
-// FIXME imported file needs to be able to inherit the outer reduce type.
-// so this should only be an error if an incompatible reduce type
-// was explicitly specified in the impoted fpl
-            fail(stringformat(
+            // warn if there's an explicit reduce type which isn't
+            // exactly the same as ours, but plow on - they'll get
+            // compile errors if the types are actually incompatible.
+            warn(stringformat(
                 "Incompatible reduce type '{}' in {} (expected {})\n",
                 from.reduce_type, src_fn, reduce_type
             ));
@@ -1528,24 +1540,47 @@ public:
         std::list<std::string> all_wanted;
         std::set<std::string> already_wanted;
         std::string import_as;
-        if(pname.length()) {
+        if(pname.size()) {
             import_as = pname;
             all_wanted.push_back(pname);
             already_wanted.insert(pname);
-        } else {
+        } else if(from.rules.size()) {
+debug_hook();
+            // no particular production specified.  import the
+            // default (first) production.
+            std::string def_prd(from.rules[0].product());
+// XXX import_as is redundant now.  but, possibly we _do_ want to
+// do what we did below (and name the top level after the file)
+// but if so we should produce a dummy top level rule to reduce
+// to a product named from import_as..
+            import_as = def_prd;
+            all_wanted.push_back(def_prd);
+            already_wanted.insert(def_prd);
+/*
             // no particular production specified.  import the
             // default production, but use the base name of the
             // fpl file to refer to it
             import_as = from.inp.base_name();
-            std::string def_prd(rules[0].product());
+            // XXX check if rules[0] exists
+            std::string def_prd(from.rules[0].product());
             all_wanted.push_back(def_prd);
             already_wanted.insert(def_prd);
+            ... ok if we want to do the above, this is not how
+            to do it. among the problems: if the top level production
+            is referenced in the contained fpl, it'll have the wrong
+            name.  instead, do `foo.fpl` => bar ; or such.  then
+            foo.fpl's tree is either aliased normally reduced in
+            some sensible consistent way.  So we'd need to return
+            .. a GrammarElement? oh huh we do.  why this not parses
+            like that already?  perhaps it does!
+ */
         }
 
-        // NOTE we're assuming here that we can append to a list
+        // NOTE I'm assuming here that we can append to a list
         // while iterating it and have things dtrt.  I believe
         // this is a reasonable thing to ask from std::list,
         // but have no documentation/spec saying it's ok.
+        int num_imported = 0;
         for(auto wanted : all_wanted) {
             // NOTE:  no scoping currently.  so rule names can
             // collide and cause mayhem... hmm
@@ -1557,6 +1592,7 @@ public:
             for(auto rit = strl; rit != endrl; ++rit) {
                 ProductionRule rule = from.rules[rit->second];
                 push_rule(rule);
+                num_imported++;
 
                 // any rules needed to generate the rule we just pushed are
                 // also relevant:
@@ -1570,6 +1606,12 @@ public:
                      }
                 }
             }
+        }
+fprintf(stderr, "imported %i rules\n", num_imported);
+        if(num_imported <= 0) {
+            warn(
+                stringformat("No rules imported from {}", from.inp.filename())
+            );
         }
 
         return import_as;
