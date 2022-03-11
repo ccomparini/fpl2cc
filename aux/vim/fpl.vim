@@ -30,8 +30,10 @@ syn match	fplOperator	"\s;"
 syn match	fplOperator	"[*+?]"
 syn match	fplOperator	"+{"
 syn match	fplOperator	"}+"
-" imports.  this is sorta wrong.  FIXME
-syn match	fplOperator	"`.*`:" 
+syn match	fplOperator	":"
+
+" imports
+syn match	fplImport	"`.*`"
 
 " expressions:
 syn region	fplExpression	start="/" end="/" skip=+\\/+
@@ -50,6 +52,7 @@ hi def link fplComment	Comment
 hi def link fplTodo	Todo
 hi def link fplAtDirective	PreProc
 hi def link fplOperator	Operator
+hi def link fplImport	PreProc
 hi def link fplExpression	Constant
 hi def link fplProductionName	Identifier
 hi def link fplSnip	Operator
