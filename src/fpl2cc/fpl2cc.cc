@@ -1181,31 +1181,18 @@ public:
         // importing another fpl source.
         // syntax: '`' filename /`(:production_to_import)?/
 
-        bool failed = false;
         std::string filename(src.read_to_byte('`'));
         if(!filename.length()) {
             src.error("no filename specified");
             return "<failed import>";
         }
 
-        fpl_reader inp(filename, 
-            [](const std::string &msg)->void {
-/*
-                failed = true;
-                // report the error in the context of the importing
-                // file:
-                src.error(msg);
- */
-            }
-/*
-            [&src, &failed](const std::string &msg)->void {
-                failed = true;
-                // report the error in the context of the importing
-                // file:
-                src.error(msg);
-            }
- */
-        );
+        auto sub_errcb = [&src](const std::string &msg)->void {
+            // report errors in the sub-fpl in the context of
+            // the importing file:
+            src.error("\n\t" + msg);
+        };
+        fpl_reader inp(filename, sub_errcb);
 
         std::string prod_name;
         if(src.read_byte_equalling(':')) {
