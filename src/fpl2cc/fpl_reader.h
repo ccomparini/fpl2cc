@@ -1,6 +1,8 @@
 #ifndef FPL_READER_H
 #define FPL_READER_H
 
+#include <cassert> // XXX kill this
+
 #include <fstream>
 #include <functional>
 #include <regex>
@@ -18,6 +20,7 @@ typedef uint32_t unich; // 4 byte unicode char; for realz, unlike wchar_t
 typedef unsigned char utf8_byte;
 typedef std::basic_string<utf8_byte> utf8_buffer;
 
+<<<<<<< HEAD
 using ErrorCallback = std::function<void(const std::string &error)>;
 
 // returns a utf8 buffer containing the contents
@@ -116,6 +119,7 @@ size_t space_length(const utf8_byte *at) {
     // can't get here.
 }
 
+template<typename ErrorCallback>
 class fpl_reader {
 
     std::string input_filename;
@@ -151,6 +155,7 @@ class fpl_reader {
             // from that position to work
             is_eof = true;
 
+// XXX convert to warning
             // call the on_error callback directly, since the
             // line number is going to be invalid anyway:
             on_error(stringformat(
@@ -244,15 +249,21 @@ public:
         exit(1);
     }
 
+<<<<<<< HEAD
     fpl_reader(
         utf8_buffer &input,
         const std::string &infn,
         ErrorCallback ecb = &default_fail
     ) :
+=======
+    fpl_reader(const std::string &infn, ErrorCallback *ecb = default_fail) :
+    // fpl_reader(const std::string &infn, std::function<bool(const std::string &)> ecb = &default_fail) :
+>>>>>>> a5d4b73 (INTERIM not working)
         input_filename(infn),
         buffer(input),
         on_error(ecb),
         read_pos(0)
+<<<<<<< HEAD
     { }
 
     fpl_reader(const std::string &infn, ErrorCallback ecb = &default_fail) :
@@ -261,6 +272,27 @@ public:
         on_error(ecb),
         read_pos(0)
     {
+=======
+    {
+        std::ifstream in(infn);
+        if(!in.is_open()) {
+// convert to .... factory method?  pushing to list of errors?
+            on_error(stringformat(
+                "can't open '{}': {}\n", infn, std::string(strerror(errno))
+            ));
+        
+        } else {
+
+            in.seekg(0, std::ios::end);   
+            size_t filesize = in.tellg();
+            in.seekg(0, std::ios::beg);
+
+            utf8_byte buf[filesize + 1];
+            in.read(reinterpret_cast<char *>(buf), filesize + 1);
+            buf[filesize] = '\0';
+            buffer.assign(buf, filesize + 1);
+        }
+>>>>>>> a5d4b73 (INTERIM not working)
     }
 
     inline int current_position() const {
@@ -319,7 +351,11 @@ public:
         return byte?*byte:'\0';
     }
 
+<<<<<<< HEAD
     std::string format_error_message(const std::string &msg) const {
+=======
+    void format_error_message(const std::string &msg) const {
+>>>>>>> a5d4b73 (INTERIM not working)
         const char *nl = "";
         if(msg[msg.length() - 1] != '\n')
             nl = "\n";
@@ -330,6 +366,10 @@ public:
     }
 
     void error(const std::string &msg) const {
+<<<<<<< HEAD
+=======
+assert(on_error);
+>>>>>>> a5d4b73 (INTERIM not working)
         on_error(format_error_message(msg));
     }
 

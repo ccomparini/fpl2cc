@@ -97,6 +97,11 @@ inline std::string to_str(bool b) {
 /*
  TODO/fix
 
+  Abstracting the target language/application:
+    - default rule action is to call a handler named after the rule.
+      instantiators of the parser can install the handler
+    - add param maps to normalize across handlers
+    - probably have to add grouping?
   - error handling and messaging is _terrible_ right now (with
     the default, anyway)
   - bug:  if everything in your fpl grammar is optional, it generates
@@ -1175,20 +1180,38 @@ public:
     std::string parse_import(fpl_reader &src, ProductionRule &rule) {
         // importing another fpl source.
         // syntax: '`' filename /`(:production_to_import)?/
-        // what it needs to do:
-        //  - create a sub-parser for the production. how to fold
-        //    that into states?  possibly just fold the whole
-        //    sub-parse in, which would be easiest.
 
+        bool failed = false;
         std::string filename(src.read_to_byte('`'));
-        fpl_reader inp(filename, fail);
+        if(!filename.length()) {
+            src.error("no filename specified");
+            return "<failed import>";
+        }
+
+        fpl_reader inp(filename, 
+            [](const std::string &msg)->void {
+/*
+                failed = true;
+                // report the error in the context of the importing
+                // file:
+                src.error(msg);
+ */
+            }
+/*
+            [&src, &failed](const std::string &msg)->void {
+                failed = true;
+                // report the error in the context of the importing
+                // file:
+                src.error(msg);
+            }
+ */
+        );
+
         std::string prod_name;
         if(src.read_byte_equalling(':')) {
             prod_name = read_production_name(src);
         }
 
-        // consider keeping this around so we don't have to re-read it
-        // if something else wants to import from the same fpl
         Productions subs(inp);
 
         return import_rules(subs, prod_name);
@@ -1239,7 +1262,10 @@ public:
                     // this can happen, especially if there's a '}+'
                     // embedded in a code block.
                     if(src.read_byte_equalling('+'))
-                        src.error("stray '}+'.  perhaps there's }+ embedded in a code block");
+                        src.error(
+                            "stray '}+'.  "
+                            "perhaps there's }+ embedded in a code block"
+                        );
                     else
                         src.error("unmatched '}'");
                     break;
@@ -1253,7 +1279,7 @@ public:
                             rule.to_str(), rule.location()
                         ));
                     }
-                    type     = GrammarElement::Type::NONTERM_PRODUCTION;
+                    type = GrammarElement::Type::NONTERM_PRODUCTION;
                     break;
             }
 
@@ -1494,6 +1520,9 @@ public:
     std::string import_rules(const Productions &from, const std::string &pname) {
         std::string src_fn = from.inp.filename();
         if(from.reduce_type != reduce_type) {
+// FIXME imported file needs to be able to inherit the outer reduce type.
+// so this should only be an error if an incompatible reduce type
+// was explicitly specified in the impoted fpl
             fail(stringformat(
                 "Incompatible reduce type '{}' in {} (expected {})\n",
                 from.reduce_type, src_fn, reduce_type
@@ -1503,6 +1532,8 @@ public:
         // import any preamble as well, as it may be necessary for the rules.
         // hmm.. too bad we can't scope this and/or figure out if it's necessary
         // to import in the first place... (can we scope?)
+        // (consider either getting rid of this or making it optional - possibly
+        // we only want to be importing "pure" fpl anyway)
         preamble += "\n" + from.preamble;
 
         // these are the names of the products whose rules (and elements)
