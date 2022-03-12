@@ -1201,7 +1201,7 @@ public:
         //    that into states?  possibly just fold the whole
         //    sub-parse in, which would be easiest.
 
-        std::string filename(src.read_to_byte('`'));
+        std::string filename(src.parse_string());
         fpl_reader inp(filename, fail);
         std::string prod_name;
         if(src.read_byte_equalling(':')) {
@@ -1235,11 +1235,11 @@ public:
                     break;
                 case '"':
                 case '\'':
-                    expr_str = src.read_to_byte(inch);
+                    expr_str = src.parse_string();
                     type     = GrammarElement::Type::TERM_EXACT;
                     break;
                 case '/':
-                    expr_str = src.read_to_byte('/');
+                    expr_str = src.parse_string();
                     type     = GrammarElement::Type::TERM_REGEX;
                     break;
                 case '-':
