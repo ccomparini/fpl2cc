@@ -1185,7 +1185,7 @@ public:
         // importing another fpl source.
         // syntax: '`' filename /`(:production_to_import)?/
 
-        std::string filename(src.read_to_byte('`'));
+        std::string filename(src.parse_string());
         if(!filename.length()) {
             src.error("no filename specified");
             return "<failed import>";
@@ -1234,11 +1234,11 @@ fprintf(stderr, "synchronizing reduce types\n");
                     break;
                 case '"':
                 case '\'':
-                    expr_str = src.read_to_byte(inch);
+                    expr_str = src.parse_string();
                     type     = GrammarElement::Type::TERM_EXACT;
                     break;
                 case '/':
-                    expr_str = src.read_to_byte('/');
+                    expr_str = src.parse_string();
                     type     = GrammarElement::Type::TERM_REGEX;
                     break;
                 case '-':

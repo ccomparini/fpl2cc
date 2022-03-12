@@ -11,10 +11,6 @@
 #include "util/stringformat.h"
 #include "util/to_hex.h"
 
-// XXX actually all official utf-8 fits in 4 bytes
-// unich is a unicode codepoint but probably want to only use utf-8.
-// XXX axe unich anyway
-typedef uint32_t unich; // 4 byte unicode char; for realz, unlike wchar_t
 typedef unsigned char utf8_byte;
 typedef std::basic_string<utf8_byte> utf8_buffer;
 
@@ -164,43 +160,16 @@ class fpl_reader {
         return is_eof;
     }
 
-    // as inpp(), below, but returns as a const char *
+    // returns a pointer to the next byte of the input
+    // buffer.
+    inline const utf8_byte *inpp() const {
+        return buffer.data() + read_pos;
+    }
+
+    // as inpp(), above, but returns as a const char *
     // for ease in passing to standard library stuff.
     inline const char *inpp_as_char() {
         return reinterpret_cast<const char *>(inpp());
-    }
-
-    // returns the string inside the matching chars.
-    // returns empty string if no match.  yeah, it's ambiguous.. hmm
-    // XXX this is barely used anymore.  only used for "read_to_byte".
-    // kill it.
-    std::string read_to_match(unich start_match, unich end_match) {
-        skip_bytes(1); // XXX convert this whole thing to utf-8
-        const utf8_byte *start = inpp();
-
-        if(!*start) return std::string("");
-
-        size_t total_size = 0;
-        int depth = 1; // assume we're starting on a match
-        do {
-            size_t size;
-            unich in = unicode_char(size, inpp());
-            if(in == start_match) {
-                depth++;
-            } else if(in == end_match) {
-                depth--;
-            } else if(in == '\\') {
-                // next char is escaped - skip it:
-                read_pos   += size;
-                total_size += size;
-            }
-            read_pos   += size;
-            total_size += size;
-        } while(depth > 0);
-
-        // string length total_size - 1 so as to not include the
-        // terminating char
-        return to_std_string(start, total_size - 1);
     }
 
     // returns the line number for the position passed,
@@ -284,8 +253,8 @@ public:
         return input_filename;
     }
 
-    inline std::string location() const {
-        return filename() + ":" + std::to_string(line_number());
+    inline std::string location(src_location caller = CALLER()) const {
+        return filename() + ":" + std::to_string(line_number(caller));
     }
 
     std::string base_name() const {
@@ -307,12 +276,6 @@ public:
         return eof(read_pos);
     }
 
-private:
-    // returns a pointer to the next byte of the input
-    // buffer.
-    inline const utf8_byte *inpp() const {
-        return buffer.data() + read_pos;
-    }
 public:
 
     inline utf8_byte peek() const {
@@ -410,6 +373,7 @@ private:
 
 public:
 
+/*
     // XXX kill this and/or rename to unicode_codepoint or such...
     // or something.  and move it.
     // The value of size_out will be set to the size in bytes of
@@ -438,6 +402,7 @@ public:
 
         return out;
     }
+ */
 
     inline void go_to(size_t position) {
         read_pos = position;
@@ -496,9 +461,64 @@ public:
         return false;
     }
 
-    // XXX only used by fpl2cc - move it there
-    inline std::string read_to_byte(utf8_byte end_char) {
-        return read_to_match('\0', end_char);
+    // reads and returns the string of characters delimited by the
+    // current input byte, consuming the delimiters.  for example,
+    // if the current input is on the single quote at the start of:
+    //        'fruitbat'; # hi this is a line of code
+    // this read the "'" and infer that that's the delimiter, then
+    // read through the next "'", returning a string containing
+    // "fruitbat", leaving the read pointer on the ';'.
+    //
+    // If there's no closing delimiter, it'll return everything up
+    // to the end of input, which is kinda lame.
+    //
+    // Backslash can be used to escape delimiters, but the backslash
+    // will be included in the returned string.  Arguably, that's
+    // a bug, but it matches the behavior of what this is replacing
+    // so I'm just keeping it for now.  ship it.
+    //
+    // Caveats:
+    //   - there's a good chance I'm going to deprecate/remove this
+    //   - generally, embedded '\0' are disallowed.  '\0' is treated
+    //     as a delimiter, however, so if you escape it you can
+    //     actually read a std::string with an embedded '\0' (though
+    //     you probably don't want to)
+    //   - at the moment, this is all byte oriented, so it probably
+    //     won't handle any non-ascii delimiters in a way you'd expect.
+    //     (may change, but more likely will deprecate the whole thing)
+    //
+    inline std::string parse_string(src_location caller = CALLER()) {
+if(char_length(read_pos) > 1) {
+fprintf(stderr, "whoa dude this is going to break because the char length is %lu", char_length(read_pos));
+}
+        const utf8_byte end_byte = read_byte();
+        const char *start = inpp_as_char();
+
+        // read_byte() returns 0 at (or past) end of input,
+        // and returning a std::string with an embedded '\0'
+        // is just going to cause mayhem, so we count any 0
+        // as end of input.
+        while(utf8_byte in = read_byte()) {
+             if(in == end_byte)
+                 break;
+
+             if(in == '\\')
+                 read_byte(); // next byte is escaped - just skip
+        }
+
+        const char *end = inpp_as_char();
+        if(end > start) {
+            // normal case, we read the string + the terminating
+            // delimiter.  (end - start) is the number we read,
+            // and - 1 excludes the terminator.
+            return std::string(start, end - start - 1);
+        }
+
+        // end <= start is a degenerate case such as you might
+        // get trying to parse a string at the last byte of the
+        // file or such. returning empty string is the best we
+        // can do.
+        return "";
     }
 
     inline std::string read_range(size_t start, size_t end) const {
