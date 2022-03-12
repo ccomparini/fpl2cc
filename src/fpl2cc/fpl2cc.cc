@@ -1186,6 +1186,7 @@ public:
         // syntax: '`' filename /`(:production_to_import)?/
 
         std::string filename(src.parse_string());
+<<<<<<< HEAD
         if(!filename.length()) {
             src.error("no filename specified");
             return "<failed import>";
@@ -1198,6 +1199,9 @@ public:
         };
         fpl_reader inp(filename, sub_errcb);
 
+=======
+        fpl_reader inp(filename, fail);
+>>>>>>> master
         std::string prod_name;
         if(src.read_byte_equalling(':')) {
             prod_name = read_production_name(src);
