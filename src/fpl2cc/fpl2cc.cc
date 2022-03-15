@@ -508,14 +508,14 @@ class ProductionRule {
     std::string prod;
     std::vector<ProdExpr> steps;
     CodeBlock code_for_rule;
-    const fpl_reader &reader;
-    size_t start_of_text;
+    std::string file;
+    int         line;
 
 public:
 
     ProductionRule(const fpl_reader &rdr, size_t at_byte) :
-        reader(rdr),
-        start_of_text(at_byte)
+        file(rdr.filename()),
+        line(rdr.line_number(at_byte))
     {
     }
 
@@ -547,15 +547,15 @@ public:
     }
 
     int line_number() const {
-        return reader.line_number(start_of_text);
+        return line;
     }
 
     std::string filename() const {
-        return reader.filename();
+        return file;
     }
 
     std::string location() const {
-        return reader.filename() + " line " + std::to_string(line_number());
+        return filename() + " line " + std::to_string(line_number());
     }
 
     // XXX maybe rename "code" to "action"
@@ -611,7 +611,7 @@ public:
             code += "return out;";
         }
 
-        return CodeBlock(code, reader.filename(), line_number());
+        return CodeBlock(code, filename(), line_number());
 
 /*
         This was a fun attempt but doesn't dtrt except in trivial
