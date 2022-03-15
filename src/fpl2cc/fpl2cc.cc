@@ -2,6 +2,7 @@
 #include <climits>
 #include <list>
 #include <map>
+#include <memory>
 #include <queue>
 #include <regex>
 #include <set>
@@ -386,7 +387,8 @@ std::string c_str_escape(const std::string src) {
 
 Production rules are ordered;  first one matches.
 
-Production rules can be looked up by name.
+Production rules can be looked up the name of the thing they
+produce.
 
 Each production rule is an array of things to match (items),
 the type of thing produced (string/GrammarElement) and typically
@@ -394,6 +396,7 @@ a code block (string).  Each item has a minimum and maximum
 number of times to match (default 1; may be 0, 1, or, in the
 max case, infinite).
 
+XXX the rest of this no longer applies:
 Generating code: do we need an entry rule? (maybe a built-in
 beginning of file match?) (if so, this would give a smaller
 set of initially applicable rules to search.  yes, do this,
@@ -563,12 +566,42 @@ struct ProdExpr { // or step?
     }
 };
 
+/*
+TODO imports:
+
+What's the goal?  at the moment, the idea is to be able to use imports
+as a way to separate the grammar from the production code.  So you
+can have a "pure" grammar (i.e. no target-language code) and import
+that into the fpl for a particular "application" (of that grammar).
+
+A secondary possible goal is (the original import goal) of being able
+to have sub-grammars for code organization and/or embedded languages
+eg, one could do fpl code blocks as:
+
+  '+{' `cpp.fpl` '}+' -> code_block ;
+
+.. and have it correctly deal with string-embedded '}+' etc.  Or, if
+the application is syntax highlighting, ... you get the idea.
+
+For the first goal, the syntax ideally would be to just import
+the embedded language and not have to assign it to any particular
+resulting product (though one still could...?  perhaps the reduce
+for that product could do the translation?  but then it would want
+to be passed a tree, which is not inherently unreasonable..)
+
+Either way, the sub Products (or at least the reader) needs to be
+kept around for this to work with the whole minimizing copies thing.
+Which might or might not even be worth it... hmm.  timing would be
+good.
+
+ */
+
 class ProductionRule {
     std::string prod;
     std::vector<ProdExpr> steps;
     CodeBlock code_for_rule;
-    const fpl_reader &reader;
-    size_t start_of_text;
+    std::string file;
+    int         line;
 
     // argmap maps the indexes of the steps for this rule
     // to argument numbers.  optional - if empty, the reduce
@@ -578,8 +611,8 @@ class ProductionRule {
 public:
 
     ProductionRule(const fpl_reader &rdr, size_t at_byte) :
-        reader(rdr),
-        start_of_text(at_byte)
+        file(rdr.filename()),
+        line(rdr.line_number(at_byte))
     {
     }
 
@@ -611,15 +644,15 @@ public:
     }
 
     int line_number() const {
-        return reader.line_number(start_of_text);
+        return line;
     }
 
     std::string filename() const {
-        return reader.filename();
+        return file;
     }
 
     std::string location() const {
-        return reader.filename() + " line " + std::to_string(line_number());
+        return filename() + " line " + std::to_string(line_number());
     }
 
     CodeBlock default_code() const {
@@ -674,7 +707,7 @@ public:
             code += "return out;";
         }
 
-        return CodeBlock(code, reader.filename(), line_number());
+        return CodeBlock(code, filename(), line_number());
     }
 
     void code(const CodeBlock &cd) {
@@ -712,7 +745,7 @@ public:
 };
 
 class Productions {
-    fpl_reader inp;
+    std::shared_ptr<fpl_reader> inp;
 
     std::string reduce_type;
     CodeBlock default_action;
@@ -1048,7 +1081,9 @@ public:
 
 public:
 
-    Productions(fpl_reader &src) : inp(src), default_main(false) {
+    Productions(std::shared_ptr<fpl_reader> src) :
+        inp(src), default_main(false)
+    {
         // element 0 is a null element and can be used to
         // indicate missing/uninitialized elements or such.
         // we count it as a nonterminal so that it can be
@@ -1186,7 +1221,6 @@ public:
         // syntax: '`' filename /`(:production_to_import)?/
 
         std::string filename(src.parse_string());
-<<<<<<< HEAD
         if(!filename.length()) {
             src.error("no filename specified");
             return "<failed import>";
@@ -1199,9 +1233,6 @@ public:
         };
         fpl_reader inp(filename, sub_errcb);
 
-=======
-        fpl_reader inp(filename, fail);
->>>>>>> master
         std::string prod_name;
         if(src.read_byte_equalling(':')) {
             prod_name = read_production_name(src);
@@ -1490,6 +1521,7 @@ fprintf(stderr, "synchronizing reduce types\n");
                 // wrong..
                 inp.error("unmatched '}'\n");
             } else {
+// XXX here (
                 ProductionRule rule(inp, inp.current_position());
                 if(read_expressions(inp, rule)) {
                     // .. we've read the expressions/steps leading to
@@ -1594,6 +1626,10 @@ debug_hook();
                 fail(stringformat("No rule for '{}' in {}\n", wanted, src_fn));
             }
             for(auto rit = strl; rit != endrl; ++rit) {
+// XXX here.. does this copy correctly?
+// not really, in part at least because it refers to the Productions
+// from which it comes (or perhaps it _should_)... or really refers
+// to the reader
                 ProductionRule rule = from.rules[rit->second];
                 push_rule(rule);
                 num_imported++;

@@ -283,18 +283,21 @@ public:
         return byte?*byte:'\0';
     }
 
-    std::string format_error_message(const std::string &msg) const {
+    std::string format_error_message(
+        const std::string &msg,
+        src_location caller = CALLER()
+    ) const {
         const char *nl = "";
         if(msg[msg.length() - 1] != '\n')
             nl = "\n";
 
         return stringformat("Error {} near «{}»: {}{}",
-            location(), debug_peek(), msg, nl
+            location(caller), debug_peek(), msg, nl
         );
     }
 
-    void error(const std::string &msg) const {
-        on_error(format_error_message(msg));
+    void error(const std::string &msg, src_location caller = CALLER()) const {
+        on_error(format_error_message(msg, caller));
     }
 
     // Returns the length in bytes of the newline "character" at the
