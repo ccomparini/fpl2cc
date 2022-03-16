@@ -828,6 +828,8 @@ class Productions {
         }
 
         std::string to_str(const Productions *prds) const {
+            if(!prds) return "NULL Productions";
+
             const ProductionRule &rl = prds->rules[rule];
 
             const int bs = 40;
@@ -1104,7 +1106,7 @@ public:
     // expects/scans a +{ }+ code block for the named directive.
     // the named directive is essentially for error reporting.
     inline CodeBlock code_for_directive(const std::string &dir) {
-        CodeBlock code = read_code(inp);
+        CodeBlock code = read_code(*inp);
         if(!code) {
             fail(stringformat("expected a code block for @{}\n", dir));
         }
@@ -1129,12 +1131,12 @@ public:
     // +{ }+ code blocks parsed?)
     void parse_directive(const std::string &dir) {
         if(dir == "comment_style") {
-            int line_num = inp.line_number();
-            std::string style = inp.read_re("\\s*(.+)\\s*")[1];
+            int line_num = inp->line_number();
+            std::string style = inp->read_re("\\s*(.+)\\s*")[1];
             if(!style.length()) {
                 warn("no comment style specified");
             } else {
-                add_comment_style(style, inp.filename(), line_num);
+                add_comment_style(style, inp->filename(), line_num);
             }
         } else if(dir == "default_action") {
             default_action = code_for_directive(dir);
@@ -1154,7 +1156,7 @@ public:
         } else if(dir == "post_reduce") {
             post_reduce = code_for_directive(dir);
         } else if(dir == "produces") {
-            reduce_type = inp.read_re("\\s*(.+)\\s*")[1];
+            reduce_type = inp->read_re("\\s*(.+)\\s*")[1];
         } else if(dir == "separator") {
             if(separator_code)
                 warn("@separator overrides existing separator code\n");
@@ -1231,7 +1233,9 @@ public:
             // the importing file:
             src.error("\n\t" + msg);
         };
-        fpl_reader inp(filename, sub_errcb);
+        std::shared_ptr<fpl_reader> inp = std::make_shared<fpl_reader>(
+            filename, sub_errcb
+        );
 
         std::string prod_name;
         if(src.read_byte_equalling(':')) {
@@ -1407,8 +1411,8 @@ fprintf(stderr, "synchronizing reduce types\n");
 
 /*
     void parse_argmap(ProductionRule &rule) {
-        while(!inp.read_byte_equalling(')')) {
-            std::cmatch arg = inp.read_re("[0-9]+");
+        while(!inp->read_byte_equalling(')')) {
+            std::cmatch arg = inp->read_re("[0-9]+");
             if(!arg.length()) {
                 // ... what's a better way to put this?
                 src.error("expected integer expression index");
@@ -1421,13 +1425,13 @@ fprintf(stderr, "synchronizing reduce types\n");
             // accept any number of spaces or commas to
             // separate arguments.  this is sloppy but
             // who cares - it's easy and will work.
-            inp.read_re("[\\s,]*");
+            inp->read_re("[\\s,]*");
         }
     }
  */
 /*
     void parse_implementation_function(fpl_reader &src, ProductionRule &rule) {
-        std::cmatch fnm = inp.read_re("~([a-zA-Z_0-9]+)");
+        std::cmatch fnm = inp->read_re("~([a-zA-Z_0-9]+)");
         std::string funcname = fnm[1];
         if(!funcname.length()) {
              src.error(stringformat(
@@ -1444,14 +1448,14 @@ fprintf(stderr, "synchronizing reduce types\n");
         // by an arbitrary number of spaces or commas.  it's sloppy
         // but should work.  no space is allowed before the initial '(',
         // btw. (for now anyway).
-        if(!inp.read_byte_equalling('(')) {
+        if(!inp->read_byte_equalling('(')) {
             // no specific argument list means pass everything
             for(int sti = 0; sti < rule.num_steps(); sti++) {
                 arg_ind.push_back(std::to_string(sti));
             }
         } else {
-            while(!inp.read_byte_equalling(')')) {
-                std::cmatch arg = inp.read_re("[0-9]+");
+            while(!inp->read_byte_equalling(')')) {
+                std::cmatch arg = inp->read_re("[0-9]+");
                 if(!arg.length()) {
                     // ... what's a better way to put this?
                     src.error("expected integer expression index");
@@ -1463,7 +1467,7 @@ fprintf(stderr, "synchronizing reduce types\n");
                 // accept any number of spaces or commas to
                 // separate arguments.  this is sloppy but
                 // who cares - it's easy and will work.
-                inp.read_re("[\\s,]*");
+                inp->read_re("[\\s,]*");
             }
         }
         rule.code(code_for_impl(src, funcname, arg_ind));
@@ -1475,25 +1479,25 @@ fprintf(stderr, "synchronizing reduce types\n");
 // XXX uhh... src unused;  we use inp. heh.
     //void parse_reduction(fpl_reader &src, ProductionRule &rule) {
     void parse_reduction(ProductionRule &rule) {
-        if(inp.peek() == '(') {
+        if(inp->peek() == '(') {
             parse_argmap(rule);
         }
 
-        inp.eat_separator();
+        inp->eat_separator();
 
-        switch(inp.peek()) {
+        switch(inp->peek()) {
             case ';':
                 // if it's ';', just read it and move on.  rule will
                 // get default code.
-                inp.read_byte_equalling(';');
+                inp->read_byte_equalling(';');
                 break;
             case '+':
                 // + implies code block coming:
                 rule.code(read_code(inp));
                 break;
             default:
-                inp.error(stringformat(
-                    "expected ';', '~', or '+' but got '{}'", inp.debug_peek()
+                inp->error(stringformat(
+                    "expected ';', '~', or '+' but got '{}'", inp->debug_peek()
                 ));
                 break;
         }
@@ -1502,33 +1506,33 @@ fprintf(stderr, "synchronizing reduce types\n");
 
     void parse_fpl() {
         do {
-            inp.eat_separator();
-            if(inp.peek() == '#') {
-                inp.read_line();
-            } else if(inp.peek() == '+') {
+            inp->eat_separator();
+            if(inp->peek() == '#') {
+                inp->read_line();
+            } else if(inp->peek() == '+') {
                 // inlined/general code - goes at the top of the generated
                 // code.  Use to define types or whatever.
-                CodeBlock code(read_code(inp));
+                CodeBlock code(read_code(*inp));
                 if(code) {
                     add_preamble(code);
                 }
-            } else if(inp.read_byte_equalling('@')) {
-                std::string directive = read_directive(inp);
+            } else if(inp->read_byte_equalling('@')) {
+                std::string directive = read_directive(*inp);
                 parse_directive(directive);
-            } else if(inp.read_byte_equalling('}')) {
+            } else if(inp->read_byte_equalling('}')) {
                 // likely what happened is someone put a }+ inside
                 // a code block.  anyway a floating end brace is 
                 // wrong..
-                inp.error("unmatched '}'\n");
+                inp->error("unmatched '}'\n");
             } else {
 // XXX here (
-                ProductionRule rule(inp, inp.current_position());
-                if(read_expressions(inp, rule)) {
+                ProductionRule rule(*inp, inp->current_position());
+                if(read_expressions(*inp, rule)) {
                     // .. we've read the expressions/steps leading to
                     // the production (including the "->").
                     // read what the expressions above produce:
-                    inp.eat_separator();
-                    rule.product(inp.read_to_separator());
+                    inp->eat_separator();
+                    rule.product(inp->read_to_separator());
                     if(rule.product().length() <= 0) {
                         fail(stringformat(
                             "missing production name at {}\n",
@@ -1536,24 +1540,24 @@ fprintf(stderr, "synchronizing reduce types\n");
                         ));
                     }
 
-                    inp.eat_separator();
+                    inp->eat_separator();
 
                     // next we expect either ';' or a code block.
                     // if it's ';' we read it and move on;  otherwise
                     // it's a code block for the rule.
-                    if(!inp.read_byte_equalling(';'))
-                        rule.code(read_code(inp));
+                    if(!inp->read_byte_equalling(';'))
+                        rule.code(read_code(*inp));
 
                     push_rule(rule);
                 }
             }
-        } while(!inp.eof());
+        } while(!inp->eof());
     }
 
     // returns the name of the production which this import will produce,
     // or 
     std::string import_rules(const Productions &from, const std::string &pname) {
-        std::string src_fn = from.inp.filename();
+        std::string src_fn = from.inp->filename();
         if(from.reduce_type != reduce_type) {
             // warn if there's an explicit reduce type which isn't
             // exactly the same as ours, but plow on - they'll get
@@ -1596,7 +1600,7 @@ debug_hook();
             // no particular production specified.  import the
             // default production, but use the base name of the
             // fpl file to refer to it
-            import_as = from.inp.base_name();
+            import_as = from.inp->base_name();
             // XXX check if rules[0] exists
             std::string def_prd(from.rules[0].product());
             all_wanted.push_back(def_prd);
@@ -1650,7 +1654,7 @@ debug_hook();
 fprintf(stderr, "imported %i rules\n", num_imported);
         if(num_imported <= 0) {
             warn(
-                stringformat("No rules imported from {}", from.inp.filename())
+                stringformat("No rules imported from {}", from.inp->filename())
             );
         }
 
@@ -2272,7 +2276,7 @@ fprintf(stderr, "imported %i rules\n", num_imported);
 
     std::string parser_class_name() {
         std::string base;
-        for(auto chr : inp.base_name()) {
+        for(auto chr : inp->base_name()) {
             switch(chr) {
                 case '-':
                     base += '_';
@@ -2495,7 +2499,7 @@ ExitVal fpl2cc(const Options &opts) {
     if(opts.src_fpl.size() == 0)
         fail("Error:  no source fpl specified");
 
-    fpl_reader inp(opts.src_fpl, fail);
+    auto inp = make_shared<fpl_reader>(opts.src_fpl, fail);
 
     // parse the input file into a set of productions:
     Productions productions(inp);
