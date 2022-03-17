@@ -604,9 +604,16 @@ class ProductionRule {
     int         line;
 
     // argmap maps the indexes of the steps for this rule
-    // to argument numbers.  optional - if empty, the reduce
+    // to argument names .  optional - if empty, the reduce
     // code gets one argument per rule step
-    std::list<int> argmap;
+    struct arg {
+        int index;
+        std::string name;
+
+        arg(int ind, const std::string nm = "") : index(ind), name(nm) { }
+
+    };
+    std::list<arg> argmap;
 
 public:
 
@@ -614,6 +621,10 @@ public:
         file(rdr.filename()),
         line(rdr.line_number(at_byte))
     {
+    }
+
+    void push_arg(int ind, const std::string nm) {
+        argmap.push_back(arg(ind, nm));
     }
 
     void add_step(ProdExpr step) {
@@ -655,6 +666,42 @@ public:
         return filename() + " line " + std::to_string(line_number());
     }
 
+/*
+  OK SO new default strategy:
+
+We want to support specifying the reduce for a given production
+outside of the rules for that production.
+
+So how's this - you can specify reduce rules via
+@reduce <product name> <params> <code block>
+
+... or should it really be an @ directive?
+
+maybe it's just <product name> <code block>?
+
+<product name> : <code block> ?
+
+possibly make it "normal" rule syntax? and somehow know
+to alias stuff in?  advantage is that the parameters
+to the component are specified in a consistent way.
+OH HUH in fact you could use the first rule producing
+whatever it is as the template for anything else
+producing that thing... 
+
+Or reverse it?  +{ }+ -> <production name>
+
+KISS is something like +<production name> ( <params> ) <code block>
+
+Do we need to have params?
+
+.. but that's all parsing.
+
+In general, reduce code should be from:
+  1) whatever's explicitly specified in the rule
+  2) reduce code for the type of thing produced
+  3) some reasonable default (perhaps exactly as below)
+
+ */
     CodeBlock default_code() const {
         // start the code block with a comment referring to this
         // line in this source file (fpl2cc.cc), to reduce puzzlement
@@ -1247,7 +1294,7 @@ public:
             // the imported fpl doesn't specify that it produces any
             // particular type, so we tell it to produce what we want:
             subs.reduce_type = reduce_type;
-fprintf(stderr, "synchronizing reduce types\n");
+fprintf(stderr, "synchronizing reduce types to %s\n", subs.reduce_type.c_str());
         }
 
         return import_rules(subs, prod_name);
@@ -1286,7 +1333,7 @@ fprintf(stderr, "synchronizing reduce types\n");
                         // just scanned "->", so we're done:
                         done = true;
                     } else {
-                        src.error("read unexpected '-'");
+                        src.error("unexpected '-'");
                     }
                     break;
                 case '`':
@@ -1409,26 +1456,46 @@ fprintf(stderr, "synchronizing reduce types\n");
     }
  */
 
-/*
+    // argument map:
+    //   
+    //   '(' arguments ')' -> argument_map ;
+    //   argument* -> arguments ;
+    //   /[0-9]+/ /:([a-zA-Z][a-zA-Z_0-9]*)/? ,* -> argument ;
+    //
+    //   the starting number is the argument number.
+    //   if it's followed by :..., it means assign a name to that argument.
+    //   arguments are optionally separated by commas (but space will do).
+    //
     void parse_argmap(ProductionRule &rule) {
-        while(!inp->read_byte_equalling(')')) {
-            std::cmatch arg = inp->read_re("[0-9]+");
-            if(!arg.length()) {
-                // ... what's a better way to put this?
-                src.error("expected integer expression index");
-                break;
+        if(inp->read_byte_equalling('(')) {
+            while(!inp->read_byte_equalling(')')) {
+                std::cmatch arg = inp->read_re("[0-9]+");
+                if(!arg.length()) {
+                    // ... what's a better way to put this?
+                    inp->error("expected integer expression index");
+                    break;
+                }
+
+                std::string name;
+                if(inp->read_byte_equalling(':')) {
+                    std::cmatch nm = inp->read_re("[a-zA-Z][a-zA-Z_0-9]*");
+                    if(!nm.length()) {
+                        inp->error("invalid argument name");
+                        break;
+                    }
+                    name = nm[0];
+                }
+
+                rule.push_arg(std::stoi(arg[0]), name);
+
+                // accept any number of spaces or commas to
+                // separate arguments.  this is sloppy but
+                // who cares - it's easy and will work.
+                inp->read_re("[\\s,]*");
             }
-
-            //arg_ind.push_back(arg[0]);
-            
-
-            // accept any number of spaces or commas to
-            // separate arguments.  this is sloppy but
-            // who cares - it's easy and will work.
-            inp->read_re("[\\s,]*");
         }
     }
- */
+
 /*
     void parse_implementation_function(fpl_reader &src, ProductionRule &rule) {
         std::cmatch fnm = inp->read_re("~([a-zA-Z_0-9]+)");
@@ -1474,10 +1541,7 @@ fprintf(stderr, "synchronizing reduce types\n");
     }
  */
 
-/*
     // parses whatever's after -> [production name] in the rule
-// XXX uhh... src unused;  we use inp. heh.
-    //void parse_reduction(fpl_reader &src, ProductionRule &rule) {
     void parse_reduction(ProductionRule &rule) {
         if(inp->peek() == '(') {
             parse_argmap(rule);
@@ -1493,7 +1557,7 @@ fprintf(stderr, "synchronizing reduce types\n");
                 break;
             case '+':
                 // + implies code block coming:
-                rule.code(read_code(inp));
+                rule.code(read_code(*inp));
                 break;
             default:
                 inp->error(stringformat(
@@ -1502,7 +1566,6 @@ fprintf(stderr, "synchronizing reduce types\n");
                 break;
         }
     }
- */
 
     void parse_fpl() {
         do {
@@ -1532,21 +1595,21 @@ fprintf(stderr, "synchronizing reduce types\n");
                     // the production (including the "->").
                     // read what the expressions above produce:
                     inp->eat_separator();
-                    rule.product(inp->read_to_separator());
-                    if(rule.product().length() <= 0) {
+                    //std::cmatch pname = inp->read_re("[A-Za-z][A-Za-z0-9_]+");
+                    std::cmatch pname = inp->read_re("[A-Za-z][A-Za-z0-9_]*");
+                    if(!pname.length()) {
                         fail(stringformat(
-                            "missing production name at {}\n",
+                            "invalid production name at {}\n",
                             rule.location()
                         ));
+                    } else {
+                        rule.product(pname[0]);
                     }
 
                     inp->eat_separator();
 
-                    // next we expect either ';' or a code block.
-                    // if it's ';' we read it and move on;  otherwise
-                    // it's a code block for the rule.
-                    if(!inp->read_byte_equalling(';'))
-                        rule.code(read_code(*inp));
+                    // next is how to reduce, or the end of the rule:
+                    parse_reduction(rule);
 
                     push_rule(rule);
                 }
