@@ -384,7 +384,7 @@ public:
         read_pos += skip;
     }
 
-    // XXX redundant;  kill
+    // skips the current utf-8 character
     inline void skip_char() {
         read_pos += char_length(read_pos);
     }
@@ -395,6 +395,7 @@ public:
         }
     }
 
+/*
     // XXX kill
     std::string read_to_separator(LengthCallback sep_cb = &space_length) {
         const utf8_byte *start = inpp();
@@ -414,6 +415,7 @@ public:
 
         return to_std_string(start, length);
     }
+ */
 
     inline char read_byte() {
         if(const utf8_byte *in = inpp()) {
@@ -565,6 +567,7 @@ fprintf(stderr, "whoa dude this is going to break because the char length is %lu
             // const std::regex cre(re, std::regex::multiline);
             const std::regex cre(re);
             if(std::regex_search(in, matched, cre, opts))
+// XXX check exceptions here
                 read_pos += matched.length();
 // XXX wait what?  we _can _ get here on matches of "0 bytes".  we don't want to return true in such cases. investigate.
 // fprintf(stderr, "/%s/ matched %li bytes!  specifically: (%s)\n", re.c_str(), matched.length(), matched.str().c_str());
