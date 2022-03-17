@@ -560,7 +560,9 @@ fprintf(stderr, "whoa dude this is going to break because the char length is %lu
         return result;
     }
 
-    inline std::cmatch read_re(const std::string &re) {
+    inline std::cmatch read_re(
+        const std::string &re, src_location caller = CALLER()
+    ) {
         // this doesn't support utf-8 in any reasonable way.
         // btw:
         //  https://stackoverflow.com/questions/37989081/how-to-use-unicode-range-in-c-regex
@@ -591,9 +593,16 @@ fprintf(stderr, "whoa dude this is going to break because the char length is %lu
             // keeping it out of both versions because we wouldn't
             // want regexes to work differently on different platforms.
             // const std::regex cre(re, std::regex::multiline);
-            const std::regex cre(re);
-            if(std::regex_search(in, matched, cre, opts))
-                read_pos += matched.length();
+            try {
+                const std::regex cre(re);
+                if(std::regex_search(in, matched, cre, opts))
+                    read_pos += matched.length();
+            }
+            catch(const std::regex_error& err) {
+                error(stringformat(
+                    "/{}/ <- {} (caller: {})", re, err.what(), caller
+                ));
+            }
 // XXX wait what?  we _can _ get here on matches of "0 bytes".  we don't want to return true in such cases. investigate.
 // fprintf(stderr, "/%s/ matched %li bytes!  specifically: (%s)\n", re.c_str(), matched.length(), matched.str().c_str());
             // (matched is now set to whatever was matched, if anything)
