@@ -2061,7 +2061,7 @@ public:
         }
 
         // if nothing returned a length yet, no separator
-        out += "    return 0;";
+        out += "    return 0;\n";
         out += "}\n";
         
         return out;
