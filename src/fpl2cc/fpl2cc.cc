@@ -2268,7 +2268,7 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         }
 
         // if nothing returned a length yet, no separator
-        out += "    return 0;";
+        out += "    return 0;\n";
         out += "}\n";
         
         return out;
