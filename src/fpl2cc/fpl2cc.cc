@@ -627,6 +627,12 @@ public:
         argmap.push_back(arg(ind, nm));
     }
 
+    // return the name to use for the nth argument
+    inline std::string argname(int argi) const {
+// XXX
+return "XXX";
+    }
+
     void add_step(ProdExpr step) {
         steps.push_back(step);
     }
@@ -1809,6 +1815,20 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         // type is.  This is complicated for the code generator,
         // but simplifies life for the fpl author, especially
         // for trivial cases.
+// XXX here, we want to get parameter names from the argmap.
+// OR DO WE?  perhaps names in argmap are a bad idea - think about
+// the default case where there's no code block.  names are at
+// best meaningless and at worst   or maybe only
+// allow names in code-block associated argmaps?
+// XXX POSSIBLY argmaps are a dumb idea, or at least don't solve
+// the right problem.  eg a rule with '[' ']' and then a rule with
+// '[' foo ']' is a very common case and not solved by argmaps
+// (unless we have some way to mark an empty argument)
+// XXX possibly the better idea is to "eject" unwanted arguments
+// (though then there's no way to reorder)
+// grouping is a much more useful thing all around.
+// How hard would it be to fpl the fpl parser?  there's
+// bootstrapping in that, of course.
         for(int stind = 0; stind < rule.num_steps(); stind++) {
             std::string arg_name = "arg_" + std::to_string(stind);
             const ProdExpr *expr = rule.step(stind);
@@ -1888,11 +1908,20 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         // at the top of the stack will be the last argument, and
         // the item one down from the top of the stack the second
         // to last, etc.
+// XXX change here:
+//   - iterate the argmap entries instead.  possibly this means moving
+//     this code to the ProductionRule?  in any case,
+//     the "pos" trick where pos gets updated isn't going to dtrt anymore!
+// reevaluate if we even need these temps..... oh oof maybe we do because
+// slices are used to deal with repetition.  can't know the stack size
+// at compile time - depends on the input.
+// perhaps create and discard arguments we don't care about?
+// perhaps always create an array of stack slices and use indexes
+// from the argmap.
         out += "int frame_start = base_parser.lr_top();\n";
         out += "int pos = frame_start;\n"; // (pos gets updated as we go)
         for(int stind = rule.num_steps() - 1; stind >= 0; --stind) {
             const ProdExpr *expr = rule.step(stind);
-            std::string argname = "arg_" + std::to_string(stind);
             if(!expr) {
                 fail(stringformat(
                     "Bug: no expression for step {} in {}",
@@ -1901,7 +1930,7 @@ fprintf(stderr, "imported %i rules\n", num_imported);
             } else {
                 std::string eid_str = std::to_string(element_index[expr->gexpr]);
                 std::string max_str = std::to_string(expr->max_times);
-                out += "FPLBP::StackSlice " + argname
+                out += "FPLBP::StackSlice arg_" + std::to_string(stind)
                      + "(base_parser, " + eid_str + ", " + max_str + ", pos);\n";
             }
         }
