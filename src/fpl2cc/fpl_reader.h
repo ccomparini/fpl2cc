@@ -376,37 +376,6 @@ private:
 
 public:
 
-/*
-    // XXX kill this and/or rename to unicode_codepoint or such...
-    // or something.  and move it.
-    // The value of size_out will be set to the size in bytes of
-    // the utf-8 representation of the character (scanned from *in)
-    static unich unicode_char(size_t &size_out, const utf8_byte *in) {
-        if(!in) {
-            size_out = 0;
-            return '\0';
-        }
-
-        unich out;
-        uint8_t acc = in[0];
-        out = acc & 0x7f;
-        size_out = 1;
-        while((acc & 0xc0) == 0xc0) {
-            acc <<= 1;
-            unich inb = in[size_out];
-            if((inb & 0xc0) != 0x80) {
-                // invalid input...
-                fprintf(stderr, "invalid utf-8 byte 0x%0x\n", inb);
-                // (but I guess blaze on..)
-            }
-            out |= inb << size_out*6;
-            size_out++;
-        }
-
-        return out;
-    }
- */
-
     inline void go_to(size_t position) {
         read_pos = position;
     }
