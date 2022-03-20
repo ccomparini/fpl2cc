@@ -278,9 +278,12 @@ public:
 
 public:
 
-    inline utf8_byte peek() const {
-        const utf8_byte *byte = inpp();
-        return byte?*byte:'\0';
+    inline utf8_byte peek(int offset = 0) const {
+        size_t full_off = read_pos + offset;
+        if(full_off < buffer.length()) {
+            return buffer.data()[full_off];
+        }
+        return '\0';
     }
 
     std::string format_error_message(
