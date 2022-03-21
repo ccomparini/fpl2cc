@@ -542,12 +542,19 @@ struct GrammarElement {
 
 struct ProdExpr { // or step?
     GrammarElement gexpr;
+    std::string varname;
 
     int min_times;
     int max_times;
 
     ProdExpr(const std::string &str, GrammarElement::Type tp)
-        : gexpr(str,tp), min_times(1), max_times(1) { }
+        : gexpr(str,tp), min_times(1), max_times(1)
+     {
+         if(tp == GrammarElement::VARIABLE) {
+             varname = str;
+             // .. and the gexpr will get splatted on resolution
+         }
+     }
 
     friend bool operator<(const ProdExpr& left, const ProdExpr& right) {
         if(left.gexpr.compare(right.gexpr) == 0) {
@@ -671,7 +678,7 @@ public:
         if(index < rsteps.size()) {
             return &rsteps[index];
         }
-        return NULL;
+        return nullptr;
     }
 
     const std::vector<ProdExpr> &steps() const {
@@ -1513,7 +1520,8 @@ fprintf(stderr, "synchronizing reduce types to %s\n", subs.reduce_type.c_str());
                     break;
                 }
 
-                ProdExpr prod(name, GrammarElement::NONTERM_PRODUCTION);
+                //ProdExpr prod(name, GrammarElement::NONTERM_PRODUCTION);
+                ProdExpr prod(name, GrammarElement::VARIABLE);
                 read_quantifiers(*inp, prod);
                 args.push_back(prod);
 
@@ -1804,13 +1812,6 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         }
         out += rule.code_or(default_action).format(false);
         out += "\n}\n";
-        // restore line number after end of function so that
-        // compiler warnings about stuff like lack of return
-        // value show the line in the fpl source (which is
-        // where the fpl author has to fix it).
-        // (actually, it'll show the line after... calling it
-        // good enough for now)
-        out += "\n#$LINE\n";
         return out;
     }
 
@@ -2395,6 +2396,10 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         }
     }
 
+    void resolve_variables() {
+    }
+
+    // returns the declaration for a reduce function
     std::string reducer_decl(
         const std::string &rfn, const std::vector<ProdExpr> &steps
     ) {
@@ -2423,16 +2428,15 @@ fprintf(stderr, "imported %i rules\n", num_imported);
                 // as a slice:
                 out += "const FPLBP::StackSlice &";
             } else if(expr.is_terminal()) {
+                // TODO probably want to allow multiple regex captures..?
                 out += "std::string ";
             } else {
                 out += reduce_type + " ";
             }
 
             // argument name:
-            if(expr.type() == GrammarElement::VARIABLE) {
-                // if variable, the expression is the name of the variable
-                // ... hmmm
-                out += expr.gexpr.expr; // heinous
+            if(expr.varname.length()) {
+                out += expr.varname;
             } else {
                 out += "arg_" + std::to_string(stind);
             }
@@ -2452,10 +2456,34 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         return out;
     }
 
-    std::string reducer_code(const Reducer &red) {
-        return stringformat(
-            ""
-        );
+    std::string reducer_code(const Options &opts, const Reducer &red) {
+        std::string funcname = "reduce_to_" + red.production_name;
+        std::string debug;
+        if(opts.debug) {
+            debug = stringformat(
+                "fprintf(stderr, \"reducing by {} (file {})\\n\");\n",
+                funcname, red.code.source_file, red.code.line
+            );
+        }
+        return reducer_decl(funcname, red.args) + " {\n"
+             // TODO unlike inline rules we're not including the
+             // metadata.  figure out if we care.  how much can
+             // we base on code_block?  Or, make a new class
+             // of code block for full functions and base on that?
+             + debug
+             + red.code.format(false)
+             + "\n}\n";
+    }
+
+    const Reducer *reducer_for(const ProductionRule &rule) {
+        Reducer finder;
+        finder.production_name = rule.product();
+        finder.args = rule.steps();
+
+        auto found = reducers.find(finder);
+        if(found != reducers.end())
+            return &*found;
+        return nullptr;
     }
 
     void generate_reduce_functions(const Options &opts, std::string &out) {
@@ -2473,11 +2501,21 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         */
 
         for(auto reducer: reducers) {
-            //out += 
+            out += reducer_code(opts, reducer);
+            // restore line number after end of function so that
+            // compiler warnings about stuff like lack of return
+            // value show the line in the fpl source (which is
+            // where the fpl author has to fix it).
+            out += "\n#$LINE\n\n";
         }
 
         for(int rnum = 0; rnum < rules.size(); rnum++) {
-            out += code_for_rule(opts, rnum);
+            // if there's no "abstracted" reducer suitable for this
+            // rule, we're onto rules 2 or 4:
+            if(!reducer_for(rules[rnum])) {
+                out += code_for_rule(opts, rnum);
+                out += "\n#$LINE\n\n"; // (as above)
+            }
         }
     }
 
