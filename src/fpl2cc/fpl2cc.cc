@@ -116,15 +116,9 @@ inline std::string to_str(bool b) {
   For abstracting implementations:
     - reducers:
       x argdecl which specifies the arguments to 
-      - code generation: specificity is, counter to what might seem
-        intuitive:
-        1) abstracted implementations (+product) override everything
-           this means you can use non-"pure" fpl and override everything.
-        2) code defined in the rule
-        3) folding rules with only one step. (note that if we implement "^",
-           you could do eg parens by '('^ expr ')'^ -> expr and thus not
-           require any language specific code)
-        4) default code
+      - integrate reducers (generate_reduce_functions)
+        - abstracted impls
+        - folding
     - '^' suffix to "eject" a given step from the argument lists (or is this
       needed?  maybe just don't pass if it's not named, or ..hmm)
     - :foo suffix to rename a step for purposes of argument passing
@@ -464,6 +458,7 @@ struct GrammarElement {
         TERM_EXACT,
         TERM_REGEX,
         NONTERM_PRODUCTION,
+        VARIABLE, // i.e. this is a placeholder
     } Type;
     Type type;
 
@@ -473,8 +468,9 @@ struct GrammarElement {
             "TERM_EXACT",
             "TERM_REGEX",
             "NONTERM_PRODUCTION",
+            "VARIABLE",
         };
-        if(t > NONE && t <= NONTERM_PRODUCTION) {
+        if(t > NONE && t <= VARIABLE) {
             return strs[t];
         }
         return "invalid GrammarElement::Type";
@@ -525,6 +521,7 @@ struct GrammarElement {
                 rb = "/";
                 break;
             case NONTERM_PRODUCTION:
+            case VARIABLE: // hmm should variable have some signifier?
                 lb = "";
                 rb = "";
                 break;
@@ -650,7 +647,7 @@ good.
 
 class ProductionRule {
     std::string prod;
-    std::vector<ProdExpr> steps;
+    std::vector<ProdExpr> rsteps;
     CodeBlock code_for_rule;
     std::string file;
     int         line;
@@ -664,17 +661,21 @@ public:
     }
 
     void add_step(ProdExpr step) {
-        steps.push_back(step);
+        rsteps.push_back(step);
     }
 
-    inline int num_steps() const { return steps.size(); }
+    inline int num_steps() const { return rsteps.size(); }
 
     // returns NULL if index is out of bounds
     const ProdExpr *step(unsigned int index) const {
-        if(index < steps.size()) {
-            return &steps[index];
+        if(index < rsteps.size()) {
+            return &rsteps[index];
         }
         return NULL;
+    }
+
+    const std::vector<ProdExpr> &steps() const {
+        return rsteps;
     }
 
     const std::string &product(const std::string &pr) {
@@ -702,42 +703,7 @@ public:
         return filename() + " line " + std::to_string(line_number());
     }
 
-/*
-  OK SO new default strategy:
 
-We want to support specifying the reduce for a given production
-outside of the rules for that production.
-
-So how's this - you can specify reduce rules via
-@reduce <product name> <params> <code block>
-
-... or should it really be an @ directive?
-
-maybe it's just <product name> <code block>?
-
-<product name> : <code block> ?
-
-possibly make it "normal" rule syntax? and somehow know
-to alias stuff in?  advantage is that the parameters
-to the component are specified in a consistent way.
-OH HUH in fact you could use the first rule producing
-whatever it is as the template for anything else
-producing that thing... 
-
-Or reverse it?  +{ }+ -> <production name>
-
-KISS is something like +<production name> ( <params> ) <code block>
-
-Do we need to have params?
-
-.. but that's all parsing.
-
-In general, reduce code should be from:
-  1) whatever's explicitly specified in the rule
-  2) reduce code for the type of thing produced
-  3) some reasonable default (perhaps exactly as below)
-
- */
     CodeBlock default_code() const {
         // start the code block with a comment referring to this
         // line in this source file (fpl2cc.cc), to reduce puzzlement
@@ -746,8 +712,8 @@ In general, reduce code should be from:
 
         int first_single_nonterm = -1;
         int num_single_nonterms = 0;
-        for(int sti = 0; sti < steps.size(); sti++) {
-            if(!steps[sti].is_terminal() && steps[sti].is_single()) {
+        for(int sti = 0; sti < rsteps.size(); sti++) {
+            if(!rsteps[sti].is_terminal() && rsteps[sti].is_single()) {
                 num_single_nonterms++;
                 if(first_single_nonterm < 0)
                     first_single_nonterm = sti;
@@ -776,7 +742,7 @@ In general, reduce code should be from:
             // or stack slices full of strings.
             // maybe the reduce type has a constructor which can do
             // something sane with a string?
-            if(steps.size() > 1) {
+            if(rsteps.size() > 1) {
                 warn(stringformat(
                     "default for rule {} probably won't dtrt\n",
                     to_str()
@@ -816,7 +782,7 @@ In general, reduce code should be from:
 
     std::string to_str() const {
         std::string out;
-        for(auto step : steps) {
+        for(auto step : rsteps) {
             out += step.to_str();
             out += " ";
         }
@@ -1825,67 +1791,12 @@ fprintf(stderr, "imported %i rules\n", num_imported);
     #undef rule_meta_int
     #undef rule_meta_str
 
+
     std::string code_for_rule(const Options &opts, int rule_ind) {
         const ProductionRule &rule = rules[rule_ind];
-        std::string out;
 
         std::string rule_name = rule_fn(rule_ind);
-        out += reduce_type + " " + rule_name + "(";
-
-        // "simple" parameters:
-        // If the expression for the step has a min/max times of
-        // anything other than exactly 1 (is_single()), we pass
-        // it as a stack slice.
-        // Otherwise, if it's a terminal, pass it as a string,
-        // or (if it's the result of a reduce) as whatever the reduce
-        // type is.  This is complicated for the code generator,
-        // but simplifies life for the fpl author, especially
-        // for trivial cases.
-// XXX here, we want to get parameter names from the argmap.
-// OR DO WE?  perhaps names in argmap are a bad idea - think about
-// the default case where there's no code block.  names are at
-// best meaningless and at worst   or maybe only
-// allow names in code-block associated argmaps?
-// XXX POSSIBLY argmaps are a dumb idea, or at least don't solve
-// the right problem.  eg a rule with '[' ']' and then a rule with
-// '[' foo ']' is a very common case and not solved by argmaps
-// (unless we have some way to mark an empty argument)
-// XXX possibly the better idea is to "eject" unwanted arguments
-// (though then there's no way to reorder)
-// grouping is a much more useful thing all around.
-// How hard would it be to fpl the fpl parser?  there's
-// bootstrapping in that, of course.
-        for(int stind = 0; stind < rule.num_steps(); stind++) {
-            std::string arg_name = "arg_" + std::to_string(stind);
-            const ProdExpr *expr = rule.step(stind);
-            if(!expr) {
-                fail(stringformat("Bug: no expression for {} in {}",
-                    arg_name, rule.to_str()
-                ));
-            } else if(!expr->is_single()) {
-                // the argument is either optional or can repeat or
-                // both, so we can't pass it simply.  so pass it
-                // as a slice:
-                out += "const FPLBP::StackSlice &";
-            } else if(expr->is_terminal()) {
-                out += "std::string ";
-            } else {
-                out += reduce_type + " ";
-            }
-            out += arg_name;
-            out += ", ";
-        }
-
-        // last parameter is the slice of the stack with
-        // everything we're popping.  this lets the fpl author
-        // get things like the line number for a given argument
-        // or whatever.  (actully, the "simple" positional
-        // parameters below can be implemented via this,
-        // and in the jest version might be).  It's last only
-        // because that simplifies the generating code
-        out += "const FPLBP::StackSlice &args";
-
-        out += ") {\n";
+        std::string out = reducer_decl(rule_name, rule.steps()) + " {\n";
         out += "// " + rule.to_str() + "\n";
         out += rule_metadata(rule_ind);
         if(opts.debug) {
@@ -2057,6 +1968,12 @@ fprintf(stderr, "imported %i rules\n", num_imported);
                 break;
             case GrammarElement::NONTERM_PRODUCTION:
                 out += "} else if(base_parser.shift_nonterm(";
+                break;
+            case GrammarElement::VARIABLE:
+                inp->error(stringformat(
+                    "bug: unresolved variable {} in shift for state {}",
+                    right_of_dot->to_str(), state.to_str(this)
+                ));
                 break;
             case GrammarElement::NONE:
                 // .. this pretty much implies a bug in fpl2cc:
@@ -2478,6 +2395,92 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         }
     }
 
+    std::string reducer_decl(
+        const std::string &rfn, const std::vector<ProdExpr> &steps
+    ) {
+        std::string out ;
+        out += reduce_type + " " + rfn + "(";
+
+        // "simple" parameters:
+        // If the expression for the step has a min/max times of
+        // anything other than exactly 1 (is_single()), we pass
+        // it as a stack slice.
+        // Otherwise, if it's a terminal, pass it as a string,
+        // or (if it's the result of a reduce) as whatever the reduce
+        // type is.  This is complicated for the code generator,
+        // but simplifies life for the fpl author, especially
+        // for trivial cases.
+        for(int stind = 0; stind < steps.size(); stind++) {
+            const ProdExpr &expr = steps[stind];
+
+            // arg type depends on the expression:
+            // XXX consider if we always should just pass stack element
+            // for singles and slices for multiples.  stack element needs
+            // to be able to behave as whatever, then.
+            if(!expr.is_single()) {
+                // the argument is either optional or can repeat or
+                // both, so we can't pass it simply.  so pass it
+                // as a slice:
+                out += "const FPLBP::StackSlice &";
+            } else if(expr.is_terminal()) {
+                out += "std::string ";
+            } else {
+                out += reduce_type + " ";
+            }
+
+            // argument name:
+            if(expr.type() == GrammarElement::VARIABLE) {
+                // if variable, the expression is the name of the variable
+                // ... hmmm
+                out += expr.gexpr.expr; // heinous
+            } else {
+                out += "arg_" + std::to_string(stind);
+            }
+      
+            out += ", ";
+        }
+
+        // last parameter is the slice of the stack with
+        // everything we're popping.  this lets the fpl author
+        // get things like the line number for a given argument
+        // or whatever.  (actully, the "simple" positional
+        // parameters below can be implemented via this,
+        // and in the jest version might be).  It's last only
+        // because that simplifies the generating code
+        out += "const FPLBP::StackSlice &args)";
+
+        return out;
+    }
+
+    std::string reducer_code(const Reducer &red) {
+        return stringformat(
+            ""
+        );
+    }
+
+    void generate_reduce_functions(const Options &opts, std::string &out) {
+        /*
+          A given rule will be reduce accoring to one of (in priority order):
+          1) abstracted implementations (+product) override everything,
+             which means you can use non-"pure" fpl and override stuff
+             with abstractedimplementations and not have to touch the
+             grammar.
+          2) code defined in the rule
+          3) folding rules with only one step. (note that if we implement "^",
+             you could do eg parens by '('^ expr ')'^ -> expr and thus not
+             require any language specific code)
+          4) default code (as it is now, including @default_action)
+        */
+
+        for(auto reducer: reducers) {
+            //out += 
+        }
+
+        for(int rnum = 0; rnum < rules.size(); rnum++) {
+            out += code_for_rule(opts, rnum);
+        }
+    }
+
     std::string generate_code(const Options &opts) {
 
         if(rules.size() <= 0) {
@@ -2551,9 +2554,7 @@ fprintf(stderr, "imported %i rules\n", num_imported);
 
         out += separator_method().format();
 
-        for(int rnum = 0; rnum < rules.size(); rnum++) {
-            out += code_for_rule(opts, rnum);
-        }
+        generate_reduce_functions(opts, out);
 
         for(lr_set state : states) {
             out += code_for_state(opts, state).c_str();
@@ -2682,5 +2683,6 @@ int main(int argc, const char** argv) {
 
     exit(status);
 }
+
 
 
