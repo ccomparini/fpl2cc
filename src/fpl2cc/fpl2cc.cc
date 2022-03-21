@@ -101,6 +101,48 @@ inline std::string to_str(bool b) {
 
 /*
  TODO/fix
+# # XXX fpl thought - any value in making some kind
+# # of construct for fussy old languages like
+# # this which don't allow terminal ','?
+# # say it's a dot (.). then we could just do (eg):
+# #  '[' element ','.element* ']'
+# # i.e. the dot would join items for purposes of repetition.
+# # then perhaps we wouldn't need to use lists or
+# # whatever for the items in languages like this.
+    - add --purify option ro such which means discard all code blocks
+      (and anything else non-pure) from the fpl.. hmm but it would have
+      to be from the sub-fpls only or such.  hmm maybe an options on
+      importing?
+  For abstracting implementations:
+    - reducers:
+      x argdecl which specifies the arguments to 
+      - code generation: specificity is, counter to what might seem
+        intuitive:
+        1) abstracted implementations (+product) override everything
+           this means you can use non-"pure" fpl and override everything.
+        2) code defined in the rule
+        3) folding rules with only one step. (note that if we implement "^",
+           you could do eg parens by '('^ expr ')'^ -> expr and thus not
+           require any language specific code)
+        4) default code
+    - '^' suffix to "eject" a given step from the argument lists (or is this
+      needed?  maybe just don't pass if it's not named, or ..hmm)
+    - :foo suffix to rename a step for purposes of argument passing
+      (or I suppose it could be used 
+    - aliases in general:  if a rule has only a single nonterminal
+      and no reduce code, make it an alias.  fold the terminal in.
+      (but count the ProeExpr as a production until the folding)
+      (the advantage here is the author doesn't have to make explicit
+      reduce code for)
+  Also nice to have:
+    - '\' after step makes the step only match if the separator length
+      directly after it is 0!  I think that's a working and simple
+      implementation
+  Also nice to have but harder (?):
+    - parenthesize steps.  but, if :foo is implemented as a mini-reduce
+      ... I guess the implementation  could be to make an anonymous
+      rule for anything parenthesized, which would reduce to... a stack slice?
+      use the ^ operator to kill things you don't want?
 
   Abstract the target language/application:
     - default rule action is to call a handler named after the rule.
@@ -510,6 +552,16 @@ struct ProdExpr { // or step?
     ProdExpr(const std::string &str, GrammarElement::Type tp)
         : gexpr(str,tp), min_times(1), max_times(1) { }
 
+    friend bool operator<(const ProdExpr& left, const ProdExpr& right) {
+        if(left.gexpr.compare(right.gexpr) == 0) {
+            if(left.min_times == right.min_times)
+                return left.max_times < right.max_times;
+            else
+                return left.min_times < right.min_times;
+        }
+        return left.gexpr < right.gexpr;
+    }
+
     inline bool is_single() const {
         return((min_times == 1) && (max_times == 1));
     }
@@ -603,34 +655,12 @@ class ProductionRule {
     std::string file;
     int         line;
 
-    // argmap maps the indexes of the steps for this rule
-    // to argument names .  optional - if empty, the reduce
-    // code gets one argument per rule step
-    struct arg {
-        int index;
-        std::string name;
-
-        arg(int ind, const std::string nm = "") : index(ind), name(nm) { }
-
-    };
-    std::list<arg> argmap;
-
 public:
 
     ProductionRule(const fpl_reader &rdr, size_t at_byte) :
         file(rdr.filename()),
         line(rdr.line_number(at_byte))
     {
-    }
-
-    void push_arg(int ind, const std::string nm) {
-        argmap.push_back(arg(ind, nm));
-    }
-
-    // return the name to use for the nth argument
-    inline std::string argname(int argi) const {
-// XXX
-return "XXX";
     }
 
     void add_step(ProdExpr step) {
@@ -797,6 +827,28 @@ In general, reduce code should be from:
     }
 };
 
+struct Reducer {
+    std::string production_name;
+    std::vector<ProdExpr> args;
+    CodeBlock code;
+
+    // reducers are first identified by the name of the thing they
+    // produce, and next distinguished by arguments if there's more
+    // than one Reducer producing a given thing.
+    // this is so we can keep Reducers in std::set or similar.
+    friend bool operator<(const Reducer& left, const Reducer& right) {
+        if(left.production_name == right.production_name)
+            return left.args < right.args;
+        return left.production_name < right.production_name;
+    }
+/*
+    friend bool operator==(const Reducer& left, const Reducer& right) {
+        return (left.production_name == right.production_name)
+            && (left.args == right.args);
+    }
+ */
+};
+
 class Productions {
     std::shared_ptr<fpl_reader> inp;
 
@@ -816,6 +868,8 @@ class Productions {
 
     std::vector<GrammarElement>     elements;
     std::map<GrammarElement, int>   element_index;
+
+    std::set<Reducer> reducers;
 
     struct lr_set;
     std::vector<lr_set> states;
@@ -1462,114 +1516,80 @@ fprintf(stderr, "synchronizing reduce types to %s\n", subs.reduce_type.c_str());
     }
  */
 
-    // argument map:
-    //   
-    //   '(' arguments ')' -> argument_map ;
-    //   argument* -> arguments ;
-    //   /[0-9]+/ /:([a-zA-Z][a-zA-Z_0-9]*)/? ,* -> argument ;
-    //
-    //   the starting number is the argument number.
-    //   if it's followed by :..., it means assign a name to that argument.
-    //   arguments are optionally separated by commas (but space will do).
-    //
-    void parse_argmap(ProductionRule &rule) {
-        if(inp->read_byte_equalling('(')) {
-            while(!inp->read_byte_equalling(')')) {
-                std::cmatch arg = inp->read_re("[0-9]+");
-                if(!arg.length()) {
-                    // ... what's a better way to put this?
-                    inp->error("expected integer expression index");
-                    break;
-                }
-
-                std::string name;
-                if(inp->read_byte_equalling(':')) {
-                    std::cmatch nm = inp->read_re("[a-zA-Z][a-zA-Z_0-9]*");
-                    if(!nm.length()) {
-                        inp->error("invalid argument name");
-                        break;
-                    }
-                    name = nm[0];
-                }
-
-                rule.push_arg(std::stoi(arg[0]), name);
-
-                // accept any number of spaces or commas to
-                // separate arguments.  this is sloppy but
-                // who cares - it's easy and will work.
-                inp->read_re("[\\s,]*");
-            }
-        }
+    // reads and returns the production name from the current
+    // reader.
+    // on error, returns a 0-length string
+    std::string read_production_name() {
+        std::cmatch nm = inp->read_re("[a-zA-Z][a-zA-Z_0-9]*");
+        if(!nm.length())
+            return "";
+        return nm[0];
     }
 
-/*
-    void parse_implementation_function(fpl_reader &src, ProductionRule &rule) {
-        std::cmatch fnm = inp->read_re("~([a-zA-Z_0-9]+)");
-        std::string funcname = fnm[1];
-        if(!funcname.length()) {
-             src.error(stringformat(
-                 "expected ~implementation_func but got {}",
-                 src.debug_peek()
-             ));
-             return;
-        }
-
-        std::list<std::string> arg_ind;
-
-        // so we expect this to accept a list of numeric arguments
-        // representing the positions of the things to pass, separated
-        // by an arbitrary number of spaces or commas.  it's sloppy
-        // but should work.  no space is allowed before the initial '(',
-        // btw. (for now anyway).
+    // argument declaration for a reduction code block:
+    //   
+    //   '(' (argument ','?)* ')' -> argument_map ;
+    //
+    //    arg_name\ quantifiers? -> argument ;
+    //
+    //    /[*+?]/ -> quantifiers ;
+    //
+    std::vector<ProdExpr> parse_argdecl() {
+        std::vector<ProdExpr> args;
+        
         if(!inp->read_byte_equalling('(')) {
-            // no specific argument list means pass everything
-            for(int sti = 0; sti < rule.num_steps(); sti++) {
-                arg_ind.push_back(std::to_string(sti));
-            }
+            inp->error("expected start of argument declaration '('");
         } else {
             while(!inp->read_byte_equalling(')')) {
-                std::cmatch arg = inp->read_re("[0-9]+");
-                if(!arg.length()) {
-                    // ... what's a better way to put this?
-                    src.error("expected integer expression index");
+                std::string name = read_production_name();
+                if(!name.length()) {
+                    inp->error("invalid production name");
                     break;
                 }
 
-                arg_ind.push_back(arg[0]);
+                ProdExpr prod(name, GrammarElement::NONTERM_PRODUCTION);
+                read_quantifiers(*inp, prod);
+                args.push_back(prod);
 
-                // accept any number of spaces or commas to
-                // separate arguments.  this is sloppy but
-                // who cares - it's easy and will work.
-                inp->read_re("[\\s,]*");
+                inp->eat_separator();
+
+                if(inp->peek() == '\0') // more reasons to fpl this..
+                    break;
             }
         }
-        rule.code(code_for_impl(src, funcname, arg_ind));
-    }
- */
 
-    // parses whatever's after -> [production name] in the rule
-    void parse_reduction(ProductionRule &rule) {
-        if(inp->peek() == '(') {
-            parse_argmap(rule);
+        return args;
+    }
+
+    //
+    // +<production_name> <argdecl> <code_block>
+    //
+    void parse_reducer() {
+        if(!inp->read_byte_equalling('+')) {
+            inp->error("expected +<production_name>");
+            return;
         }
 
-        inp->eat_separator();
+        Reducer reducer;
+        reducer.production_name =read_production_name();
+        if(reducer.production_name.length() == 0) {
+            inp->error("expected production name after '+'");
+            return;
+        }
 
-        switch(inp->peek()) {
-            case ';':
-                // if it's ';', just read it and move on.  rule will
-                // get default code.
-                inp->read_byte_equalling(';');
-                break;
-            case '+':
-                // + implies code block coming:
-                rule.code(read_code(*inp));
-                break;
-            default:
-                inp->error(stringformat(
-                    "expected ';', '~', or '+' but got '{}'", inp->debug_peek()
-                ));
-                break;
+        reducer.args = parse_argdecl();
+        reducer.code = read_code(*inp);
+
+        auto existing = reducers.find(reducer);
+        if(existing != reducers.end()) {
+            // possibly warn and splat instead?
+            inp->error(stringformat(
+                "reducer for {} collides with existing reducer from {} line {}",
+                reducer.production_name,
+                existing->code.source_file, existing->code.line
+            ));
+        } else {
+            reducers.insert(reducer);
         }
     }
 
@@ -1579,11 +1599,16 @@ fprintf(stderr, "synchronizing reduce types to %s\n", subs.reduce_type.c_str());
             if(inp->peek() == '#') {
                 inp->read_line();
             } else if(inp->peek() == '+') {
-                // inlined/general code - goes at the top of the generated
-                // code.  Use to define types or whatever.
-                CodeBlock code(read_code(*inp));
-                if(code) {
-                    add_preamble(code);
+                if(inp->peek(1) == '{') {
+                    // inlined/general code - goes at the top of the
+                    // generated code.  Use to define types or whatever.
+                    CodeBlock code(read_code(*inp));
+                    if(code) {
+                        add_preamble(code);
+                    }
+                } else {
+                    // expect code for reducing to the production given:
+                    parse_reducer();
                 }
             } else if(inp->read_byte_equalling('@')) {
                 std::string directive = read_directive(*inp);
@@ -1594,14 +1619,12 @@ fprintf(stderr, "synchronizing reduce types to %s\n", subs.reduce_type.c_str());
                 // wrong..
                 inp->error("unmatched '}'\n");
             } else {
-// XXX here (
                 ProductionRule rule(*inp, inp->current_position());
                 if(read_expressions(*inp, rule)) {
                     // .. we've read the expressions/steps leading to
                     // the production (including the "->").
                     // read what the expressions above produce:
                     inp->eat_separator();
-                    //std::cmatch pname = inp->read_re("[A-Za-z][A-Za-z0-9_]+");
                     std::cmatch pname = inp->read_re("[A-Za-z][A-Za-z0-9_]*");
                     if(!pname.length()) {
                         fail(stringformat(
@@ -1614,8 +1637,11 @@ fprintf(stderr, "synchronizing reduce types to %s\n", subs.reduce_type.c_str());
 
                     inp->eat_separator();
 
-                    // next is how to reduce, or the end of the rule:
-                    parse_reduction(rule);
+                    // next we expect either ';' or a code block.
+                    // if it's ';' we read it and move on;  otherwise
+                    // it's a code block for the rule.
+                    if(!inp->read_byte_equalling(';'))
+                        rule.code(read_code(*inp));
 
                     push_rule(rule);
                 }
