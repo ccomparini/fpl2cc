@@ -131,8 +131,7 @@ inline std::string to_str(bool b) {
             adding to the above, 'x' -> bar ; /y+/ -> bar ;
             moo bar -> bat +{ ... }+ should also fold, as should 'a' -> goo ;
             goo -> bar ; added to the above
-    - '^' suffix to "eject" a given step from the argument lists (or is this
-      needed?  maybe just don't pass if it's not named, or ..hmm)
+    x '^' suffix to "eject" a given step from the argument lists
     - :foo suffix to rename a step for purposes of argument passing
       (or maybe foo: prefix instead - makes the relationship with
       repetition suffixes etc cleaner)
@@ -550,13 +549,15 @@ struct GrammarElement {
 
 struct ProdExpr { // or step?
     GrammarElement gexpr;
-    std::string varname;
+    std::string varname; // if set, name of this expression in reduce code
 
     int min_times;
     int max_times;
 
+    bool eject; // if set, don't pass this to reduce code
+
     ProdExpr(const std::string &str, GrammarElement::Type tp)
-        : gexpr(str,tp), min_times(1), max_times(1)
+        : gexpr(str,tp), min_times(1), max_times(1), eject(false)
      {
          if(tp == GrammarElement::VARIABLE) {
              varname = str;
@@ -594,6 +595,10 @@ struct ProdExpr { // or step?
         return min_times == 0;
     }
 
+    inline bool skip_on_reduce() const {
+        return eject;
+    }
+
     inline std::string production_name() const {
         if(gexpr.type == GrammarElement::NONTERM_PRODUCTION) {
             return gexpr.expr;
@@ -625,6 +630,9 @@ struct ProdExpr { // or step?
             }
             out += "}";
         }
+
+        if(eject)
+            out += "^";
 
         return out;
     }
@@ -1352,7 +1360,6 @@ public:
             // the imported fpl doesn't specify that it produces any
             // particular type, so we tell it to produce what we want:
             subs.reduce_type = reduce_type;
-fprintf(stderr, "synchronizing reduce types to %s\n", subs.reduce_type.c_str());
         }
 
         return import_rules(subs, prod_name);
@@ -1428,6 +1435,8 @@ fprintf(stderr, "synchronizing reduce types to %s\n", subs.reduce_type.c_str());
                 if(expr_str.length() >= 1) {
                     ProdExpr expr(expr_str, type);
                     read_quantifiers(src, expr);
+                    if(src.read_byte_equalling('^'))
+                        expr.eject = true;
                     rule.add_step(expr);
                     num_read++;
                 } else {
@@ -1484,35 +1493,6 @@ fprintf(stderr, "synchronizing reduce types to %s\n", subs.reduce_type.c_str());
 
          return CodeBlock(code_str, src.filename(), src.line_number(start));
     }
-
-/*
-    CodeBlock code_for_impl(
-        fpl_reader &src, const std::string &name, std::list<std::string> &args
-    ) {
-        int num_args = args.size();
-        auto existing = reduce_implementations.find(name);
-        if(existing == reduce_implementations.end()) {
-            reduce_implementations[name] = num_args;
-        } else if(existing->second != num_args) {
-            // this may be unnessessary.  possibly the implementation
-            // is in a language which can do varargs or whatever.. XXX
-            src.error(stringformat(
-                "{} previously defined with {} parameters (not {})",
-                name, existing->second, num_args
-            ));
-        }
-
-        CodeBlock code(name + "(", src.filename(), src.line_number());
-        int aleft = num_args;
-        for(const std::string &arg : args) {
-            code += "args[" + arg + "]";
-            if(--aleft > 0) code += ", ";
-        }
-        code += ");";
-
-        return code;
-    }
- */
 
     // reads and returns the production name from the current
     // reader.
@@ -1895,16 +1875,6 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         // at the top of the stack will be the last argument, and
         // the item one down from the top of the stack the second
         // to last, etc.
-// XXX change here:
-//   - iterate the argmap entries instead.  possibly this means moving
-//     this code to the ProductionRule?  in any case,
-//     the "pos" trick where pos gets updated isn't going to dtrt anymore!
-// reevaluate if we even need these temps..... oh oof maybe we do because
-// slices are used to deal with repetition.  can't know the stack size
-// at compile time - depends on the input.
-// perhaps create and discard arguments we don't care about?
-// perhaps always create an array of stack slices and use indexes
-// from the argmap.
         out += "int frame_start = base_parser.lr_top();\n";
         out += "int pos = frame_start;\n"; // (pos gets updated as we go)
         for(int stind = rule.num_steps() - 1; stind >= 0; --stind) {
@@ -1929,6 +1899,10 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         out += "    " + reduce_type + " result = " + rule_fn(rule_ind) + "(";
         for(int stind = 0; stind < rule.num_steps(); stind++) {
             const ProdExpr *expr = rule.step(stind);
+
+            if(expr->skip_on_reduce())
+                continue;  // Author has specified that this arg isn't passed
+
             std::string argname = "arg_" + std::to_string(stind);
             out += argname;
             if(expr->is_single()) {
@@ -2513,8 +2487,15 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         // type is.  This is complicated for the code generator,
         // but simplifies life for the fpl author, especially
         // for trivial cases.
+        int argind = 0;
         for(int stind = 0; stind < steps.size(); stind++) {
             const ProdExpr &expr = steps[stind];
+
+            // this expression might be suffixed with '^', which
+            // means it's only used for recognizing, and is not
+            // passed to the reduce function:
+            if(expr.skip_on_reduce())
+                continue;
 
             // arg type depends on the expression:
             // XXX consider if we always should just pass stack element
@@ -2536,11 +2517,11 @@ fprintf(stderr, "imported %i rules\n", num_imported);
             if(abs_impl) {
                 // if there's an abstracted implementation,
                 // we get the argument name from that:
-                std::string argname = abs_impl->argname(stind);
+                std::string argname = abs_impl->argname(argind);
                 if(!argname.length()) {
                     fail(stringformat(
                         "BUG: No {}th argument name for {} in {}",
-                        stind, abs_impl->to_str(), rfn
+                        argind, abs_impl->to_str(), rfn
                     ));
                 }
             } else if(expr.varname.length()) {
@@ -2548,10 +2529,12 @@ fprintf(stderr, "imported %i rules\n", num_imported);
                 // set for this expression:
                 out += expr.varname;
             } else {
-                out += "arg_" + std::to_string(stind);
+                out += "arg_" + std::to_string(argind);
             }
       
             out += ", ";
+
+            argind++;
         }
 
         // last parameter is the slice of the stack with
