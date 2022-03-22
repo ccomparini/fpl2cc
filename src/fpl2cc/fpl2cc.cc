@@ -101,21 +101,13 @@ inline std::string to_str(bool b) {
 
 /*
  TODO/fix
-# # XXX fpl thought - any value in making some kind
-# # of construct for fussy old languages like
-# # this which don't allow terminal ','?
-# # say it's a dot (.). then we could just do (eg):
-# #  '[' element ','.element* ']'
-# # i.e. the dot would join items for purposes of repetition.
-# # then perhaps we wouldn't need to use lists or
-# # whatever for the items in languages like this.
-    - add --purify option ro such which means discard all code blocks
+    - add --purify option or such which means discard all code blocks
       (and anything else non-pure) from the fpl.. hmm but it would have
       to be from the sub-fpls only or such.  hmm maybe an options on
       importing?
   For abstracting implementations:
     - reducers:
-      x argdecl which specifies the arguments to 
+      x argdecl which specifies the arguments
       - integrate reducers (generate_reduce_functions)
         o abstracted impls
         - folding ProdExprs:
@@ -814,6 +806,9 @@ public:
     }
 };
 
+/*
+  Reducer implementats an abstracted reduce function.
+ */
 struct Reducer {
     std::string production_name;
     std::vector<ProdExpr> args;
@@ -829,6 +824,15 @@ struct Reducer {
         return left.production_name < right.production_name;
     }
 
+    // returns the name to use for the nth argument,
+    // or an empty string if there's no such argument
+    std::string argname(int index) const {
+        if(index >= 0 && index < args.size()) {
+            return args[index].varname;
+        }
+        return "";
+    }
+
     std::string to_str() const {
         std::string out("+");
         out += production_name;
@@ -837,6 +841,7 @@ struct Reducer {
             out += arg.to_str();
         }
         out += ")";
+        return out;
     }
 };
 
@@ -1562,6 +1567,9 @@ fprintf(stderr, "synchronizing reduce types to %s\n", subs.reduce_type.c_str());
             return;
         }
 
+// XXX ok argdecl can now just be a list of strings
+// ... unless we want the quantifiers
+
         Reducer reducer;
         reducer.production_name =read_production_name();
         if(reducer.production_name.length() == 0) {
@@ -1818,17 +1826,38 @@ fprintf(stderr, "imported %i rules\n", num_imported);
     #undef rule_meta_str
 
 
+// XXX rename to something like reduction_code
     std::string code_for_rule(const Options &opts, int rule_ind) {
         const ProductionRule &rule = rules[rule_ind];
 
+        /*
+          A given rule will be reduced according to (in priority order):
+          1) abstracted implementations (+product). this is top
+             priority so that you can use the grammer defined by
+             non-"pure" fpl and just override anything you need to
+             without having to change the grammar fpl
+          2) code defined in the rule
+          3) folding rules with only one step. (note that if we implement "^",
+             you could do eg parens by '('^ expr ')'^ -> expr and thus not
+             require any language specific code)
+          4) default code (as it is now, including @default_action)
+         */
+
         std::string rule_name = rule_fn(rule_ind);
-        std::string out = reducer_decl(rule_name, rule.steps()) + " {\n";
+        const Reducer *reducer = reducer_for(rule);
+        std::string out = reducer_decl(rule_name, rule.steps(), reducer) + " {\n";
         out += "// " + rule.to_str() + "\n";
         out += rule_metadata(rule_ind);
         if(opts.debug) {
             out += "fprintf(stderr, \"reducing by " + rule_name + "\\n\");\n";
         }
-        out += rule.code_or(default_action).format(false);
+        if(reducer) {
+            // abstracted implementation (1):
+            out += reducer->code.format(false);
+        } else {
+            // code in the rule (2) or default acton (4):
+            out += rule.code_or(default_action).format(false);
+        }
         out += "\n}\n";
         return out;
     }
@@ -2466,7 +2495,9 @@ fprintf(stderr, "imported %i rules\n", num_imported);
 
     // returns the declaration for a reduce function
     std::string reducer_decl(
-        const std::string &rfn, const std::vector<ProdExpr> &steps
+        const std::string &rfn,
+        const std::vector<ProdExpr> &steps,
+        const Reducer *abs_impl
     ) {
         std::string out ;
         out += reduce_type + " " + rfn + "(";
@@ -2500,7 +2531,19 @@ fprintf(stderr, "imported %i rules\n", num_imported);
             }
 
             // argument name:
-            if(expr.varname.length()) {
+            if(abs_impl) {
+                // if there's an abstracted implementation,
+                // we get the argument name from that:
+                std::string argname = abs_impl->argname(stind);
+                if(!argname.length()) {
+                    fail(stringformat(
+                        "BUG: No {}th argument name for {} in {}",
+                        stind, abs_impl->to_str(), rfn
+                    ));
+                }
+            } else if(expr.varname.length()) {
+                // else maybe there's a specific variable name
+                // set for this expression:
                 out += expr.varname;
             } else {
                 out += "arg_" + std::to_string(stind);
@@ -2521,24 +2564,6 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         return out;
     }
 
-    std::string reducer_code(const Options &opts, const Reducer &red) {
-        std::string funcname = "reduce_to_" + red.production_name;
-        std::string debug;
-        if(opts.debug) {
-            debug = stringformat(
-                "fprintf(stderr, \"reducing by {} (file {})\\n\");\n",
-                funcname, red.code.source_file, red.code.line
-            );
-        }
-        return reducer_decl(funcname, red.args) + " {\n"
-             // TODO unlike inline rules we're not including the
-             // metadata.  figure out if we care.  how much can
-             // we base on code_block?  Or, make a new class
-             // of code block for full functions and base on that?
-             + debug
-             + red.code.format(false)
-             + "\n}\n";
-    }
 
     // finds and returns a pointer to the abstracted reducer
     // for the rule passed, or returns nullptr if there's no
@@ -2554,38 +2579,6 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         return nullptr;
     }
 
-    void generate_reduce_functions(const Options &opts, std::string &out) {
-        /*
-          A given rule will be reduce accoring to one of (in priority order):
-          1) abstracted implementations (+product) override everything,
-             which means you can use non-"pure" fpl and override stuff
-             with abstractedimplementations and not have to touch the
-             grammar.
-          2) code defined in the rule
-          3) folding rules with only one step. (note that if we implement "^",
-             you could do eg parens by '('^ expr ')'^ -> expr and thus not
-             require any language specific code)
-          4) default code (as it is now, including @default_action)
-        */
-
-        for(auto reducer: reducers) {
-            out += reducer_code(opts, reducer);
-            // restore line number after end of function so that
-            // compiler warnings about stuff like lack of return
-            // value show the line in the fpl source (which is
-            // where the fpl author has to fix it).
-            out += "\n#$LINE\n\n";
-        }
-
-        for(int rnum = 0; rnum < rules.size(); rnum++) {
-            // if there's no "abstracted" reducer suitable for this
-            // rule, we're onto rules 2 or 4:
-            if(!reducer_for(rules[rnum])) {
-                out += code_for_rule(opts, rnum);
-                out += "\n#$LINE\n\n"; // (as above)
-            }
-        }
-    }
 
     std::string generate_code(const Options &opts) {
 
@@ -2660,7 +2653,9 @@ fprintf(stderr, "imported %i rules\n", num_imported);
 
         out += separator_method().format();
 
-        generate_reduce_functions(opts, out);
+        for(int rnum = 0; rnum < rules.size(); rnum++) {
+            out += code_for_rule(opts, rnum);
+        }
 
         for(lr_set state : states) {
             out += code_for_state(opts, state).c_str();
