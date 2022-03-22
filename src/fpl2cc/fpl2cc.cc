@@ -101,6 +101,8 @@ inline std::string to_str(bool b) {
 
 /*
  TODO/fix
+    - make it so you can do regex separators/comments.
+      this will allow separators to be specified in "pure" fpl
     - add --purify option or such which means discard all code blocks
       (and anything else non-pure) from the fpl.. hmm but it would have
       to be from the sub-fpls only or such.  hmm maybe an options on
