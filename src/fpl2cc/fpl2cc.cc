@@ -689,6 +689,16 @@ public:
 
     inline int num_steps() const { return rsteps.size(); }
 
+    // the result of a given step may or may not be passed
+    // to the reduction code.  this tells how many are.
+    inline int num_reduce_params() const {
+        int num = 0;
+        for(auto st : rsteps) {
+            if(!st.skip_on_reduce()) num++;
+        }
+        return num;
+    }
+
     // returns NULL if index is out of bounds
     const ProdExpr *step(unsigned int index) const {
         if(index < rsteps.size()) {
@@ -735,12 +745,17 @@ public:
 
         int first_single_nonterm = -1;
         int num_single_nonterms = 0;
+        int vari = 0; // separate from step because of ejected arguments
         for(int sti = 0; sti < rsteps.size(); sti++) {
+            if(rsteps[sti].skip_on_reduce())
+                continue;
+
             if(!rsteps[sti].is_terminal() && rsteps[sti].is_single()) {
                 num_single_nonterms++;
                 if(first_single_nonterm < 0)
-                    first_single_nonterm = sti;
+                    first_single_nonterm = vari;
             }
+            vari++;
         }
 
         if(num_single_nonterms >= 1) {
@@ -771,12 +786,14 @@ public:
                     to_str()
                 ));
             }
-            code += "std::string out;\n";
-            code += "for(int ind = 0; ind < args.num_args; ++ind) {\n";
-            code += "    out += args[ind].product.term_str();\n";
-            code += "    if(ind < args.num_args - 1) out += \" \";\n";
-            code += "}\n";
-            code += "return out;";
+            code += "return ";
+            int num_params = num_reduce_params();
+            for(int argi = 0; argi < num_params; argi++) {
+                code += stringformat(
+                    "arg_{}{}", argi, argi < num_params - 1?" + ":""
+                );
+            }
+            code += ";\n";
         }
 
         return CodeBlock(code, filename(), line_number());
@@ -967,8 +984,7 @@ class Productions {
 
     // an lr_set is a set of lr items.
     // each state is represented by an lr_set.
-    struct lr_set {
-private:
+    class lr_set {
         mutable std::string _id_cache;
         std::set<lr_item> items;
 public:
@@ -1211,7 +1227,7 @@ public:
         // this will (mostly?) work with defaults if
         // you just want to sketch out a grammar and
         // not have to specify any particular code.
-        //reduce_type = "std::string";
+        reduce_type = "std::string";
 
         parse_fpl();
     }
