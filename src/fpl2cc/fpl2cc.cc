@@ -2072,6 +2072,7 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         out += state.to_str(this, "// ");
         out += "//\n";
         out += "void " + sfn + "() {\n";
+        out += "base_parser.eat_separator(separator_length);\n";
         out += debug_single_step_code(opts, state);
 
         out += "    if(0) {\n"; // now everything past this can be "else if"
