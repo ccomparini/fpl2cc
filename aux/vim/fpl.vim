@@ -40,6 +40,10 @@ syn region	fplExpression	start="/" end="/" skip=+\\/+
 syn region	fplExpression	start=+"+ end=+"+
 syn region	fplExpression	start=+'+ end=+'+
 
+" expression suffixes:
+syn match	fplSuffix	"\^"
+syn match	fplSuffix	"\~"
+
 " rules (treat as variables)
 syn match	fplProductionName	"[A-Za-z][A-Za-z0-9_]*"
 
@@ -55,6 +59,7 @@ hi def link fplOperator	Operator
 hi def link fplImport	PreProc
 hi def link fplExpression	Constant
 hi def link fplProductionName	Identifier
+hi def link fplSuffix	Special
 hi def link fplSnip	Operator
 
 
