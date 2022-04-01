@@ -101,6 +101,10 @@ inline std::string to_str(bool b) {
 
 /*
  TODO/fix
+    - -> expression ( fpl ) for sub-parsers!
+      i.e. ... see grammarlib/strf.fpl
+    - [ ] for precedence grouping
+      - allow 'right-to-left' after such grouping to specify associativity
     - make it so you can do regex separators/comments.
       this will allow separators to be specified in "pure" fpl
     - add --purify option or such which means discard all code blocks
@@ -135,9 +139,9 @@ inline std::string to_str(bool b) {
       (or maybe foo: prefix instead - makes the relationship with
       repetition suffixes etc cleaner)
   Also nice to have:
-    - '\' after step makes the step only match if the separator length
+    o '~' after step makes the step only match if the separator length
       directly after it is 0!  I think that's a working and simple
-      implementation
+      implementation. (working for terminals)
   Also nice to have but harder (?):
     - parenthesize steps.  but, if :foo is implemented as a mini-reduce
       ... I guess the implementation  could be to make an anonymous
@@ -168,11 +172,6 @@ inline std::string to_str(bool b) {
     in cases where you are parsing a buffer as it's being filled
     (such as parsing network input or even just from the command line).
     the current buffering framework doesn't allow that, though.
-
-  - ~scan_function.  regexes suck for quoted strings and the like
-    (need non-greedy match, escaped quotes, etc).  maybe have a
-    standard lib of scan functions for things like quoted strings
-    with escaping or whatever.
   - parens to join steps for purposes of repetition, so as to easily
     support old-style languages which don't allow trailing commas
     and such.  eg allow:
@@ -459,6 +458,7 @@ Anyway, given a certain position in the text,
 
 struct GrammarElement {
     std::string expr; // either a string, regex, or name of product
+    bool no_separator_after; // if set, disallow trailing separator
     typedef enum {
         NONE,
         TERM_EXACT,
@@ -483,7 +483,7 @@ struct GrammarElement {
     }
 
     GrammarElement(const std::string &str, Type tp)
-        : expr(str), type(tp) { }
+        : expr(str), type(tp), no_separator_after(false) { }
 
     // returns a negative, 0, or positive value depending on
     // if this element can be considered <, ==, or > than the
@@ -492,6 +492,12 @@ struct GrammarElement {
         int cmp = type - other.type;
         if(cmp == 0) {
             cmp = expr.compare(other.expr);
+
+            // for terminals, if they specify no separator after, we just
+            // make a new terminal and check for separator after we do
+            // the match.  so, in the case of terminals, we distiunguish:
+            if((cmp == 0) && is_terminal())
+                cmp = other.no_separator_after - no_separator_after;
         }
         return cmp;
     }
@@ -504,9 +510,17 @@ struct GrammarElement {
         return(type == TERM_EXACT || type == TERM_REGEX);
     }
 
-    std::string nonterm_id_str() const {
-        if(type == NONTERM_PRODUCTION)
-            return "NontermID::_" + expr;
+    std::string nonterm_id_str(bool full_name = true) const {
+        if(type == NONTERM_PRODUCTION) {
+            // always prefix with underscore as a hack to avoid
+            // colliding with target language keywords:
+            std::string out = "_" + expr;
+
+            if(full_name)
+                return "NontermID::" + out;
+
+            return out;
+        }
 
         // the ID passed isn't a nonterminal.
         // returning a string like this should
@@ -542,6 +556,9 @@ struct GrammarElement {
         out += expr;
         out += rb;
 
+        if(no_separator_after)
+            out += "~";
+
         return out;
     }
 };
@@ -556,7 +573,8 @@ struct ProdExpr { // or step?
     bool eject; // if set, don't pass this to reduce code
 
     ProdExpr(const std::string &str, GrammarElement::Type tp)
-        : gexpr(str,tp), min_times(1), max_times(1), eject(false)
+        : gexpr(str,tp), min_times(1), max_times(1),
+          eject(false)
      {
          if(tp == GrammarElement::VARIABLE) {
              varname = str;
@@ -1364,6 +1382,26 @@ public:
         }
     }
 
+    static void read_suffixes(fpl_reader &src, ProdExpr &expr) {
+        while(true) {
+            if(src.read_byte_equalling('^')) {
+                expr.eject = true;
+                continue;
+            }
+
+            // the fact that ^ applies to the prod expr but
+            // ~ applies to the gexpr makes me wonder if
+            // ~ should be scanned here..
+            if(src.read_byte_equalling('~')) {
+                expr.gexpr.no_separator_after = true;
+                continue;
+            }
+
+            // if we got here, next thing isn't a separator:
+            break;
+        }
+    }
+
     // production names must start with a letter, and
     // thereafter may contain letters, digits, or underscores.
     static inline std::string read_production_name(fpl_reader &src) {
@@ -1479,9 +1517,8 @@ public:
             if(type != GrammarElement::Type::NONE) {
                 if(expr_str.length() >= 1) {
                     ProdExpr expr(expr_str, type);
+                    read_suffixes(src, expr);
                     read_quantifiers(src, expr);
-                    if(src.read_byte_equalling('^'))
-                        expr.eject = true;
                     rule.add_step(expr);
                     num_read++;
                 } else {
@@ -1996,7 +2033,8 @@ fprintf(stderr, "imported %i rules\n", num_imported);
                    ", " + el_id
                  + ", " + std::to_string(expr.min_times)
                  + ", " + std::to_string(expr.max_times)
-                 + ", &" + state_fn(next_state, true);
+                 + ", &" + state_fn(next_state, true)
+                 + (expr.gexpr.no_separator_after?", NO_SEPARATOR":"");
         } else {
             return expr.gexpr.nonterm_id_str()
                  + ", " + std::to_string(expr.min_times)
@@ -2265,10 +2303,8 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         for(int el_id = 0; el_id < elements.size(); ++el_id) {
             is_terminal_guts += "case " + std::to_string(el_id);
             if(elements[el_id].type == GrammarElement::NONTERM_PRODUCTION) {
-                std::string name(elements[el_id].to_str());
-                // prefix with underscore as a hack to avoid keyword
-                // collisions:
-                out += "_" + name;
+                std::string name = elements[el_id].nonterm_id_str(false);
+                out += name;
                 nonterm_str_guts += "case " + std::to_string(el_id);
                 nonterm_str_guts += ": return \"" + name + "\";\n";
                 if(el_id == 0) {
@@ -2464,56 +2500,6 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         }
     }
 
-/*
-    void resolve_variables() {
-
-// for each rule,
-//   save rule -> reducer for that rule
-// for each reducer:
-//   
-
-
-// for each reducer
-//   for each rule
-//     if rule applies to the reducer, add it to a list
-//     for each step in the reducer/rule (they should correlate)
-//       if step is still variable, splat with the expr from the rule
-// XXX actually let's see if we can do this at parse time
-        for(auto rule: rules) {
-            Reducer *reducer = reducer_for(rule);
-            if(reducer) {
-                for(int exind = 0; exind < rule.num_steps(); exind++) {
-                    if(exind > reducer()) {
-                        fail(stringformat(
-                            "no reducer element {} in {}",
-                            exind, reducer->to_str()
-                        ));
-                    }
-
-                    ProdExpr *step = rule.step(exind);
-                    if(step) {
-                        ProdExpr &redarg = args[exind];
-                        if(redarg.type != step->type()) {
-                            switch(redarg.type) {
-                                case GrammarElement::VARIABLE:
-                                    redarg.gexpr = step->gexpr;
-                                    break;
-                                case GrammarElement::NONTERM_PRODUCTION:
-                                    fail(stringformat(
-                                        ""
-                                    ));
-                                    break;
-                                case GrammarElement::VARIABLE:
-                                case GrammarElement::VARIABLE:
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
- */
-
     // returns the declaration for a reduce function
     std::string reducer_decl(
         const std::string &rfn,
@@ -2671,6 +2657,7 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         out += "    using State = FPLBP::State;\n";
         out += "    using Product = FPLBP::Product;\n";
         out += "    using StackEntry = FPLBP::StackEntry;\n";
+        out += "    static const bool NO_SEPARATOR = false;\n";
         out += "    FPLBP base_parser;\n";
         for(auto mem : parser_members) {
             out += mem.format();

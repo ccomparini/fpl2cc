@@ -166,6 +166,17 @@ class fpl_reader {
         return buffer.data() + read_pos;
     }
 
+    // as above, but with a relative offset.
+    // returns a pointer to the end of the buffer if the
+    // offset is outside the buffer.
+    inline const utf8_byte *inpp(size_t offset) const {
+        size_t full_pos = read_pos + offset;
+        if(full_pos >= buffer.length()) {
+            full_pos = buffer.length() - 1;
+        }
+        return buffer.data() + full_pos;
+    }
+
     // as inpp(), above, but returns as a const char *
     // for ease in passing to standard library stuff.
     inline const char *inpp_as_char() {
@@ -279,11 +290,7 @@ public:
 public:
 
     inline utf8_byte peek(int offset = 0) const {
-        size_t full_off = read_pos + offset;
-        if(full_off < buffer.length()) {
-            return buffer.data()[full_off];
-        }
-        return '\0';
+        return *inpp(offset);
     }
 
     std::string format_error_message(
@@ -392,33 +399,18 @@ public:
         read_pos += char_length(read_pos);
     }
 
+    size_t separator_length(LengthCallback separator_cb) {
+        size_t len = 0;
+        while(size_t adv = separator_cb(inpp(len))) {
+            len += adv;
+        }
+
+        return len;
+    }
+
     void eat_separator(LengthCallback separator_cb = &space_length) {
-        while(size_t adv = separator_cb(inpp())) {
-            skip_bytes(adv);
-        }
+        skip_bytes(separator_length(separator_cb));
     }
-
-/*
-    // XXX kill
-    std::string read_to_separator(LengthCallback sep_cb = &space_length) {
-        const utf8_byte *start = inpp();
-
-        if(!start)
-            return std::string("");
-
-        size_t length = 0;
-        while(const utf8_byte *in = inpp()) {
-            if(sep_cb(in))
-                break;
-
-            size_t len = char_length(read_pos);
-            length += len;
-            skip_bytes(len);
-        }
-
-        return to_std_string(start, length);
-    }
- */
 
     inline char read_byte() {
         if(const utf8_byte *in = inpp()) {
