@@ -1912,9 +1912,6 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         std::string out = reducer_decl(rule_name, rule.steps(), reducer) + " {\n";
         out += "// " + rule.to_str() + "\n";
         out += rule_metadata(rule_ind);
-        if(opts.debug) {
-            out += "fprintf(stderr, \"reducing by " + rule_name + "\\n\");\n";
-        }
         if(reducer) {
             // abstracted implementation (1):
             out += reducer->code.format(false);
@@ -2004,14 +2001,16 @@ fprintf(stderr, "imported %i rules\n", num_imported);
             out += "\n{\n" + post_reduce.format() + "\n}\n";
         }
 
+        if(opts.debug) {
+            out += "fprintf(stderr, \"popping %i to %i:\\n%s\\n\", "
+                   "frame_start, pos, args.to_str().c_str());\n";
+        }
+
         // this is what actually pops the stack. note we pop after
         // the reduce (mainly to minimize moves, but also so the
         // stack is more intact for error/bug analysis)
-        out += "base_parser.lr_top(pos);\n";
+        out += "base_parser.lr_pop_to(pos);\n";
 
-        if(opts.debug) {
-            out += "fprintf(stderr, \"... finished reducing\\n\");\n";
-        }
 
         out += "    base_parser.set_product(Product(result, "
              + rule.product_element().nonterm_id_str()
@@ -2061,7 +2060,9 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         ));
     }
 
-    std::string code_for_shift(const lr_set &state, const ProdExpr *right_of_dot) {
+    std::string code_for_shift(
+        const Options &op, const lr_set &state, const ProdExpr *right_of_dot
+    ) {
         std::string out;
 
         const GrammarElement::Type type = right_of_dot->type();
@@ -2098,6 +2099,13 @@ fprintf(stderr, "imported %i rules\n", num_imported);
             *right_of_dot, lr_goto(state, right_of_dot->gexpr)
         ) + "\n";
  */
+
+        if(op.debug) {
+            out += "fprintf(stderr, \"    " + state_fn(state) +
+                   " shifted %s\\n\", \""
+                   + c_str_escape(right_of_dot->to_str()) +
+                   "\");\n";
+        }
 
         return out;
     }
@@ -2154,7 +2162,7 @@ fprintf(stderr, "imported %i rules\n", num_imported);
                     }
                 }
 
-                out += code_for_shift(state, right_of_dot);
+                out += code_for_shift(opts, state, right_of_dot);
 
                 if(right_of_dot->is_optional())
                     optionals.push_back(item);
@@ -2180,10 +2188,18 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         out += "} else {\n";
 
         if(reduce_item) {
-            //out += "    fprintf(stderr, \"" + sfn + " is going to reduce to a %s\\n\", \"" + c_str_escape(reduce_item.to_str(this)) + "\");\n";
+            if(opts.debug) {
+                out += "fprintf(stderr, \"    " + sfn +
+                       " is going to reduce to a %s\\n\", \"" +
+                       c_str_escape(reduce_item.to_str(this)) + "\");\n";
+            }
             out += production_code(opts, state, reduce_item.rule);
             //out += "    fprintf(stderr, \"%i items on stack after reduce\\n\", base_parser.lr_stack_size());\n";
         } else {
+            if(opts.debug)
+                out += "fprintf(stderr, \"    terminating in " +
+                       sfn + "\\n\");\n";
+
             // since we want to be able to do partial parses, if we
             // don't see input we expect, it's not necessarily
             // an error - we might have parsed whatever was wanted
