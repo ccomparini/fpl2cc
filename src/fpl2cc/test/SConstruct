@@ -30,9 +30,10 @@ env = env.Clone()
 # and returns success if they match, or reports failure otherwise.
 env.Append(BUILDERS =
     { 'CompareOut' : Builder(
-        action = 'diff $SOURCES && touch $TARGET || { echo "$SOURCES did not meet expectations" ; rm -f $TARGET ; false; }',
+        action = 'diff -c $SOURCES && touch $TARGET || { echo "$SOURCES did not meet expectations" ; rm -f $TARGET ; false; }',
         suffix = '.success',
         src_suffix = '.out') } )
+
 
 # each language we might be using to test will have an fpl,
 # so the set of fpl files determines the set of languages
@@ -82,6 +83,7 @@ for fpl in fpls :
 
     # .. and, the language program is built from <lang>.fpl AND
     # any <lang>.impl.* files, which can be in other languages
+    #env.Fpl2CC(language + '.cc', [ langprog + '.fpl', Glob(langprog + ".impl.*") ], FPLOPTS="--generate-main --debug-single-step")
     env.Fpl2CC(language + '.cc', [ langprog + '.fpl', Glob(langprog + ".impl.*") ], FPLOPTS="--generate-main")
     #env.Fpl2CC(language + '.cc', [ langprog + '.fpl', Glob(langprog + ".impl.*") ], FPLOPTS="--generate-main --debug-single-step")
     #env.Fpl2CC(language + '.cc', [ langprog + '.fpl', Glob(langprog + ".impl.*") ], FPLOPTS="--generate-main --debug")
