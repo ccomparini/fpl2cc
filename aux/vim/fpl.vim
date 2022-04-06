@@ -39,10 +39,10 @@ syn match	fplImport	"`.*`"
 syn region	fplExpression	start="/" end="/" skip=+\\/+
 syn region	fplExpression	start=+"+ end=+"+
 syn region	fplExpression	start=+'+ end=+'+
+syn match	fplExpression	"\~"
 
 " expression suffixes:
 syn match	fplSuffix	"\^"
-syn match	fplSuffix	"\~"
 
 " rules (treat as variables)
 syn match	fplProductionName	"[A-Za-z][A-Za-z0-9_]*"

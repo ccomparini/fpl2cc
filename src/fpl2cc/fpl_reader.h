@@ -390,8 +390,9 @@ public:
         read_pos = position;
     }
 
-    inline void skip_bytes(int skip) {
+    inline size_t skip_bytes(size_t skip) {
         read_pos += skip;
+        return skip;
     }
 
     // skips the current utf-8 character
@@ -408,8 +409,8 @@ public:
         return len;
     }
 
-    void eat_separator(LengthCallback separator_cb = &space_length) {
-        skip_bytes(separator_length(separator_cb));
+    size_t eat_separator(LengthCallback separator_cb = &space_length) {
+        return skip_bytes(separator_length(separator_cb));
     }
 
     inline char read_byte() {

@@ -139,9 +139,7 @@ inline std::string to_str(bool b) {
       (or maybe foo: prefix instead - makes the relationship with
       repetition suffixes etc cleaner)
   Also nice to have:
-    o '~' after step makes the step only match if the separator length
-      directly after it is 0!  I think that's a working and simple
-      implementation. (working for terminals)
+    o '~' is a pseudo-terminal indicating lack of separator
   Also nice to have but harder (?):
     - parenthesize steps.  but, if :foo is implemented as a mini-reduce
       ... I guess the implementation  could be to make an anonymous
@@ -437,34 +435,20 @@ a code block (string).  Each item has a minimum and maximum
 number of times to match (default 1; may be 0, 1, or, in the
 max case, infinite).
 
-XXX the rest of this no longer applies:
-Generating code: do we need an entry rule? (maybe a built-in
-beginning of file match?) (if so, this would give a smaller
-set of initially applicable rules to search.  yes, do this,
-or make it so the first rule is the first set).
-Anyway, given a certain position in the text,
-
-   - Attempt to match the text at the current position vs the next
-     position in each applicable rule.  If it continues to match,
-     that rule stays in the set of applicable rules; otherwise, it's
-     out.  .. how to recurse on named rules?  can we do it without
-     recursing per se?
-
-   - if a complete rule matches, we call the sub whose body is
-     in the "code" part of the rule, with arguments derived from
-     the matches.
-
  */
 
 struct GrammarElement {
     std::string expr; // either a string, regex, or name of product
-    bool no_separator_after; // if set, disallow trailing separator
+// XXX maybe get rid of no_separator_after and just look for the "no separator" following
+    bool no_separator_after; // terminal only - if set, disallow trailing separator
     typedef enum {
         NONE,
         TERM_EXACT,
         TERM_REGEX,
         NONTERM_PRODUCTION,
-        VARIABLE, // i.e. this is a placeholder
+        VARIABLE, // XXX kill
+        LACK_OF_SEPARATOR, // pseudoterminal indicating no separator
+        _TYPE_CAP
     } Type;
     Type type;
 
@@ -474,9 +458,8 @@ struct GrammarElement {
             "TERM_EXACT",
             "TERM_REGEX",
             "NONTERM_PRODUCTION",
-            "VARIABLE",
         };
-        if(t > NONE && t <= VARIABLE) {
+        if(t > NONE && t < _TYPE_CAP) {
             return strs[t];
         }
         return "invalid GrammarElement::Type";
@@ -496,8 +479,10 @@ struct GrammarElement {
             // for terminals, if they specify no separator after, we just
             // make a new terminal and check for separator after we do
             // the match.  so, in the case of terminals, we distiunguish:
-            if((cmp == 0) && is_terminal())
+            if((cmp == 0) && is_terminal()) {
+if(no_separator_after) fprintf(stderr, "OH HAI no_separator_after is deprecated\n");
                 cmp = other.no_separator_after - no_separator_after;
+            }
         }
         return cmp;
     }
@@ -507,7 +492,10 @@ struct GrammarElement {
     }
 
     inline bool is_terminal() const {
-        return(type == TERM_EXACT || type == TERM_REGEX);
+// XXX pseudo terminals too or not?
+        //return(type == TERM_EXACT || type == TERM_REGEX);
+// XXX possibly the name of this function should be turned around as well...
+        return (type != NONTERM_PRODUCTION);
     }
 
     std::string nonterm_id_str(bool full_name = true) const {
@@ -541,7 +529,7 @@ struct GrammarElement {
                 rb = "/";
                 break;
             case NONTERM_PRODUCTION:
-            case VARIABLE: // hmm should variable have some signifier?
+            case LACK_OF_SEPARATOR:
                 lb = "";
                 rb = "";
                 break;
@@ -565,6 +553,7 @@ struct GrammarElement {
 
 struct ProdExpr { // or step?
     GrammarElement gexpr;
+// XXX varname goes somewhere else
     std::string varname; // if set, name of this expression in reduce code
 
     int min_times;
@@ -575,12 +564,7 @@ struct ProdExpr { // or step?
     ProdExpr(const std::string &str, GrammarElement::Type tp)
         : gexpr(str,tp), min_times(1), max_times(1),
           eject(false)
-     {
-         if(tp == GrammarElement::VARIABLE) {
-             varname = str;
-             // .. and the gexpr will get splatted on resolution
-         }
-     }
+    { }
 
     friend bool operator<(const ProdExpr& left, const ProdExpr& right) {
         if(left.gexpr.compare(right.gexpr) == 0) {
@@ -612,6 +596,7 @@ struct ProdExpr { // or step?
         return min_times == 0;
     }
 
+// XXX this is actually going to mean don't put on the stack in the first place
     inline bool skip_on_reduce() const {
         return eject;
     }
@@ -1389,6 +1374,9 @@ public:
                 continue;
             }
 
+/*
+no longer a suffix
+XXX
             // the fact that ^ applies to the prod expr but
             // ~ applies to the gexpr makes me wonder if
             // ~ should be scanned here..
@@ -1396,6 +1384,7 @@ public:
                 expr.gexpr.no_separator_after = true;
                 continue;
             }
+ */
 
             // if we got here, next thing isn't a separator:
             break;
@@ -1475,6 +1464,12 @@ public:
                     expr_str = src.parse_string();
                     type     = GrammarElement::Type::TERM_REGEX;
                     break;
+                case '~':
+                    // lack-of-space pseudo-terminal (or assertion?)
+                    src.read_byte();
+                    expr_str = "~";
+                    type     = GrammarElement::Type::LACK_OF_SEPARATOR;
+                    break;
                 case '-':
                     src.read_byte();
                     if(src.read_byte_equalling('>')) {
@@ -1517,6 +1512,9 @@ public:
             if(type != GrammarElement::Type::NONE) {
                 if(expr_str.length() >= 1) {
                     ProdExpr expr(expr_str, type);
+                    // XXX awkward
+                    if(type == GrammarElement::Type::LACK_OF_SEPARATOR)
+                        expr.eject = true;
                     read_suffixes(src, expr);
                     read_quantifiers(src, expr);
                     rule.add_step(expr);
@@ -1594,6 +1592,7 @@ public:
     //
     //    /[*+?]/ -> quantifiers ;
     //
+// FIXME make this not use  VARIABLE
     std::vector<ProdExpr> parse_argdecl() {
         std::vector<ProdExpr> args;
         
@@ -1607,8 +1606,7 @@ public:
                     break;
                 }
 
-                //ProdExpr prod(name, GrammarElement::NONTERM_PRODUCTION);
-                ProdExpr prod(name, GrammarElement::VARIABLE);
+                ProdExpr prod(name, GrammarElement::VARIABLE); // XXX kill variable
                 read_quantifiers(*inp, prod);
                 args.push_back(prod);
 
@@ -2011,7 +2009,6 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         // stack is more intact for error/bug analysis)
         out += "base_parser.lr_pop_to(pos);\n";
 
-
         out += "    base_parser.set_product(Product(result, "
              + rule.product_element().nonterm_id_str()
              + "));\n";
@@ -2024,8 +2021,7 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         return out;
     }
 
-    std::string args_for_shift(const lr_set &state, const ProdExpr &expr) {
-        lr_set next_state = lr_goto(state, expr.gexpr);
+    std::string args_for_shift(const lr_set &next_state, const ProdExpr &expr) {
         std::string el_id(std::to_string(element_index[expr.gexpr]));
         if(expr.is_terminal()) {
             return "\"" + expr.terminal_string() + "\""
@@ -2065,25 +2061,42 @@ fprintf(stderr, "imported %i rules\n", num_imported);
     ) {
         std::string out;
 
+        // this is a redundant goto, but keeping it for now because it's
+        // easier than restructuring
+        // (XXX actually just pass in next state.  current state is only
+        // used for debug and doesn't need to go here)
+        lr_set next_state = lr_goto(state, right_of_dot->gexpr);
+
         const GrammarElement::Type type = right_of_dot->type();
         switch(type) {
-            // shifts
             case GrammarElement::TERM_EXACT:
                 out += "} else if(base_parser.shift_exact(separator_length,";
+                out += args_for_shift(next_state, *right_of_dot) + ")) {\n";
                 break;
             case GrammarElement::TERM_REGEX:
                 out += "} else if(base_parser.shift_re(separator_length,";
+                out += args_for_shift(next_state, *right_of_dot) + ")) {\n";
                 break;
             case GrammarElement::NONTERM_PRODUCTION:
                 out += "} else if(base_parser.shift_nonterm(";
+                out += args_for_shift(next_state, *right_of_dot) + ")) {\n";
                 break;
-            case GrammarElement::VARIABLE:
-                inp->error(stringformat(
-                    "bug: unresolved variable {} in shift for state {}",
-                    right_of_dot->to_str(), state.to_str(this)
-                ));
+            case GrammarElement::LACK_OF_SEPARATOR:
+                out += "} else if(!base_parser.eat_separator(separator_length)) {\n";
+                // OK the problem here is that we _do_ need to shift the state,
+                // even though we do not need to shift the lack of separator per se.
+                // this makes me wonder about going back to recursive ascent.
+                // going to try to just make it work
+                //out += "    base_parser.set_state(&" + state_fn(next_state, true) + ");\n";
+                out += "FPLBP::Terminal term(\"<special ~>\");\n"; // XXX this is terrible
+                out += stringformat(
+                    "base_parser.lr_push(&{}, FPLBP::Product(term, {}), base_parser.position());\n",
+                    state_fn(next_state, true), element_index[right_of_dot->gexpr]
+                );
                 break;
             case GrammarElement::NONE:
+            case GrammarElement::VARIABLE: // XXX axe
+            case GrammarElement::_TYPE_CAP:
                 // .. this pretty much implies a bug in fpl2cc:
                 fail(stringformat(
                     "Missing/unknown grammar element (id: {} {})",
@@ -2091,8 +2104,6 @@ fprintf(stderr, "imported %i rules\n", num_imported);
                 ));
                 break;
         }
-        // XXX redundant goto and other calculations here. restructure.
-        out += args_for_shift(state, *right_of_dot) + ")) {\n";
 
 /*
         out += "    // transition ID: " + transition_id(
@@ -2118,7 +2129,12 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         out += state.to_str(this, "// ");
         out += "//\n";
         out += "void " + sfn + "() {\n";
-        out += "base_parser.eat_separator(separator_length);\n";
+        out += "size_t bytes_eaten = base_parser.eat_separator(separator_length);\n";
+        if(opts.debug) {
+            out += "fprintf(stderr, \"%li bytes eaten since last terminal\\n\", ";
+            out += "bytes_eaten);\n";
+        }
+                   
         out += debug_single_step_code(opts, state);
 
         out += "    if(0) {\n"; // now everything past this can be "else if"
