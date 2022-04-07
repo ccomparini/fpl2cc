@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+#include "searchpath.h"
 #include "fpl_reader.h"
 #include "util/fs.h"
 #include "util/src_location.h"
@@ -183,6 +184,7 @@ inline std::string to_str(bool b) {
 
 struct Options {
     std::string src_fpl;
+    Searchpath src_path;
     FILE *out;
     std::string output_fn;
 
@@ -215,6 +217,7 @@ struct Options {
 
     // janky, but good enough:
     Options(int argc, const char* const* argv) :
+        src_path("."),
         out(stdout),
         output_fn("«stdout»"),
         debug(false),
@@ -279,6 +282,9 @@ struct Options {
                                 strerror(errno)
                             );
                         }
+                    } else if(opt == "src-path") {
+                        SCAN_VALUE();
+                        src_path.append(val);
                     } else {
                         error("Unknown option: --" + opt);
                     }
@@ -291,6 +297,10 @@ struct Options {
             }
             #undef SCAN_VALUE
         }
+    }
+
+    std::string src_filename() const {
+        return src_fpl;
     }
 
     std::string to_str() const {
@@ -2767,8 +2777,8 @@ fprintf(stderr, "imported %i rules\n", num_imported);
 ExitVal fpl2cc(const Options &opts) {
     if(opts.src_fpl.size() == 0)
         fail("Error:  no source fpl specified");
-
-    auto inp = make_shared<fpl_reader>(opts.src_fpl, fail);
+    std::string src = opts.src_path.find(opts.src_fpl);
+    auto inp = make_shared<fpl_reader>(src, fail);
 
     // parse the input file into a set of productions:
     Productions productions(inp);
@@ -2808,6 +2818,7 @@ void usage() {
     fprintf(stderr, "        --generate-main - generate main() function\n");
     fprintf(stderr, "        --help - show this page\n");
     fprintf(stderr, "        --out=<fn> - write to fn instead of stdout\n");
+    fprintf(stderr, "        --src-path=<path> - search the dirs given (':' delimited)\n");
 }
 
 int main(int argc, const char** argv) {
