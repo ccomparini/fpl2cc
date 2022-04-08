@@ -140,7 +140,7 @@ inline std::string to_str(bool b) {
       (or maybe foo: prefix instead - makes the relationship with
       repetition suffixes etc cleaner)
   Also nice to have:
-    o '~' is a pseudo-terminal indicating lack of separator
+    x '~' is a pseudo-terminal indicating lack of separator
   Also nice to have but harder (?):
     - parenthesize steps.  but, if :foo is implemented as a mini-reduce
       ... I guess the implementation  could be to make an anonymous
@@ -336,6 +336,8 @@ struct CodeBlock {
 
     CodeBlock() : line(0) { }
 
+    static const CodeBlock none; // i.e. no code
+
     CodeBlock(
         const std::string &cd,
         const std::string &file = CALLER_FILE(),
@@ -412,6 +414,7 @@ struct CodeBlock {
     }
 };
 
+const CodeBlock CodeBlock::none;
 
 /*
    Returns a version of the string passed which is suitable for
@@ -456,7 +459,6 @@ struct GrammarElement {
         TERM_EXACT,
         TERM_REGEX,
         NONTERM_PRODUCTION,
-        VARIABLE, // XXX kill
         LACK_OF_SEPARATOR, // pseudoterminal indicating no separator
         _TYPE_CAP
     } Type;
@@ -748,7 +750,6 @@ public:
         return filename() + " line " + std::to_string(line_number());
     }
 
-
     CodeBlock default_code() const {
         // start the code block with a comment referring to this
         // line in this source file (fpl2cc.cc), to reduce puzzlement
@@ -850,9 +851,12 @@ public:
  */
 struct Reducer {
     std::string production_name;
-    std::vector<ProdExpr> args;
+    std::vector<std::string> args;
     CodeBlock code;
 
+/*
+// XXX figure out if we need/want to overload on number of
+// arguments.  might be clearer not to allow that.
     // reducers are first identified by the name of the thing they
     // produce, and next distinguished by arguments if there's more
     // than one Reducer producing a given thing.
@@ -862,12 +866,19 @@ struct Reducer {
             return left.args < right.args;
         return left.production_name < right.production_name;
     }
+ */
+    // reducers are identified by the name of the thing
+    // they produce:
+    friend bool operator<(const Reducer& left, const Reducer& right) {
+        return left.production_name < right.production_name;
+    }
+// XXX alternately maybe operator< can compare to a rule
 
     // returns the name to use for the nth argument,
     // or an empty string if there's no such argument
     std::string argname(int index) const {
         if(index >= 0 && index < args.size()) {
-            return args[index].varname;
+            return args[index];
         }
         return "";
     }
@@ -877,7 +888,7 @@ struct Reducer {
         out += production_name;
         out += "(";
         for(auto arg : args) {
-            out += arg.to_str();
+            out += arg + " ";
         }
         out += ")";
         return out;
@@ -894,7 +905,7 @@ class Productions {
     CodeBlock separator_code;
     std::list<CodeBlock> comment_code;
     bool default_main;
-    std::string preamble;
+    std::list<CodeBlock> preamble;
     std::list<CodeBlock> parser_members;
     std::list<std::string> goal; // goal is any of these
 
@@ -1227,6 +1238,8 @@ class Productions {
 
 public:
 
+// XXX this is currently stupid in that you pass the inp but then
+// you have to make a separate call to parse it.  fix that.
     Productions(std::shared_ptr<fpl_reader> src) :
         inp(src), default_main(false)
     {
@@ -1243,8 +1256,6 @@ public:
         // you just want to sketch out a grammar and
         // not have to specify any particular code.
         reduce_type = "std::string";
-
-        parse_fpl();
     }
 
     // expects/scans a +{ }+ code block for the named directive.
@@ -1273,7 +1284,7 @@ public:
     // non-portable with respect to generated language.
     // (perhaps can be done with a counter on the number of
     // +{ }+ code blocks parsed?)
-    void parse_directive(const std::string &dir) {
+    void parse_directive(const Options &opts, const std::string &dir) {
         if(dir == "comment_style") {
             int line_num = inp->line_number();
             std::string style = inp->read_re("\\s*(.+)\\s*")[1];
@@ -1286,6 +1297,11 @@ public:
             default_action = code_for_directive(dir);
         } else if(dir == "default_main") {
             default_main = true;
+        } else if(dir == "grammar") {
+            // import the grammar from another fpl (or a library)
+            std::string grammar = inp->read_re("\\s*(.+)\\s*")[1];
+            grammar += ".fpl";
+            import_grammar(opts, grammar);
         } else if(dir == "internal") {
             // a code block which goes in the "private" part
             // of the parser class itself.  This is either
@@ -1350,7 +1366,7 @@ public:
     }
 
     void add_preamble(const CodeBlock &code) {
-        preamble += code.format();
+        preamble.push_back(code);
     }
 
     static void read_quantifiers(fpl_reader &src, ProdExpr &expr) {
@@ -1428,7 +1444,7 @@ XXX
             // the importing file:
             src.error("\n\t" + msg);
         };
-        std::shared_ptr<fpl_reader> inp = std::make_shared<fpl_reader>(
+        fpl_reader_p inp = std::make_shared<fpl_reader>(
             filename, sub_errcb
         );
 
@@ -1436,6 +1452,8 @@ XXX
         if(src.read_byte_equalling(':')) {
             prod_name = read_production_name(src);
         }
+
+        // XXX use options search path
 
         Productions subs(inp);
         if(!subs.reduce_type.length()) {
@@ -1445,6 +1463,35 @@ XXX
         }
 
         return import_rules(subs, prod_name);
+    }
+
+    // import just the grammar from another fpl (into this Productions).
+    // the idea here is that you can import "pure" fpl describing
+    // a grammar, without any specific code implementation,
+    // from a file with specific application code.  and, actually you
+    // can do this regardless of if the thing being imported is "pure".
+    void import_grammar(const Options &opts, const std::string gname) {
+        Searchpath searchp = opts.src_path;
+        searchp.prepend(inp->input_dir());
+        std::string src = opts.src_path.find(gname);
+        auto inp = make_shared<fpl_reader>(src, fail);
+        // this is a hokey/hackish way to do this.  we should be
+        // able to parse directly into our own productions from
+        // the input file.  but.. whatevs - make it work.
+// XXX FIXME pass inp to parse_fpl instead of constructor
+        Productions sub(inp);
+        sub.parse_fpl(opts);
+
+        // import the rules from the sub, which will create the
+        // corresponding elements:
+        for(auto rule : sub.rules) {
+            rule.code(CodeBlock::none);
+            push_rule(rule);
+        }
+        // questions:
+        //   - can/should we import the type of separator?  I think not.
+        //     this is not for sub-grammars. 
+        
     }
 
     int read_expressions(fpl_reader &src, ProductionRule &rule) {
@@ -1596,15 +1643,11 @@ XXX
 
     // argument declaration for a reduction code block:
     //   
-    //   '(' (argument ','?)* ')' -> argument_map ;
+    //   '(' (argument ','?)* ')' -> argdecl ;
     //
-    //    arg_name\ quantifiers? -> argument ;
-    //
-    //    /[*+?]/ -> quantifiers ;
-    //
-// FIXME make this not use  VARIABLE
-    std::vector<ProdExpr> parse_argdecl() {
-        std::vector<ProdExpr> args;
+    std::vector<std::string> parse_argdecl() {
+fprintf(stderr, "\n\n\n\nOH HAI PARSING ARGDECL\n\n\n");
+        std::vector<std::string> args;
         
         if(!inp->read_byte_equalling('(')) {
             inp->error("expected start of argument declaration '('");
@@ -1616,10 +1659,9 @@ XXX
                     break;
                 }
 
-                ProdExpr prod(name, GrammarElement::VARIABLE); // XXX kill variable
-                read_quantifiers(*inp, prod);
-                args.push_back(prod);
+                args.push_back(name);
 
+                // XXX actually eat any number of separators or commas
                 inp->eat_separator();
 
                 if(inp->peek() == '\0') // more reasons to fpl this..
@@ -1634,13 +1676,11 @@ XXX
     // +<production_name> <argdecl> <code_block>
     //
     void parse_reducer() {
+fprintf(stderr, "\n\nOH HAIU PARSING SONIC REDUCER OSCILLATOR 4 MORE TRIANGLES\n");
         if(!inp->read_byte_equalling('+')) {
             inp->error("expected +<production_name>");
             return;
         }
-
-// XXX ok argdecl can now just be a list of strings
-// ... unless we want the quantifiers
 
         Reducer reducer;
         reducer.production_name =read_production_name();
@@ -1665,7 +1705,7 @@ XXX
         }
     }
 
-    void parse_fpl() {
+    void parse_fpl(const Options &opts) {
         do {
             inp->eat_separator();
             if(inp->peek() == '#') {
@@ -1684,7 +1724,7 @@ XXX
                 }
             } else if(inp->read_byte_equalling('@')) {
                 std::string directive = read_directive(*inp);
-                parse_directive(directive);
+                parse_directive(opts, directive);
             } else if(inp->read_byte_equalling('}')) {
                 // likely what happened is someone put a }+ inside
                 // a code block.  anyway a floating end brace is 
@@ -1722,7 +1762,8 @@ XXX
     }
 
     // returns the name of the production which this import will produce,
-    // or 
+    // or  ... 
+    // XXX deprecate?  or fix/generalize/rename?
     std::string import_rules(const Productions &from, const std::string &pname) {
         std::string src_fn = from.inp->filename();
         if(from.reduce_type != reduce_type) {
@@ -1740,7 +1781,9 @@ XXX
         // to import in the first place... (can we scope?)
         // (consider either getting rid of this or making it optional - possibly
         // we only want to be importing "pure" fpl anyway)
-        preamble += "\n" + from.preamble;
+        //preamble += "\n" + from.preamble;
+        for(auto primp : from.preamble)
+            add_preamble(primp);
 
         // these are the names of the products whose rules (and elements)
         // we need to import:
@@ -2105,7 +2148,6 @@ fprintf(stderr, "imported %i rules\n", num_imported);
                 );
                 break;
             case GrammarElement::NONE:
-            case GrammarElement::VARIABLE: // XXX axe
             case GrammarElement::_TYPE_CAP:
                 // .. this pretty much implies a bug in fpl2cc:
                 fail(stringformat(
@@ -2629,7 +2671,9 @@ fprintf(stderr, "imported %i rules\n", num_imported);
     const Reducer *reducer_for(const ProductionRule &rule) {
         Reducer finder; // hack to make a key for the search
         finder.production_name = rule.product();
-        finder.args = rule.steps();
+// XXX can probably just search by name.  doing it wrong here
+// actually..
+//        finder.args = rule.steps();
 
         auto found = reducers.find(finder);
         if(found != reducers.end())
@@ -2676,7 +2720,11 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         // declared before the template (not just before
         // template instantiation.. ?) (did I miss something?)
         out += "\n// preamble:\n";
-        out += preamble;
+        for(auto pre : preamble) {
+            // can't format_scoped here because this is where the
+            // #include stuff is (typically)
+            out += pre.format();
+        }
         out += "// end preamble\n\n";
         out += "#line " + std::to_string(__LINE__) + " \"" + __FILE__ + "\"\n";
         out += "#include \"fpl2cc/fpl_reader.h\"\n";
@@ -2782,6 +2830,7 @@ ExitVal fpl2cc(const Options &opts) {
 
     // parse the input file into a set of productions:
     Productions productions(inp);
+    productions.parse_fpl(opts);
 
     std::string output = productions.generate_code(opts);
 

@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <functional>
+#include <memory>
 #include <regex>
 #include <string>
 
@@ -281,6 +282,13 @@ public:
 
         // .. or, if there's no ".", it's the whole filename:
         return infn;
+    }
+
+    // returns the directory portion of the path to the input file
+    std::string input_dir() const {
+        fs::path in = fs::path(input_filename);
+        in.remove_filename();
+        return in;
     }
 
     inline bool eof() const {
@@ -617,6 +625,8 @@ fprintf(stderr, "whoa dude this is going to break because the char length is %lu
         return out;
     }
 };
+
+using fpl_reader_p = std::shared_ptr<fpl_reader>;
 
 
 #endif // FPL_READER_H
