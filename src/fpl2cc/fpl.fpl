@@ -3,165 +3,53 @@
 #
 
 @comment_style sh
+@grammar fpl
 
-+{
-#include <stdio.h>
-#include "fplp.h"
-#include "limits.h"
+
++items(items_in) +{
+    // XXX
 }+
 
-@internal +{
-
-// shortcuts for rule arguments:
-typedef const std::string &Terminal;
-typedef const FPLBP::StackSlice &Prods;
-
-inline fplp_directive directive(Terminal nm, Prods all_args) {
-    return {
-        .name = all_args[0].capgroup(0),
-        .arg  = (all_args.count() > 1)?all_args[1].product.term_str():"",
-    };
-}
-
-inline fplp_quantifier quantifier(Terminal qt) {
-    switch(qt[0]) {
-        case '*': return { .min = 0, .max = INT_MAX };
-        case '+': return { .min = 1, .max = INT_MAX };
-        case '?': return { .min = 0, .max =       1 };
-        default : return { .min = 1, .max =       1 };
-    }
-}
-
-inline fplp_rule_step rule_step(Terminal match_in, Prods opt_quant) {
-    char type = ' ';
-    std::string match;
-    if(match_in[0] == '\'' || match_in[0] == '"' || match_in[0] == '/') {
-        type  = match_in[0];
-        match = match_in.substr(1, match_in.size() - 2);
-    } else {
-        match = match_in;
-    }
-
-    fplp_quantifier quant = { .min = 1, .max = 1 };
-    if(opt_quant.count()) quant = std::get<fplp_quantifier>(opt_quant.val(0));
-
-    return {
-        .type  = type,
-        .match = match,
-        .quant = quant
-    };
-}
-
-inline fplp_rule rule(Prods stin, Terminal pn, const fplp_element &code) {
-    std::list<fplp_rule_step> steps;
-    for(int sti = 0; sti < stin.count(); ++sti) {
-        steps.push_back(std::get<fplp_rule_step>(stin.val(sti)));
-    }
-    return {
-        .product     = pn,
-        .steps       = steps,
-        .reduce_code = std::get<fplp_code_block>(code)
-    };
-
-/*
-    fplp_element  result;
-    fplp_rule          &rl = result.rule;
-
-    for(int sti = 0; sti < args.count(); ++sti) {
-        rl.steps.push_back(steps[sti].product);
-    }
-    rl.product = pn;
-    rl.code = code;
-
-    return result;
- */
-}
-
+# src/fpl2cc/grammarlib/fpl.fpl:37
++directive_comment_style(term_0 term_1) +{
 }+
 
-@produces fplp_element
-
-item+ -> items +{
-    fprintf(stderr, "got %i items in general in %s.\n", args.count(), base_parser.filename().c_str());
-    for(int itemi = 0; itemi < args.count(); ++itemi) { // fail? off by one?  it's the damn stack slices again. redo
-        // TODO:  change so that we pass products, not stack entries.
-        // stack entries contain a state pointer which I'm not sure
-        // we can or should care about.  What we do want is the thing
-        // itself and I guess the line number/source....
-        fprintf(stderr, "  %i:   %s\n", itemi, args[itemi].to_str().c_str());
-    }
-    return arg_0[0].product.val(); // XXX FIXME
+# src/fpl2cc/grammarlib/fpl.fpl:38
++directive_default_action(term_0 code_block) +{
 }+
 
-code_block -> item ;
-directive  -> item ;
-import     -> item ;
-rule       -> item ;
-
-# +{ }+ code blocks.
-# the regex here is:
-#   begin with '+{'
-#   match 0 or more of either:
-#     '}' followed by anything not a '+', or
-#     anything not a '}'
-#   terminated with '}+
-# this has to be one regex - if you do (eg) '+{'
-# as a token and then some regex to read the guts,
-# it'll read the +{ correctly then promptly strip
-# all your #includes as comments.  ask me how I know!
-# XXX meta discussion - arguments to code blocks (or in general).
-#   need/want to support:
-#    - multiple items in a given arg
-#    - capture groups (terminals only)
-#    - type determined by production (productions only)
-#    - easy access to line number etc
-#   ideally it's simple and .. maybe even portable?
-# possibly all of them are some sort of array like container
-# 
-/\+\{((?:(?:\}[^+])|[^}])*)\}\+/ -> code_block +{
-    return fplp_code_block(args[0].capgroup(0));
++directive_default_main() +{
 }+
 
-# or do we want to spell out directives here, so we have the list?
-# I think yes.
-# /@[a-z_]*/ -> directive_name ;
-'@comment_style'  /(\S+)/    -> directive +{ return directive(arg_0, args); }+
-'@default_action' code_block -> directive +{ return directive(arg_0, args); }+
-'@default_main'              -> directive +{ return directive(arg_0, args); }+
-'@internal'       code_block -> directive +{ return directive(arg_0, args); }+
-'@post_parse'     code_block -> directive +{ return directive(arg_0, args); }+
-'@produces'       /(\S+)/    -> directive +{ return directive(arg_0, args); }+
-'@separator'      code_block -> directive +{ return directive(arg_0, args); }+
-# /@\S*/                       -> directive +{ error("invalid directive: {}", arg_0) }+ XXX support this
-
-/`([^`]*)`/ -> import +{
-    fplp_imp out = {
-        .filename = args[0].capgroup(0)
-    };
-    return out;
+# src/fpl2cc/grammarlib/fpl.fpl:40
++directive_grammar(term_0 term_1) +{
 }+
 
-'*' -> quantifier +{ return quantifier(arg_0); }+
-'+' -> quantifier +{ return quantifier(arg_0); }+
-'?' -> quantifier +{ return quantifier(arg_0); }+
-
-/"(?:[^"\\]|\\.)*"/        quantifier? -> step +{ return rule_step(arg_0, arg_1); }+
-/'(?:[^'\\]|\\.)*'/        quantifier? -> step +{ return rule_step(arg_0, arg_1); }+
-/\/(?:[^\/\\]|\\.)*\/[m]?/ quantifier? -> step +{ return rule_step(arg_0, arg_1); }+
-production_name            quantifier? -> step +{
-    return rule_step(std::get<std::string>(arg_0), arg_1);
+# src/fpl2cc/grammarlib/fpl.fpl:41
++directive_internal(term_0 code_block) +{
 }+
 
-step+ '->' production_name code_block -> rule +{ return rule(arg_0, std::get<std::string>(arg_2), arg_3); }+
-step+ '->' production_name ';'        -> rule +{ return rule(arg_0, std::get<std::string>(arg_2), fplp_code_block(""));    }+
-
-/[A-Za-z][A-Za-z0-9_]*/ -> production_name ;
-
-@default_main
-
-@post_parse +{
-    fprintf(stderr, "finished parsing at line %i\n", base_parser.line_number());
-    fprintf(stderr, "state of parser:\n%s\n--------\n", to_str().c_str());
+# src/fpl2cc/grammarlib/fpl.fpl:42
++directive_post_parse(term_0 code_block) +{
 }+
 
+# src/fpl2cc/grammarlib/fpl.fpl:43
++directive_produces(term_0 term_1) +{
+}+
+
+# src/fpl2cc/grammarlib/fpl.fpl:44
++directive_separator(term_0 code_block) +{
+}+
+
+# src/fpl2cc/grammarlib/fpl.fpl:67
++step(match_expression quantifier) +{
+}+
+
+# src/fpl2cc/grammarlib/fpl.fpl:69
++rule(step  production_name code_block) +{
+}+
+
+## src/fpl2cc/grammarlib/fpl.fpl:70
+#+rule(step  production_name ) +{
+#}+
 

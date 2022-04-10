@@ -56,6 +56,21 @@ inline std::string to_str(bool b) {
     return "false";
 }
 
+// Grr XXX:  this probably works but not for what I wanted it to
+/*
+template<typename T>
+std::string join(const std::string &sep, const T &group) {
+    std::string out;
+    using namespace std;
+    for(int item = 0; item < group.size(); item++) {
+        out += to_string(group[item]);
+        if(item < group.size() + 1)
+            out += sep;
+    }
+    return out;
+}
+ */
+
 /*
 
   fpl grammar:
@@ -103,6 +118,7 @@ inline std::string to_str(bool b) {
 /*
  TODO/fix
 
+  - add timings so we can compare algorithms/implementations
   - make it so you can do regex separators/comments.
     this will allow separators to be specified in "pure" fpl
   - Refactor:
@@ -382,6 +398,7 @@ struct CodeBlock {
     std::string format_scoped() const {
         return "\n{\n" + format() + "\n}\n";
     }
+
 };
 
 const CodeBlock CodeBlock::none;
@@ -462,7 +479,6 @@ struct GrammarElement {
             // make a new terminal and check for separator after we do
             // the match.  so, in the case of terminals, we distiunguish:
             if((cmp == 0) && is_terminal()) {
-if(no_separator_after) fprintf(stderr, "OH HAI no_separator_after is deprecated\n");
                 cmp = other.no_separator_after - no_separator_after;
             }
         }
@@ -535,7 +551,6 @@ if(no_separator_after) fprintf(stderr, "OH HAI no_separator_after is deprecated\
 
 struct ProdExpr { // or step?
     GrammarElement gexpr;
-// XXX varname goes somewhere else
     std::string varname; // if set, name of this expression in reduce code
 
     int min_times;
@@ -658,13 +673,23 @@ class ProductionRule {
     CodeBlock code_for_rule;
     std::string file;
     int         line;
+    int         rulenum;
 
 public:
 
     ProductionRule(const fpl_reader &rdr, size_t at_byte) :
         file(rdr.filename()),
-        line(rdr.line_number(at_byte))
+        line(rdr.line_number(at_byte)),
+        rulenum(0)
     {
+    }
+
+    void set_rulenum(int num) {
+        rulenum = num;
+    }
+
+    std::string rule_fn() const {
+        return stringformat("rule_{}", rulenum);
     }
 
     void add_step(ProdExpr step) {
@@ -681,6 +706,19 @@ public:
             if(!st.skip_on_reduce()) num++;
         }
         return num;
+    }
+
+    bool foldable() const {
+        int num_simples = 0;
+        for(auto st : rsteps) {
+            if(!st.skip_on_reduce()) {
+                if((st.min_times == 1) && (st.max_times == 1))
+                    num_simples++;
+            }
+        }
+        // the rule is "foldable" if the reduce rule
+        // will have exactly one simple parameter:
+        return (num_simples == 1) && (num_reduce_params() == 1);
     }
 
     // returns NULL if index is out of bounds
@@ -717,7 +755,7 @@ public:
     }
 
     std::string location() const {
-        return filename() + " line " + std::to_string(line_number());
+        return filename() + ":" + std::to_string(line_number());
     }
 
     CodeBlock default_code() const {
@@ -726,77 +764,21 @@ public:
         // about where this mixed-generated code comes from:
         std::string code("// " THIS_LINE "\n");
 
-        int first_single_nonterm = -1;
-        int num_single_nonterms = 0;
-        int vari = 0; // separate from step because of ejected arguments
-        for(int sti = 0; sti < rsteps.size(); sti++) {
-            if(rsteps[sti].skip_on_reduce())
-                continue;
+        // At this point, given that we can "eject" steps
+        // in the grammar, the default is always going to be
+        // to just return the first parameter.
+// XXX possibly warn if we got ehre and there's more than one parameter.
+        code += "return arg_0;\n";
 
-            if(!rsteps[sti].is_terminal() && rsteps[sti].is_single()) {
-                num_single_nonterms++;
-                if(first_single_nonterm < 0)
-                    first_single_nonterm = vari;
-            }
-            vari++;
-        }
-
-        if(num_single_nonterms >= 1) {
-            if(num_single_nonterms != 1) {
-                warn(stringformat(
-                    "default for nontrivial rule {} probably won't dtrt\n",
-                    to_str()
-                ));
-            }
-
-            // if there's exactly one nonterminal, I think returning it
-            // is a sane-enough default.  this allows for aliasing
-            // (where you have just foo -> bar) as well as doing the
-            // right thing in some simple cases like parenthesized
-            // expressions.
-            // If there's more than one nonterm, we still need to return
-            // something, so just do the first one (we warned in this case,
-            // above).
-            code = "return arg_" + std::to_string(first_single_nonterm) + ";";
-        } else {
-            // this rule has terminals only so they'll come in as strings
-            // or stack slices full of strings.
-            // maybe the reduce type has a constructor which can do
-            // something sane with a string?
-            if(rsteps.size() > 1) {
-                warn(stringformat(
-                    "default for rule {} probably won't dtrt\n",
-                    to_str()
-                ));
-            }
-            code += "return ";
-            int num_params = num_reduce_params();
-            for(int argi = 0; argi < num_params; argi++) {
-                code += stringformat(
-                    "arg_{}{}", argi, argi < num_params - 1?" + ":""
-                );
-            }
-            code += ";\n";
-        }
-
-        return CodeBlock(code, filename(), line_number());
+        return code;
     }
 
     void code(const CodeBlock &cd) {
         code_for_rule = cd;
     }
 
-    CodeBlock code_or(const CodeBlock &alternative) const {
-        if(code_for_rule) {
-            return code_for_rule;
-        } else if(alternative) {
-            // caller provided code, so return that.
-            // this is just a way to make the calling code
-            // not have to do if/else or ?:
-            return alternative;
-        }
-
-        return default_code();
+    CodeBlock code() const {
+        return code_for_rule;
     }
 
     const char *product_c_str() const {
@@ -1296,8 +1278,9 @@ public:
         }
     }
 
-    void push_rule(const ProductionRule &rule) {
+    void push_rule(ProductionRule &rule) {
         int rule_num = rules.size();
+        rule.set_rulenum(rule_num);
         rules.push_back(rule);
 
         for(int stp = 0; stp < rule.num_steps(); stp++) {
@@ -1616,7 +1599,6 @@ XXX
     //   '(' (argument ','?)* ')' -> argdecl ;
     //
     std::vector<std::string> parse_argdecl() {
-fprintf(stderr, "\n\n\n\nOH HAI PARSING ARGDECL\n\n\n");
         std::vector<std::string> args;
         
         if(!inp->read_byte_equalling('(')) {
@@ -1646,7 +1628,6 @@ fprintf(stderr, "\n\n\n\nOH HAI PARSING ARGDECL\n\n\n");
     // +<production_name> <argdecl> <code_block>
     //
     void parse_reducer() {
-fprintf(stderr, "\n\nOH HAIU PARSING SONIC REDUCER OSCILLATOR 4 MORE TRIANGLES\n");
         if(!inp->read_byte_equalling('+')) {
             inp->error("expected +<production_name>");
             return;
@@ -1859,9 +1840,8 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         return fn;
     }
 
-    std::string rule_fn(int rule_ind, bool fq = false) {
-        std::string fn("rule_");
-        fn += std::to_string(rule_ind);
+    std::string rule_fn(const ProductionRule rule, bool fq = false) {
+        std::string fn = rule.rule_fn();
 
         if(fq)
             fn = fq_member_name(fn);
@@ -1895,8 +1875,7 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         std::string("static int " #mem "() {\n") +\
             "return " + std::to_string(rule.mem()) + ";\n" \
         "}\n"
-    std::string rule_metadata(int rule_ind) {
-        const ProductionRule &rule = rules[rule_ind];
+    std::string rule_metadata(const ProductionRule &rule) {
         std::string out;
         out += "struct {\n";
         out += rule_meta_str(product);
@@ -1911,37 +1890,46 @@ fprintf(stderr, "imported %i rules\n", num_imported);
     #undef rule_meta_str
 
 
-// XXX rename to something like reduction_code
-    std::string code_for_rule(const Options &opts, int rule_ind) {
-        const ProductionRule &rule = rules[rule_ind];
-
+    CodeBlock reduce_action(const Options &opts, const ProductionRule &rule) {
         /*
           A given rule will be reduced according to (in priority order):
           1) abstracted implementations (+product). this is top
              priority so that you can use the grammer defined by
              non-"pure" fpl and just override anything you need to
              without having to change the grammar fpl
+             (reducer_for(...))
           2) code defined in the rule
-          3) folding rules with only one step. (note that if we implement "^",
+          3) @default_action
+          4) folding rules with only one step. (note that if we implement "^",
              you could do eg parens by '('^ expr ')'^ -> expr and thus not
              require any language specific code)
-          4) default code (as it is now, including @default_action)
+          If none of these apply, there's no code for the rule,
+          and the caller will handle it.
          */
 
-        std::string rule_name = rule_fn(rule_ind);
+        std::string rule_name = rule_fn(rule);
         const Reducer *reducer = reducer_for(rule);
         std::string out = reducer_decl(rule_name, rule.steps(), reducer) + " {\n";
         out += "// " + rule.to_str() + "\n";
-        out += rule_metadata(rule_ind);
+        out += rule_metadata(rule);
         if(reducer) {
             // abstracted implementation (1):
             out += reducer->code.format(false);
+        } else if(rule.code()) {
+            // code defined in the rule (2):
+            out += rule.code().format(false);
+        } else if(default_action) {
+            // default action (3):
+            out += default_action.format(false);
+        } else if(rule.foldable() == 1) {
+            // "folded" means just return the one param,
+            // which is the "default"
+            out += rule.default_code().format(false);
         } else {
-            // code in the rule (2) or default acton (4):
-            out += rule.code_or(default_action).format(false);
+            return CodeBlock(); // i.e. false/no code
         }
         out += "\n}\n";
-        return out;
+        return CodeBlock(out);
     }
 
     // returns code for reduce within a given state
@@ -1996,7 +1984,7 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         out += "FPLBP::StackSlice args(base_parser, pos + 1, frame_start - pos);\n";
 
         // generates the call to the reduction rule:
-        out += "    " + reduce_type + " result = " + rule_fn(rule_ind) + "(";
+        out += "    " + reduce_type + " result = " + rule_fn(rule) + "(";
         for(int stind = 0; stind < rule.num_steps(); stind++) {
             const ProdExpr *expr = rule.step(stind);
 
@@ -2639,6 +2627,13 @@ fprintf(stderr, "imported %i rules\n", num_imported);
     // for the rule passed, or returns nullptr if there's no
     // such rule.
     const Reducer *reducer_for(const ProductionRule &rule) {
+// TODO:
+//   - search by name, first
+//   - then, by number of arguments:
+//       ... hrrm reducers kinda need to be able to specify quantifiers
+//   or go by names of arguments?
+// .. punting on overloads for the moment.
+
         Reducer finder; // hack to make a key for the search
         finder.production_name = rule.product();
 // XXX can probably just search by name.  doing it wrong here
@@ -2651,6 +2646,30 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         return nullptr;
     }
 
+    // returns a string containing one possible reducer
+    // declaration for the rule passed.  used for giving
+    // fpl authors a hint about what to declare.
+    std::string hypothetical_reducer(const ProductionRule &rule) {
+        std::string out("+");
+        out += rule.product() + "(";
+        auto steps = rule.steps();
+        int term_name = 0;
+        for(int sti = 0; sti < steps.size(); sti++) {
+            auto step = steps[sti];
+            if(!step.skip_on_reduce()) {
+                if(step.varname.size())
+                    out += step.varname;
+                else if(step.is_terminal())
+                    out += stringformat("term_{}", term_name++);
+                else // XXX this can collide
+                    out += stringformat(step.production_name());
+            }
+            if(sti < steps.size() - 1)
+                out += " ";
+        }
+        out += ")";
+        return out;
+    }
 
     std::string generate_code(const Options &opts) {
 
@@ -2689,13 +2708,15 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         // functions (called by the template) have to be
         // declared before the template (not just before
         // template instantiation.. ?) (did I miss something?)
-        out += "\n// preamble:\n";
-        for(auto pre : preamble) {
-            // can't format_scoped here because this is where the
-            // #include stuff is (typically)
-            out += pre.format();
+        if(preamble.size()) {
+            out += "\n// preamble:\n";
+            for(auto pre : preamble) {
+                // can't format_scoped here because this is where the
+                // #include stuff is (typically)
+                out += pre.format();
+            }
+            out += "// end preamble\n\n";
         }
-        out += "// end preamble\n\n";
         out += "#line " + std::to_string(__LINE__) + " \"" + __FILE__ + "\"\n";
         out += "#include \"fpl2cc/fpl_reader.h\"\n";
         out += "#include \"fpl2cc/fpl_base_parser.h\"\n";
@@ -2730,8 +2751,27 @@ fprintf(stderr, "imported %i rules\n", num_imported);
 
         out += separator_method().format();
 
+        std::list<std::string> missing_actions;
         for(int rnum = 0; rnum < rules.size(); rnum++) {
-            out += code_for_rule(opts, rnum);
+            const ProductionRule &rule = rules[rnum];
+            if(CodeBlock rc = reduce_action(opts, rule)) {
+                out += rc.format();
+            } else {
+                missing_actions.push_back(stringformat(
+                    "{}\t{}\n", rule.location(), hypothetical_reducer(rule)
+                ));
+            }
+        }
+        if(missing_actions.size() > 0) {
+            std::string msg = stringformat(
+                "missing reduce action for {} rules:\n"
+                "    original rule location\tdesired reducer\n",
+                missing_actions.size()
+            );
+            for(std::string rmsg : missing_actions) {
+                msg += "    " + rmsg;
+            }
+            fail(msg);
         }
 
         for(lr_set state : states) {

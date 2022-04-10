@@ -5,8 +5,8 @@ env = env.Clone()
 
 env.Program('#bin/fpl2cc', [ 'fpl2cc.cc', ])
 
-env.Fpl2CC('fpl.fpl')
-env.Program('#bin/fpl', [ 'fpl.cc', ])
+env.Fpl2h('fpl.fpl')
+# env.Program('#bin/fpl', [ 'fpl.cc', ])
 
 # test subdir:
 SConscript('test/SConstruct', 'env');
