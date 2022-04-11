@@ -30,9 +30,10 @@ env = env.Clone()
 # and returns success if they match, or reports failure otherwise.
 env.Append(BUILDERS =
     { 'CompareOut' : Builder(
-        action = 'diff $SOURCES && touch $TARGET || { echo "$SOURCES did not meet expectations" ; rm -f $TARGET ; false; }',
+        action = 'diff -c $SOURCES && touch $TARGET || { echo "$SOURCES did not meet expectations" ; rm -f $TARGET ; false; }',
         suffix = '.success',
         src_suffix = '.out') } )
+
 
 # each language we might be using to test will have an fpl,
 # so the set of fpl files determines the set of languages
@@ -46,8 +47,11 @@ def build_json_exe(lprog) :
     return env.Program(lprog, [ lprog + '.cc' ], LIBS = 'jest')
     
 
+# functions for generating the executable for a given language.
 # if a given language executable needs particular libraries
-# or whatever, put 
+# or whatever, put the name of your custom env.Program (or
+# equivalent) here.  if not, build_default() will be called,
+# which should work for most cases.
 build_lang_exe = {
     "json" : build_json_exe,
 }
@@ -58,7 +62,6 @@ build_lang_exe = {
 # for each language we're testing, and makes the builder for:
 #   [x].out : [x].[lang] [lang]
 for fpl in fpls :
-    # langprog, foo = os.path.splitext(fpl.get_path())
     langprog, foo = os.path.splitext(fpl.get_abspath())
     language = os.path.basename(langprog)
 
@@ -78,9 +81,12 @@ for fpl in fpls :
             suffix = '.out',
             src_suffix = language) } )
 
-    # .. and tell scons how to generate the language program:
-    env.Fpl2CC(langprog + '.fpl', FPLOPTS="--generate-main")
-    #env.Fpl2jest(langprog + '.fpl')
+    # .. and, the language program is built from <lang>.fpl AND
+    # any <lang>.impl.* files, which can be in other languages
+    #env.Fpl2CC(language + '.cc', [ langprog + '.fpl', Glob(langprog + ".impl.*") ], FPLOPTS="--generate-main --debug-single-step")
+    env.Fpl2CC(language + '.cc', [ langprog + '.fpl', Glob(langprog + ".impl.*") ], FPLOPTS="--generate-main")
+    #env.Fpl2CC(language + '.cc', [ langprog + '.fpl', Glob(langprog + ".impl.*") ], FPLOPTS="--generate-main --debug-single-step")
+    #env.Fpl2CC(language + '.cc', [ langprog + '.fpl', Glob(langprog + ".impl.*") ], FPLOPTS="--generate-main --debug")
     compiler = build_lang_exe.get(language, build_default)(langprog)
 
 

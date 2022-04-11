@@ -155,7 +155,7 @@ production_name            quantifier? -> step +{
 step+ '->' production_name code_block -> rule +{ return rule(arg_0, std::get<std::string>(arg_2), arg_3); }+
 step+ '->' production_name ';'        -> rule +{ return rule(arg_0, std::get<std::string>(arg_2), fplp_code_block(""));    }+
 
-/[A-Za-z][A-Za-z0-9_]+/ -> production_name ;
+/[A-Za-z][A-Za-z0-9_]*/ -> production_name ;
 
 @default_main
 

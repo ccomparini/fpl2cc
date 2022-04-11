@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <functional>
+#include <memory>
 #include <regex>
 #include <string>
 
@@ -166,6 +167,17 @@ class fpl_reader {
         return buffer.data() + read_pos;
     }
 
+    // as above, but with a relative offset.
+    // returns a pointer to the end of the buffer if the
+    // offset is outside the buffer.
+    inline const utf8_byte *inpp(size_t offset) const {
+        size_t full_pos = read_pos + offset;
+        if(full_pos >= buffer.length()) {
+            full_pos = buffer.length() - 1;
+        }
+        return buffer.data() + full_pos;
+    }
+
     // as inpp(), above, but returns as a const char *
     // for ease in passing to standard library stuff.
     inline const char *inpp_as_char() {
@@ -272,29 +284,38 @@ public:
         return infn;
     }
 
+    // returns the directory portion of the path to the input file
+    std::string input_dir() const {
+        fs::path in = fs::path(input_filename);
+        in.remove_filename();
+        return in;
+    }
+
     inline bool eof() const {
         return eof(read_pos);
     }
 
 public:
 
-    inline utf8_byte peek() const {
-        const utf8_byte *byte = inpp();
-        return byte?*byte:'\0';
+    inline utf8_byte peek(int offset = 0) const {
+        return *inpp(offset);
     }
 
-    std::string format_error_message(const std::string &msg) const {
+    std::string format_error_message(
+        const std::string &msg,
+        src_location caller = CALLER()
+    ) const {
         const char *nl = "";
         if(msg[msg.length() - 1] != '\n')
             nl = "\n";
 
         return stringformat("Error {} near «{}»: {}{}",
-            location(), debug_peek(), msg, nl
+            location(caller), debug_peek(), msg, nl
         );
     }
 
-    void error(const std::string &msg) const {
-        on_error(format_error_message(msg));
+    void error(const std::string &msg, src_location caller = CALLER()) const {
+        on_error(format_error_message(msg, caller));
     }
 
     // Returns the length in bytes of the newline "character" at the
@@ -373,74 +394,31 @@ private:
 
 public:
 
-/*
-    // XXX kill this and/or rename to unicode_codepoint or such...
-    // or something.  and move it.
-    // The value of size_out will be set to the size in bytes of
-    // the utf-8 representation of the character (scanned from *in)
-    static unich unicode_char(size_t &size_out, const utf8_byte *in) {
-        if(!in) {
-            size_out = 0;
-            return '\0';
-        }
-
-        unich out;
-        uint8_t acc = in[0];
-        out = acc & 0x7f;
-        size_out = 1;
-        while((acc & 0xc0) == 0xc0) {
-            acc <<= 1;
-            unich inb = in[size_out];
-            if((inb & 0xc0) != 0x80) {
-                // invalid input...
-                fprintf(stderr, "invalid utf-8 byte 0x%0x\n", inb);
-                // (but I guess blaze on..)
-            }
-            out |= inb << size_out*6;
-            size_out++;
-        }
-
-        return out;
-    }
- */
-
     inline void go_to(size_t position) {
         read_pos = position;
     }
 
-    inline void skip_bytes(int skip) {
+    inline size_t skip_bytes(size_t skip) {
         read_pos += skip;
+        return skip;
     }
 
-    // XXX redundant;  kill
+    // skips the current utf-8 character
     inline void skip_char() {
         read_pos += char_length(read_pos);
     }
 
-    void eat_separator(LengthCallback separator_cb = &space_length) {
-        while(size_t adv = separator_cb(inpp())) {
-            skip_bytes(adv);
+    size_t separator_length(LengthCallback separator_cb) {
+        size_t len = 0;
+        while(size_t adv = separator_cb(inpp(len))) {
+            len += adv;
         }
+
+        return len;
     }
 
-    // XXX kill
-    std::string read_to_separator(LengthCallback sep_cb = &space_length) {
-        const utf8_byte *start = inpp();
-
-        if(!start)
-            return std::string("");
-
-        size_t length = 0;
-        while(const utf8_byte *in = inpp()) {
-            if(sep_cb(in))
-                break;
-
-            size_t len = char_length(read_pos);
-            length += len;
-            skip_bytes(len);
-        }
-
-        return to_std_string(start, length);
+    size_t eat_separator(LengthCallback separator_cb = &space_length) {
+        return skip_bytes(separator_length(separator_cb));
     }
 
     inline char read_byte() {
@@ -647,6 +625,8 @@ fprintf(stderr, "whoa dude this is going to break because the char length is %lu
         return out;
     }
 };
+
+using fpl_reader_p = std::shared_ptr<fpl_reader>;
 
 
 #endif // FPL_READER_H

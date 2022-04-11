@@ -18,6 +18,7 @@ syn region	fplComment	start="#" skip="\\$" end="$" keepend contains=fplTodo
 syn match	fplAtDirective	"@comment_style"
 syn match	fplAtDirective	"@default_action"
 syn match	fplAtDirective	"@default_main"
+syn match	fplAtDirective	"@grammar"
 syn match	fplAtDirective	"@internal"
 syn match	fplAtDirective	"@post_parse"
 syn match	fplAtDirective	"@post_reduce"
@@ -39,6 +40,10 @@ syn match	fplImport	"`.*`"
 syn region	fplExpression	start="/" end="/" skip=+\\/+
 syn region	fplExpression	start=+"+ end=+"+
 syn region	fplExpression	start=+'+ end=+'+
+syn match	fplExpression	"\~"
+
+" expression suffixes:
+syn match	fplSuffix	"\^"
 
 " rules (treat as variables)
 syn match	fplProductionName	"[A-Za-z][A-Za-z0-9_]*"
@@ -55,6 +60,7 @@ hi def link fplOperator	Operator
 hi def link fplImport	PreProc
 hi def link fplExpression	Constant
 hi def link fplProductionName	Identifier
+hi def link fplSuffix	Special
 hi def link fplSnip	Operator
 
 

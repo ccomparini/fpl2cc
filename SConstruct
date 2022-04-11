@@ -7,6 +7,10 @@ from pprint import pprint
 debugger = ''
 #debugger = 'TERM=xterm-256color /usr/bin/lldb --one-line "b debug_hook" -- '
 
+fpl_include = ' --src-path=src/fpl2cc/grammarlib '
+
+SetOption('num_jobs', 4)
+
 ccflags = ''
 if debugger : ccflags += " -g"
 else        : ccflags += " -O2"
@@ -51,19 +55,19 @@ env.Append(
 # fpl -> cc builder:
 # at this point this is for testing fpl
 env.Append(BUILDERS =
-    { 'Fpl2CC' : Builder(action = debugger + 'bin/fpl2cc $FPLOPTS $SOURCE --out $TARGET',
+    { 'Fpl2CC' : Builder(action = debugger + 'bin/fpl2cc ' + fpl_include + ' $FPLOPTS $SOURCES --out $TARGET',
 	         suffix = '.cc',
 	         src_suffix = '.fpl') } )
 
 # fpl -> h builder:
 env.Append(BUILDERS =
-    { 'Fpl2h' : Builder(action = debugger + 'bin/fpl2cc $FPLOPTS $SOURCE --out $TARGET',
+    { 'Fpl2h' : Builder(action = debugger + 'bin/fpl2cc ' + fpl_include + ' $FPLOPTS $SOURCES --out $TARGET',
 	         suffix = '.h',
 	         src_suffix = '.fpl') } )
 
 # fpl -> jest builder:
 env.Append(BUILDERS =
-    { 'Fpl2jest' : Builder(action = debugger + 'bin/fpl $FPLOPTS $SOURCE --out $TARGET',
+    { 'Fpl2jest' : Builder(action = debugger + 'bin/fpl ' + fpl_include + ' $FPLOPTS $SOURCES --out $TARGET',
 	         suffix = '.jest',
 	         src_suffix = '.fpl') } )
 

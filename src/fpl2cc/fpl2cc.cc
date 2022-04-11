@@ -2,6 +2,7 @@
 #include <climits>
 #include <list>
 #include <map>
+#include <memory>
 #include <queue>
 #include <regex>
 #include <set>
@@ -12,7 +13,9 @@
 #include <string>
 #include <vector>
 
+#include "searchpath.h"
 #include "fpl_reader.h"
+#include "util/fs.h"
 #include "util/src_location.h"
 
 enum ExitVal {
@@ -21,6 +24,10 @@ enum ExitVal {
     BAD_ARGS = 2
 };
 
+int debug_hook() {
+    fprintf(stderr, "hoooked on debugics\n");
+    return 23;
+}
 
 void fail(const std::string &msg) {
     if(msg[msg.length() - 1] != '\n') {
@@ -53,14 +60,16 @@ inline std::string to_str(bool b) {
 
   fpl grammar:
 
-   <exprs to match> -> <production name> { <code> }
-                   or
    <exprs to match> -> <production name> ;
+                   or
+   <exprs to match> -> <production name> <code_block>
+                   or
 
-  In the first case, the <code> block returns a member (see below).
-  In the second case, the ; tells it to return the string matching
-  whatever's on the left of the ->.  ";" is only valid if
-  everything on the left evaluates to a string.
+  In the first case, the ; tells it to reduce using a default/stub
+  function, OR if an implementation file has been specified, to call
+  a reduce function specified in that file.
+  
+  In the second case, reduce using the code_block specified.
 
   Expressions may be any of:
    - double-quoted string ("xxx") - match text
@@ -94,6 +103,30 @@ inline std::string to_str(bool b) {
 /*
  TODO/fix
 
+  - make it so you can do regex separators/comments.
+    this will allow separators to be specified in "pure" fpl
+  - Refactor:
+    - separate parsing out of Productions
+    - make an fpl based fpl parser, then add:
+      - parens to join steps for purposes of repetition, so as to easily
+        support old-style languages which don't allow trailing commas
+        and such.  eg allow:   foo (',' foo)* ->  foo_list ;
+      - [ ] for precedence grouping
+        - allow 'right-to-left' after such grouping to specify associativity
+      - -> expression ( fpl ) for sub-parsers!
+        i.e. ... see grammarlib/strf.fpl
+  - fix param maps
+
+  For abstracting implementations:
+    - reducers:
+      x argdecl which specifies the arguments
+      - integrate reducers (generate_reduce_functions)
+        o abstracted impls
+
+  Abstract the target language/application:
+    - default rule action is to call a handler named after the rule.
+      instantiators of the parser can install the handler
+    - add param maps to normalize across handlers
   - error handling and messaging is _terrible_ right now (with
     the default, anyway)
   - bug:  if everything in your fpl grammar is optional, it generates
@@ -112,17 +145,7 @@ inline std::string to_str(bool b) {
     in cases where you are parsing a buffer as it's being filled
     (such as parsing network input or even just from the command line).
     the current buffering framework doesn't allow that, though.
-
-  - ~scan_function.  regexes suck for quoted strings and the like
-    (need non-greedy match, escaped quotes, etc).  maybe have a
-    standard lib of scan functions for things like quoted strings
-    with escaping or whatever.
-  - parens to join steps for purposes of repetition, so as to easily
-    support old-style languages which don't allow trailing commas
-    and such.  eg allow:
-       foo (',' foo)* ->  foo_list ;
   - precedence.  maybe an @prec (... )? or ^other_rule?
-
   - timings, so we can see if this or that is faster.
   o document the fpl (see docs dir)
 
@@ -130,6 +153,7 @@ inline std::string to_str(bool b) {
 
 struct Options {
     std::string src_fpl;
+    Searchpath src_path;
     FILE *out;
     std::string output_fn;
 
@@ -145,8 +169,24 @@ struct Options {
         errors.push_back(errst);
     }
 
+    std::list<std::string> impl_sources;
+
+    void add_source(const std::string &fn) {
+        std::string ext(fs::path(fn).extension());
+        if(ext != ".fpl") {
+            impl_sources.push_back(fn);
+        } else {
+            if(src_fpl.size() != 0) {
+                error("only one source fpl is supported at present");
+            } else {
+                src_fpl = fn;
+            }
+        }
+    }
+
     // janky, but good enough:
     Options(int argc, const char* const* argv) :
+        src_path("."),
         out(stdout),
         output_fn("«stdout»"),
         debug(false),
@@ -207,10 +247,13 @@ struct Options {
                         out = fopen(output_fn.c_str(), "w");
                         if(!out) {
                             error(
-                                "can't open '" + output_fn + "' for write: " +
+                                "--out: can't open '" + output_fn + "' for write: " +
                                 strerror(errno)
                             );
                         }
+                    } else if(opt == "src-path") {
+                        SCAN_VALUE();
+                        src_path.append(val);
                     } else {
                         error("Unknown option: --" + opt);
                     }
@@ -219,14 +262,14 @@ struct Options {
                     error("Unknown option: " + std::string(arg));
                 }
             } else {
-                if(src_fpl.size() != 0) {
-                    error("only one source fpl is supported at present");
-                } else {
-                    src_fpl = arg;
-                }
+                add_source(arg);
             }
             #undef SCAN_VALUE
         }
+    }
+
+    std::string src_filename() const {
+        return src_fpl;
     }
 
     std::string to_str() const {
@@ -243,6 +286,13 @@ struct Options {
                 out += "        " + entry + "\n";
             }
         }
+        if(impl_sources.size()) {
+            out += "    impl: ";
+            for(auto impl : impl_sources) {
+                out += impl + " ";
+            }
+            out += "\n";
+        }
 
         return out;
     }
@@ -255,6 +305,8 @@ struct CodeBlock {
 
     CodeBlock() : line(0) { }
 
+    static const CodeBlock none; // i.e. no code
+
     CodeBlock(
         const std::string &cd,
         const std::string &file = CALLER_FILE(),
@@ -264,6 +316,34 @@ struct CodeBlock {
         line(ln),
         code(cd) {
     }
+
+    /*
+      constructs and returns a code block whose contents are that of the file
+      specified by "filename".
+      on error, the CodeBlock returned will contain a #error directive
+      describing what went wrong.
+     */
+    static CodeBlock from_file(
+        const std::string &filename,
+        const std::string &context_fn, int context_ln
+    ) {
+        std::ifstream in(filename);
+        if(!in.is_open()) {
+            return CodeBlock(
+                stringformat(
+                    "#line {} \"{}\"\n"
+                    "#error \"unable to open '{}' for reading: {}\n",
+                    context_ln, context_fn,
+                    filename, std::string(strerror(errno))
+                ), filename, 1
+            );
+        }
+
+        using BufIt = std::istreambuf_iterator<char>;
+        return CodeBlock(
+            std::string(BufIt(in.rdbuf()), BufIt()), filename, 1
+        );
+    } 
 
     operator bool() const {
         return code.length();
@@ -303,6 +383,7 @@ struct CodeBlock {
     }
 };
 
+const CodeBlock CodeBlock::none;
 
 /*
    Returns a version of the string passed which is suitable for
@@ -327,7 +408,8 @@ std::string c_str_escape(const std::string src) {
 
 Production rules are ordered;  first one matches.
 
-Production rules can be looked up by name.
+Production rules can be looked up the name of the thing they
+produce.
 
 Each production rule is an array of things to match (items),
 the type of thing produced (string/GrammarElement) and typically
@@ -335,31 +417,19 @@ a code block (string).  Each item has a minimum and maximum
 number of times to match (default 1; may be 0, 1, or, in the
 max case, infinite).
 
-Generating code: do we need an entry rule? (maybe a built-in
-beginning of file match?) (if so, this would give a smaller
-set of initially applicable rules to search.  yes, do this,
-or make it so the first rule is the first set).
-Anyway, given a certain position in the text,
-
-   - Attempt to match the text at the current position vs the next
-     position in each applicable rule.  If it continues to match,
-     that rule stays in the set of applicable rules; otherwise, it's
-     out.  .. how to recurse on named rules?  can we do it without
-     recursing per se?
-
-   - if a complete rule matches, we call the sub whose body is
-     in the "code" part of the rule, with arguments derived from
-     the matches.
-
  */
 
 struct GrammarElement {
     std::string expr; // either a string, regex, or name of product
+// XXX maybe get rid of no_separator_after and just look for the "no separator" following
+    bool no_separator_after; // terminal only - if set, disallow trailing separator
     typedef enum {
         NONE,
         TERM_EXACT,
         TERM_REGEX,
         NONTERM_PRODUCTION,
+        LACK_OF_SEPARATOR, // pseudoterminal indicating no separator
+        _TYPE_CAP
     } Type;
     Type type;
 
@@ -370,14 +440,14 @@ struct GrammarElement {
             "TERM_REGEX",
             "NONTERM_PRODUCTION",
         };
-        if(t > NONE && t <= NONTERM_PRODUCTION) {
+        if(t > NONE && t < _TYPE_CAP) {
             return strs[t];
         }
         return "invalid GrammarElement::Type";
     }
 
     GrammarElement(const std::string &str, Type tp)
-        : expr(str), type(tp) { }
+        : expr(str), type(tp), no_separator_after(false) { }
 
     // returns a negative, 0, or positive value depending on
     // if this element can be considered <, ==, or > than the
@@ -386,6 +456,14 @@ struct GrammarElement {
         int cmp = type - other.type;
         if(cmp == 0) {
             cmp = expr.compare(other.expr);
+
+            // for terminals, if they specify no separator after, we just
+            // make a new terminal and check for separator after we do
+            // the match.  so, in the case of terminals, we distiunguish:
+            if((cmp == 0) && is_terminal()) {
+if(no_separator_after) fprintf(stderr, "OH HAI no_separator_after is deprecated\n");
+                cmp = other.no_separator_after - no_separator_after;
+            }
         }
         return cmp;
     }
@@ -395,12 +473,23 @@ struct GrammarElement {
     }
 
     inline bool is_terminal() const {
-        return(type == TERM_EXACT || type == TERM_REGEX);
+// XXX pseudo terminals too or not?
+        //return(type == TERM_EXACT || type == TERM_REGEX);
+// XXX possibly the name of this function should be turned around as well...
+        return (type != NONTERM_PRODUCTION);
     }
 
-    std::string nonterm_id_str() const {
-        if(type == NONTERM_PRODUCTION)
-            return "NontermID::_" + expr;
+    std::string nonterm_id_str(bool full_name = true) const {
+        if(type == NONTERM_PRODUCTION) {
+            // always prefix with underscore as a hack to avoid
+            // colliding with target language keywords:
+            std::string out = "_" + expr;
+
+            if(full_name)
+                return "NontermID::" + out;
+
+            return out;
+        }
 
         // the ID passed isn't a nonterminal.
         // returning a string like this should
@@ -421,6 +510,7 @@ struct GrammarElement {
                 rb = "/";
                 break;
             case NONTERM_PRODUCTION:
+            case LACK_OF_SEPARATOR:
                 lb = "";
                 rb = "";
                 break;
@@ -435,18 +525,37 @@ struct GrammarElement {
         out += expr;
         out += rb;
 
+        if(no_separator_after)
+            out += "~";
+
         return out;
     }
 };
 
 struct ProdExpr { // or step?
     GrammarElement gexpr;
+// XXX varname goes somewhere else
+    std::string varname; // if set, name of this expression in reduce code
 
     int min_times;
     int max_times;
 
+    bool eject; // if set, don't pass this to reduce code
+
     ProdExpr(const std::string &str, GrammarElement::Type tp)
-        : gexpr(str,tp), min_times(1), max_times(1) { }
+        : gexpr(str,tp), min_times(1), max_times(1),
+          eject(false)
+    { }
+
+    friend bool operator<(const ProdExpr& left, const ProdExpr& right) {
+        if(left.gexpr.compare(right.gexpr) == 0) {
+            if(left.min_times == right.min_times)
+                return left.max_times < right.max_times;
+            else
+                return left.min_times < right.min_times;
+        }
+        return left.gexpr < right.gexpr;
+    }
 
     inline bool is_single() const {
         return((min_times == 1) && (max_times == 1));
@@ -466,6 +575,11 @@ struct ProdExpr { // or step?
 
     inline bool is_optional() const {
         return min_times == 0;
+    }
+
+// XXX this is actually going to mean don't put on the stack in the first place
+    inline bool skip_on_reduce() const {
+        return eject;
     }
 
     inline std::string production_name() const {
@@ -500,13 +614,46 @@ struct ProdExpr { // or step?
             out += "}";
         }
 
+        if(eject)
+            out += "^";
+
         return out;
     }
 };
 
+/*
+TODO imports:
+
+What's the goal?  at the moment, the idea is to be able to use imports
+as a way to separate the grammar from the production code.  So you
+can have a "pure" grammar (i.e. no target-language code) and import
+that into the fpl for a particular "application" (of that grammar).
+
+A secondary possible goal is (the original import goal) of being able
+to have sub-grammars for code organization and/or embedded languages
+eg, one could do fpl code blocks as:
+
+  '+{' `cpp.fpl` '}+' -> code_block ;
+
+.. and have it correctly deal with string-embedded '}+' etc.  Or, if
+the application is syntax highlighting, ... you get the idea.
+
+For the first goal, the syntax ideally would be to just import
+the embedded language and not have to assign it to any particular
+resulting product (though one still could...?  perhaps the reduce
+for that product could do the translation?  but then it would want
+to be passed a tree, which is not inherently unreasonable..)
+
+Either way, the sub Products (or at least the reader) needs to be
+kept around for this to work with the whole minimizing copies thing.
+Which might or might not even be worth it... hmm.  timing would be
+good.
+
+ */
+
 class ProductionRule {
     std::string prod;
-    std::vector<ProdExpr> steps;
+    std::vector<ProdExpr> rsteps;
     CodeBlock code_for_rule;
     std::string file;
     int         line;
@@ -520,17 +667,31 @@ public:
     }
 
     void add_step(ProdExpr step) {
-        steps.push_back(step);
+        rsteps.push_back(step);
     }
 
-    inline int num_steps() const { return steps.size(); }
+    inline int num_steps() const { return rsteps.size(); }
+
+    // the result of a given step may or may not be passed
+    // to the reduction code.  this tells how many are.
+    inline int num_reduce_params() const {
+        int num = 0;
+        for(auto st : rsteps) {
+            if(!st.skip_on_reduce()) num++;
+        }
+        return num;
+    }
 
     // returns NULL if index is out of bounds
     const ProdExpr *step(unsigned int index) const {
-        if(index < steps.size()) {
-            return &steps[index];
+        if(index < rsteps.size()) {
+            return &rsteps[index];
         }
-        return NULL;
+        return nullptr;
+    }
+
+    const std::vector<ProdExpr> &steps() const {
+        return rsteps;
     }
 
     const std::string &product(const std::string &pr) {
@@ -558,7 +719,6 @@ public:
         return filename() + " line " + std::to_string(line_number());
     }
 
-    // XXX maybe rename "code" to "action"
     CodeBlock default_code() const {
         // start the code block with a comment referring to this
         // line in this source file (fpl2cc.cc), to reduce puzzlement
@@ -567,12 +727,17 @@ public:
 
         int first_single_nonterm = -1;
         int num_single_nonterms = 0;
-        for(int sti = 0; sti < steps.size(); sti++) {
-            if(!steps[sti].is_terminal() && steps[sti].is_single()) {
+        int vari = 0; // separate from step because of ejected arguments
+        for(int sti = 0; sti < rsteps.size(); sti++) {
+            if(rsteps[sti].skip_on_reduce())
+                continue;
+
+            if(!rsteps[sti].is_terminal() && rsteps[sti].is_single()) {
                 num_single_nonterms++;
                 if(first_single_nonterm < 0)
-                    first_single_nonterm = sti;
+                    first_single_nonterm = vari;
             }
+            vari++;
         }
 
         if(num_single_nonterms >= 1) {
@@ -597,93 +762,37 @@ public:
             // or stack slices full of strings.
             // maybe the reduce type has a constructor which can do
             // something sane with a string?
-            if(steps.size() > 1) {
+            if(rsteps.size() > 1) {
                 warn(stringformat(
                     "default for rule {} probably won't dtrt\n",
                     to_str()
                 ));
             }
-            code += "std::string out;\n";
-            code += "for(int ind = 0; ind < args.num_args; ++ind) {\n";
-            code += "    out += args[ind].product.term_str();\n";
-            code += "    if(ind < args.num_args - 1) out += \" \";\n";
-            code += "}\n";
-            code += "return out;";
+            code += "return ";
+            int num_params = num_reduce_params();
+            for(int argi = 0; argi < num_params; argi++) {
+                code += stringformat(
+                    "arg_{}{}", argi, argi < num_params - 1?" + ":""
+                );
+            }
+            code += ";\n";
         }
 
         return CodeBlock(code, filename(), line_number());
-
-/*
-        This was a fun attempt but doesn't dtrt except in trivial
-        cases, and is hard to debug in cases where it doesn't work
-        (i.e. doesn't compile) because of deceptive line numbers
-        being reported etc.  So let's not do this this way.
-
-        An alternate would be to allow to supply default code in
-        an @ directive or such.  Or make this kind of thing optional
-        in some other way.
-
-        // XXX the file and line here needs to be the generated file/line, or
-        // it's too hard to figure out where we're messed up.  we should
-        // add a comment, though, telling where in this file generated the code.
-        // ... actually maybe giving the fpl source location is the next best thing.
-        // but errf this has no access to the source.
-        CodeBlock block = CODE_BLOCK("return ");
-        std::string code;
-        for(int argi = 0; argi < steps.size(); argi++) {
-            // XXX how to deal with repetition?
-            // this will definitely dtwt with repetition on terminals
-            const ProdExpr &arg = steps[argi];
-            const std::string argvar("arg_" + std::to_string(argi));
-            switch(arg.gexpr.type) {
-                case GrammarElement::TERM_EXACT:
-                    // let's guess it might be a straight up operator,
-                    // and also one which is valid in our target language!
-                    code += arg.gexpr.expr;
-                    break;
-                case GrammarElement::TERM_REGEX:
-                    // possibly this is something like a constant or
-                    // variable name or something.
-                    // possibly the reduce type knows what to do?
-                    code += "reduce_type(" + argvar + ")";
-                    break;
-                case GrammarElement::NONTERM_PRODUCTION:
-                    // this is already reduced, so try just using/returning it
-                    code += argvar;
-                    break;
-                default:
-                    // XXX maybe warn here?
-                    break;
-            }
-
-            if(argi < steps.size() - 1) {
-                code += " ";
-            } else {
-                code += ";\n";
-            }
-        }
-        block.append(code);
-        return block;
-
-            // perhaps default could be:
-            //  - if one nonterminal, return that one nonterminal.  this allows
-            //    aliasing and stuff like '(' foo ')' to do what's intuitive.
-            //  - if two nonterminals separated by a terminal, return
-            //  - if more than one arg, return aggregate XXX do this part
-            // .. or have the fpl author specify somehow.
- */
     }
 
     void code(const CodeBlock &cd) {
         code_for_rule = cd;
     }
 
-    CodeBlock code(const CodeBlock &def) const {
+    CodeBlock code_or(const CodeBlock &alternative) const {
         if(code_for_rule) {
             return code_for_rule;
-        } else if(def) {
-            // (caller provided code, so return that)
-            return def;
+        } else if(alternative) {
+            // caller provided code, so return that.
+            // this is just a way to make the calling code
+            // not have to do if/else or ?:
+            return alternative;
         }
 
         return default_code();
@@ -695,7 +804,7 @@ public:
 
     std::string to_str() const {
         std::string out;
-        for(auto step : steps) {
+        for(auto step : rsteps) {
             out += step.to_str();
             out += " ";
         }
@@ -706,8 +815,57 @@ public:
     }
 };
 
+/*
+  Reducer implementats an abstracted reduce function.
+ */
+struct Reducer {
+    std::string production_name;
+    std::vector<std::string> args;
+    CodeBlock code;
+
+/*
+// XXX figure out if we need/want to overload on number of
+// arguments.  might be clearer not to allow that.
+    // reducers are first identified by the name of the thing they
+    // produce, and next distinguished by arguments if there's more
+    // than one Reducer producing a given thing.
+    // this is so we can keep Reducers in std::set or similar.
+    friend bool operator<(const Reducer& left, const Reducer& right) {
+        if(left.production_name == right.production_name)
+            return left.args < right.args;
+        return left.production_name < right.production_name;
+    }
+ */
+    // reducers are identified by the name of the thing
+    // they produce:
+    friend bool operator<(const Reducer& left, const Reducer& right) {
+        return left.production_name < right.production_name;
+    }
+// XXX alternately maybe operator< can compare to a rule
+
+    // returns the name to use for the nth argument,
+    // or an empty string if there's no such argument
+    std::string argname(int index) const {
+        if(index >= 0 && index < args.size()) {
+            return args[index];
+        }
+        return "";
+    }
+
+    std::string to_str() const {
+        std::string out("+");
+        out += production_name;
+        out += "(";
+        for(auto arg : args) {
+            out += arg + " ";
+        }
+        out += ")";
+        return out;
+    }
+};
+
 class Productions {
-    fpl_reader inp;
+    std::shared_ptr<fpl_reader> inp;
 
     std::string reduce_type;
     CodeBlock default_action;
@@ -716,7 +874,7 @@ class Productions {
     CodeBlock separator_code;
     std::list<CodeBlock> comment_code;
     bool default_main;
-    std::string preamble;
+    std::list<CodeBlock> preamble;
     std::list<CodeBlock> parser_members;
     std::list<std::string> goal; // goal is any of these
 
@@ -725,6 +883,8 @@ class Productions {
 
     std::vector<GrammarElement>     elements;
     std::map<GrammarElement, int>   element_index;
+
+    std::set<Reducer> reducers;
 
     struct lr_set;
     std::vector<lr_set> states;
@@ -737,6 +897,7 @@ class Productions {
         states.push_back(st);
     }
 
+    // records the fact that the given grammar element exists
     void record_element(const GrammarElement &nge) {
         if(element_index.find(nge) == element_index.end()) {
             element_index[nge] = elements.size();
@@ -790,6 +951,8 @@ class Productions {
         }
 
         std::string to_str(const Productions *prds) const {
+            if(!prds) return "NULL Productions";
+
             const ProductionRule &rl = prds->rules[rule];
 
             const int bs = 40;
@@ -814,11 +977,10 @@ class Productions {
 
     // an lr_set is a set of lr items.
     // each state is represented by an lr_set.
-    struct lr_set {
-private:
+    class lr_set {
         mutable std::string _id_cache;
         std::set<lr_item> items;
-public:
+    public:
 
         lr_set() { }
 
@@ -995,9 +1157,11 @@ public:
     }
 
     // adds the given lr_item to the lr_set, plus any other
-    // related items to cover optionalness.
+    // related items to cover optionalness.  folding is also
+    // done here.
     // (repetition is handled in the goto)
     void add_expanded(lr_set &set, const lr_item &it) {
+        if(!it) return;
 
         const ProductionRule &rule = rules[it.rule];
         for(int pos = it.position; pos <= rule.num_steps(); pos++) {
@@ -1043,7 +1207,11 @@ public:
 
 public:
 
-    Productions(fpl_reader &src) : inp(src), default_main(false) {
+// XXX this is currently stupid in that you pass the inp but then
+// you have to make a separate call to parse it.  fix that.
+    Productions(std::shared_ptr<fpl_reader> src) :
+        inp(src), default_main(false)
+    {
         // element 0 is a null element and can be used to
         // indicate missing/uninitialized elements or such.
         // we count it as a nonterminal so that it can be
@@ -1057,46 +1225,58 @@ public:
         // you just want to sketch out a grammar and
         // not have to specify any particular code.
         reduce_type = "std::string";
-
-        parse_fpl();
     }
-
 
     // expects/scans a +{ }+ code block for the named directive.
     // the named directive is essentially for error reporting.
     inline CodeBlock code_for_directive(const std::string &dir) {
-        CodeBlock code = read_code(inp);
+        CodeBlock code = read_code(*inp);
         if(!code) {
             fail(stringformat("expected a code block for @{}\n", dir));
         }
         return code;
     }
 
-    void add_comment_style(const std::string &style) {
+    void add_comment_style(const std::string &style,
+        const std::string &context_fn, int context_ln
+   ) {
         // comment style files are relative to this source:
         fs::path fn(__FILE__);
         fn.replace_filename("comment/" + style + ".inc");
 
-        comment_code.push_back(CodeBlock(load_file(fn), fn, 1));
+        comment_code.push_back(
+            CodeBlock::from_file(fn, context_fn, context_ln)
+        );
     }
 
-    void parse_directive(const std::string &dir) {
+    // TODO perhaps mark the ones of these which are inherently
+    // non-portable with respect to generated language.
+    // (perhaps can be done with a counter on the number of
+    // +{ }+ code blocks parsed?)
+    void parse_directive(const Options &opts, const std::string &dir) {
         if(dir == "comment_style") {
-            std::string style = inp.read_re("\\s*(.+)\\s*")[1];
+            int line_num = inp->line_number();
+            std::string style = inp->read_re("\\s*(.+)\\s*")[1];
             if(!style.length()) {
                 warn("no comment style specified");
             } else {
-                add_comment_style(style);
+                add_comment_style(style, inp->filename(), line_num);
             }
         } else if(dir == "default_action") {
             default_action = code_for_directive(dir);
         } else if(dir == "default_main") {
             default_main = true;
+        } else if(dir == "grammar") {
+            // import the grammar from another fpl (or a library)
+            std::string grammar = inp->read_re("\\s*(.+)\\s*")[1];
+            grammar += ".fpl";
+            import_grammar(opts, grammar);
         } else if(dir == "internal") {
             // a code block which goes in the "private" part
-            // of the parser class itself.
-            // XXX wtb better name?  in the jest version of this,
-            // it won't necessarily be internal
+            // of the parser class itself.  This is either
+            // convenience for the fpl author, or a hack around
+            // c++, depending on how you want to look at it.
+            // use of this renders the fpl non-portable.
             if(CodeBlock mem = code_for_directive(dir)) {
                 parser_members.push_back(mem);
             }
@@ -1105,7 +1285,7 @@ public:
         } else if(dir == "post_reduce") {
             post_reduce = code_for_directive(dir);
         } else if(dir == "produces") {
-            reduce_type = inp.read_re("\\s*(.+)\\s*")[1];
+            reduce_type = inp->read_re("\\s*(.+)\\s*")[1];
         } else if(dir == "separator") {
             if(separator_code)
                 warn("@separator overrides existing separator code\n");
@@ -1125,10 +1305,37 @@ public:
         record_element(rule.product_element());
 
         rules_for_product.insert(std::make_pair(rule.product(), rule_num));
+
+        // if this rule has exactly one (.. hmm or <= 1?)
+        // step, it's a candidate for folding.. 
+        //  OK foldable thought/typing experiments (all assume there's
+        //  no abstracted reducer):
+        //    a -> b ;  # fold: a can be substituted for b always
+        //    "a" -> b ;  # fold: "a" can be substituted in for b (assuming
+        //                # the "a" can be converted on passing)
+        //    "("^ foo ")"^ -> bar ; # fold: match all; foo will be passed
+        //    "true" -> true ;
+        //    "false" -> false ;
+        //    true -> boolean ;  # foldable, except that...
+        //    false -> boolean ; #  ... since this is also boolean and we
+        //                       # don't do "or" we'd have to duplicate
+        //                       # rules or somehting to fold
+        //    boolean '|' boolean => bexpr ; # ... 
+        // .. so anyway I guess we're justing findind fold candidates here.
+        // OH ONE INTERESTING THING:  if a parameter is ejected, 
+        // it can be folded into a rule where the same param is ejected:
+        //      foo^ => bar ;
+        //      "x" "y" "z" => foo ;
+        // The above can be converted to "x"^ "y"^ "z"^ => bar ; because nothing
+        // is passed;  it's solely for matching.
+        // i.e. if the step the rule is being folded into gets ejected, I think
+        // you can always fold..?
+        // XXX figure out if folding is useful.  at one point you thought it
+        // was.  maybe more explicit aliasing of terminals is enough.
     }
 
     void add_preamble(const CodeBlock &code) {
-        preamble += code.format();
+        preamble.push_back(code);
     }
 
     static void read_quantifiers(fpl_reader &src, ProdExpr &expr) {
@@ -1155,6 +1362,30 @@ public:
         }
     }
 
+    static void read_suffixes(fpl_reader &src, ProdExpr &expr) {
+        while(true) {
+            if(src.read_byte_equalling('^')) {
+                expr.eject = true;
+                continue;
+            }
+
+/*
+no longer a suffix
+XXX
+            // the fact that ^ applies to the prod expr but
+            // ~ applies to the gexpr makes me wonder if
+            // ~ should be scanned here..
+            if(src.read_byte_equalling('~')) {
+                expr.gexpr.no_separator_after = true;
+                continue;
+            }
+ */
+
+            // if we got here, next thing isn't a separator:
+            break;
+        }
+    }
+
     // production names must start with a letter, and
     // thereafter may contain letters, digits, or underscores.
     static inline std::string read_production_name(fpl_reader &src) {
@@ -1165,54 +1396,71 @@ public:
         return src.read_re("([A-Za-z][A-Za-z0-9_]+)\\s*")[1];
     }
 
-    // reads the specified file and returns its contents as a string.
-    // calls fail() (and returns enpty string) on error.
-    // this should be some kind of standard library thingo.
-    static std::string load_file(const std::string &infn) {
-
-        // blatant copypasta from fpl_reader
-        std::ifstream in(infn);
-        if(!in.is_open()) {
-            fail(stringformat("can't open '{}': {}\n", infn, strerror(errno)));
-            return "";
-        } 
-
-        in.seekg(0, std::ios::end);   
-        size_t filesize = in.tellg();
-        in.seekg(0, std::ios::beg);
-
-        // .. except... apparently the appended '\0' in the fpl_reader
-        // version ends up being spurous and extra end makes an
-        // embedded newline in the string.  d'oh.
-        char buf[filesize];
-        in.read(buf, filesize);
-        std::string out(buf, filesize);
-
-        return out;
-    }
-
     // .. imports relevant rules into this and returns the name of
     // the top level production created
     std::string parse_import(fpl_reader &src, ProductionRule &rule) {
         // importing another fpl source.
         // syntax: '`' filename /`(:production_to_import)?/
-        // what it needs to do:
-        //  - create a sub-parser for the production. how to fold
-        //    that into states?  possibly just fold the whole
-        //    sub-parse in, which would be easiest.
 
         std::string filename(src.parse_string());
-        fpl_reader inp(filename, fail);
+        if(!filename.length()) {
+            src.error("no filename specified");
+            return "<failed import>";
+        }
+
+        auto sub_errcb = [&src](const std::string &msg)->void {
+            // report errors in the sub-fpl in the context of
+            // the importing file:
+            src.error("\n\t" + msg);
+        };
+        fpl_reader_p inp = std::make_shared<fpl_reader>(
+            filename, sub_errcb
+        );
+
         std::string prod_name;
         if(src.read_byte_equalling(':')) {
             prod_name = read_production_name(src);
         }
 
-        // consider keeping this around so we don't have to re-read it
-        // if something else wants to import from the same fpl
+        // XXX use options search path
+
         Productions subs(inp);
+        if(!subs.reduce_type.length()) {
+            // the imported fpl doesn't specify that it produces any
+            // particular type, so we tell it to produce what we want:
+            subs.reduce_type = reduce_type;
+        }
 
         return import_rules(subs, prod_name);
+    }
+
+    // import just the grammar from another fpl (into this Productions).
+    // the idea here is that you can import "pure" fpl describing
+    // a grammar, without any specific code implementation,
+    // from a file with specific application code.  and, actually you
+    // can do this regardless of if the thing being imported is "pure".
+    void import_grammar(const Options &opts, const std::string gname) {
+        Searchpath searchp = opts.src_path;
+        searchp.prepend(inp->input_dir());
+        std::string src = opts.src_path.find(gname);
+        auto inp = make_shared<fpl_reader>(src, fail);
+        // this is a hokey/hackish way to do this.  we should be
+        // able to parse directly into our own productions from
+        // the input file.  but.. whatevs - make it work.
+// XXX FIXME pass inp to parse_fpl instead of constructor
+        Productions sub(inp);
+        sub.parse_fpl(opts);
+
+        // import the rules from the sub, which will create the
+        // corresponding elements:
+        for(auto rule : sub.rules) {
+            rule.code(CodeBlock::none);
+            push_rule(rule);
+        }
+        // questions:
+        //   - can/should we import the type of separator?  I think not.
+        //     this is not for sub-grammars. 
+        
     }
 
     int read_expressions(fpl_reader &src, ProductionRule &rule) {
@@ -1242,13 +1490,19 @@ public:
                     expr_str = src.parse_string();
                     type     = GrammarElement::Type::TERM_REGEX;
                     break;
+                case '~':
+                    // lack-of-space pseudo-terminal (or assertion?)
+                    src.read_byte();
+                    expr_str = "~";
+                    type     = GrammarElement::Type::LACK_OF_SEPARATOR;
+                    break;
                 case '-':
                     src.read_byte();
                     if(src.read_byte_equalling('>')) {
                         // just scanned "->", so we're done:
                         done = true;
                     } else {
-                        src.error("read unexpected '-'");
+                        src.error("unexpected '-'");
                     }
                     break;
                 case '`':
@@ -1260,7 +1514,10 @@ public:
                     // this can happen, especially if there's a '}+'
                     // embedded in a code block.
                     if(src.read_byte_equalling('+'))
-                        src.error("stray '}+'.  perhaps there's }+ embedded in a code block");
+                        src.error(
+                            "stray '}+'.  "
+                            "perhaps there's }+ embedded in a code block"
+                        );
                     else
                         src.error("unmatched '}'");
                     break;
@@ -1274,13 +1531,17 @@ public:
                             rule.to_str(), rule.location()
                         ));
                     }
-                    type     = GrammarElement::Type::NONTERM_PRODUCTION;
+                    type = GrammarElement::Type::NONTERM_PRODUCTION;
                     break;
             }
 
             if(type != GrammarElement::Type::NONE) {
                 if(expr_str.length() >= 1) {
                     ProdExpr expr(expr_str, type);
+                    // XXX awkward
+                    if(type == GrammarElement::Type::LACK_OF_SEPARATOR)
+                        expr.eject = true;
+                    read_suffixes(src, expr);
                     read_quantifiers(src, expr);
                     rule.add_step(expr);
                     num_read++;
@@ -1339,59 +1600,146 @@ public:
          return CodeBlock(code_str, src.filename(), src.line_number(start));
     }
 
-    void parse_fpl() {
-        do {
-            inp.eat_separator();
-            if(inp.peek() == '#') {
-                inp.read_line();
-            } else if(inp.peek() == '+') {
-                // inlined/general code - goes at the top of the generated
-                // code.  Use to define types or whatever.
-                CodeBlock code(read_code(inp));
-                if(code) {
-                    add_preamble(code);
+    // reads and returns the production name from the current
+    // reader.
+    // on error, returns a 0-length string
+    std::string read_production_name() {
+        std::cmatch nm = inp->read_re("[a-zA-Z][a-zA-Z_0-9]*");
+        if(!nm.length())
+            return "";
+        return nm[0];
+    }
+
+    // argument declaration for a reduction code block:
+    //   
+    //   '(' (argument ','?)* ')' -> argdecl ;
+    //
+    std::vector<std::string> parse_argdecl() {
+fprintf(stderr, "\n\n\n\nOH HAI PARSING ARGDECL\n\n\n");
+        std::vector<std::string> args;
+        
+        if(!inp->read_byte_equalling('(')) {
+            inp->error("expected start of argument declaration '('");
+        } else {
+            while(!inp->read_byte_equalling(')')) {
+                std::string name = read_production_name();
+                if(!name.length()) {
+                    inp->error("invalid production name");
+                    break;
                 }
-            } else if(inp.read_byte_equalling('@')) {
-                std::string directive = read_directive(inp);
-                parse_directive(directive);
-            } else if(inp.read_byte_equalling('}')) {
+
+                args.push_back(name);
+
+                // XXX actually eat any number of separators or commas
+                inp->eat_separator();
+
+                if(inp->peek() == '\0') // more reasons to fpl this..
+                    break;
+            }
+        }
+
+        return args;
+    }
+
+    //
+    // +<production_name> <argdecl> <code_block>
+    //
+    void parse_reducer() {
+fprintf(stderr, "\n\nOH HAIU PARSING SONIC REDUCER OSCILLATOR 4 MORE TRIANGLES\n");
+        if(!inp->read_byte_equalling('+')) {
+            inp->error("expected +<production_name>");
+            return;
+        }
+
+        Reducer reducer;
+        reducer.production_name =read_production_name();
+        if(reducer.production_name.length() == 0) {
+            inp->error("expected production name after '+'");
+            return;
+        }
+
+        reducer.args = parse_argdecl();
+        reducer.code = read_code(*inp);
+
+        auto existing = reducers.find(reducer);
+        if(existing != reducers.end()) {
+            // possibly warn and splat instead?
+            inp->error(stringformat(
+                "reducer for {} collides with existing reducer from {} line {}",
+                reducer.production_name,
+                existing->code.source_file, existing->code.line
+            ));
+        } else {
+            reducers.insert(reducer);
+        }
+    }
+
+    void parse_fpl(const Options &opts) {
+        do {
+            inp->eat_separator();
+            if(inp->peek() == '#') {
+                inp->read_line();
+            } else if(inp->peek() == '+') {
+                if(inp->peek(1) == '{') {
+                    // inlined/general code - goes at the top of the
+                    // generated code.  Use to define types or whatever.
+                    CodeBlock code(read_code(*inp));
+                    if(code) {
+                        add_preamble(code);
+                    }
+                } else {
+                    // expect code for reducing to the production given:
+                    parse_reducer();
+                }
+            } else if(inp->read_byte_equalling('@')) {
+                std::string directive = read_directive(*inp);
+                parse_directive(opts, directive);
+            } else if(inp->read_byte_equalling('}')) {
                 // likely what happened is someone put a }+ inside
                 // a code block.  anyway a floating end brace is 
                 // wrong..
-                inp.error("unmatched '}'\n");
+                inp->error("unmatched '}'\n");
             } else {
-                ProductionRule rule(inp, inp.current_position());
-                if(read_expressions(inp, rule)) {
+                ProductionRule rule(*inp, inp->current_position());
+                if(read_expressions(*inp, rule)) {
                     // .. we've read the expressions/steps leading to
                     // the production (including the "->").
                     // read what the expressions above produce:
-                    inp.eat_separator();
-                    rule.product(inp.read_to_separator());
-                    if(rule.product().length() <= 0) {
+                    inp->eat_separator();
+                    std::cmatch pname = inp->read_re("[A-Za-z][A-Za-z0-9_]*");
+                    if(!pname.length()) {
                         fail(stringformat(
-                            "missing production name at {}\n",
+                            "invalid production name at {}\n",
                             rule.location()
                         ));
+                    } else {
+                        rule.product(pname[0]);
                     }
 
-                    inp.eat_separator();
+                    inp->eat_separator();
 
                     // next we expect either ';' or a code block.
                     // if it's ';' we read it and move on;  otherwise
                     // it's a code block for the rule.
-                    if(!inp.read_byte_equalling(';'))
-                        rule.code(read_code(inp));
+                    if(!inp->read_byte_equalling(';'))
+                        rule.code(read_code(*inp));
 
                     push_rule(rule);
                 }
             }
-        } while(!inp.eof());
+        } while(!inp->eof());
     }
 
+    // returns the name of the production which this import will produce,
+    // or  ... 
+    // XXX deprecate?  or fix/generalize/rename?
     std::string import_rules(const Productions &from, const std::string &pname) {
-        std::string src_fn = from.inp.filename();
+        std::string src_fn = from.inp->filename();
         if(from.reduce_type != reduce_type) {
-            fail(stringformat(
+            // warn if there's an explicit reduce type which isn't
+            // exactly the same as ours, but plow on - they'll get
+            // compile errors if the types are actually incompatible.
+            warn(stringformat(
                 "Incompatible reduce type '{}' in {} (expected {})\n",
                 from.reduce_type, src_fn, reduce_type
             ));
@@ -1400,31 +1748,58 @@ public:
         // import any preamble as well, as it may be necessary for the rules.
         // hmm.. too bad we can't scope this and/or figure out if it's necessary
         // to import in the first place... (can we scope?)
-        preamble += "\n" + from.preamble;
+        // (consider either getting rid of this or making it optional - possibly
+        // we only want to be importing "pure" fpl anyway)
+        //preamble += "\n" + from.preamble;
+        for(auto primp : from.preamble)
+            add_preamble(primp);
 
         // these are the names of the products whose rules (and elements)
         // we need to import:
         std::list<std::string> all_wanted;
         std::set<std::string> already_wanted;
         std::string import_as;
-        if(pname.length()) {
+        if(pname.size()) {
             import_as = pname;
             all_wanted.push_back(pname);
             already_wanted.insert(pname);
-        } else {
+        } else if(from.rules.size()) {
+debug_hook();
+            // no particular production specified.  import the
+            // default (first) production.
+            std::string def_prd(from.rules[0].product());
+// XXX import_as is redundant now.  but, possibly we _do_ want to
+// do what we did below (and name the top level after the file)
+// but if so we should produce a dummy top level rule to reduce
+// to a product named from import_as..
+            import_as = def_prd;
+            all_wanted.push_back(def_prd);
+            already_wanted.insert(def_prd);
+/*
             // no particular production specified.  import the
             // default production, but use the base name of the
             // fpl file to refer to it
-            import_as = from.inp.base_name();
-            std::string def_prd(rules[0].product());
+            import_as = from.inp->base_name();
+            // XXX check if rules[0] exists
+            std::string def_prd(from.rules[0].product());
             all_wanted.push_back(def_prd);
             already_wanted.insert(def_prd);
+            ... ok if we want to do the above, this is not how
+            to do it. among the problems: if the top level production
+            is referenced in the contained fpl, it'll have the wrong
+            name.  instead, do `foo.fpl` => bar ; or such.  then
+            foo.fpl's tree is either aliased normally reduced in
+            some sensible consistent way.  So we'd need to return
+            .. a GrammarElement? oh huh we do.  why this not parses
+            like that already?  perhaps it does!
+ */
         }
 
-        // NOTE we're assuming here that we can append to a list
+        // NOTE I'm assuming here that we can append to a list
         // while iterating it and have things dtrt.  I believe
         // this is a reasonable thing to ask from std::list,
         // but have no documentation/spec saying it's ok.
+        int num_imported = 0;
         for(auto wanted : all_wanted) {
             // NOTE:  no scoping currently.  so rule names can
             // collide and cause mayhem... hmm
@@ -1434,8 +1809,13 @@ public:
                 fail(stringformat("No rule for '{}' in {}\n", wanted, src_fn));
             }
             for(auto rit = strl; rit != endrl; ++rit) {
+// XXX here.. does this copy correctly?
+// not really, in part at least because it refers to the Productions
+// from which it comes (or perhaps it _should_)... or really refers
+// to the reader
                 ProductionRule rule = from.rules[rit->second];
                 push_rule(rule);
+                num_imported++;
 
                 // any rules needed to generate the rule we just pushed are
                 // also relevant:
@@ -1449,6 +1829,12 @@ public:
                      }
                 }
             }
+        }
+fprintf(stderr, "imported %i rules\n", num_imported);
+        if(num_imported <= 0) {
+            warn(
+                stringformat("No rules imported from {}", from.inp->filename())
+            );
         }
 
         return import_as;
@@ -1523,67 +1909,37 @@ public:
     #undef rule_meta_int
     #undef rule_meta_str
 
+
+// XXX rename to something like reduction_code
     std::string code_for_rule(const Options &opts, int rule_ind) {
         const ProductionRule &rule = rules[rule_ind];
-        std::string out;
+
+        /*
+          A given rule will be reduced according to (in priority order):
+          1) abstracted implementations (+product). this is top
+             priority so that you can use the grammer defined by
+             non-"pure" fpl and just override anything you need to
+             without having to change the grammar fpl
+          2) code defined in the rule
+          3) folding rules with only one step. (note that if we implement "^",
+             you could do eg parens by '('^ expr ')'^ -> expr and thus not
+             require any language specific code)
+          4) default code (as it is now, including @default_action)
+         */
 
         std::string rule_name = rule_fn(rule_ind);
-        out += reduce_type + " " + rule_name + "(";
-
-        // "simple" parameters:
-        // If the expression for the step has a min/max times of
-        // anything other than exactly 1 (is_single()), we pass
-        // it as a stack slice.
-        // Otherwise, if it's a terminal, pass it as a string,
-        // or (if it's the result of a reduce) as whatever the reduce
-        // type is.  This is complicated for the code generator,
-        // but simplifies life for the fpl author, especially
-        // for trivial cases.
-        for(int stind = 0; stind < rule.num_steps(); stind++) {
-            std::string arg_name = "arg_" + std::to_string(stind);
-            const ProdExpr *expr = rule.step(stind);
-            if(!expr) {
-                fail(stringformat("Bug: no expression for {} in {}",
-                    arg_name, rule.to_str()
-                ));
-            } else if(!expr->is_single()) {
-                // the argument is either optional or can repeat or
-                // both, so we can't pass it simply.  so pass it
-                // as a slice:
-                out += "const FPLBP::StackSlice &";
-            } else if(expr->is_terminal()) {
-                out += "std::string ";
-            } else {
-                out += reduce_type + " ";
-            }
-            out += arg_name;
-            out += ", ";
-        }
-
-        // last parameter is the slice of the stack with
-        // everything we're popping.  this lets the fpl author
-        // get things like the line number for a given argument
-        // or whatever.  (actully, the "simple" positional
-        // parameters below can be implemented via this,
-        // and in the jest version might be).  It's last only
-        // because that simplifies the generating code
-        out += "const FPLBP::StackSlice &args";
-
-        out += ") {\n";
+        const Reducer *reducer = reducer_for(rule);
+        std::string out = reducer_decl(rule_name, rule.steps(), reducer) + " {\n";
         out += "// " + rule.to_str() + "\n";
         out += rule_metadata(rule_ind);
-        if(opts.debug) {
-            out += "fprintf(stderr, \"reducing by " + rule_name + "\\n\");\n";
+        if(reducer) {
+            // abstracted implementation (1):
+            out += reducer->code.format(false);
+        } else {
+            // code in the rule (2) or default acton (4):
+            out += rule.code_or(default_action).format(false);
         }
-        out += rule.code(default_action).format(false);
         out += "\n}\n";
-        // restore line number after end of function so that
-        // compiler warnings about stuff like lack of return
-        // value show the line in the fpl source (which is
-        // where the fpl author has to fix it).
-        // (actually, it'll show the line after... calling it
-        // good enough for now)
-        out += "\n#$LINE\n";
         return out;
     }
 
@@ -1622,7 +1978,6 @@ public:
         out += "int pos = frame_start;\n"; // (pos gets updated as we go)
         for(int stind = rule.num_steps() - 1; stind >= 0; --stind) {
             const ProdExpr *expr = rule.step(stind);
-            std::string argname = "arg_" + std::to_string(stind);
             if(!expr) {
                 fail(stringformat(
                     "Bug: no expression for step {} in {}",
@@ -1631,7 +1986,7 @@ public:
             } else {
                 std::string eid_str = std::to_string(element_index[expr->gexpr]);
                 std::string max_str = std::to_string(expr->max_times);
-                out += "FPLBP::StackSlice " + argname
+                out += "FPLBP::StackSlice arg_" + std::to_string(stind)
                      + "(base_parser, " + eid_str + ", " + max_str + ", pos);\n";
             }
         }
@@ -1643,6 +1998,10 @@ public:
         out += "    " + reduce_type + " result = " + rule_fn(rule_ind) + "(";
         for(int stind = 0; stind < rule.num_steps(); stind++) {
             const ProdExpr *expr = rule.step(stind);
+
+            if(expr->skip_on_reduce())
+                continue;  // Author has specified that this arg isn't passed
+
             std::string argname = "arg_" + std::to_string(stind);
             out += argname;
             if(expr->is_single()) {
@@ -1662,14 +2021,15 @@ public:
             out += "\n{\n" + post_reduce.format() + "\n}\n";
         }
 
+        if(opts.debug) {
+            out += "fprintf(stderr, \"popping %i to %i:\\n%s\\n\", "
+                   "frame_start, pos, args.to_str().c_str());\n";
+        }
+
         // this is what actually pops the stack. note we pop after
         // the reduce (mainly to minimize moves, but also so the
         // stack is more intact for error/bug analysis)
-        out += "base_parser.lr_top(pos);\n";
-
-        if(opts.debug) {
-            out += "fprintf(stderr, \"... finished reducing\\n\");\n";
-        }
+        out += "base_parser.lr_pop_to(pos);\n";
 
         out += "    base_parser.set_product(Product(result, "
              + rule.product_element().nonterm_id_str()
@@ -1683,15 +2043,15 @@ public:
         return out;
     }
 
-    std::string args_for_shift(const lr_set &state, const ProdExpr &expr) {
-        lr_set next_state = lr_goto(state, expr.gexpr);
+    std::string args_for_shift(const lr_set &next_state, const ProdExpr &expr) {
         std::string el_id(std::to_string(element_index[expr.gexpr]));
         if(expr.is_terminal()) {
             return "\"" + expr.terminal_string() + "\""
                    ", " + el_id
                  + ", " + std::to_string(expr.min_times)
                  + ", " + std::to_string(expr.max_times)
-                 + ", &" + state_fn(next_state, true);
+                 + ", &" + state_fn(next_state, true)
+                 + (expr.gexpr.no_separator_after?", NO_SEPARATOR":"");
         } else {
             return expr.gexpr.nonterm_id_str()
                  + ", " + std::to_string(expr.min_times)
@@ -1718,22 +2078,46 @@ public:
         ));
     }
 
-    std::string code_for_shift(const lr_set &state, const ProdExpr *right_of_dot) {
+    std::string code_for_shift(
+        const Options &op, const lr_set &state, const ProdExpr *right_of_dot
+    ) {
         std::string out;
+
+        // this is a redundant goto, but keeping it for now because it's
+        // easier than restructuring
+        // (XXX actually just pass in next state.  current state is only
+        // used for debug and doesn't need to go here)
+        lr_set next_state = lr_goto(state, right_of_dot->gexpr);
 
         const GrammarElement::Type type = right_of_dot->type();
         switch(type) {
-            // shifts
             case GrammarElement::TERM_EXACT:
                 out += "} else if(base_parser.shift_exact(separator_length,";
+                out += args_for_shift(next_state, *right_of_dot) + ")) {\n";
                 break;
             case GrammarElement::TERM_REGEX:
                 out += "} else if(base_parser.shift_re(separator_length,";
+                out += args_for_shift(next_state, *right_of_dot) + ")) {\n";
                 break;
             case GrammarElement::NONTERM_PRODUCTION:
                 out += "} else if(base_parser.shift_nonterm(";
+                out += args_for_shift(next_state, *right_of_dot) + ")) {\n";
+                break;
+            case GrammarElement::LACK_OF_SEPARATOR:
+                out += "} else if(!base_parser.eat_separator(separator_length)) {\n";
+                // OK the problem here is that we _do_ need to shift the state,
+                // even though we do not need to shift the lack of separator per se.
+                // this makes me wonder about going back to recursive ascent.
+                // going to try to just make it work
+                //out += "    base_parser.set_state(&" + state_fn(next_state, true) + ");\n";
+                out += "FPLBP::Terminal term(\"<special ~>\");\n"; // XXX this is terrible
+                out += stringformat(
+                    "base_parser.lr_push(&{}, FPLBP::Product(term, {}), base_parser.position());\n",
+                    state_fn(next_state, true), element_index[right_of_dot->gexpr]
+                );
                 break;
             case GrammarElement::NONE:
+            case GrammarElement::_TYPE_CAP:
                 // .. this pretty much implies a bug in fpl2cc:
                 fail(stringformat(
                     "Missing/unknown grammar element (id: {} {})",
@@ -1741,14 +2125,19 @@ public:
                 ));
                 break;
         }
-        // XXX redundant goto and other calculations here. restructure.
-        out += args_for_shift(state, *right_of_dot) + ")) {\n";
 
 /*
         out += "    // transition ID: " + transition_id(
             *right_of_dot, lr_goto(state, right_of_dot->gexpr)
         ) + "\n";
  */
+
+        if(op.debug) {
+            out += "fprintf(stderr, \"    " + state_fn(state) +
+                   " shifted %s\\n\", \""
+                   + c_str_escape(right_of_dot->to_str()) +
+                   "\");\n";
+        }
 
         return out;
     }
@@ -1761,6 +2150,12 @@ public:
         out += state.to_str(this, "// ");
         out += "//\n";
         out += "void " + sfn + "() {\n";
+        out += "size_t bytes_eaten = base_parser.eat_separator(separator_length);\n";
+        if(opts.debug) {
+            out += "fprintf(stderr, \"%li bytes eaten since last terminal\\n\", ";
+            out += "bytes_eaten);\n";
+        }
+                   
         out += debug_single_step_code(opts, state);
 
         out += "    if(0) {\n"; // now everything past this can be "else if"
@@ -1804,7 +2199,7 @@ public:
                     }
                 }
 
-                out += code_for_shift(state, right_of_dot);
+                out += code_for_shift(opts, state, right_of_dot);
 
                 if(right_of_dot->is_optional())
                     optionals.push_back(item);
@@ -1830,10 +2225,18 @@ public:
         out += "} else {\n";
 
         if(reduce_item) {
-            //out += "    fprintf(stderr, \"" + sfn + " is going to reduce to a %s\\n\", \"" + c_str_escape(reduce_item.to_str(this)) + "\");\n";
+            if(opts.debug) {
+                out += "fprintf(stderr, \"    " + sfn +
+                       " is going to reduce to a %s\\n\", \"" +
+                       c_str_escape(reduce_item.to_str(this)) + "\");\n";
+            }
             out += production_code(opts, state, reduce_item.rule);
             //out += "    fprintf(stderr, \"%i items on stack after reduce\\n\", base_parser.lr_stack_size());\n";
         } else {
+            if(opts.debug)
+                out += "fprintf(stderr, \"    terminating in " +
+                       sfn + "\\n\");\n";
+
             // since we want to be able to do partial parses, if we
             // don't see input we expect, it's not necessarily
             // an error - we might have parsed whatever was wanted
@@ -1953,10 +2356,8 @@ public:
         for(int el_id = 0; el_id < elements.size(); ++el_id) {
             is_terminal_guts += "case " + std::to_string(el_id);
             if(elements[el_id].type == GrammarElement::NONTERM_PRODUCTION) {
-                std::string name(elements[el_id].to_str());
-                // prefix with underscore as a hack to avoid keyword
-                // collisions:
-                out += "_" + name;
+                std::string name = elements[el_id].nonterm_id_str(false);
+                out += name;
                 nonterm_str_guts += "case " + std::to_string(el_id);
                 nonterm_str_guts += ": return \"" + name + "\";\n";
                 if(el_id == 0) {
@@ -2069,7 +2470,7 @@ public:
 
     std::string parser_class_name() {
         std::string base;
-        for(auto chr : inp.base_name()) {
+        for(auto chr : inp->base_name()) {
             switch(chr) {
                 case '-':
                     base += '_';
@@ -2130,7 +2531,6 @@ public:
                 ));
             }
             for(auto rit = strl; rit != endrl; ++rit) {
-                // entry_set.add_item(lr_item(rit->second, 0));
                 add_expanded(entry_set, lr_item(rit->second, 0));
             }
         }
@@ -2152,6 +2552,104 @@ public:
             }
         }
     }
+
+    // returns the declaration for a reduce function
+    std::string reducer_decl(
+        const std::string &rfn,
+        const std::vector<ProdExpr> &steps,
+        const Reducer *abs_impl
+    ) {
+        std::string out ;
+        out += reduce_type + " " + rfn + "(";
+
+        // "simple" parameters:
+        // If the expression for the step has a min/max times of
+        // anything other than exactly 1 (is_single()), we pass
+        // it as a stack slice.
+        // Otherwise, if it's a terminal, pass it as a string,
+        // or (if it's the result of a reduce) as whatever the reduce
+        // type is.  This is complicated for the code generator,
+        // but simplifies life for the fpl author, especially
+        // for trivial cases.
+        int argind = 0;
+        for(int stind = 0; stind < steps.size(); stind++) {
+            const ProdExpr &expr = steps[stind];
+
+            // this expression might be suffixed with '^', which
+            // means it's only used for recognizing, and is not
+            // passed to the reduce function:
+            if(expr.skip_on_reduce())
+                continue;
+
+            // arg type depends on the expression:
+            // XXX consider if we always should just pass stack element
+            // for singles and slices for multiples.  stack element needs
+            // to be able to behave as whatever, then.
+            if(!expr.is_single()) {
+                // the argument is either optional or can repeat or
+                // both, so we can't pass it simply.  so pass it
+                // as a slice:
+                out += "const FPLBP::StackSlice &";
+            } else if(expr.is_terminal()) {
+                // TODO probably want to allow multiple regex captures..?
+                out += "std::string ";
+            } else {
+                out += reduce_type + " ";
+            }
+
+            // argument name:
+            if(abs_impl) {
+                // if there's an abstracted implementation,
+                // we get the argument name from that:
+                std::string argname = abs_impl->argname(argind);
+                if(!argname.length()) {
+                    fail(stringformat(
+                        "BUG: No {}th argument name for {} in {}",
+                        argind, abs_impl->to_str(), rfn
+                    ));
+                }
+            } else if(expr.varname.length()) {
+                // else maybe there's a specific variable name
+                // set for this expression:
+                out += expr.varname;
+            } else {
+                out += "arg_" + std::to_string(argind);
+            }
+      
+            out += ", ";
+
+            argind++;
+        }
+
+        // last parameter is the slice of the stack with
+        // everything we're popping.  this lets the fpl author
+        // get things like the line number for a given argument
+        // or whatever.  (actully, the "simple" positional
+        // parameters below can be implemented via this,
+        // and in the jest version might be).  It's last only
+        // because that simplifies the generating code
+        out += "const FPLBP::StackSlice &args)";
+
+        return out;
+    }
+
+
+    // finds and returns a pointer to the abstracted reducer
+    // for the rule passed, or returns nullptr if there's no
+    // such rule.
+    const Reducer *reducer_for(const ProductionRule &rule) {
+        Reducer finder; // hack to make a key for the search
+        finder.production_name = rule.product();
+// XXX can probably just search by name.  doing it wrong here
+// actually..
+//        finder.args = rule.steps();
+
+        auto found = reducers.find(finder);
+        if(found != reducers.end())
+            return &*found;
+        return nullptr;
+    }
+
 
     std::string generate_code(const Options &opts) {
 
@@ -2175,7 +2673,11 @@ public:
         }
         out += " */\n\n";
 
-        generate_states(goal);
+        for(auto fn : opts.impl_sources) {
+            out += CodeBlock::from_file(fn, "(command line)", 1).format();
+        }
+
+        generate_states(goal); // XXX move me.
 
         out += "#include <string>\n";
 
@@ -2187,7 +2689,11 @@ public:
         // declared before the template (not just before
         // template instantiation.. ?) (did I miss something?)
         out += "\n// preamble:\n";
-        out += preamble;
+        for(auto pre : preamble) {
+            // can't format_scoped here because this is where the
+            // #include stuff is (typically)
+            out += pre.format();
+        }
         out += "// end preamble\n\n";
         out += "#line " + std::to_string(__LINE__) + " \"" + __FILE__ + "\"\n";
         out += "#include \"fpl2cc/fpl_reader.h\"\n";
@@ -2210,6 +2716,7 @@ public:
         out += "    using State = FPLBP::State;\n";
         out += "    using Product = FPLBP::Product;\n";
         out += "    using StackEntry = FPLBP::StackEntry;\n";
+        out += "    static const bool NO_SEPARATOR = false;\n";
         out += "    FPLBP base_parser;\n";
         for(auto mem : parser_members) {
             out += mem.format();
@@ -2285,10 +2792,14 @@ public:
 
 // returns an exit()-appropriate status (i.e. 0 on success)
 ExitVal fpl2cc(const Options &opts) {
-    fpl_reader inp(opts.src_fpl, fail);
+    if(opts.src_fpl.size() == 0)
+        fail("Error:  no source fpl specified");
+    std::string src = opts.src_path.find(opts.src_fpl);
+    auto inp = make_shared<fpl_reader>(src, fail);
 
     // parse the input file into a set of productions:
     Productions productions(inp);
+    productions.parse_fpl(opts);
 
     std::string output = productions.generate_code(opts);
 
@@ -2311,11 +2822,13 @@ ExitVal fpl2cc(const Options &opts) {
 
 void usage() {
     fprintf(stderr,
-        "\nUsage:    fpl2cc [options] <source>\n\n"
-        "If no [target] is specified, prints to stdout.\n\n"
+        "\nUsage:    fpl2cc [options] <fpl source> [sources]\n\n"
+        "If no [target] is specified, prints to stdout.\n"
+        "[sources] is 0 or more non-fpl source files to integrate\n"
+        "into the target file.\n\n"
         "Options:\n"
     );
-    // .. these decriptions suck...
+    // .. these descriptions suck...
     fprintf(stderr, "        --debug - emebed debug blather in target code\n");
     fprintf(stderr, "        --debug-single-step - as above plus pauses\n");
     fprintf(stderr, "        --debug-dump-states - print generated states\n");
@@ -2323,6 +2836,7 @@ void usage() {
     fprintf(stderr, "        --generate-main - generate main() function\n");
     fprintf(stderr, "        --help - show this page\n");
     fprintf(stderr, "        --out=<fn> - write to fn instead of stdout\n");
+    fprintf(stderr, "        --src-path=<path> - search the dirs given (':' delimited)\n");
 }
 
 int main(int argc, const char** argv) {
@@ -2348,5 +2862,6 @@ int main(int argc, const char** argv) {
 
     exit(status);
 }
+
 
 
