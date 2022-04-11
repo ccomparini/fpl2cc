@@ -1870,7 +1870,7 @@ fprintf(stderr, "imported %i rules\n", num_imported);
 
     #define rule_meta_str(mem) \
         std::string("static const char *" #mem "() {\n") +\
-            "return \"" + rule.mem() + "\";\n" \
+            "return \"" + c_str_escape(rule.mem()) + "\";\n" \
         "}\n"
     #define rule_meta_int(mem) \
         std::string("static int " #mem "() {\n") +\
@@ -1884,6 +1884,7 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         out += rule_meta_int(line_number);
         out += rule_meta_str(filename);
         out += rule_meta_str(location);
+        out += rule_meta_str(to_str);
         out += "} this_rule;\n";
         return out;
     }
