@@ -848,7 +848,8 @@ struct Reducer {
 };
 
 class Productions {
-    std::shared_ptr<fpl_reader> inp;
+    std::shared_ptr<fpl_reader> inp; // XXX use the below instead
+    // fpl_reader_p inp;
 
     std::string reduce_type;
     CodeBlock default_action;
@@ -2492,7 +2493,7 @@ fprintf(stderr, "imported %i rules\n", num_imported);
         out += "        );\n";
         out += "    }\n";
         // XXX this is also weak; handle more than one source
-        out += "    fpl_reader inp(argv[1]);\n";
+        out += "    fpl_reader_p inp = std::make_shared<fpl_reader>(argv[1]);\n";
         out +=      parser_class + " parser(inp);\n";
         out += "    using namespace std;\n";
         out += "    auto result = parser.parse();\n";
@@ -2778,7 +2779,8 @@ fprintf(stderr, "imported %i rules\n", num_imported);
             out += code_for_state(opts, state).c_str();
         }
 
-        out += "    " + parser_class + "(fpl_reader &src) : base_parser(src) { }\n";
+        // constructor:
+        out += "    " + parser_class + "(fpl_reader_p src) : base_parser(src) { }\n";
         out += "    std::string to_str() { return base_parser.to_str(); }\n";
         out += "    inline " + reduce_type + " parse() {\n";
         out += "        auto result = base_parser.parse(*this);\n";
