@@ -627,6 +627,7 @@ fprintf(stderr, "whoa dude this is going to break because the char length is %lu
 };
 
 using fpl_reader_p = std::shared_ptr<fpl_reader>;
+using fpl_reader_p_c = std::shared_ptr<const fpl_reader>;
 
 
 #endif // FPL_READER_H

@@ -5,6 +5,8 @@
 #include <string>
 #include <variant>
 
+// XXX this header is deprecated
+
 // what are the possible elements?
 //  - directives (w/ arguments, which I guess can always be strings)
 //  - code blocks (which are strings)

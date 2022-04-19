@@ -5,51 +5,158 @@
 @comment_style sh
 @grammar fpl
 
++{
+#include <climits>
+#include <variant>
+#include "stringformat.h"
 
-+items(items_in) +{
-    // XXX
+class CodeBlock;
+class ProductionRule;
+class Productions;
+
+struct quantifier {
+    int min;
+    int max;
+    quantifier(int mn, int mx) : min(mn), max(mx) { }
+};
+
+/*
+// XXX maybe implement this and all the predeclarations via
+// some kind of fpl feature.
+typedef std::variant<
+    std::string,
+    Productions *, // the final thing
+    ProductionRule,
+>;
+ */
 }+
 
-# src/fpl2cc/grammarlib/fpl.fpl:37
-+directive_comment_style(term_0 term_1) +{
+#@produces Productions *
+
+
+@internal +{
+public:  // XXX this is a terible hack - make a reasonable way
+    Productions *productions;  // XXX this too.. @params?  something? naming is hard
+                               // @model_class? @implementation? @apply_to?
+                               // if @apply_to one could abstract further
+                               // by having grammar to call methods in
+                               // the @apply_to instance, which could be
+                               // language independent
 }+
 
-# src/fpl2cc/grammarlib/fpl.fpl:38
-+directive_default_action(term_0 code_block) +{
-}+
-
-+directive_default_main() +{
-}+
-
-# src/fpl2cc/grammarlib/fpl.fpl:40
-+directive_grammar(term_0 term_1) +{
-}+
-
-# src/fpl2cc/grammarlib/fpl.fpl:41
-+directive_internal(term_0 code_block) +{
-}+
-
-# src/fpl2cc/grammarlib/fpl.fpl:42
-+directive_post_parse(term_0 code_block) +{
-}+
-
-# src/fpl2cc/grammarlib/fpl.fpl:43
-+directive_produces(term_0 term_1) +{
-}+
-
-# src/fpl2cc/grammarlib/fpl.fpl:44
-+directive_separator(term_0 code_block) +{
-}+
-
-# src/fpl2cc/grammarlib/fpl.fpl:67
-+step(match_expression quantifier) +{
+@type_for match_expression GrammarElement
++production_name(term_0) +{
+    return GrammarElement(term_0, GrammarElement::Type::NONTERM_PRODUCTION);
 }+
 
 # src/fpl2cc/grammarlib/fpl.fpl:69
-+rule(step  production_name code_block) +{
++regex(term_0) +{
+    return GrammarElement(term_0, GrammarElement::Type::TERM_REGEX);
 }+
 
-## src/fpl2cc/grammarlib/fpl.fpl:70
-#+rule(step  production_name ) +{
-#}+
+# src/fpl2cc/grammarlib/fpl.fpl:67
++exact_match(term_0) +{
+    return GrammarElement(term_0, GrammarElement::Type::TERM_EXACT);
+}+
+
+# quantifiers:
+@type_for quantifier quantifier
++zero_or_more() +{ return quantifier(0, INT_MAX); }+
++one_or_more()  +{ return quantifier(1, INT_MAX); }+
++zero_or_one()  +{ return quantifier(0, 1      ); }+
+
+# src/fpl2cc/grammarlib/fpl.fpl:73
+@type_for step ProdExpr
++step(match_expression quantifier) +{
+    return ProdExpr(match_expression, quantifier.min, quantifier.max);
+}+
+
+# src/fpl2cc/grammarlib/fpl.fpl:69
+# hmm default name was "step", but we want steps... I guess
+# fix that when we can assign names in the pure
+@type_for rule ProductionRule
++rule(steps production_name code_block) +{
+    // step base_parser
+    ProductionRule rule(start_pos.filename(), start_pos.line_number());
+
+    for(auto st : steps) {
+        add_step(st);
+    }
+    rule.code(code_block);
+
+    return rule;
+}+
+
+@type_for code_block CodeBlock
++code_block(code) +{
+    return CodeBlock(code, start_pos.filename(), start_pos.line_number());
+}+
+
+# src/fpl2cc/grammarlib/fpl.fpl:48
++import(filename) +{
+    #warning "import not implemented"
+    fprintf(stderr, "import (`file`) not implemented XXX\n");
+    return stringformat("@import {} fail - unimplemented\n");
+}+
+
+# src/fpl2cc/grammarlib/fpl.fpl:44
++directive_separator(code_block) +{
+    productions->set_separator_code(code_block);
+    return "@separator";
+}+
+
+# src/fpl2cc/grammarlib/fpl.fpl:43
++directive_produces(arg_0) +{
+    productions->set_reduce_type(arg_0);
+    return "@produces";
+}+
+
+# src/fpl2cc/grammarlib/fpl.fpl:42
++directive_post_parse(code_block) +{
+    productions->set_post_parse(code_block);
+    return "@post_parse";
+}+
+
+# src/fpl2cc/grammarlib/fpl.fpl:41
++directive_internal(code_block) +{
+    productions->add_internal(code_block);
+    return "@internal";
+}+
+
+# src/fpl2cc/grammarlib/fpl.fpl:40
++directive_grammar(filename) +{
+    #warning "@grammar not implemented"
+    // XXX what we need here:
+    //   - not to need options.  only for path, anyway?
+    //   - (as with import, actually) recursively invoke the
+    //     parser on a new source/productions?
+    // productions->import_grammar(opts, filename + ".fpl");
+    return "@grammar";
+}+
+
+# src/fpl2cc/grammarlib/fpl.fpl:39
++directive_default_main() +{
+    productions->set_default_main(true);
+    return "@default_main";
+}+
+
+# src/fpl2cc/grammarlib/fpl.fpl:38
++directive_default_action(code_block) +{
+    productions->set_default_action(code_block);
+    return "@default_action";
+}+
+
+# src/fpl2cc/grammarlib/fpl.fpl:37
++directive_comment_style(style) +{
+    productions->add_comment_style(style,
+        start_pos.filename(), start_pos.line_number()
+    );
+}+
+
+@type_for items Productions*
++items(items) +{
+    // everything will already have been addded to the productions
+    // passed, so just return (a pointer to) it:
+    return productions;
+}+
 

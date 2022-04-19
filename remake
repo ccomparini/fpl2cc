@@ -1,0 +1,39 @@
+#!/bin/bash
+
+#
+#  Script to run after makeing changes to fpl.fpl, or changes
+#  to anything else which might change fpl_parser.h.
+#
+#  This is a quick hack to avoid issues with the circular dependency 
+#  of fpl2cc.cc including fpl_parser.h, which is created by fpl2cc.
+#
+
+while : ;
+do
+    # run scons once, but if it fails, plow on anyway because
+    # it might be due to busted fpl_parser.h....
+    scons
+
+    # .. which we will now try to regenerate, using the last
+    # version of fpl2cc:
+    bin/fpl2cc --src-path=src/fpl2cc/grammarlib src/fpl2cc/fpl.fpl --out src/fpl2cc/fpl.h || exit 1
+
+    if ! cmp -s src/fpl2cc/fpl.h src/fpl2cc/fpl_parser.h
+    then
+        # the parser header did in fact change, so install it
+        # and loop to run scons again to make sure fpl2cc has
+        # the latest.
+        cp src/fpl2cc/fpl.h src/fpl2cc/fpl_parser.h
+    else
+        # no change to the header.  if the normals scons build
+        # still fails, then it's no use carrying on.
+        scons || exit 1
+
+        # .. but if it worked, everything is up to date.
+        break
+    fi
+
+done
+
+exit 0
+

@@ -5,6 +5,10 @@ env = env.Clone()
 
 env.Program('#bin/fpl2cc', [ 'fpl2cc.cc', ])
 
+# fpl2cc is precious so that if we break fpl_parser.h
+# we can still recreate it (with fpl2cc):
+env.Precious('#bin/fpl2cc')
+
 env.Fpl2h('fpl.fpl')
 # env.Program('#bin/fpl', [ 'fpl.cc', ])
 

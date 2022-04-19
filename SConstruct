@@ -9,7 +9,7 @@ debugger = ''
 
 fpl_include = ' --src-path=src/fpl2cc/grammarlib '
 
-SetOption('num_jobs', 4)
+#SetOption('num_jobs', 4) # XXX re-add
 
 ccflags = ''
 if debugger : ccflags += " -g"
@@ -39,8 +39,6 @@ env = Environment(
 # fake "Scanner" to make it so that cc files generated
 # by fpl files implicitly depend on fpl2cc:
 def depend_on_fpl2cc(node, env, path) :
-    # print('sub faking a depend for node: {node} env: {env} path: {path}')
-    # print('node ' + str(node) + ' depends on fpl2cc so it\'s probably fpl')
     return [ '#bin/fpl2cc' ]
 
 env.Append(
