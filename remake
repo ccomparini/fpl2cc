@@ -10,22 +10,18 @@
 
 while : ;
 do
-    # run scons once, but if it fails, plow on anyway because
-    # it might be due to busted fpl_parser.h....
-    scons
-
-    # .. which we will now try to regenerate, using the last
-    # version of fpl2cc:
+    # make a new fpl.h, using whatever version of fpl2cc is around:
     bin/fpl2cc --src-path=src/fpl2cc/grammarlib src/fpl2cc/fpl.fpl --out src/fpl2cc/fpl.h || exit 1
 
     if ! cmp -s src/fpl2cc/fpl.h src/fpl2cc/fpl_parser.h
     then
-        # the parser header did in fact change, so install it
-        # and loop to run scons again to make sure fpl2cc has
-        # the latest.
+        # the new fpl.h did change from whatever we last compiled
+        # with, so copy it, recompile, and loop again to try to
+        # get an fpl2pp with whatever those changes were:
         cp src/fpl2cc/fpl.h src/fpl2cc/fpl_parser.h
+        scons  # (compile and try again)
     else
-        # no change to the header.  if the normals scons build
+        # no change to the header.  if the normal scons build
         # still fails, then it's no use carrying on.
         scons || exit 1
 

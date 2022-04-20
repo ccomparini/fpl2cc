@@ -43,9 +43,9 @@ static int num_warnings = 0;
 void warn(const std::string &msg) {
     // indent warnings so that errors stand out:
     if(msg[msg.length() - 1] != '\n') {
-        fprintf(stderr, "       warning: %s\n", msg.c_str());
+        fprintf(stderr, "    warning: %s\n", msg.c_str());
     } else {
-        fprintf(stderr, "       warning: %s", msg.c_str());
+        fprintf(stderr, "    warning: %s", msg.c_str());
     }
 
     num_warnings++;
@@ -676,6 +676,9 @@ struct ProdExpr { // or step?
             out += "}";
         }
 
+        if(varname.length())
+            out += ":" + varname;
+
         if(eject)
             out += "^";
 
@@ -898,6 +901,40 @@ public:
         return out;
     }
 };
+
+std::string why_cant_use_reducer(const Reducer &red, const ProductionRule &rule) {
+    if(red.production_name != rule.product()) {
+        return stringformat(
+            "different products ({} vs {})", 
+            red.production_name, rule.product()
+        );
+    }
+
+    // check if there are any variables in the reducer which
+    // don't match steps in the rule:
+    std::set<std::string> unknown_vars = red.args;
+    for(int stepi = 0; stepi < rule.num_steps(); ++stepi) {
+        const ProdExpr *step = rule.step(stepi);
+        if(step) {
+            // this one matches, so remove it from the set:
+            unknown_vars.erase(step->variable_name());
+        }
+    }
+    int num_unk = unknown_vars.size();
+    if(num_unk > 0) {
+        std::string unks;
+        bool did = false;
+        for(auto unk : unknown_vars) {
+            if(did) unks += ", ";
+            unks += unk;
+            did = true;
+        }
+        return stringformat("rule has no steps matching '{}'", unks);
+    }
+
+    // no reason this can't be a match!
+    return "";
+}
 
 // returns the number of matching parameters.
 // used to determine which rule the reducer
@@ -1946,6 +1983,28 @@ debug_hook();
         return out;
     }
 
+    std::string rule_meta_argname(const ProductionRule &rule) const {
+        std::string out =
+            "static const char *argname(unsigned int argi) {\n"
+            "    static const char *an[] = {\n"
+        ;
+
+        for(int sti = 0; sti < rule.num_steps(); ++sti) {
+            if(const ProdExpr *st = rule.step(sti)) {
+                if(sti > 0) out += ", ";
+                out += "    \"" + st->variable_name() + "\"\n";
+            }
+        }
+        out += "    };\n";
+        out += "    if(argi < " + std::to_string(rule.num_steps()) + ") {\n";
+        out += "        return an[argi];\n";
+        out += "    } else {\n";
+        out += "        return \"arg index out of bounds\";\n";
+        out += "    }\n";
+        out += "}\n";
+        return out;
+    }
+
     #define rule_meta_str(mem) \
         std::string("static const char *" #mem "() {\n") +\
             "return \"" + c_str_escape(rule.mem()) + "\";\n" \
@@ -1954,7 +2013,7 @@ debug_hook();
         std::string("static int " #mem "() {\n") +\
             "return " + std::to_string(rule.mem()) + ";\n" \
         "}\n"
-    std::string rule_metadata(const ProductionRule &rule) {
+    std::string rule_metadata(const ProductionRule &rule) const {
         std::string out;
         out += "struct {\n";
         out += rule_meta_str(product);
@@ -1963,6 +2022,7 @@ debug_hook();
         out += rule_meta_str(filename);
         out += rule_meta_str(location);
         out += rule_meta_str(to_str);
+        out += rule_meta_argname(rule);
         out += "} this_rule;\n";
         return out;
     }
@@ -2687,12 +2747,22 @@ debug_hook();
 
     void apply_reducers() {
         for(auto reducer : reducers) {
+            std::string why_no_match;
+            
             const std::string &pname = reducer.production_name;
             auto rulei_0 = rules_for_product.lower_bound(pname);
             auto rulei_l = rules_for_product.upper_bound(pname);
             bool used = false;
             for(auto rit = rulei_0; rit != rulei_l; ++rit) {
                 ProductionRule &rule = rules[rit->second];
+
+                std::string why_not = why_cant_use_reducer(reducer, rule);
+                if(why_not.length()) {
+                    why_no_match += stringformat(
+                        "\n        {}: {}", rule.to_str(), why_not
+                    );
+                    continue;
+                }
 
                 int existing_mc = -1;
                 Reducer existing = rule.reducer();
@@ -2716,11 +2786,17 @@ debug_hook();
                 }
             }
 
+            // note this _won't_ warn if we just overwrote an existing
+            // reducer to the point where it's no longer used... hmmm..
             if(!used) {
-                // oh hmm this _won't_ warn if we just overwrote an existing
-                // reducer to the point where it's no longer used.......
+                if(rulei_0 == rulei_l) {
+                    why_no_match = stringformat(
+                        "nothing produces {}", reducer.production_name
+                    );
+                }
                 warn(stringformat(
-                    "reducer {} doesn't match any rules", reducer.to_str()
+                    "reducer {} doesn't match any rules: {}\n",
+                    reducer.to_str(), why_no_match
                 ));
             }
         }
@@ -2838,10 +2914,7 @@ debug_hook();
             if(CodeBlock rc = reduce_action(opts, rule)) {
                 out += rc.format();
             } else {
-                // push_front because typically the earlier rules
-                // depend on the later ones, so they'll want to fix
-                // the later missing actions first:
-                missing_actions.push_front(stringformat(
+                missing_actions.push_back(stringformat(
                     "{}\t{}\n", rule.location(), hypothetical_reducer(rule)
                 ));
             }

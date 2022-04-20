@@ -44,19 +44,21 @@ public:  // XXX this is a terible hack - make a reasonable way
                                // language independent
 }+
 
-@type_for match_expression GrammarElement
-+production_name(term_0) +{
-    return GrammarElement(term_0, GrammarElement::Type::NONTERM_PRODUCTION);
+@type_for grammar_element GrammarElement
++grammar_element(production_name) +{
+    return GrammarElement(
+        production_name, GrammarElement::Type::NONTERM_PRODUCTION
+    );
 }+
 
 # src/fpl2cc/grammarlib/fpl.fpl:69
-+regex(term_0) +{
-    return GrammarElement(term_0, GrammarElement::Type::TERM_REGEX);
++grammar_element(regex) +{
+    return GrammarElement(regex, GrammarElement::Type::TERM_REGEX);
 }+
 
 # src/fpl2cc/grammarlib/fpl.fpl:67
-+exact_match(term_0) +{
-    return GrammarElement(term_0, GrammarElement::Type::TERM_EXACT);
++grammar_element(exact_match) +{
+    return GrammarElement(exact_match, GrammarElement::Type::TERM_EXACT);
 }+
 
 # quantifiers:
@@ -67,21 +69,21 @@ public:  // XXX this is a terible hack - make a reasonable way
 
 # src/fpl2cc/grammarlib/fpl.fpl:73
 @type_for step ProdExpr
-+step(match_expression quantifier) +{
-    return ProdExpr(match_expression, quantifier.min, quantifier.max);
++step(grammar_element quantifier) +{
+    return ProdExpr(grammar_element, quantifier.min, quantifier.max);
 }+
 
 # src/fpl2cc/grammarlib/fpl.fpl:69
-# hmm default name was "step", but we want steps... I guess
-# fix that when we can assign names in the pure
 @type_for rule ProductionRule
 +rule(steps production_name code_block) +{
     // step base_parser
     ProductionRule rule(start_pos.filename(), start_pos.line_number());
 
-    for(auto st : steps) {
-        add_step(st);
+    // for(auto st : steps) { // grr support iterators somehow
+    for(int sti = 0; sti < steps.count(); ++sti) {
+        rule.add_step(steps[sti]);
     }
+
     rule.code(code_block);
 
     return rule;
@@ -92,6 +94,10 @@ public:  // XXX this is a terible hack - make a reasonable way
     return CodeBlock(code, start_pos.filename(), start_pos.line_number());
 }+
 
++code_block(no_code) +{
+    return CodeBlock::none;
+}+
+
 # src/fpl2cc/grammarlib/fpl.fpl:48
 +import(filename) +{
     #warning "import not implemented"
@@ -99,32 +105,32 @@ public:  // XXX this is a terible hack - make a reasonable way
     return stringformat("@import {} fail - unimplemented\n");
 }+
 
-# src/fpl2cc/grammarlib/fpl.fpl:44
-+directive_separator(code_block) +{
-    productions->set_separator_code(code_block);
-    return "@separator";
+# src/fpl2cc/grammarlib/fpl.fpl:37
++directive(comment_style) +{
+    productions->add_comment_style(comment_style,
+        start_pos.filename(), start_pos.line_number()
+    );
+    return "@comment_style";
 }+
 
-# src/fpl2cc/grammarlib/fpl.fpl:43
-+directive_produces(arg_0) +{
-    productions->set_reduce_type(arg_0);
-    return "@produces";
+# src/fpl2cc/grammarlib/fpl.fpl:38
++directive(default_action) +{
+    productions->set_default_action(default_action);
+    return "@default_action";
 }+
 
-# src/fpl2cc/grammarlib/fpl.fpl:42
-+directive_post_parse(code_block) +{
-    productions->set_post_parse(code_block);
-    return "@post_parse";
-}+
-
-# src/fpl2cc/grammarlib/fpl.fpl:41
-+directive_internal(code_block) +{
-    productions->add_internal(code_block);
-    return "@internal";
+# src/fpl2cc/grammarlib/fpl.fpl:39
++directive(default_main) +{
+    bool dm = false;
+    if(default_main.exists()) {
+        dm = default_main[0].term_str();
+    }
+    productions->set_default_main(dm);
+    return "@default_main";
 }+
 
 # src/fpl2cc/grammarlib/fpl.fpl:40
-+directive_grammar(filename) +{
++directive(grammar_name) +{
     #warning "@grammar not implemented"
     // XXX what we need here:
     //   - not to need options.  only for path, anyway?
@@ -134,23 +140,27 @@ public:  // XXX this is a terible hack - make a reasonable way
     return "@grammar";
 }+
 
-# src/fpl2cc/grammarlib/fpl.fpl:39
-+directive_default_main() +{
-    productions->set_default_main(true);
-    return "@default_main";
+# src/fpl2cc/grammarlib/fpl.fpl:41
++directive(internal_code) +{
+    productions->add_internal(internal_code);
+    return "@internal";
 }+
 
-# src/fpl2cc/grammarlib/fpl.fpl:38
-+directive_default_action(code_block) +{
-    productions->set_default_action(code_block);
-    return "@default_action";
+# src/fpl2cc/grammarlib/fpl.fpl:42
++directive(post_parse) +{
+    productions->set_post_parse(post_parse);
+    return "@post_parse";
 }+
 
-# src/fpl2cc/grammarlib/fpl.fpl:37
-+directive_comment_style(style) +{
-    productions->add_comment_style(style,
-        start_pos.filename(), start_pos.line_number()
-    );
+# src/fpl2cc/grammarlib/fpl.fpl:43
++directive(produces) +{
+    productions->set_reduce_type(produces);
+    return "@produces";
+}+
+
++directive(separator_code) +{
+    productions->set_separator_code(separator_code);
+    return "@separator";
 }+
 
 @type_for items Productions*
