@@ -15,6 +15,7 @@
 
 #include "searchpath.h"
 #include "fpl_reader.h"
+#include "util/c_str_escape.h"
 #include "util/fs.h"
 #include "util/src_location.h"
 
@@ -437,25 +438,6 @@ struct CodeBlock {
 };
 
 const CodeBlock CodeBlock::none;
-
-/*
-   Returns a version of the string passed which is suitable for
-   embedding in a c (or c++) program
- */
-std::string c_str_escape(const std::string src) {
-    std::string escaped;
-    for(const char &inch : src) {
-        // escape quotes and backslashes so that they make
-        // it through the c compiler without prematurely
-        // terminating the string:
-        if(inch == '"' || inch == '\\') {
-            escaped += '\\';
-        } // else normal char
-
-        escaped += inch;
-    }
-    return escaped;
-}
 
 /*
 
