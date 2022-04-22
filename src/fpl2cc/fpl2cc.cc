@@ -2996,8 +2996,7 @@ debug_hook();
 ExitVal fpl2cc(const Options &opts) {
     if(opts.src_fpl.size() == 0)
         fail("Error:  no source fpl specified");
-    std::string src = opts.src_path.find(opts.src_fpl);
-    auto inp = make_shared<fpl_reader>(src, fail);
+    auto inp = make_shared<fpl_reader>(opts.src_fpl, fail);
 
     // parse the input file into a set of productions:
     Productions productions(inp); // XXX don't pass inp here
