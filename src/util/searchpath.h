@@ -36,6 +36,16 @@ public:
         return initialized;
     }
 
+    std::string to_str() const {
+        std::string out;
+        for(auto el : directories) {
+            if(out.length() > 0) 
+                out += ":";
+            out += el;
+        }
+        return out;
+    }
+
     void append(const fs::path &element) {
         initialized = true;
         directories.push_back(element);
