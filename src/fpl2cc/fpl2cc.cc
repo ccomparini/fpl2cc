@@ -474,8 +474,6 @@ max case, infinite).
 
 struct GrammarElement {
     std::string expr; // either a string, regex, or name of product
-// XXX maybe get rid of no_separator_after and just look for the "no separator" following
-    bool no_separator_after; // terminal only - if set, disallow trailing separator
     typedef enum {
         NONE,
         TERM_EXACT,
@@ -501,7 +499,7 @@ struct GrammarElement {
     }
 
     GrammarElement(const std::string &str, Type tp)
-        : expr(str), type(tp), no_separator_after(false) { }
+        : expr(str), type(tp) { }
 
     // returns a negative, 0, or positive value depending on
     // if this element can be considered <, ==, or > than the
@@ -511,12 +509,6 @@ struct GrammarElement {
         if(cmp == 0) {
             cmp = expr.compare(other.expr);
 
-            // for terminals, if they specify no separator after, we just
-            // make a new terminal and check for separator after we do
-            // the match.  so, in the case of terminals, we distiunguish:
-            if((cmp == 0) && is_terminal()) {
-                cmp = other.no_separator_after - no_separator_after;
-            }
         }
         return cmp;
     }
@@ -575,8 +567,6 @@ struct GrammarElement {
         out += expr;
         out += rb;
 
-        if(no_separator_after)
-            out += "~";
 
         return out;
     }
@@ -2179,8 +2169,7 @@ debug_hook();
                    ", " + el_id
                  + ", " + std::to_string(expr.min_times)
                  + ", " + std::to_string(expr.max_times)
-                 + ", &" + state_fn(next_state, true)
-                 + (expr.gexpr.no_separator_after?", NO_SEPARATOR":"");
+                 + ", &" + state_fn(next_state, true);
         } else {
             return expr.gexpr.nonterm_id_str()
                  + ", " + std::to_string(expr.min_times)
@@ -2895,7 +2884,6 @@ debug_hook();
         out += "    using State = FPLBP::State;\n";
         out += "    using Product = FPLBP::Product;\n";
         out += "    using StackEntry = FPLBP::StackEntry;\n";
-        out += "    static const bool NO_SEPARATOR = false;\n";
         out += "    FPLBP base_parser;\n";
         for(auto mem : parser_members) {
             out += mem.format();
