@@ -325,6 +325,7 @@ struct Options {
         std::string out;
 
         out += "    src: " + src_fpl + "\n";
+        out += "    src_path: " + src_path.to_str() + "\n";
         out += "    output: " + output_fn + "\n";
         out += "    generate_main: " + ::to_str(generate_main) + "\n";
         out += "    debug: " + ::to_str(debug) + "\n";
@@ -373,9 +374,11 @@ struct CodeBlock {
       describing what went wrong.
      */
     static CodeBlock from_file(
-        const std::string &filename,
+        const std::string &in_filename,
+        const Searchpath &search,
         const std::string &context_fn, int context_ln
     ) {
+        std::string filename = search?search.find(in_filename):in_filename;
         std::ifstream in(filename);
         if(!in.is_open()) {
             return CodeBlock(
@@ -936,8 +939,7 @@ class Productions {
     CodeBlock default_action;
     CodeBlock post_parse;
     CodeBlock post_reduce;
-    CodeBlock separator_code;
-    std::list<CodeBlock> comment_code;
+    std::list<CodeBlock> separator_code;
     bool default_main;
     std::list<CodeBlock> preamble;
     std::list<CodeBlock> parser_members;
@@ -1312,6 +1314,10 @@ public:
         return code;
     }
 
+    void add_separator_code(const CodeBlock &code) {
+        separator_code.push_back(code);
+    }
+
     void add_comment_style(const std::string &style,
         const std::string &context_fn, int context_ln
     ) {
@@ -1319,8 +1325,8 @@ public:
         fs::path fn(__FILE__);
         fn.replace_filename("comment/" + style + ".inc");
 
-        comment_code.push_back(
-            CodeBlock::from_file(fn, context_fn, context_ln)
+        add_separator_code(
+            CodeBlock::from_file(fn, Searchpath(), context_fn, context_ln)
         );
     }
 
@@ -1328,16 +1334,12 @@ public:
     void set_default_action(const std::string &rt) { default_action = rt; }
     void set_post_parse(const CodeBlock &cb)       { post_parse = cb; }
     void set_post_reduce(const CodeBlock &cb)      { post_reduce = cb; }
-    void set_separator_code(const CodeBlock &cb)   { separator_code = cb; }
     void set_default_main(bool def)                { default_main = def; }
     void add_internal(const CodeBlock &cb)         { parser_members.push_back(cb); }
 
-    // TODO perhaps mark the ones of these which are inherently
-    // non-portable with respect to generated language.
-    // (perhaps can be done with a counter on the number of
-    // +{ }+ code blocks parsed?)
     void parse_directive(const Options &opts, const std::string &dir) {
         if(dir == "comment_style") {
+            // this is a near synonym with @separator
             int line_num = inp->line_number();
             std::string style = inp->read_re("\\s*(.+)\\s*")[1];
             if(!style.length()) {
@@ -1370,15 +1372,32 @@ public:
             // HEY can this scan a pointer correctly? I think not.
             reduce_type = inp->read_re("\\s*(.+)\\s*")[1];
         } else if(dir == "separator") {
-            if(separator_code)
-                warn("@separator overrides existing separator code\n");
-            separator_code = code_for_directive(dir);
+            // XXX rename this to "elide" and use for both comments and other
+            CodeBlock code = read_code(*inp);
+            if(!code) {
+                // expect the name of a file with the code:
+                std::string fn = inp->read_re("\\s*(.+)\\s*")[1];
+                if(fn.length() == 0) {
+                    fail(stringformat("expected filename or code block"));
+                } else {
+                    code = CodeBlock::from_file(
+                        fn + ".inc", opts.src_path,
+                        inp->filename(), inp->line_number()
+                    );
+                }
+            }
+            if(!code) {
+                // I just don't even know what to say here.
+                // moving on;  make this make more sense on parser rewrite
+                fail("no luck getting separator code");
+            } else {
+                add_separator_code(code);
+            }
         } else if(dir == "type_for") {
             inp->eat_separator();
             std::string prod = read_production_name();
             inp->eat_separator();
             std::string type = inp->read_re(".*")[0];
-//fprintf(stderr, "%s\n", stringformat("type for prod '{}' is {}\n", prod, type).c_str());
             if(prod.length() && type.length()) {
                 type_for_product[prod] = type;
             } else {
@@ -1650,10 +1669,7 @@ public:
 
          size_t start = src.current_position();
          if(!src.read_exact_match("+{")) {
-             src.error(stringformat(
-                 "expected start of code (\"+{{\") but got «{}»",
-                 src.debug_peek()
-             ));
+             // no code - return a false value
              return CodeBlock();
          }
 
@@ -1731,7 +1747,7 @@ public:
         }
 
         Reducer reducer;
-        reducer.production_name =read_production_name();
+        reducer.production_name = read_production_name();
         if(reducer.production_name.length() == 0) {
             inp->error("expected production name after '+'");
             return;
@@ -1739,6 +1755,13 @@ public:
 
         reducer.args = parse_argdecl();
         reducer.code = read_code(*inp);
+
+        if(!reducer.code) {
+             inp->error(stringformat(
+                 "expected start of code (\"+{{\") but got «{}»",
+                 inp->debug_peek()
+             ));
+        }
 
         reducers.push_back(reducer);
     }
@@ -1790,8 +1813,15 @@ public:
                     // next we expect either ';' or a code block.
                     // if it's ';' we read it and move on;  otherwise
                     // it's a code block for the rule.
-                    if(!inp->read_byte_equalling(';'))
+                    if(!inp->read_byte_equalling(';')) {
                         rule.code(read_code(*inp));
+                        if(!rule.code()) {
+                            inp->error(stringformat(
+                                "expected ';' or code block for rule {}",
+                                rule.to_str()
+                            ));
+                        }
+                    }
 
                     push_rule(rule);
                 }
@@ -2545,20 +2575,16 @@ debug_hook();
             "static size_t separator_length(const utf8_byte *inp) {\n"
         );
 
-        if(separator_code) {
-            out += separator_code.format_scoped();
-        } else {
+        if(separator_code.size() == 0) {
             // default is space separation:
-            // (maybe make this explicit?)
-            out += CodeBlock(
-                "if(size_t len = space_length(inp)) {\nreturn len;\n}\n"
-            );
+            add_separator_code(CodeBlock(
+                "return space_length(inp);\n"
+            ));
         }
 
-        // Comments are effectively separators so code for them
-        // gets tacked on here:
-        for(auto comc : comment_code) {
-            out += comc.format_scoped();
+        // Comments/separators:
+        for(auto sepc : separator_code) {
+            out += sepc.format_scoped();
         }
 
         // if nothing returned a length yet, no separator
@@ -2824,7 +2850,9 @@ debug_hook();
         out += " */\n\n";
 
         for(auto fn : opts.impl_sources) {
-            out += CodeBlock::from_file(fn, "(command line)", 1).format();
+            out += CodeBlock::from_file(
+                fn, opts.src_path, "(command line)", 1
+            ).format();
         }
 
         generate_states(goal); // XXX move me.
