@@ -11,7 +11,7 @@ debugger = ''
 
 fpl_include = ' --src-path=src/fpl2cc/grammarlib '
 
-SetOption('num_jobs', 4) # XXX re-add
+SetOption('num_jobs', 4)
 
 ccflags = ''
 if debugger : ccflags += " -g"
@@ -63,7 +63,7 @@ def sources_are_same(target, source, env):
         with open(fn.abspath) as f: contents = f.readlines()
         if last_contents is not None:
             if contents != last_contents:
-                sys.stderr.write("MISMATCH: {a} vs {b}\n".format(a=fn.path, b=last_fn.path))
+                sys.stderr.write("MISMATCH: {a} {b}\n".format(a=fn.path, b=last_fn.path))
                 return 1
         last_contents = contents
         last_fn = fn
@@ -101,6 +101,24 @@ env.Append(BUILDERS =
 	         suffix = '.jest',
 	         src_suffix = '.fpl') } )
 
+# another fake "Scanner" to make it so that headers generated
+# from .jemp sources depend on jemplate.
+# there must be a simpler way to do this...
+def depend_on_jemplate(node, env, path) :
+    return [ '#bin/jemplate' ]
+env.Append(
+    SCANNERS = Scanner(
+        function = depend_on_jemplate,
+        skeys = ['.jemp']
+    )
+)
+
+
+# jemp -> h builder
+env.Append(BUILDERS =
+    { 'Jemp2h' : Builder(action = 'bin/jemplate $SOURCE > $TARGET',
+	         suffix = '.h',
+	         src_suffix = '.jemp') } )
 
 SConscript('src/util/SConstruct', 'env');
 SConscript('src/fpl2cc/SConstruct', 'env');
