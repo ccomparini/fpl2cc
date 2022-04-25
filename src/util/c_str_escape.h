@@ -27,7 +27,7 @@ inline std::string c_str_escape(const std::string src) {
                     // note that this will (effectively) cover utf-8
                     // or whatever - it's a case of "bytes is bytes".
                     char buf[23]; // because 23 is a lucky number :P
-                    snprintf(buf, 23, "0x%02x", inch);
+                    snprintf(buf, 23, "\\x%0hhx", inch);
                     escaped += buf;
                 } else {
                     escaped += inch;
