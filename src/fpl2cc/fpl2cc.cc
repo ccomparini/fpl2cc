@@ -2060,7 +2060,8 @@ debug_hook();
         out += "// " + rule.to_str() + "\n";
         out += rule_metadata(rule) + "\n";
         out += "FPLBP::SourcePosition start_pos(base_parser, args[0].position);\n";
-        out += "FPLBP::SourcePosition end_pos(base_parser, args[-1].position);\n";
+        out += "FPLBP::SourcePosition end_pos(base_parser, base_parser.position());\n";
+//out += "fprintf(stderr, \"%s\\n\", stringformat(\"{} {} from '{}'\", this_rule.name(), this_rule.product(), base_parser.const_reader()->debug_peek(args[0].position, base_parser.position() - args[0].position)).c_str());\n";
         Reducer reducer = rule.reducer();
         if(reducer) {
             // abstracted implementation (1):
