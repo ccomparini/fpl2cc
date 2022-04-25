@@ -754,6 +754,13 @@ public:
         return stringformat("rule_{}", rulenum);
     }
 
+    // makes a better rule_meta method; probably a better
+    // name in general, but I'm keeping rule_fn for now
+    // because it's more grepable.
+    std::string name() const {
+        return rule_fn();
+    }
+
     void add_step(ProdExpr step) {
         rsteps.push_back(step);
     }
@@ -2018,6 +2025,7 @@ debug_hook();
     std::string rule_metadata(const ProductionRule &rule) const {
         std::string out;
         out += "struct {\n";
+        out += rule_meta_str(name);
         out += rule_meta_str(product);
         out += rule_meta_int(num_steps);
         out += rule_meta_int(line_number);
