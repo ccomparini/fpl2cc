@@ -273,12 +273,11 @@ struct Options {
                         single_step = true;
                     } else if(opt == "debug-dump-states") {
                         dump_states = true;
-                    } else if(opt == "entry") {
-                        // specifies an entry rule (i.e. a parsing
-                        // starting point)
+                    } else if(opt == "goal") {
+                        // specifies what we want out of this parser.
                         SCAN_VALUE();
                         if(val.empty())
-                            errors.push_back("--entry requires a value.");
+                            errors.push_back("--goal requires a value.");
                         entry_points.push_back(std::string(val));
                     } else if(opt == "generate-main") {
                         generate_main = true;
@@ -331,9 +330,9 @@ struct Options {
         out += "    debug: " + ::to_str(debug) + "\n";
         out += "    single_step: " + ::to_str(single_step) + "\n";
         if(entry_points.size() > 0) {
-            out += "    entry points:\n";
-            for(auto entry : entry_points) {
-                out += "        " + entry + "\n";
+            out += "    goals:\n";
+            for(auto goal : entry_points) {
+                out += "        " + goal + "\n";
             }
         }
         if(impl_sources.size()) {
@@ -2662,7 +2661,7 @@ debug_hook();
             auto endrl = rules_for_product.upper_bound(entry_prod);
             if(strl == endrl) {
                 fail(stringformat(
-                    "Can't find entry rule for '{}'\n", entry_prod
+                    "Can't find rule for goal '{}'\n", entry_prod
                 ));
             }
             for(auto rit = strl; rit != endrl; ++rit) {
@@ -2854,7 +2853,7 @@ debug_hook();
             // no particular goal products specified, so we default
             // to whatever the first rule produces:
             goal.push_back(rules[0].product());
-            out += "default entry point: " + rules[0].product() + "\n";
+            out += "\n default goal: " + rules[0].product() + "\n";
         }
         out += " */\n\n";
 
@@ -3048,7 +3047,7 @@ void usage() {
     fprintf(stderr, "        --debug - emebed debug blather in target code\n");
     fprintf(stderr, "        --debug-single-step - as above plus pauses\n");
     fprintf(stderr, "        --debug-dump-states - print generated states\n");
-    fprintf(stderr, "        --entry=<product> - specify a target production\n");
+    fprintf(stderr, "        --goal=<product> - specify a target production\n");
     fprintf(stderr, "        --generate-main - generate main() function\n");
     fprintf(stderr, "        --help - show this page\n");
     fprintf(stderr, "        --out=<fn> - write to fn instead of stdout\n");
