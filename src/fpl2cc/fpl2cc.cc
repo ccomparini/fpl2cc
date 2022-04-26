@@ -948,6 +948,7 @@ class Productions {
     CodeBlock post_reduce;
     std::list<CodeBlock> separator_code;
     bool default_main;
+    CodeBlock main_guts;
     std::list<CodeBlock> preamble;
     std::list<CodeBlock> parser_members;
     std::list<std::string> goal; // goal is any of these
@@ -1313,11 +1314,51 @@ public:
 
     // expects/scans a +{ }+ code block for the named directive.
     // the named directive is essentially for error reporting.
-    inline CodeBlock code_for_directive(const std::string &dir) {
-        CodeBlock code = read_code(*inp);
-        if(!code) {
-            fail(stringformat("expected a code block for @{}\n", dir));
+    enum code_source{
+        INLINE = 1,
+        LIB    = 2,
+        REGEX  = 4,
+
+        INLINE_OR_LIB = 3,
+    };
+    inline CodeBlock code_for_directive(
+        const std::string &dir, code_source allowed_src = INLINE
+    ) {
+
+        CodeBlock code;
+        if(allowed_src | INLINE) {
+            code = read_code(*inp);
         }
+
+        if(!code && (allowed_src | LIB)) {
+            // expect the name of a file with the code:
+            std::string fn = inp->read_re("\\s*(.+)\\s*")[1];
+            if(fn.length() > 0) {
+                code = CodeBlock::from_file(
+                    fn + ".inc", opts.src_path,
+                    inp->filename(), inp->line_number()
+                );
+            }
+        }
+
+        if(!code && (allowed_src | REGEX)) {
+            fail("XXX FIXME ALLOW REGEX LENGTH");
+        }
+
+        if(!code) {
+            std::string errm;
+            if(allowed_src) {
+                errm = stringformat("expected code for directive {}", dir);
+            } else {
+                errm = stringformat(
+                    "Internal error: "
+                    "code for directive {} not allowed from anything",
+                    dir
+                );
+            }
+            fail(errm);
+        }
+
         return code;
     }
 
@@ -1357,6 +1398,7 @@ public:
         } else if(dir == "default_action") {
             default_action = code_for_directive(dir);
         } else if(dir == "default_main") {
+            // XXX kill this
             default_main = true;
         } else if(dir == "grammar") {
             // import the grammar from another fpl (or a library)
@@ -1371,6 +1413,8 @@ public:
             if(CodeBlock mem = code_for_directive(dir)) {
                 parser_members.push_back(mem);
             }
+        } else if(dir == "main") {
+            main_guts = code_for_directive(dir, code_source::INLINE_OR_LIB);
         } else if(dir == "post_parse") {
             post_parse = code_for_directive(dir);
         } else if(dir == "post_reduce") {
@@ -1379,27 +1423,9 @@ public:
             // HEY can this scan a pointer correctly? I think not.
             reduce_type = inp->read_re("\\s*(.+)\\s*")[1];
         } else if(dir == "separator") {
-            // XXX rename this to "elide" and use for both comments and other
-            CodeBlock code = read_code(*inp);
-            if(!code) {
-                // expect the name of a file with the code:
-                std::string fn = inp->read_re("\\s*(.+)\\s*")[1];
-                if(fn.length() == 0) {
-                    fail(stringformat("expected filename or code block"));
-                } else {
-                    code = CodeBlock::from_file(
-                        fn + ".inc", opts.src_path,
-                        inp->filename(), inp->line_number()
-                    );
-                }
-            }
-            if(!code) {
-                // I just don't even know what to say here.
-                // moving on;  make this make more sense on parser rewrite
-                fail("no luck getting separator code");
-            } else {
-                add_separator_code(code);
-            }
+            add_separator_code(
+                code_for_directive(dir, code_source::INLINE_OR_LIB)
+            );
         } else if(dir == "type_for") {
             inp->eat_separator();
             std::string prod = read_production_name();
@@ -2061,7 +2087,6 @@ debug_hook();
         out += rule_metadata(rule) + "\n";
         out += "FPLBP::SourcePosition start_pos(base_parser, args[0].position);\n";
         out += "FPLBP::SourcePosition end_pos(base_parser, base_parser.position());\n";
-//out += "fprintf(stderr, \"%s\\n\", stringformat(\"{} {} from '{}'\", this_rule.name(), this_rule.product(), base_parser.const_reader()->debug_peek(args[0].position, base_parser.position() - args[0].position)).c_str());\n";
         Reducer reducer = rule.reducer();
         if(reducer) {
             // abstracted implementation (1):
@@ -2956,6 +2981,10 @@ debug_hook();
 
         if(opts.generate_main || default_main) {
             out += default_main_code(parser_class);
+        } else if(main_guts) {
+            out += "int main(int argc, const char **argv) {\n";
+            out += main_guts.format();
+            out += "}\n\n";
         }
 
         report_unused_rules();

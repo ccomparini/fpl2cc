@@ -84,7 +84,7 @@ for fpl in fpls :
     # .. and, the language program is built from <lang>.fpl AND
     # any <lang>.impl.* files, which can be in other languages
     #env.Fpl2CC(language + '.cc', [ langprog + '.fpl', Glob(langprog + ".impl.*") ], FPLOPTS="--generate-main --debug-single-step")
-    env.Fpl2CC(language + '.cc', [ langprog + '.fpl', Glob(langprog + ".impl.*") ], FPLOPTS="--generate-main")
+    env.Fpl2CC(language + '.cc', [ langprog + '.fpl', Glob(langprog + ".impl.*") ])
     # use this one to test the fpl based parser:
     # env.Fpl2CC(language + '.cc', [ langprog + '.fpl', Glob(langprog + ".impl.*") ], FPLOPTS="--generate-main --new-parser")
     #env.Fpl2CC(language + '.cc', [ langprog + '.fpl', Glob(langprog + ".impl.*") ], FPLOPTS="--generate-main --debug-single-step")
