@@ -937,7 +937,8 @@ int matchcount(const Reducer &red, const ProductionRule &rule) {
 }
 
 class Productions {
-    fpl_reader_p inp;
+    fpl_reader_p  inp;
+    const Options opts;
 
     std::string reduce_type; // default reduce type
     std::map<std::string, std::string> type_for_product; // (reduce type for particular product)
@@ -1282,8 +1283,8 @@ public:
 
 // XXX this is currently stupid in that you pass the fpl_reader
 // but then you have to make a separate call to parse it.  fix that.
-    Productions(std::shared_ptr<fpl_reader> src) :
-        inp(src), default_main(false)
+    Productions(const Options &options, std::shared_ptr<fpl_reader> src) :
+        inp(src), opts(options), default_main(false)
     {
         // element 0 is a null element and can be used to
         // indicate missing/uninitialized elements or such.
@@ -1343,7 +1344,7 @@ public:
     void set_default_main(bool def)                { default_main = def; }
     void add_internal(const CodeBlock &cb)         { parser_members.push_back(cb); }
 
-    void parse_directive(const Options &opts, const std::string &dir) {
+    void parse_directive(const std::string &dir) {
         if(dir == "comment_style") {
             // this is a near synonym with @separator
             int line_num = inp->line_number();
@@ -1361,7 +1362,7 @@ public:
             // import the grammar from another fpl (or a library)
             std::string grammar = inp->read_re("\\s*(.+)\\s*")[1];
             grammar += ".fpl";
-            import_grammar(opts, grammar);
+            import_grammar(grammar);
         } else if(dir == "internal") {
             // a code block which goes in the "private" part
             // of the parser class itself.  This is either
@@ -1530,7 +1531,7 @@ public:
 
         // XXX use options search path
 
-        Productions subs(inp);
+        Productions subs(opts, inp);
         if(!subs.reduce_type.length()) {
             // the imported fpl doesn't specify that it produces any
             // particular type(s), so we tell it to produce what we want:
@@ -1545,7 +1546,7 @@ public:
     // a grammar, without any specific code implementation,
     // from a file with specific application code.  and, actually you
     // can do this regardless of if the thing being imported is "pure".
-    void import_grammar(const Options &opts, const std::string gname) {
+    void import_grammar(const std::string gname) {
         Searchpath searchp = opts.src_path;
         searchp.prepend(inp->input_dir());
         std::string src = opts.src_path.find(gname);
@@ -1554,8 +1555,8 @@ public:
         // able to parse directly into our own productions from
         // the input file.  but.. whatevs - make it work.
 // XXX FIXME pass inp to parse_fpl instead of constructor
-        Productions sub(inp);
-        sub.parse_fpl(opts);
+        Productions sub(opts, inp);
+        sub.parse_fpl();
 
         // import the rules from the sub, which will create the
         // corresponding elements:
@@ -1772,7 +1773,7 @@ public:
         reducers.push_back(reducer);
     }
 
-    void parse_fpl(const Options &opts) {
+    void parse_fpl() {
         do {
             inp->eat_separator();
             if(inp->peek() == '#') {
@@ -1791,7 +1792,7 @@ public:
                 }
             } else if(inp->read_byte_equalling('@')) {
                 std::string directive = read_directive(*inp);
-                parse_directive(opts, directive);
+                parse_directive(directive);
             } else if(inp->read_byte_equalling('}')) {
                 // likely what happened is someone put a }+ inside
                 // a code block.  anyway a floating end brace is 
@@ -1980,11 +1981,11 @@ debug_hook();
     // some reason it would hang on the first breakpoint
     // with the subproc spinning at 100% cpu, which was not
     // useful. so here's my punt:
-    std::string debug_single_step_code(const Options &op, const lr_set &st) {
+    std::string debug_single_step_code(const lr_set &st) {
         std::string out;
-        if(op.debug) {
+        if(opts.debug) {
             out += "fprintf(stderr, \"%s\", base_parser.to_str().c_str());\n";
-            if(op.single_step) {
+            if(opts.single_step) {
                 out += "getchar();\n";
             }
         }
@@ -2039,7 +2040,7 @@ debug_hook();
     #undef rule_meta_str
 
 
-    CodeBlock reduce_action(const Options &opts, const ProductionRule &rule) {
+    CodeBlock reduce_action(const ProductionRule &rule) {
         /*
           A given rule will be reduced according to (in priority order):
           1) abstracted implementations (+product). this is top
@@ -2084,7 +2085,6 @@ debug_hook();
 
     // returns code for reduce within a given state
     std::string production_code(
-        const Options &opts,
         const lr_set &state,
         int rule_ind
     ) {
@@ -2217,7 +2217,7 @@ debug_hook();
     }
 
     std::string code_for_shift(
-        const Options &op, const lr_set &state, const ProdExpr *right_of_dot
+        const lr_set &state, const ProdExpr *right_of_dot
     ) {
         std::string out;
 
@@ -2270,7 +2270,7 @@ debug_hook();
         ) + "\n";
  */
 
-        if(op.debug) {
+        if(opts.debug) {
             out += "fprintf(stderr, \"    " + state_fn(state) +
                    " shifted %s\\n\", \""
                    + c_str_escape(right_of_dot->to_str()) +
@@ -2280,7 +2280,7 @@ debug_hook();
         return out;
     }
 
-    std::string code_for_state(const Options &opts, const lr_set &state) {
+    std::string code_for_state(const lr_set &state) {
         std::string out;
         std::string sfn = state_fn(state);
 
@@ -2294,7 +2294,7 @@ debug_hook();
             out += "bytes_eaten);\n";
         }
                    
-        out += debug_single_step_code(opts, state);
+        out += debug_single_step_code(state);
 
         out += "    if(0) {\n"; // now everything past this can be "else if"
 
@@ -2337,7 +2337,7 @@ debug_hook();
                     }
                 }
 
-                out += code_for_shift(opts, state, right_of_dot);
+                out += code_for_shift(state, right_of_dot);
 
                 if(right_of_dot->is_optional())
                     optionals.push_back(item);
@@ -2368,7 +2368,7 @@ debug_hook();
                        " is going to reduce to a %s\\n\", \"" +
                        c_str_escape(reduce_item.to_str(this)) + "\");\n";
             }
-            out += production_code(opts, state, reduce_item.rule);
+            out += production_code(state, reduce_item.rule);
             //out += "    fprintf(stderr, \"%i items on stack after reduce\\n\", base_parser.lr_stack_size());\n";
         } else {
             if(opts.debug)
@@ -2835,7 +2835,7 @@ debug_hook();
         return out;
     }
 
-    std::string generate_code(const Options &opts) {
+    std::string generate_code() {
 
         if(rules.size() <= 0) {
             fail("No rules found\n");
@@ -2917,7 +2917,7 @@ debug_hook();
         std::list<std::string> missing_actions;
         for(int rnum = 0; rnum < rules.size(); rnum++) {
             const ProductionRule &rule = rules[rnum];
-            if(CodeBlock rc = reduce_action(opts, rule)) {
+            if(CodeBlock rc = reduce_action(rule)) {
                 out += rc.format();
             } else {
                 missing_actions.push_back(stringformat(
@@ -2938,7 +2938,7 @@ debug_hook();
         }
 
         for(lr_set state : states) {
-            out += code_for_state(opts, state).c_str();
+            out += code_for_state(state).c_str();
         }
 
         // constructor:
@@ -3005,18 +3005,18 @@ ExitVal fpl2cc(const Options &opts) {
     auto inp = make_shared<fpl_reader>(opts.src_fpl, fail);
 
     // parse the input file into a set of productions:
-    Productions productions(inp); // XXX don't pass inp here
+    Productions productions(opts, inp); // XXX don't pass inp here
     if(opts.new_parser) {
         fpl_parser parser(inp);
         parser.productions = &productions;
         parser.parse();
     } else {
-        productions.parse_fpl(opts);
+        productions.parse_fpl();
     }
 
     productions.apply_reducers();
 
-    std::string output = productions.generate_code(opts);
+    std::string output = productions.generate_code();
 
     // states are generated as a side effect of generate_code,
     // which is not great, but I'm not going to fix it right now,
