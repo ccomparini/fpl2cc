@@ -607,6 +607,10 @@ fprintf(stderr, "whoa dude this is going to break because the char length is %lu
 
         if(pos == size_t(-1)) pos = read_pos;
 
+        if(num_chars < 0) {
+            return "¡Negative peek length¡";
+        }
+
         std::string out;
         for(int chp = 0; chp < num_chars; ++chp) {
             if(pos >= buffer.length()) {
