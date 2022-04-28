@@ -3025,7 +3025,7 @@ debug_hook();
 };
 
 // self generated parser class:
-#include "fpl_parser.h"
+//#include "fpl_parser.h"
 
 // returns an exit()-appropriate status (i.e. 0 on success)
 ExitVal fpl2cc(const Options &opts) {
@@ -3036,9 +3036,12 @@ ExitVal fpl2cc(const Options &opts) {
     // parse the input file into a set of productions:
     Productions productions(opts, inp); // XXX don't pass inp here
     if(opts.new_parser) {
+        fail("Sorry, new parser not supported\n");
+/*
         fpl_parser parser(inp);
         parser.productions = &productions;
         parser.parse();
+ */
     } else {
         productions.parse_fpl();
     }
