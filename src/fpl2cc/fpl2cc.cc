@@ -2085,8 +2085,8 @@ debug_hook();
         std::string out = reducer_decl(rule) + " {\n";
         out += "// " + rule.to_str() + "\n";
         out += rule_metadata(rule) + "\n";
-        out += "FPLBP::SourcePosition start_pos(base_parser, args[0].position);\n";
-        out += "FPLBP::SourcePosition end_pos(base_parser, base_parser.position());\n";
+        out += "SourcePosition start_pos = args[0].position();\n";
+        out += "SourcePosition end_pos = base_parser.position();\n";
         Reducer reducer = rule.reducer();
         if(reducer) {
             // abstracted implementation (1):
@@ -2192,7 +2192,7 @@ debug_hook();
 
         out += "    base_parser.set_product(Product(result, "
              + rule.product_element().nonterm_id_str()
-             + "));\n";
+             + ", args[0].position()));\n";
 
         // this is what actually pops the stack. note we pop after
         // the reduce (mainly to minimize moves, but also so the
@@ -2276,7 +2276,7 @@ debug_hook();
                 // (or another dual stack solution)
                 out += "FPLBP::Terminal term(\"<special ~>\");\n"; // XXX this is terrible
                 out += stringformat(
-                    "base_parser.lr_push(&{}, FPLBP::Product(term, {}), base_parser.position());\n",
+                    "base_parser.lr_push(&{}, FPLBP::Product(term, {}, base_parser.position()));\n",
                     state_fn(next_state, true), element_index[right_of_dot->gexpr]
                 );
                 break;
