@@ -2190,14 +2190,14 @@ debug_hook();
                    "frame_start, pos, args.to_str().c_str());\n";
         }
 
+        out += "    base_parser.set_product(Product(result, "
+             + rule.product_element().nonterm_id_str()
+             + "));\n";
+
         // this is what actually pops the stack. note we pop after
         // the reduce (mainly to minimize moves, but also so the
         // stack is more intact for error/bug analysis)
         out += "base_parser.lr_pop_to(pos);\n";
-
-        out += "    base_parser.set_product(Product(result, "
-             + rule.product_element().nonterm_id_str()
-             + "));\n";
 
         return out;
     }
