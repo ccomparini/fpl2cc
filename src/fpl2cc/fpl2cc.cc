@@ -2255,11 +2255,11 @@ debug_hook();
         const GrammarElement::Type type = right_of_dot->type();
         switch(type) {
             case GrammarElement::TERM_EXACT:
-                out += "} else if(base_parser.shift_exact(separator_length,";
+                out += "} else if(base_parser.shift_exact(";
                 out += args_for_shift(next_state, *right_of_dot) + ")) {\n";
                 break;
             case GrammarElement::TERM_REGEX:
-                out += "} else if(base_parser.shift_re(separator_length,";
+                out += "} else if(base_parser.shift_re(";
                 out += args_for_shift(next_state, *right_of_dot) + ")) {\n";
                 break;
             case GrammarElement::NONTERM_PRODUCTION:
