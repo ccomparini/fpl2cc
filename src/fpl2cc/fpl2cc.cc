@@ -2267,12 +2267,13 @@ debug_hook();
                 out += args_for_shift(next_state, *right_of_dot) + ")) {\n";
                 break;
             case GrammarElement::LACK_OF_SEPARATOR:
-                out += "} else if(!base_parser.eat_separator(separator_length)) {\n";
+                // (b_eaten is number of separator bytes "eaten"
+                // since last terminal)
+                out += "} else if(!b_eaten) {\n";
                 // OK the problem here is that we _do_ need to shift the state,
                 // even though we do not need to shift the lack of separator per se.
-                // this makes me wonder about going back to recursive ascent.
-                // going to try to just make it work
-                //out += "    base_parser.set_state(&" + state_fn(next_state, true) + ");\n";
+                // this makes me wonder about going back to recursive ascent
+                // (or another dual stack solution)
                 out += "FPLBP::Terminal term(\"<special ~>\");\n"; // XXX this is terrible
                 out += stringformat(
                     "base_parser.lr_push(&{}, FPLBP::Product(term, {}), base_parser.position());\n",
@@ -2313,10 +2314,10 @@ debug_hook();
         out += state.to_str(this, "// ");
         out += "//\n";
         out += "void " + sfn + "() {\n";
-        out += "size_t bytes_eaten = base_parser.eat_separator(separator_length);\n";
+        out += "size_t b_eaten = base_parser.eat_separator(separator_length);\n";
         if(opts.debug) {
             out += "fprintf(stderr, \"%li bytes eaten since last terminal\\n\", ";
-            out += "bytes_eaten);\n";
+            out += "b_eaten);\n";
         }
                    
         out += debug_single_step_code(state);
