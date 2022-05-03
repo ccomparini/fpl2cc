@@ -2314,7 +2314,7 @@ debug_hook();
         out += state.to_str(this, "// ");
         out += "//\n";
         out += "void " + sfn + "() {\n";
-        out += "size_t b_eaten = base_parser.eat_separator(separator_length);\n";
+        out += "size_t b_eaten = eat_separator();\n";
         if(opts.debug) {
             out += "fprintf(stderr, \"%li bytes eaten since last terminal\\n\", ";
             out += "b_eaten);\n";
@@ -2628,6 +2628,14 @@ debug_hook();
         return out;
     }
 
+    std::string eat_separator_code() {
+        return (
+            "size_t eat_separator() {\n"
+            "    return base_parser.eat_separator(separator_length);\n"
+            "}\n"
+        );
+    }
+
     std::string parser_class_name() {
         std::string base;
         for(auto chr : inp->base_name()) {
@@ -2939,6 +2947,7 @@ debug_hook();
         out += is_goal();
 
         out += separator_method().format();
+        out += eat_separator_code();
 
         std::list<std::string> missing_actions;
         for(int rnum = 0; rnum < rules.size(); rnum++) {
