@@ -1,0 +1,4 @@
+
+au BufRead,BufNewFile *.fpl set filetype=fpl
+au BufRead,BufNewFile *.fplb set filetype=fpl
+
