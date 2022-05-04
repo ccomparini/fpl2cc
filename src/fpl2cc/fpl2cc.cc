@@ -965,6 +965,25 @@ class Productions {
     std::vector<lr_set> states;
     std::map<std::string, int> state_index; // keyed by set id
 
+    static void error(const fpl_reader &rdr, size_t pos, const std::string &msg) {
+        fprintf(stderr, "%s",
+            rdr.format_error_message(pos, msg).c_str()
+        );
+        exit(ExitVal::FAIL);
+    }
+
+    static void error(const SourcePosition where, const std::string &msg) {
+        error(where.reader(), where.position(), msg);
+    }
+
+    static void error(const fpl_reader &rdr, const std::string &msg) {
+        error(rdr, rdr.current_position(), msg);
+    }
+
+    void error(const std::string &msg) {
+        error(*inp, inp->current_position(), msg);
+    }
+
     void add_state(const lr_set &st) {
         state_index.insert(
             std::make_pair(st.id(), states.size())
@@ -1434,7 +1453,7 @@ public:
             if(prod.length() && type.length()) {
                 type_for_product[prod] = type;
             } else {
-                inp->error("type_for expects <product name> = <type>");
+                error("type_for expects <product name> = <type>");
             }
         } else {
             fail(stringformat("Unknown directive: '{}'\n", dir));
@@ -1537,14 +1556,14 @@ public:
 
         std::string filename(src.parse_string());
         if(!filename.length()) {
-            src.error("no filename specified");
+            error(src, "no filename specified");
             return "<failed import>";
         }
 
         auto sub_errcb = [&src](const std::string &msg)->void {
             // report errors in the sub-fpl in the context of
             // the importing file:
-            src.error("\n\t" + msg);
+            error(src, "\n\t" + msg);
         };
         fpl_reader_p inp = std::make_shared<fpl_reader>(
             filename, sub_errcb
@@ -1635,7 +1654,7 @@ public:
                         // just scanned "->", so we're done:
                         done = true;
                     } else {
-                        src.error("unexpected '-'");
+                        error(src, "unexpected '-'");
                     }
                     break;
                 case '`':
@@ -1647,18 +1666,18 @@ public:
                     // this can happen, especially if there's a '}+'
                     // embedded in a code block.
                     if(src.read_byte_equalling('+'))
-                        src.error(
+                        error(src,
                             "stray '}+'.  "
                             "perhaps there's }+ embedded in a code block"
                         );
                     else
-                        src.error("unmatched '}'");
+                        error(src, "unmatched '}'");
                     break;
                 default:
                     // should be the name of a production.
                     expr_str = read_production_name(src);
                     if(!expr_str.length()) {
-                        src.error(stringformat(
+                        error(src, stringformat(
                             "expected production name for rule '{}'\n"
                             " starting at {}",
                             rule.to_str(), rule.location()
@@ -1680,7 +1699,7 @@ public:
                     num_read++;
                 } else {
                     // XXX show the type in some non-numeric way here
-                    src.error(stringformat(
+                    error(src, stringformat(
                         "expected type {} = {} but got .. nothing?\n",
                         GrammarElement::Type_to_str(type), type
                     ));
@@ -1721,7 +1740,7 @@ public:
          }
 
          if(!found_terminator) {
-             src.error(stringformat(
+             error(src, stringformat(
                  "Expected code block terminator ('}}+') but got byte 0x{}",
                  to_hex(byte_in)
              ));
@@ -1748,12 +1767,12 @@ public:
         std::set<std::string> args;
         
         if(!inp->read_byte_equalling('(')) {
-            inp->error("expected start of argument declaration '('");
+            error("expected start of argument declaration '('");
         } else {
             while(!inp->read_byte_equalling(')')) {
                 std::string name = read_production_name();
                 if(!name.length()) {
-                    inp->error("invalid production name");
+                    error("invalid production name");
                     break;
                 }
 
@@ -1775,14 +1794,14 @@ public:
     //
     void parse_reducer() {
         if(!inp->read_byte_equalling('+')) {
-            inp->error("expected +<production_name>");
+            error("expected +<production_name>");
             return;
         }
 
         Reducer reducer;
         reducer.production_name = read_production_name();
         if(reducer.production_name.length() == 0) {
-            inp->error("expected production name after '+'");
+            error("expected production name after '+'");
             return;
         }
 
@@ -1790,7 +1809,7 @@ public:
         reducer.code = read_code(*inp);
 
         if(!reducer.code) {
-             inp->error(stringformat(
+             error(stringformat(
                  "expected start of code (\"+{{\") but got «{}»",
                  inp->debug_peek()
              ));
@@ -1823,7 +1842,7 @@ public:
                 // likely what happened is someone put a }+ inside
                 // a code block.  anyway a floating end brace is 
                 // wrong..
-                inp->error("unmatched '}'\n");
+                error("unmatched '}'\n");
             } else {
                 ProductionRule rule(*inp, inp->current_position());
                 if(read_expressions(*inp, rule)) {
@@ -1849,7 +1868,7 @@ public:
                     if(!inp->read_byte_equalling(';')) {
                         rule.code(read_code(*inp));
                         if(!rule.code()) {
-                            inp->error(stringformat(
+                            error(stringformat(
                                 "expected ';' or code block for rule {}",
                                 rule.to_str()
                             ));

@@ -15,6 +15,10 @@
 typedef unsigned char utf8_byte;
 typedef std::basic_string<utf8_byte> utf8_buffer;
 
+class fpl_reader;
+using fpl_reader_p = std::shared_ptr<fpl_reader>;
+using fpl_reader_p_c = std::shared_ptr<const fpl_reader>;
+
 using ErrorCallback = std::function<void(const std::string &error)>;
 
 // returns a utf8 buffer containing the contents
@@ -265,8 +269,8 @@ public:
         return input_filename;
     }
 
-    inline std::string location(src_location caller = CALLER()) const {
-        return filename() + ":" + std::to_string(line_number(caller));
+    inline std::string location_str(size_t offset) const {
+        return filename() + ":" + std::to_string(line_number(offset));
     }
 
     std::string base_name() const {
@@ -301,7 +305,9 @@ public:
         return *inpp(offset);
     }
 
+    // formats an error message in the context of this reader.
     std::string format_error_message(
+        size_t pos,
         const std::string &msg,
         src_location caller = CALLER()
     ) const {
@@ -310,13 +316,10 @@ public:
             nl = "\n";
 
         return stringformat("Error {} near «{}»: {}{}",
-            location(caller), debug_peek(), msg, nl
+            location_str(pos), debug_peek(pos), msg, nl
         );
     }
 
-    void error(const std::string &msg, src_location caller = CALLER()) const {
-        on_error(format_error_message(msg, caller));
-    }
 
     // Returns the length in bytes of the newline "character" at the
     // position passed.
@@ -577,7 +580,12 @@ fprintf(stderr, "whoa dude this is going to break because the char length is %lu
                     read_pos += matched.length();
             }
             catch(const std::regex_error& err) {
-                error(stringformat(
+                // doing the error detection here essentially turns
+                // a non-compiling regex error into an internal error.
+                // so I think we really want callers to compile the
+                // regex.  but, that complicates life for the callers,
+                // so doing it this way for the moment.
+                on_error(stringformat(
                     "/{}/ <- {} (caller: {})", re, err.what(), caller
                 ));
             }
@@ -630,8 +638,65 @@ fprintf(stderr, "whoa dude this is going to break because the char length is %lu
     }
 };
 
-using fpl_reader_p = std::shared_ptr<fpl_reader>;
-using fpl_reader_p_c = std::shared_ptr<const fpl_reader>;
+class SourcePosition {
+    fpl_reader_p_c source;
+    size_t         offset; // byte offset into the file
+
+public:
+
+    SourcePosition() : source(nullptr), offset(0) { }
+
+    SourcePosition(fpl_reader_p src, size_t pos)
+        : source(src), offset(pos) {
+    }
+
+    SourcePosition(fpl_reader_p src) 
+        : source(src), offset(src->current_position()) {
+    }
+
+    inline operator bool() const {
+        return source != nullptr;
+    }
+
+    const fpl_reader &reader()   const { return *source; }
+    size_t            position() const { return offset; }
+
+    std::string debug_peek(SourcePosition to_pos = SourcePosition()) const {
+        int length = 12;
+
+        if(!source) {
+            return "¡debug_peek: no source reader¡";
+        }
+
+        if(to_pos) {
+            if(source == to_pos.source) {
+                length = to_pos.offset - offset;
+            } else {
+                return "¡debug_peek source file mismatch: "
+                     + source->filename() + " vs " 
+                     + to_pos.source->filename() + "¡";
+            }
+        }
+
+        return source->debug_peek(offset, length);
+    }
+
+    inline int line_number() const {
+        if(source)
+            return source->line_number(offset);
+        return 0;
+    }
+
+    inline std::string filename() const {
+        if(source)
+            return source->filename();
+        return "<no source file>";
+    }
+
+    inline std::string to_str() const {
+        return filename() + ":" + std::to_string(line_number());
+    }
+};
 
 
 #endif // FPL_READER_H
