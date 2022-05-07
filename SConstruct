@@ -9,7 +9,7 @@ debugger = ''
 
 fpl_include = ' --src-path=src/fpl2cc/grammarlib '
 
-#SetOption('num_jobs', 4) # XXX re-add
+SetOption('num_jobs', 4) # XXX re-add
 
 ccflags = ''
 if debugger : ccflags += " -g"
