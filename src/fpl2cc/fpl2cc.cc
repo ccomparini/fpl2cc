@@ -961,7 +961,7 @@ class Productions {
 
     std::list<Reducer> reducers;
 
-    struct lr_set;
+    class lr_set;
     std::vector<lr_set> states;
     std::map<std::string, int> state_index; // keyed by set id
 
@@ -1078,7 +1078,7 @@ class Productions {
 
         lr_set() { }
 
-        // an lr_item is a 1-item set:
+        // an lr_item can count as a 1-item set:
         lr_set(const lr_item &in) {
             items.insert(in);
         }
@@ -1156,13 +1156,16 @@ class Productions {
         std::string to_str(
             const Productions *prds,
             const std::string &line_prefix = "",
-            const std::string &line_suffix = "\n"
+            const std::string &line_suffix = "\n",
+            bool stringescape = false
         ) const {
-            // efficient? probably not. do I care?
             std::string out;
             for(auto it : items) {
                 out.append(line_prefix);
-                out.append(it.to_str(prds));
+                if(stringescape)
+                    out.append(c_str_escape(it.to_str(prds)));
+                else
+                    out.append(it.to_str(prds));
                 out.append(line_suffix);
             }
             return out;
@@ -2585,9 +2588,10 @@ debug_hook();
         return out;
     }
 
-    std::string state_to_string() {
+    std::string state_to_str_code() {
         std::string out("static std::string state_to_str(State st) {\n");
         out += "if(!st) return \"NULL\";\n";
+        // c++ won't let you compare pointers in a switch statement.. sigh
         for(auto st: states) {
             out += "if(&" + state_fn(st, true) + " == st) ";
             out += "return \"" + state_fn(st) + "\";\n";
@@ -2595,6 +2599,19 @@ debug_hook();
         out += "    return \"<not a state>\";\n";
         out += "}\n";
 
+        return out;
+    }
+
+    std::string state_string_code() {
+        std::string out("static const char *state_string(State st) {\n");
+        for(auto st: states) {
+            out += stringformat(
+                "    if(&{} == st) return\n{};\n",
+                state_fn(st, true), st.to_str(this, "\"    ", "\\n\"\n", true)
+            );
+        }
+        out += "    return \"<invalid state>\";\n";
+        out += "}\n";
         return out;
     }
 
@@ -2962,7 +2979,8 @@ debug_hook();
         out += "public:\n";
 
         out += nonterm_enum();
-        out += state_to_string();
+        out += state_to_str_code();
+        out += state_string_code();
         out += is_goal();
 
         out += separator_method().format();
