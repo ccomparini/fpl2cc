@@ -1,4 +1,6 @@
 from pprint import pprint
+from pathlib import Path
+import sys
 
 # TODO you _can_ get the target files to not be slapped into
 # the source tree!  Maybe?
@@ -49,6 +51,36 @@ env.Append(
         skeys = ['.fpl']
     )
 )
+
+# action-compatible comparison function to check if all source
+# files have the same content.  used for comparing output in tests.
+# prints an error message and returns 1 (= fail) if there's
+# a mismatch.
+# Otherwise, creates the target file(s) and returns 0 (= success)
+def sources_are_same(target, source, env):
+    last_contents = None
+    for fn in source:
+        with open(fn.abspath) as f: contents = f.readlines()
+        if last_contents is not None:
+            if contents != last_contents:
+                sys.stderr.write("MISMATCH: {a} vs {b}\n".format(a=fn.path, b=last_fn.path))
+                return 1
+        last_contents = contents
+        last_fn = fn
+
+    for fn in target:
+        Path(fn.abspath).touch()
+    return 0
+
+# CompareOut is a "builder" which compares the source files (actually
+# 2 test output files - one with whatever was generated and one with
+# what we expected it to generate) and creates the target file (.success)
+# and returns success if they match, or reports failure otherwise.
+env.Append(BUILDERS =
+    { 'CompareOut' : Builder(
+        action=sources_are_same,
+        suffix = '.success',
+        src_suffix = '.out') } )
 
 # fpl -> cc builder:
 # at this point this is for testing fpl

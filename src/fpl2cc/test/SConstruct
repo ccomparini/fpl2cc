@@ -24,15 +24,6 @@ env = env.Clone()
 #     https://scons.org/doc/production/HTML/scons-user.html#app-variables
 #
 
-# CompareOut is a "builder" which compares the source files (actually
-# 2 test output files - one with whatever was generated and one with
-# what we expected it to generate) and creates the target file (.success)
-# and returns success if they match, or reports failure otherwise.
-env.Append(BUILDERS =
-    { 'CompareOut' : Builder(
-        action = 'diff -c $SOURCES && touch $TARGET || { echo "$SOURCES did not meet expectations" ; rm -f $TARGET ; false; }',
-        suffix = '.success',
-        src_suffix = '.out') } )
 
 
 # each language we might be using to test will have an fpl,
