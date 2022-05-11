@@ -13,6 +13,6 @@ env.Fpl2h('fpl.fpl')
 # env.Program('#bin/fpl', [ 'fpl.cc', ])
 
 # test subdir:
-SConscript('test/SConstruct', 'env');
+#SConscript('test/SConstruct', 'env');
 
 

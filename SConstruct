@@ -11,7 +11,7 @@ debugger = ''
 
 fpl_include = ' --src-path=src/fpl2cc/grammarlib '
 
-SetOption('num_jobs', 4)
+SetOption('num_jobs', 10)
 
 ccflags = ''
 if debugger : ccflags += " -g"
@@ -120,7 +120,14 @@ env.Append(BUILDERS =
 	         suffix = '.h',
 	         src_suffix = '.jemp') } )
 
-SConscript('src/util/SConstruct', 'env');
-SConscript('src/fpl2cc/SConstruct', 'env');
-SConscript('src/compiler/SConstruct', 'env');
+src_subdirs = [
+    # these are specified roughly in compile/dependency order:
+    'util/',
+    'util/test/',
+    'fpl2cc/',
+    'fpl2cc/test/',
+    'compiler/',
+]
+for sdir in src_subdirs: 
+    SConscript('src/' + sdir + 'SConstruct', exports='env', variant_dir='build/'+sdir)
 

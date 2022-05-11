@@ -1391,13 +1391,15 @@ public:
     void add_comment_style(const std::string &style,
         const std::string &context_fn, int context_ln
     ) {
-        // comment style files are relative to this source:
-        fs::path fn(__FILE__);
+        // comment styles are to be found in a "comment"
+        // subdir.  this is because eventually I think I
+        // want to fold the whole @comment_style thing into
+        // other separators and not implement as c++ fragments.
+        fs::path fn(style);
         fn.replace_filename("comment/" + style + ".inc");
-
-        add_separator_code(
-            CodeBlock::from_file(fn, Searchpath(), context_fn, context_ln)
-        );
+        add_separator_code(CodeBlock::from_file(
+            opts.src_path.find(fn), Searchpath(), context_fn, context_ln
+        ));
     }
 
     void set_reduce_type(const std::string &rt)    { reduce_type = rt; }
