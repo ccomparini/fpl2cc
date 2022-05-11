@@ -1783,7 +1783,10 @@ public:
 
                 args.insert(name);
 
-                // XXX actually eat any number of separators or commas
+                // allow (but do not require) commas between (or after)
+                // production names (by skipping them)
+                inp->eat_separator();
+                inp->read_byte_equalling(',');
                 inp->eat_separator();
 
                 if(inp->peek() == '\0') // more reasons to fpl this..
