@@ -73,6 +73,7 @@ std::string stringformat(std::string_view fmt, Args&&... args) {
     for(ind = 0; ind < inlen; ++ind) {
         if(fmt[ind] == '{') {
             if(fmt[ind + 1] == '{') {
+                // '{{' evaluates to a single '{' (it's how you escape '{')
                 ++ind;
                 out += '{';
             } else if(fmt[ind + 1] == '}') {
@@ -98,6 +99,10 @@ std::string stringformat(std::string_view fmt, Args&&... args) {
                 }
  */
             }
+        } else if((fmt[ind] == '}') && (fmt[ind + 1] == '}')) {
+            // turn '}}' into a single '}' so that we can balance
+            // braces if there's an embedded '{{' (by doing nothing
+            // here and thus skipping the first '}')
         } else {
             out += fmt[ind];
         }
