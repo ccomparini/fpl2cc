@@ -2980,6 +2980,10 @@ debug_hook();
         out += "    FPLBP base_parser;\n";
         for(auto mem : parser_members) {
             out += mem.format();
+            // return to "private" after each such block.
+            // this way, authors can add public members
+            // to the parser without turning other stuff public
+            out += "private:";
         }
         out += "public:\n";
 
