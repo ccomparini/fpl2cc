@@ -85,7 +85,7 @@ env.Append(BUILDERS =
 # fpl -> cc builder:
 # at this point this is for testing fpl
 env.Append(BUILDERS =
-    { 'Fpl2CC' : Builder(action = debugger + 'bin/fpl2cc ' + fpl_include + ' $FPLOPTS $SOURCES --out $TARGET',
+    { 'Fpl2cc' : Builder(action = debugger + 'bin/fpl2cc ' + fpl_include + ' $FPLOPTS $SOURCES --out $TARGET',
 	         suffix = '.cc',
 	         src_suffix = '.fpl') } )
 
