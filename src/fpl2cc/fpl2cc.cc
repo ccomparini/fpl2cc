@@ -691,7 +691,18 @@ good.
  */
 
 /*
-  Reducer implementats an abstracted reduce function.
+  Reducer implements an abstracted reduce function.
+
+  Authors can declare such a function as:
+   '+' ~ <reducer name> '(' <arguments> ')' <code block>
+
+  Arguments is a space-separated list of names corresponding
+  by name to the steps of the rule which it reduces.  Argument
+  order does not matter!  If you have two rules with the same
+  product, and one has steps "foo bar bat" and the other has
+  "bar foo", both are candidates to match a reducer with arguments
+  "bar foo bat".
+
  */
 struct Reducer {
     std::string production_name;
@@ -708,10 +719,10 @@ struct Reducer {
         out += "(";
         int ind = 0;
         for(auto arg : args) {
-            if(ind == 0)
+            if(ind++ == 0)
                 out += arg;
             else
-                out += "^" + arg;
+                out += " " + arg;
         }
         out += ") at ";
         out += code.location();
