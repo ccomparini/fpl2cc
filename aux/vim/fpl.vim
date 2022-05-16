@@ -15,17 +15,17 @@ syn keyword	fplTodo	contained TODO FIXME XXX
 syn region	fplComment	start="#" skip="\\$" end="$" keepend contains=fplTodo
 
 " @directives:
-syn match	fplAtDirective	"@comment_style"
-syn match	fplAtDirective	"@default_action"
-syn match	fplAtDirective	"@default_main"
-syn match	fplAtDirective	"@grammar"
-syn match	fplAtDirective	"@internal"
-syn match	fplAtDirective	"@main"
-syn match	fplAtDirective	"@post_parse"
-syn match	fplAtDirective	"@post_reduce"
-syn match	fplAtDirective	"@produces"
-syn match	fplAtDirective	"@separator"
-syn match	fplAtDirective	"@type_for"
+syn match	fplAtDirective	"@comment_style.*"
+syn match	fplAtDirective	"@default_action.*"
+syn match	fplAtDirective	"@default_main.*"
+syn match	fplAtDirective	"@grammar.*"
+syn match	fplAtDirective	"@internal.*"
+syn match	fplAtDirective	"@main.*"
+syn match	fplAtDirective	"@post_parse.*"
+syn match	fplAtDirective	"@post_reduce.*"
+syn match	fplAtDirective	"@produces.*"
+syn match	fplAtDirective	"@separator.*"
+syn match	fplAtDirective	"@type_for.*"
 
 " operators (such as they are):
 syn match	fplOperator	"->"
