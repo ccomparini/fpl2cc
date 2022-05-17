@@ -704,13 +704,43 @@ good.
   "bar foo bat".
 
  */
-struct Reducer {
+class Reducer {
+
     std::string production_name;
     std::set<std::string> args;
     CodeBlock code;
+public:
+
+    Reducer() { }
+
+    Reducer(
+        const std::string &name,
+        const std::set<std::string> arg,
+        const CodeBlock &cd
+    ) :
+        production_name(name),
+        args(arg),
+        code(cd)
+    { }
 
     operator bool() const {
         return code;
+    }
+
+    bool argument_matches(const std::string &var_name) const {
+        return args.contains(var_name);
+    }
+
+    std::string name() const {
+        return production_name;
+    }
+
+    std::string format_code() const {
+        return code.format(false);
+    }
+
+    std::set<std::string> required_arguments() const {
+        return args;
     }
 
     std::string to_str() const {
@@ -895,16 +925,16 @@ public:
 };
 
 std::string why_cant_use_reducer(const Reducer &red, const ProductionRule &rule) {
-    if(red.production_name != rule.product()) {
+    if(red.name() != rule.product()) {
         return stringformat(
             "different products ({} vs {})", 
-            red.production_name, rule.product()
+            red.name(), rule.product()
         );
     }
 
     // check if there are any variables in the reducer which
     // don't match steps in the rule:
-    std::set<std::string> unknown_vars = red.args;
+    std::set<std::string> unknown_vars = red.required_arguments();
     for(int stepi = 0; stepi < rule.num_steps(); ++stepi) {
         const ProdExpr *step = rule.step(stepi);
         if(step) {
@@ -928,20 +958,21 @@ std::string why_cant_use_reducer(const Reducer &red, const ProductionRule &rule)
     return "";
 }
 
-// returns the number of matching parameters.
-// used to determine which rule the reducer
-// best fits.
+// Returns the number of matching parameters.
+// This is used to determine which rule the reducer best fits.
+// Note that this is separate from the check which sees if
+// the reducer can fit the rule at all - a given rule/reducer
+// might have a righ match count, but still be incompatible
+// for one reason or another.
 int matchcount(const Reducer &red, const ProductionRule &rule) {
     int cnt = 0;
 
-// XXX also detect complete mismatches somehow
-// a complete mismatch needs to invalidate the matchcount
     for(int stepi = 0; stepi < rule.num_steps(); ++stepi) {
         const ProdExpr *step = rule.step(stepi);
         // what if there's an unnamed step?
         // this will "just work", but will it be
         // confusing?
-        if(step && red.args.contains(step->variable_name()))
+        if(step && red.argument_matches(step->variable_name()))
             cnt++;
     }
     return cnt;
@@ -1824,24 +1855,23 @@ public:
             return;
         }
 
-        Reducer reducer;
-        reducer.production_name = read_production_name();
-        if(reducer.production_name.length() == 0) {
+        std::string name = read_production_name();
+        if(name.length() == 0) {
             error("expected production name after '+'");
             return;
         }
 
-        reducer.args = parse_argdecl();
-        reducer.code = read_code(*inp);
+        auto args = parse_argdecl();
+        auto code = read_code(*inp);
 
-        if(!reducer.code) {
+        if(!code) {
              error(stringformat(
                  "expected start of code (\"+{{\") but got «{}»",
                  inp->debug_peek()
              ));
         }
 
-        reducers.push_back(reducer);
+        reducers.push_back(Reducer(name, args, code));
     }
 
     void parse_fpl() {
@@ -2135,7 +2165,7 @@ debug_hook();
         Reducer reducer = rule.reducer();
         if(reducer) {
             // abstracted implementation (1):
-            out += reducer.code.format(false);
+            out += reducer.format_code();
         } else if(rule.code()) {
             // code defined in the rule (2):
             out += rule.code().format(false);
@@ -2847,7 +2877,7 @@ debug_hook();
         for(auto reducer : reducers) {
             std::string why_no_match;
             
-            const std::string &pname = reducer.production_name;
+            const std::string &pname = reducer.name();
             auto rulei_0 = rules_for_product.lower_bound(pname);
             auto rulei_l = rules_for_product.upper_bound(pname);
             bool used = false;
@@ -2888,9 +2918,7 @@ debug_hook();
             // reducer to the point where it's no longer used... hmmm..
             if(!used) {
                 if(rulei_0 == rulei_l) {
-                    why_no_match = stringformat(
-                        "nothing produces {}", reducer.production_name
-                    );
+                    why_no_match = stringformat("nothing produces {}", pname);
                 }
                 warn(stringformat(
                     "reducer {} doesn't match any rules: {}\n",
