@@ -129,5 +129,5 @@ src_subdirs = [
     'compiler/',
 ]
 for sdir in src_subdirs: 
-    SConscript('src/' + sdir + 'SConstruct', exports='env', variant_dir='build/'+sdir)
+    SConscript('src/' + sdir + 'SConstruct', exports='env', variant_dir='build/'+sdir, duplicate=False)
 
