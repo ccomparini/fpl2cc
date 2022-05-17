@@ -1476,9 +1476,9 @@ public:
             default_main = true;
         } else if(dir == "grammar") {
             // import the grammar from another fpl (or a library)
-            std::string grammar = arg_for_directive();
-            grammar += ".fpl";
-            import_grammar(grammar);
+            Productions sub(opts, open_for_import(arg_for_directive()));
+            sub.parse_fpl();
+            import_grammar(sub);
         } else if(dir == "internal") {
             // a code block which goes in the "private" part
             // of the parser class itself.  This is either
@@ -1602,6 +1602,27 @@ public:
         return src.read_re("([A-Za-z][A-Za-z0-9_]+)\\s*")[1];
     }
 
+    // Attempts to open an fpl source file and associate it with a
+    // reader for import.  Searches the directory this source file
+    // is in, as well as any other directories in the --src-path.
+    fpl_reader_p open_for_import(const std::string &fpl_name) {
+
+        Searchpath searchp = opts.src_path;
+
+        // search relative to the importing fpl first:
+        searchp.prepend(inp->input_dir()); 
+        std::string filename = opts.src_path.find(fpl_name + ".fpl");
+
+        // report errors in the sub-fpl in the context of
+        // the importing file:
+        fpl_reader &src = *inp;
+        auto sub_errcb = [&src](const std::string &msg)->void {
+            error(src, "\n\t" + msg);
+        };
+
+        return make_shared<fpl_reader>(filename, sub_errcb);
+    }
+
     // .. imports relevant rules into this and returns the name of
     // the top level production created
     std::string parse_import(fpl_reader &src, ProductionRule &rule) {
@@ -1614,60 +1635,26 @@ public:
             return "<failed import>";
         }
 
-        auto sub_errcb = [&src](const std::string &msg)->void {
-            // report errors in the sub-fpl in the context of
-            // the importing file:
-            error(src, "\n\t" + msg);
-        };
-        fpl_reader_p inp = std::make_shared<fpl_reader>(
-            filename, sub_errcb
-        );
-
+        // `grammarname`.production means import only the
+        // specified production. (this used to use ':' but I
+        // changed that to use for naming parameters)
         std::string prod_name;
-        if(src.read_byte_equalling(':')) {
+        if(src.read_byte_equalling('.')) {
             prod_name = read_production_name(src);
         }
 
-        // XXX use options search path
 
-        Productions subs(opts, inp);
+        Productions subs(opts, open_for_import(filename));
+        subs.parse_fpl();
         if(!subs.reduce_type.length()) {
             // the imported fpl doesn't specify that it produces any
             // particular type(s), so we tell it to produce what we want:
             subs.reduce_type = reduce_type;
         }
 
-        return import_rules(subs, prod_name);
+        return import_grammar(subs, prod_name);
     }
 
-    // import just the grammar from another fpl (into this Productions).
-    // the idea here is that you can import "pure" fpl describing
-    // a grammar, without any specific code implementation,
-    // from a file with specific application code.  and, actually you
-    // can do this regardless of if the thing being imported is "pure".
-    void import_grammar(const std::string gname) {
-        Searchpath searchp = opts.src_path;
-        searchp.prepend(inp->input_dir());
-        std::string src = opts.src_path.find(gname);
-        auto inp = make_shared<fpl_reader>(src, fail);
-        // this is a hokey/hackish way to do this.  we should be
-        // able to parse directly into our own productions from
-        // the input file.  but.. whatevs - make it work.
-// XXX FIXME pass inp to parse_fpl instead of constructor
-        Productions sub(opts, inp);
-        sub.parse_fpl();
-
-        // import the rules from the sub, which will create the
-        // corresponding elements:
-        for(auto rule : sub.rules) {
-            rule.code(CodeBlock::none);
-            push_rule(rule);
-        }
-        // questions:
-        //   - can/should we import the type of separator?  I think not.
-        //     this is not for sub-grammars. 
-        
-    }
 
     int read_expressions(fpl_reader &src, ProductionRule &rule) {
         int num_read = 0;
@@ -1937,22 +1924,15 @@ public:
         } while(!inp->eof());
     }
 
+    // Imports the grammar from the Productions specified.
+    // This will include rules and whatever's deemed necessary
+    // to support those rules.
     // returns the name of the production which this import will produce,
     // or  ... 
-    // XXX deprecate?  or fix/generalize/rename?
-    std::string import_rules(const Productions &from, const std::string &pname) {
+    std::string import_grammar(
+        const Productions &from, const std::string &pname = ""
+    ) {
         std::string src_fn = from.inp->filename();
-/*
-        if(from.reduce_type != reduce_type) {
-            // warn if there's an explicit reduce type which isn't
-            // exactly the same as ours, but plow on - they'll get
-            // compile errors if the types are actually incompatible.
-            warn(stringformat(
-                "Incompatible reduce type '{}' in {} (expected {})\n",
-                from.reduce_type, src_fn, reduce_type
-            ));
-        }
- */
 
         // import any preamble as well, as it may be necessary for the rules.
         // hmm.. too bad we can't scope this and/or figure out if it's necessary
@@ -1967,41 +1947,18 @@ public:
         // we need to import:
         std::list<std::string> all_wanted;
         std::set<std::string> already_wanted;
-        std::string import_as;
+        std::string import_name;
         if(pname.size()) {
-            import_as = pname;
+            import_name = pname;
             all_wanted.push_back(pname);
             already_wanted.insert(pname);
         } else if(from.rules.size()) {
-debug_hook();
             // no particular production specified.  import the
             // default (first) production.
             std::string def_prd(from.rules[0].product());
-// XXX import_as is redundant now.  but, possibly we _do_ want to
-// do what we did below (and name the top level after the file)
-// but if so we should produce a dummy top level rule to reduce
-// to a product named from import_as..
-            import_as = def_prd;
+            import_name = def_prd;
             all_wanted.push_back(def_prd);
             already_wanted.insert(def_prd);
-/*
-            // no particular production specified.  import the
-            // default production, but use the base name of the
-            // fpl file to refer to it
-            import_as = from.inp->base_name();
-            // XXX check if rules[0] exists
-            std::string def_prd(from.rules[0].product());
-            all_wanted.push_back(def_prd);
-            already_wanted.insert(def_prd);
-            ... ok if we want to do the above, this is not how
-            to do it. among the problems: if the top level production
-            is referenced in the contained fpl, it'll have the wrong
-            name.  instead, do `foo.fpl` => bar ; or such.  then
-            foo.fpl's tree is either aliased normally reduced in
-            some sensible consistent way.  So we'd need to return
-            .. a GrammarElement? oh huh we do.  why this not parses
-            like that already?  perhaps it does!
- */
         }
 
         // NOTE I'm assuming here that we can append to a list
@@ -2015,13 +1972,12 @@ debug_hook();
             auto strl  = from.rules_for_product.lower_bound(wanted);
             auto endrl = from.rules_for_product.upper_bound(wanted);
             if(strl == endrl) {
-                fail(stringformat("No rule for '{}' in {}\n", wanted, src_fn));
+                error(stringformat(
+                    "No rule for '{}' in {}\n",
+                    wanted, src_fn
+                ));
             }
             for(auto rit = strl; rit != endrl; ++rit) {
-// XXX here.. does this copy correctly?
-// not really, in part at least because it refers to the Productions
-// from which it comes (or perhaps it _should_)... or really refers
-// to the reader
                 ProductionRule rule = from.rules[rit->second];
                 push_rule(rule);
                 num_imported++;
@@ -2045,7 +2001,7 @@ debug_hook();
             );
         }
 
-        return import_as;
+        return import_name;
     }
 
     // returns the name of the function to use for the
