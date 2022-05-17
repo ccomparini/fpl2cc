@@ -1420,11 +1420,18 @@ public:
     void set_default_main(bool def)                { default_main = def; }
     void add_internal(const CodeBlock &cb)         { parser_members.push_back(cb); }
 
+    std::string arg_for_directive() {
+        // reads an argument to the end of the line.
+        // end of line is any ascii vertical space (for now).
+        // leading and trailing spaces/tabs are stripped
+        return inp->read_re("[ \\t]*([^@\\x0a-\\x0d]+)[ \\t]*\n")[1];
+    }
+
     void parse_directive(const std::string &dir) {
         if(dir == "comment_style") {
             // this is a near synonym with @separator
             int line_num = inp->line_number();
-            std::string style = inp->read_re("\\s*(.+)\\s*")[1];
+            std::string style = arg_for_directive();
             if(!style.length()) {
                 warn("no comment style specified");
             } else {
@@ -1433,11 +1440,12 @@ public:
         } else if(dir == "default_action") {
             default_action = code_for_directive(dir);
         } else if(dir == "default_main") {
-            // XXX kill this
+            // XXX deprecated. kill this in favor of
+            // having a default main in grammarlib and importing.
             default_main = true;
         } else if(dir == "grammar") {
             // import the grammar from another fpl (or a library)
-            std::string grammar = inp->read_re("\\s*(.+)\\s*")[1];
+            std::string grammar = arg_for_directive();
             grammar += ".fpl";
             import_grammar(grammar);
         } else if(dir == "internal") {
@@ -1455,8 +1463,7 @@ public:
         } else if(dir == "post_reduce") {
             post_reduce = code_for_directive(dir);
         } else if(dir == "produces") {
-            // HEY can this scan a pointer correctly? I think not.
-            reduce_type = inp->read_re("\\s*(.+)\\s*")[1];
+            reduce_type = arg_for_directive();
         } else if(dir == "separator") {
             add_separator_code(
                 code_for_directive(dir, code_source::INLINE_OR_LIB)
