@@ -20,6 +20,11 @@ inline std::string _stringformat(char * s) {
     return std::string(s);
 }
 
+inline std::string _stringformat(bool b) {
+    if(b) return "true";
+    return "false";
+}
+
 template<typename T>
 std::string _stringformat(T in, const std::string &opts = "") {
 /*
