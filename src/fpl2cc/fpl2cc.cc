@@ -3118,8 +3118,8 @@ debug_hook();
             if(!used[rind]) {
                 const ProductionRule &rule = rules[rind];
                 warn(stringformat(
-                    "Rule producing {} at {} is unused\n",
-                    rule.product(), rule.location()
+                    "Rule {} producing {} at {} is unused\n",
+                    rind, rule.product(), rule.location()
                 ));
             }
         }
