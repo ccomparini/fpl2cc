@@ -9,14 +9,14 @@
 // The good thing is maybe I can fpl up the jest string formatting
 // and slap it in here.
 
-std::string _stringformat(const std::string &s) {
+inline std::string _stringformat(const std::string &s) {
     return s;
 }
 
-std::string _stringformat(const char * s) {
+inline std::string _stringformat(const char * s) {
     return std::string(s);
 }
-std::string _stringformat(char * s) {
+inline std::string _stringformat(char * s) {
     return std::string(s);
 }
 
