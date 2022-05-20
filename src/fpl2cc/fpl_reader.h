@@ -33,11 +33,11 @@ utf8_buffer slurp_file(const std::string &fn, ErrorCallback err) {
             "can't open '{}': {}\n", fn, std::string(strerror(errno))
         ));
     }
-    
-    in.seekg(0, std::ios::end);   
+
+    in.seekg(0, std::ios::end);
     size_t filesize = in.tellg();
     in.seekg(0, std::ios::beg);
-    
+
     utf8_byte buf[filesize + 1];
     in.read(reinterpret_cast<char *>(buf), filesize + 1);
     buf[filesize] = '\0';
@@ -86,7 +86,7 @@ size_t space_length(const utf8_byte *at) {
                     // 0xe2,0x80,0x87 -> U+2007 = figure space
                     // 0xe2,0x80,0x88 -> U+2008 = punctuation space
                     // 0xe2,0x80,0x89 -> U+2009 = thin space
-                    // 0xe2,0x80,0x8a -> U+200A = hair space         
+                    // 0xe2,0x80,0x8a -> U+200A = hair space
                     return 3;
                 }
 
@@ -135,7 +135,7 @@ class fpl_reader {
         }
         return empty_match;
     }
-    
+
     inline size_t bytes_left() const {
         return buffer.length() - read_pos;
     }
@@ -601,7 +601,7 @@ fprintf(stderr, "whoa dude this is going to break because the char length is %lu
 
     // pos is the position in the input at which to look; < 0
     // means use the current read position (the default).
-    // num_chars is the maximum number of utf8 chars to 
+    // num_chars is the maximum number of utf8 chars to
     // look at.
     // since we translate things like newlines (to "\n")
     // and eof, the output length might be more characters
@@ -650,7 +650,7 @@ public:
         : source(src), offset(pos) {
     }
 
-    SourcePosition(fpl_reader_p src) 
+    SourcePosition(fpl_reader_p src)
         : source(src), offset(src->current_position()) {
     }
 
@@ -673,7 +673,7 @@ public:
                 length = to_pos.offset - offset;
             } else {
                 return "¡debug_peek source file mismatch: "
-                     + source->filename() + " vs " 
+                     + source->filename() + " vs "
                      + to_pos.source->filename() + "¡";
             }
         }
