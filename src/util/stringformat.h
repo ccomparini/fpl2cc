@@ -111,6 +111,15 @@ std::string stringformat(std::string_view fmt, Args&&... args) {
     return out;
 }
 
+// returns the string passed, with an extra newline at the end
+// if the string didn't have one already.
+inline std::string ensure_nl(const std::string &src) {
+    if(src[src.length() - 1] != '\n') 
+        return src + "\n";
+
+    return src;
+}
+
 
 #endif // STRINGFORMAT_H
 
