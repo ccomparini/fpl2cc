@@ -15,7 +15,7 @@ namespace fpl {
 
 class production_rule {
 public:
-    struct Step {
+    struct step {
         grammar_element gexpr;
         std::string varname; // if set, name of this expression in reduce code
 
@@ -24,12 +24,12 @@ public:
 
         bool eject; // if set, don't pass this to reduce code
 
-        Step(const std::string &str, grammar_element::Type tp)
+        step(const std::string &str, grammar_element::Type tp)
             : gexpr(str,tp), min_times(1), max_times(1),
               eject(false)
         { }
 
-        friend bool operator<(const Step& left, const Step& right) {
+        friend bool operator<(const step& left, const step& right) {
             if(left.gexpr.compare(right.gexpr) == 0) {
                 if(left.min_times == right.min_times)
                     return left.max_times < right.max_times;
@@ -121,7 +121,7 @@ public:
 
 private:
     std::string prod;
-    std::vector<Step> rsteps;
+    std::vector<step> rsteps;
     code_block   code_for_rule; // inlined reduce code, if any
     reducer      abs_impl;      // abstracted implementation, if any
     std::string file;
@@ -160,7 +160,7 @@ public:
         return rule_fn();
     }
 
-    void add_step(Step step) {
+    void add_step(step step) {
         rsteps.push_back(step);
     }
 
@@ -177,7 +177,7 @@ public:
     }
 
     // returns NULL if index is out of bounds
-    const Step *step(unsigned int index) const {
+    const step *nth_step(unsigned int index) const {
         if(index < rsteps.size()) {
             return &rsteps[index];
         }
@@ -189,11 +189,11 @@ public:
         // the rule is "foldable" if it has exactly one step
         // and that step is not optional, repeated, or ejected.
         if(num_steps() != 1) return false;
-        const Step *st = step(0);
+        const step *st = nth_step(0);
         return (st->min_times == 1) && (st->max_times == 1) && (!st->eject);
     }
 
-    const std::vector<Step> &steps() const {
+    const std::vector<step> &steps() const {
         return rsteps;
     }
 
@@ -225,7 +225,7 @@ public:
     // returns the variable name for the given step number.
     // rudely asserts if the step isn't valid
     std::string varname(int stepi) const {
-        if(const Step *st = step(stepi)) {
+        if(const step *st = nth_step(stepi)) {
             std::string name = st->variable_name();
             if(name.length() == 0) {
                 name = "arg_" + std::to_string(stepi);

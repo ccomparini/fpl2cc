@@ -148,7 +148,7 @@ class productions {
                 if(step == position)
                     out += "•";
                 out += " ";
-                out += rl.step(step)->to_str();
+                out += rl.nth_step(step)->to_str();
             }
             if(step == position)
                 out += "•";
@@ -231,7 +231,7 @@ class productions {
         bool reduce_only(const productions *prods) const {
             for(lr_item item : iterable_items()) {
                 const production_rule &rule = prods->rules[item.rule];
-                if(rule.step(item.position)) {
+                if(rule.nth_step(item.position)) {
                     // this item is not at the end of the rule,
                     // so it's some kind of shift, so this is
                     // not pure reduce.
@@ -261,7 +261,7 @@ class productions {
     };
 
     void lr_closure_add_rules(lr_set &set, const production_rule &rule, int pos) {
-        const production_rule::Step *right_of_dot = rule.step(pos);
+        const production_rule::step *right_of_dot = rule.nth_step(pos);
 
         if(right_of_dot && !right_of_dot->is_terminal()) {
             // The thing to the right of the dot is a product,
@@ -319,11 +319,11 @@ class productions {
                 //   x "!" is complicated, so I got rid of it
                 const production_rule &rule = rules[item.rule];
                 int pos = item.position;
-                const production_rule::Step *right_of_dot;
+                const production_rule::step *right_of_dot;
                 // while loop here handles positions at eof (= NULL)
                 // as well helping handle optional expressions
                 // (i.e. expressions with "*" and "?"):
-                while(right_of_dot = rule.step(pos)) {
+                while(right_of_dot = rule.nth_step(pos)) {
                     lr_closure_add_rules(set, rule, pos);
 
                     // only need to keep looking for following symbols
@@ -350,7 +350,7 @@ class productions {
         const production_rule &rule = rules[it.rule];
         for(int pos = it.position; pos <= rule.num_steps(); pos++) {
             set.add_item(lr_item(it.rule, pos));
-            const production_rule::Step *expr = rule.step(pos);
+            const production_rule::step *expr = rule.nth_step(pos);
             if(!expr || !expr->is_optional()) {
                 // end of rule or the items is not optional so we
                 // don't need to look after:
@@ -367,7 +367,7 @@ class productions {
     lr_set lr_goto(const lr_set &in, const grammar_element &sym) {
         lr_set set;
         for(auto item : in.iterable_items()) {
-            const production_rule::Step *step = rules[item.rule].step(item.position);
+            const production_rule::step *step = rules[item.rule].nth_step(item.position);
             if(step && step->matches(sym)) {
 
                 add_expanded(set, lr_item(item.rule, item.position + 1));
@@ -381,7 +381,7 @@ class productions {
     }
 
     // used for detecting conflicts
-    std::string transition_id(const production_rule::Step &pexp, const lr_set &to) {
+    std::string transition_id(const production_rule::step &pexp, const lr_set &to) {
         char buf[40]; // 40 is arbitrarily larger than the 5 we'll need
         snprintf(buf, 40, "%0x_", element_index[pexp.gexpr]);
         std::string out(buf);
@@ -565,7 +565,7 @@ public:
         rules.push_back(rule);
 
         for(int stp = 0; stp < rule.num_steps(); stp++) {
-            record_element(rule.step(stp)->gexpr);
+            record_element(rule.nth_step(stp)->gexpr);
         }
         record_element(rule.product_element());
 
@@ -603,7 +603,7 @@ public:
         preamble.push_back(code);
     }
 
-    static void read_quantifier(fpl_reader &src, production_rule::Step &expr) {
+    static void read_quantifier(fpl_reader &src, production_rule::step &expr) {
         switch(src.peek()) {
             case '*':
                 expr.min_times = 0;
@@ -627,7 +627,7 @@ public:
         }
     }
 
-    static void read_suffix(fpl_reader &src, production_rule::Step &expr) {
+    static void read_suffix(fpl_reader &src, production_rule::step &expr) {
         if(src.read_byte_equalling('^')) {
             expr.eject = true;
         } else if(src.read_byte_equalling(':')) {
@@ -775,7 +775,7 @@ public:
 
             if(type != grammar_element::Type::NONE) {
                 if(expr_str.length() >= 1) {
-                    production_rule::Step expr(expr_str, type);
+                    production_rule::step expr(expr_str, type);
                     // XXX awkward
                     if(type == grammar_element::Type::LACK_OF_SEPARATOR)
                         expr.eject = true;
@@ -1027,7 +1027,7 @@ public:
                 // any rules needed to generate the rule we just pushed are
                 // also relevant:
                 for(int stepi = 0; stepi < rule.num_steps(); ++stepi) {
-                     const production_rule::Step *step = rule.step(stepi);
+                     const production_rule::step *step = rule.nth_step(stepi);
                      if(step && !step->is_terminal()) {
                          if(!already_wanted.count(step->production_name())) {
                              all_wanted.push_back(step->production_name());
@@ -1098,7 +1098,7 @@ public:
         ;
 
         for(int sti = 0; sti < rule.num_steps(); ++sti) {
-            if(const production_rule::Step *st = rule.step(sti)) {
+            if(const production_rule::step *st = rule.nth_step(sti)) {
                 if(sti > 0) out += ", ";
                 out += "    \"" + st->variable_name() + "\"\n";
             }
@@ -1214,7 +1214,7 @@ public:
         out += "int frame_start = base_parser.lr_top();\n";
         out += "int pos = frame_start;\n"; // (pos gets updated as we go)
         for(int stind = rule.num_steps() - 1; stind >= 0; --stind) {
-            const production_rule::Step *expr = rule.step(stind);
+            const production_rule::step *expr = rule.nth_step(stind);
             if(!expr) {
                 error(rule.location(), stringformat(
                     "Bug: no expression for step {} in {}",
@@ -1234,7 +1234,7 @@ public:
         // generates the call to the reduction rule:
         out += "    " + type_for(rule.product()) + " result = " + rule_fn(rule) + "(";
         for(int stind = 0; stind < rule.num_steps(); stind++) {
-            const production_rule::Step *expr = rule.step(stind);
+            const production_rule::step *expr = rule.nth_step(stind);
 
             if(expr->skip_on_reduce())
                 continue;  // Author has specified that this arg isn't passed
@@ -1280,7 +1280,7 @@ public:
         return out;
     }
 
-    std::string args_for_shift(const lr_set &next_state, const production_rule::Step &expr) {
+    std::string args_for_shift(const lr_set &next_state, const production_rule::step &expr) {
         std::string el_id(std::to_string(element_index[expr.gexpr]));
         if(expr.is_terminal()) {
             return "\"" + expr.terminal_string() + "\""
@@ -1315,7 +1315,7 @@ public:
     }
 
     std::string code_for_shift(
-        const lr_set &state, const production_rule::Step *right_of_dot
+        const lr_set &state, const production_rule::step *right_of_dot
     ) {
         if(!right_of_dot)  // if this happens, it's a bug
             return "\n#error \"missing right_of_dot???\"\n";
@@ -1413,7 +1413,7 @@ public:
         std::vector<lr_item> optionals;
         for(lr_item item : state.iterable_items()) {
             const production_rule &rule = rules[item.rule];
-            const production_rule::Step *right_of_dot = rule.step(item.position);
+            const production_rule::step *right_of_dot = rule.nth_step(item.position);
             if(!right_of_dot) {
                 if(reduce_item) {
                     reduce_reduce_conflict(item.rule, reduce_item.rule);
@@ -1827,9 +1827,9 @@ public:
         // but simplifies life for the fpl author, especially
         // for trivial cases.
         int argind = 0;
-        const std::vector<production_rule::Step> &steps = rule.steps();
+        const std::vector<production_rule::step> &steps = rule.steps();
         for(int stind = 0; stind < steps.size(); stind++) {
-            const production_rule::Step &expr = steps[stind];
+            const production_rule::step &expr = steps[stind];
 
             // this expression might be suffixed with '^', which
             // means it's only used for recognizing, and is not
@@ -1885,7 +1885,7 @@ public:
         // don't match steps in the rule:
         std::set<std::string> unknown_vars = red.required_arguments();
         for(int stepi = 0; stepi < rule.num_steps(); ++stepi) {
-            const production_rule::Step *step = rule.step(stepi);
+            const production_rule::step *step = rule.nth_step(stepi);
             if(step) {
                 // this one matches, so remove it from the set:
                 unknown_vars.erase(step->variable_name());
@@ -1917,7 +1917,7 @@ public:
         int cnt = 0;
 
         for(int stepi = 0; stepi < rule.num_steps(); ++stepi) {
-            const production_rule::Step *step = rule.step(stepi);
+            const production_rule::step *step = rule.nth_step(stepi);
             // what if there's an unnamed step?
             // this will "just work", but will it be
             // confusing?
