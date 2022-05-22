@@ -130,14 +130,6 @@ private:
 
 public:
 
-    // deprecated:
-    production_rule(const fpl_reader &rdr, size_t at_byte) :
-        file(rdr.filename()),
-        line(rdr.line_number(at_byte)),
-        rulenum(0) // or should this be -1? XXX
-    {
-    }
-
     production_rule(const std::string fn, int ln) :
         file(fn),
         line(ln),

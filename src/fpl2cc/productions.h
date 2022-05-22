@@ -932,7 +932,7 @@ public:
                 // wrong..
                 error("unmatched '}'\n");
             } else {
-                production_rule rule(*inp, inp->current_position());
+                production_rule rule(inp->filename(), inp->line_number());
                 if(read_expressions(*inp, rule)) {
                     // .. we've read the expressions/steps leading to
                     // the production (including the "->").
