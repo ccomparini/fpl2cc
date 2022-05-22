@@ -1,6 +1,12 @@
 #ifndef CODE_BLOCK_H
 #define CODE_BLOCK_H
 
+#include <fstream>
+#include <string>
+#include "util/searchpath.h"
+#include "util/src_location.h"
+#include "util/stringformat.h"
+
 namespace fpl {
 
 struct code_block {
