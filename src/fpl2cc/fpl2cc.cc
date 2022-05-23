@@ -51,30 +51,6 @@ void warn(const std::string &msg, src_location caller = CALLER()) {
     num_warnings++;
 }
 
-
-/*
-std::string to_string(std::pair<const std::string, const std::string> tfp) {
-    return stringformat("'{}':'{}'", tfp.first, tfp.second);
-}
- */
-
-/*
-// errf unused....
-template<typename T>
-std::string join(const std::string &sep, const T &group) {
-    std::string out;
-    using namespace std;
-    int ind = 0;
-    for(auto item : group) {
-        out += to_string(item);
-        if(ind++ < group.size())
-            out += sep;
-    }
-    return out;
-}
- */
-
-
 /*
 
   fpl grammar:

@@ -265,7 +265,14 @@ public:
         return abs_impl;
     }
 
-    code_block final_reduction_code() const {
+    // this is the _actual_ reduction code, after factoring
+    // in abstracted reducers and defaults and whatnot.
+    code_block reduce_code() const {
+
+        // abstracted reducers take priority over inline code.
+        // this is so that fpl authors can import grammar
+        // from whatever they want, and override actions
+        // as necessary for their particular applications
         reducer red = abstracted_reducer();
         if(red)
             return red.code();
@@ -303,7 +310,6 @@ public:
 };
 
 }
-
 
 #endif // PRODUCTION_RULE_H
 

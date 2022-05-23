@@ -17,6 +17,9 @@
 
 namespace fpl {
 
+class productions;
+std::string fpl_x_parser(const productions &, const options &);
+
 class productions {
 
     fpl_reader_p  inp;
@@ -103,7 +106,7 @@ class productions {
         // refer to the rule itself.  So each item
         // can be encoded as a rule ID and the step
         // within that rule:
-        uint16_t rule;     // offset into rules
+        uint16_t rule;     // offset into rules (i.e. rule number)
         uint16_t position; // offset into rule->steps
 
         static const uint16_t no_rule = 0xffff;
@@ -113,6 +116,7 @@ class productions {
         // it also determines the order of the items
         // such that earlier items (in the fpl source)
         // are ordered earlier.
+// XXX why is this friend?
         friend bool operator<(const lr_item& left, const lr_item& right) {
 
             // same rule?  earlier position in the rule
@@ -1207,7 +1211,7 @@ public:
           If none of these apply, there's no code for the rule,
           and the caller will handle it.
          */
-        code_block rule_code = rule.final_reduction_code();
+        code_block rule_code = rule.reduce_code();
 
         // (this is the "none of these apply" case:)
         if(!rule_code) return rule_code;
@@ -1539,6 +1543,8 @@ public:
     // this is fairly rough but does result in more or less readable
     // code for most cases.
     // ... this should also be done in fpl.
+    // fn is the name of the file this will be written to, and is
+    // used in "restoring" line numbers
     static std::string reformat_code(
         const std::string &code, const std::string &fn
     ) {
@@ -1629,6 +1635,7 @@ public:
     // this makes the generated code easier to read - eg
     // instead of "if(prd.grammar_element_id == 62)" we can
     // do "if(prd.grammar_element_id == NontermID::_decimal_constant)"
+public:
     std::string nonterm_enum() const {
         std::string out;
         std::string nonterm_str_guts;
@@ -1788,7 +1795,7 @@ public:
         return parser_class_name() + "::" + mem;
     }
 
-    std::string default_main_code(const std::string &parser_class) const {
+    std::string default_main_code() const {
         std::string out("\n\n");
 
         // the main() generated here is pretty much just a test stub.
@@ -1803,7 +1810,7 @@ public:
         out += "    }\n";
         // XXX this is also weak; handle more than one source
         out += "    fpl_reader_p inp = std::make_shared<fpl_reader>(argv[1]);\n";
-        out +=      parser_class + " parser(inp);\n";
+        out +=      parser_class_name() + " parser(inp);\n";
         out += "    using namespace std;\n";
         out += "    auto result = parser.parse();\n";
         //out += "    printf(\" %s\\n\", to_string(result).c_str());\n";
@@ -2082,7 +2089,7 @@ public:
         std::list<std::string> missing_actions;
         for(int rnum = 0; rnum < rules.size(); rnum++) {
             const production_rule &rule = rules[rnum];
-            if(!rule.final_reduction_code()) {
+            if(!rule.reduce_code()) {
                 missing_actions.push_back(stringformat(
                     "{}\t{}\n", rule.location(), hypothetical_reducer(rule)
                 ));
@@ -2101,111 +2108,12 @@ public:
         }
     }
 
+    // jemp-based output:
+    friend std::string fpl_x_parser(const productions &, const options &);
+
     std::string generate_code(src_location caller = CALLER()) {
         resolve(caller);
-
-        const std::string parser_class = parser_class_name();
-        // "base" is probably the wrong term..
-        const std::string base_parser_class = "FPLBaseParser<" + parser_class + ">";
-
-        std::string out("/*\n");
-        out += " options:\n" + opts.to_str();
-        out += stringformat("\n calculated goal()s: {}\n", goal);
-        out += " */\n\n";
-
-        // this is the source file(s), except we actually only
-        // have one (top level) source file per generated file..
-        for(auto fn : opts.impl_sources) {
-            out += code_block::from_file(
-                fn, opts.src_path, "(command line)", 1
-            ).format();
-        }
-
-        out += "#include <string>\n";
-
-        // preamble has to come before the fpl headers
-        // because (to my surpise) things like to_string
-        // functions (called by the template) have to be
-        // declared before the template (not just before
-        // template instantiation.. ?) (did I miss something?)
-        if(preamble.size()) {
-            out += "\n// preamble:\n";
-            for(auto pre : preamble) {
-                // can't format_scoped here because this is where the
-                // #include stuff is (typically)
-                out += pre.format();
-            }
-            out += "// end preamble\n\n";
-        }
-        out += "#line " + std::to_string(__LINE__) + " \"" + __FILE__ + "\"\n";
-        out += "#include \"fpl2cc/fpl_reader.h\"\n";
-        out += "#include \"fpl2cc/fpl_base_parser.h\"\n";
-        out += "\n\n";
-
-        // parser_class is now really parser_impl_class or such...
-        out += "class " + parser_class + " {\n";
-        // Can't do the private declarations first because the
-        // FPLBaseParser template needs to know about state methods
-        // and such to determine the types it needs, but c++ won't
-        // let you predeclare such methods.
-        out += "public:\n";
-        out += "    // state() and reduce_type tell FPLBaseParser what types to use\n";
-        out += "    void state();\n"; // this must match state_x methods; XXX document/typedef?
-        out += "    int error_count() { return base_parser.error_count(); }\n";
-        out += "    static " + reduce_type + " reduce_type;\n"; // for telling the FPLBaseParser.. as above XXX document
-        out += "private:\n";
-        out += "    using FPLBP = " + base_parser_class + ";\n";
-        out += "    using State = FPLBP::State;\n";
-        out += "    using Product = FPLBP::Product;\n";
-        out += "    using StackEntry = FPLBP::StackEntry;\n";
-        out += "    FPLBP base_parser;\n";
-        for(auto mem : parser_members) {
-            out += mem.format();
-            // return to "private" after each such block.
-            // this way, authors can add public members
-            // to the parser without turning other stuff public
-            out += "private:";
-        }
-        out += "public:\n";
-
-        out += nonterm_enum();
-        out += state_to_str_code();
-        out += state_string_code();
-        out += is_goal();
-
-        out += separator_method().format();
-        out += eat_separator_code();
-
-        for(int rnum = 0; rnum < rules.size(); rnum++) {
-            out += reduce_action(rules[rnum]).format();
-        }
-
-        for(lr_set state : states) {
-            out += code_for_state(state).c_str();
-        }
-
-        // constructor:
-        out += "    " + parser_class + "(fpl_reader_p src) : base_parser(src) { }\n";
-        out += "    std::string to_str() { return base_parser.to_str(); }\n";
-        out += "    inline " + reduce_type + " parse() {\n";
-        out += "        auto result = base_parser.parse(*this);\n";
-        if(post_parse) {
-            out += post_parse.format();
-        }
-        out += "        return result;\n";
-        out += "    };\n";
-
-        out += "};\n"; // end of class
-
-        if(opts.generate_main || default_main) {
-            out += default_main_code(parser_class);
-        } else if(main_guts) {
-            out += "int main(int argc, const char **argv) {\n";
-            out += main_guts.format();
-            out += "}\n\n";
-        }
-
-        return reformat_code(out, opts.output_fn);
+        return reformat_code(fpl_x_parser(*this, opts), opts.output_fn);
     }
 
     // debugging:
@@ -2238,6 +2146,8 @@ public:
         }
     }
 };
+
+#include "fpl_x_parser.h"
 
 } // namespace fpl
 

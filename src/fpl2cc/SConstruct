@@ -2,6 +2,7 @@
 Import('env')
 env = env.Clone()
 
+env.Jemp2h('fpl_x_parser.h.jemp')
 
 env.Program('#bin/fpl2cc', [ 'fpl2cc.cc', ])
 

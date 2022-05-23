@@ -1,4 +1,3 @@
-# import pprint
 from pathlib import Path
 import subprocess
 import sys
@@ -77,8 +76,9 @@ def fpl_scan(node, env, arg):
     # bootstrapping:  chuck an error telling people what to do if
     # there's no fpl2cc, which we need for determining dependencies
     if not Path('bin/fpl2cc').exists() :
-        raise Exception("BOOTSTRAPPING: please run:\n    scons bin/fpl2cc\n")
-        
+        return [ '#bin/fpl2cc' ]
+        #raise Exception("BOOTSTRAPPING: please run:\n    scons bin/fpl2cc\n")
+
     imports = subprocess.check_output(
         [ 'bin/fpl2cc', '--no-generate-code', '--dump-dependencies', '--src-path='+path, src ]
     ).decode('utf-8').splitlines()
@@ -88,7 +88,7 @@ def fpl_scan(node, env, arg):
     imports = list(map(lambda fl: "#" + fl, imports))
 
     # also, we'll want to reprocess fpls if fpl2cc changed:
-    #imports.append('#bin/fpl2cc') # XXX temporarily disabled
+    imports.append('#bin/fpl2cc')
 
     return imports
 
