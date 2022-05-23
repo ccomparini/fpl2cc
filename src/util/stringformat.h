@@ -25,14 +25,20 @@ inline std::string _stringformat(bool b) {
     return "false";
 }
 
+// You can call to_string on normal c types such
+// as int, float etc and expect a reasonable result,
+// but there's no such (identity) sub for std::string.
+// Supplying one here makes the _stringformat template
+// version below work for things which can convert
+// themselves to string.  (sigh)
+inline std::string to_string(const std::string &in) {
+    return in;
+}
+
 template<typename T>
 std::string _stringformat(T in, const std::string &opts = "") {
-/*
-    // XXX TODO field width, padding, time formats, etc
-    if(opts == "x")
-        return to_hex(in);
- */
-    return std::to_string(in);
+    using namespace std;
+    return to_string(in);
 }
 
 template<typename T>
