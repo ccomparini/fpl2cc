@@ -118,7 +118,7 @@ env.Append(
 env.Append(BUILDERS =
     { 'Jemp2h' : Builder(action = 'bin/jemplate $SOURCE > $TARGET',
 	         suffix = '.h',
-	         src_suffix = '.jemp') } )
+	         src_suffix = '.h.jemp') } )
 
 src_subdirs = [
     # these are specified roughly in compile/dependency order:
