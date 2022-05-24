@@ -68,7 +68,7 @@ class productions {
     }
 
     // report an error at the current position in the current input
-    void error(const std::string &msg) {
+    void error(const std::string &msg) const {
         error(*inp, inp->current_position(), msg);
     }
 
@@ -413,7 +413,7 @@ public:
 
     // returns the name of the type expected as the result
     // of reducing to the product type indicated:
-    std::string type_for(const std::string &product) {
+    std::string type_for(const std::string &product) const {
         auto tf = type_for_product.find(product);
         if(tf != type_for_product.end()) {
             return tf->second;
@@ -1048,12 +1048,21 @@ public:
 
     // returns the name of the function to use for the
     // given state
-    std::string state_fn(const lr_set &state, bool fully_qualified = false) {
-        int state_num = state_index[state.id()];
-        return state_fn(state_num, fully_qualified);
+    std::string state_fn(const lr_set &state, bool fully_qualified = false) const {
+        auto state_numi = state_index.find(state.id());
+
+        if(state_numi != state_index.end())
+            return state_fn(state_numi->second, fully_qualified);
+
+        // if we got here, we didn't find the state in the index:
+        std::string errm = stringformat(
+            "Internal error: unindexed state for {}", state.to_str(this)
+        );
+        jerror::error(errm);
+        return "\n#error \"" + errm + "\"\n";
     }
 
-    std::string state_fn(int state_num, bool fully_qualified = false) {
+    std::string state_fn(int state_num, bool fully_qualified = false) const {
         std::string fn("state_");
 
         fn += std::to_string(state_num);
@@ -1064,7 +1073,7 @@ public:
         return fn;
     }
 
-    std::string rule_fn(const production_rule rule, bool fq = false) {
+    std::string rule_fn(const production_rule rule, bool fq = false) const {
         std::string fn = rule.rule_fn();
 
         if(fq)
@@ -1080,7 +1089,7 @@ public:
     // some reason it would hang on the first breakpoint
     // with the subproc spinning at 100% cpu, which was not
     // useful. so here's my punt:
-    std::string debug_single_step_code(const lr_set &st) {
+    std::string debug_single_step_code(const lr_set &st) const {
         std::string out;
         if(opts.debug) {
             out += "fprintf(stderr, \"%s\", base_parser.to_str().c_str());\n";
@@ -1139,7 +1148,7 @@ public:
     #undef rule_meta_str
 
 
-    code_block reduce_action(const production_rule &rule) {
+    code_block reduce_action(const production_rule &rule) const {
         /*
           A given rule will be reduced according to (in priority order):
           1) abstracted implementations (+product). this is top
@@ -1586,7 +1595,7 @@ public:
     // this makes the generated code easier to read - eg
     // instead of "if(prd.grammar_element_id == 62)" we can
     // do "if(prd.grammar_element_id == NontermID::_decimal_constant)"
-    std::string nonterm_enum() {
+    std::string nonterm_enum() const {
         std::string out;
         std::string nonterm_str_guts;
         std::string is_terminal_guts;
@@ -1641,7 +1650,7 @@ public:
         return out;
     }
 
-    std::string state_to_str_code() {
+    std::string state_to_str_code() const {
         std::string out("static std::string state_to_str(State st) {\n");
         out += "if(!st) return \"NULL\";\n";
         // c++ won't let you compare pointers in a switch statement.. sigh
@@ -1655,7 +1664,7 @@ public:
         return out;
     }
 
-    std::string state_string_code() {
+    std::string state_string_code() const {
         std::string out("static const char *state_string(State st) {\n");
         for(auto st: states) {
             out += stringformat(
@@ -1668,7 +1677,7 @@ public:
         return out;
     }
 
-    std::string is_goal() {
+    std::string is_goal() const {
         std::string out("static bool is_goal(int id) {\n");
         out += "    switch(id) {\n";
         for(auto gstr : goal) {
@@ -1693,31 +1702,28 @@ public:
     // "separator" might be a misnomer in all this.  it's more like
     // anything to elide before the tokenization code sees the input.
     // rename all the "separator" to "elide"?  (including directives)
-    code_block separator_method() {
+    code_block separator_method() const {
         code_block out(
             "static size_t separator_length(const utf8_byte *inp) {\n"
         );
 
         if(separator_code.size() == 0) {
             // default is space separation:
-            add_separator_code(code_block(
-                "return space_length(inp);\n"
-            ));
+            out += code_block("return space_length(inp);\n");
+        } else {
+            for(auto sepc : separator_code) {
+                out += sepc.format_scoped();
+            }
         }
 
-        // Comments/separators:
-        for(auto sepc : separator_code) {
-            out += sepc.format_scoped();
-        }
-
-        // if nothing returned a length yet, no separator
+        // catchall: if nothing returned a length yet, no separator
         out += "    return 0;\n";
         out += "}\n";
 
         return out;
     }
 
-    std::string eat_separator_code() {
+    std::string eat_separator_code() const {
         return (
             "size_t eat_separator() {\n"
             "    return base_parser.eat_separator(separator_length);\n"
@@ -1725,7 +1731,7 @@ public:
         );
     }
 
-    std::string parser_class_name() {
+    std::string parser_class_name() const {
         std::string base;
         for(auto chr : inp->base_name()) {
             switch(chr) {
@@ -1742,11 +1748,11 @@ public:
     }
 
     // returns fully-qualified name of a member of the parser class
-    std::string fq_member_name(const std::string &mem) {
+    std::string fq_member_name(const std::string &mem) const {
         return parser_class_name() + "::" + mem;
     }
 
-    std::string default_main_code(const std::string &parser_class) {
+    std::string default_main_code(const std::string &parser_class) const {
         std::string out("\n\n");
 
         // the main() generated here is pretty much just a test stub.
@@ -1812,7 +1818,7 @@ public:
 
     // returns the declaration for a reduce function
     // (possibly this can go in reducer)
-    std::string reducer_decl(const production_rule &rule) {
+    std::string reducer_decl(const production_rule &rule) const {
         std::string rfn = rule_fn(rule);
         std::string out;
         out += type_for(rule.product()) + " " + rfn + "(";
