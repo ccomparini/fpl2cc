@@ -288,7 +288,9 @@ class productions {
         }
     };
 
-    void lr_closure_add_rules(lr_set &set, const production_rule &rule, int pos) {
+    void lr_closure_add_rules(
+        lr_set &set, const production_rule &rule, int pos
+    ) const {
         const production_rule::step *right_of_dot = rule.nth_step(pos);
 
         if(right_of_dot && !right_of_dot->is_terminal()) {
@@ -331,7 +333,7 @@ class productions {
     //  possibility.) But that means it should be looking for something that
     //  is the right-hand side of a production for T. So we add items for T
     //  with the dot at the beginning.
-    lr_set lr_closure(const lr_set &in) {
+    lr_set lr_closure(const lr_set &in) const {
         lr_set set = in;
         int last_size;
         do {
@@ -376,7 +378,7 @@ class productions {
     // given a current state and a lookahead item, returns
     // the next state (i.e. the set of items which might appear
     // next)
-    lr_set lr_goto(const lr_set &in, const grammar_element &sym) {
+    lr_set lr_goto(const lr_set &in, const grammar_element &sym) const {
         lr_set set;
         for(auto item : in.iterable_items()) {
             const production_rule &rule = rules.at(item.rule);
@@ -1203,7 +1205,7 @@ public:
     std::string production_code(
         const lr_set &state,
         int rule_ind
-    ) {
+    ) const {
         std::string out;
         const production_rule &rule = rules[rule_ind];
 
@@ -1239,10 +1241,10 @@ public:
                     stind, rule.to_str()
                 ));
             } else {
-                std::string eid_str = std::to_string(element_index[expr->gexpr]);
-                std::string max_str = std::to_string(expr->max_times);
-                out += "FPLBP::StackSlice arg_" + std::to_string(stind)
-                     + "(base_parser, " + eid_str + ", " + max_str + ", pos);\n";
+                out += stringformat(
+                    "FPLBP::StackSlice arg_{}(base_parser, {}, {}, pos);\n",
+                    stind, element_index.at(expr->gexpr), expr->max_times
+                );
             }
         }
 
@@ -1298,8 +1300,8 @@ public:
         return out;
     }
 
-    std::string args_for_shift(const lr_set &next_state, const production_rule::step &expr) {
-        std::string el_id(std::to_string(element_index[expr.gexpr]));
+    std::string args_for_shift(const lr_set &next_state, const production_rule::step &expr) const {
+        std::string el_id(std::to_string(element_index.at(expr.gexpr)));
         if(expr.is_terminal()) {
             return "\"" + expr.terminal_string() + "\""
                    ", " + el_id
@@ -1314,7 +1316,7 @@ public:
         }
     }
 
-    void reduce_reduce_conflict(int r1, int r2) {
+    void reduce_reduce_conflict(int r1, int r2) const {
         warn(stringformat(
             "reduce/reduce conflict:\n    {} line {}\n vs {} at {}\n",
             rules[r1].to_str().c_str(), rules[r1].location().c_str(),
@@ -1325,7 +1327,7 @@ public:
     // reports what is probably a shift/shift conflict,
     // which would probably only happen due to a bug in
     // this program...
-    void other_conflict(lr_item item1, lr_item item2) {
+    void other_conflict(lr_item item1, lr_item item2) const {
         warn(stringformat(
            "conflict:\n    {}\n vs {}\n",
            item1.to_str(this).c_str(), item2.to_str(this).c_str()
@@ -1334,7 +1336,7 @@ public:
 
     std::string code_for_shift(
         const lr_set &state, const production_rule::step *right_of_dot
-    ) {
+    ) const {
         if(!right_of_dot)  // if this happens, it's a bug
             internal_error("missing right_of_dot?");
 
@@ -1371,7 +1373,7 @@ public:
                 out += "FPLBP::Terminal term(\"<special ~>\");\n"; // XXX this is terrible
                 out += stringformat(
                     "base_parser.lr_push(&{}, FPLBP::Product(term, {}, base_parser.position()));\n",
-                    state_fn(next_state, true), element_index[right_of_dot->gexpr]
+                    state_fn(next_state, true), element_index.at(right_of_dot->gexpr)
                 );
                 break;
             default:
@@ -1399,7 +1401,7 @@ public:
         return out;
     }
 
-    std::string code_for_state(const lr_set &state) {
+    std::string code_for_state(const lr_set &state) const {
         std::string out;
         std::string sfn = state_fn(state);
 
@@ -1440,11 +1442,11 @@ public:
                 }
             } else {
                 lr_set next_state = lr_goto(state, right_of_dot->gexpr);
-                int el_id = element_index[right_of_dot->gexpr];
+                int el_id = element_index.at(right_of_dot->gexpr);
 
                 auto existing = transition.find(el_id);
                 if(existing != transition.end()) {
-                    if(existing->second == state_index[next_state.id()]) {
+                    if(existing->second == state_index.at(next_state.id())) {
                         // already have a case for this transition.
                         // no problem, no need to generate another copy
                         // of the same case - just move on to the next item.
@@ -1452,7 +1454,7 @@ public:
                     } else {
                         // ... shift/shift conflict, which makes no sense,
                         // and afaict means there's a bug someplace:
-                        other_conflict(item, item_for_el_id[existing->first]);
+                        other_conflict(item, item_for_el_id.at(existing->first));
                     }
                 }
 
@@ -1461,7 +1463,7 @@ public:
                 if(right_of_dot->is_optional())
                     optionals.push_back(item);
 
-                transition[el_id] = state_index[next_state.id()];
+                transition[el_id] = state_index.at(next_state.id());
                 item_for_el_id[el_id] = item;
             }
         }
@@ -1516,7 +1518,9 @@ public:
     // this is fairly rough but does result in more or less readable
     // code for most cases.
     // ... this should also be done in fpl.
-    std::string reformat_code(const std::string &code, const std::string &fn) {
+    static std::string reformat_code(
+        const std::string &code, const std::string &fn
+    ) {
         int indent_lev = 0;
         int line_no = 1;
         bool comment_mode = false;
@@ -1686,6 +1690,7 @@ public:
         return out;
     }
 
+    // returns the code for the target is_goal function
     std::string is_goal() const {
         std::string out("static bool is_goal(int id) {\n");
         out += "    switch(id) {\n";
@@ -1930,7 +1935,7 @@ public:
     // the reducer can fit the rule at all - a given rule/reducer
     // might have a righ match count, but still be incompatible
     // for one reason or another.
-    int matchcount(const reducer &red, const production_rule &rule) {
+    int matchcount(const reducer &red, const production_rule &rule) const {
         int cnt = 0;
 
         for(int stepi = 0; stepi < rule.num_steps(); ++stepi) {
@@ -2002,7 +2007,7 @@ public:
     // returns a string containing one possible reducer
     // declaration for the rule passed.  used for giving
     // fpl authors a hint about what to declare.
-    std::string hypothetical_reducer(const production_rule &rule) {
+    std::string hypothetical_reducer(const production_rule &rule) const {
         std::string out("+");
         out += rule.product() + "(";
         auto steps = rule.steps();
@@ -2027,36 +2032,43 @@ public:
         return out;
     }
 
-    std::string generate_code(src_location caller = CALLER()) {
-
+    // determines goal(s), generates states, matches up reducers, etc.
+    // call this before generating code.
+    void resolve(src_location caller = CALLER()) {
         if(rules.size() <= 0) {
             internal_error("No rules found\n", caller);
         }
-
-        const std::string parser_class = parser_class_name();
-        // "base" is probably the wrong term..
-        const std::string base_parser_class = "FPLBaseParser<" + parser_class + ">";
-
-        std::string out("/*\n");
-        out += opts.to_str();
 
         goal = opts.entry_points;
         if(goal.empty()) {
             // no particular goal products specified, so we default
             // to whatever the first rule produces:
             goal.push_back(rules[0].product());
-            out += "\n default goal: " + rules[0].product() + "\n";
         }
+
+        apply_reducers();
+        generate_states(goal);
+    }
+
+    std::string generate_code(src_location caller = CALLER()) {
+        resolve(caller);
+
+        const std::string parser_class = parser_class_name();
+        // "base" is probably the wrong term..
+        const std::string base_parser_class = "FPLBaseParser<" + parser_class + ">";
+
+        std::string out("/*\n");
+        out += " options:\n" + opts.to_str();
+        out += stringformat("\n calculated goal()s: {}\n", goal);
         out += " */\n\n";
 
+        // this is the source file(s), except we actually only
+        // have one (top level) source file per generated file..
         for(auto fn : opts.impl_sources) {
             out += code_block::from_file(
                 fn, opts.src_path, "(command line)", 1
             ).format();
         }
-
-        apply_reducers();
-        generate_states(goal);
 
         out += "#include <string>\n";
 
@@ -2175,7 +2187,7 @@ public:
         }
     }
 
-    void report_unused_rules() {
+    void report_unused_rules() const {
         bool used[rules.size()];
         for(int rind = 0; rind < rules.size(); rind++) {
             used[rind] = false;
