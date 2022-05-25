@@ -216,6 +216,25 @@ class productions {
             items.insert(it);
         }
 
+        // adds the given lr_item to the lr_set, plus any other
+        // related items to cover optionalness.
+        // (repetition is handled in the goto)
+        // the rule passed is the rule in the productions for the item
+        // (i.e. the rule in which we're expanding)
+        void add_expanded(const lr_item &it, const production_rule &rule) {
+            if(!it) return;
+
+            for(int pos = it.position; pos <= rule.num_steps(); pos++) {
+                add_item(lr_item(it.rule, pos));
+                const production_rule::step *expr = rule.nth_step(pos);
+                if(!expr || !expr->is_optional()) {
+                    // end of rule or the items is not optional so we
+                    // don't need to look after:
+                    break;
+                }
+            }
+        }
+
         void add_set(const lr_set &set) {
             for(auto it : set.items) {
                 //items.insert(it);
@@ -288,8 +307,10 @@ class productions {
             }
 
             for(auto rit = strl; rit != endrl; ++rit) {
-                // (these are always position 0)
-                add_expanded(set, lr_item(rit->second, 0));
+                set.add_expanded(
+                    // (these are always position 0)
+                    lr_item(rit->second, 0), rules.at(rit->second)
+                );
             }
         }
     }
@@ -349,24 +370,6 @@ class productions {
         return set;
     }
 
-    // adds the given lr_item to the lr_set, plus any other
-    // related items to cover optionalness.  folding is also
-    // done here.
-    // (repetition is handled in the goto)
-    void add_expanded(lr_set &set, const lr_item &it) {
-        if(!it) return;
-
-        const production_rule &rule = rules[it.rule];
-        for(int pos = it.position; pos <= rule.num_steps(); pos++) {
-            set.add_item(lr_item(it.rule, pos));
-            const production_rule::step *expr = rule.nth_step(pos);
-            if(!expr || !expr->is_optional()) {
-                // end of rule or the items is not optional so we
-                // don't need to look after:
-                break;
-            }
-        }
-    }
 
     // "goto" operation from page 224 Aho, Sethi and Ullman,
     // augmented to allow repetition (eg from * and + operators).
@@ -376,13 +379,13 @@ class productions {
     lr_set lr_goto(const lr_set &in, const grammar_element &sym) {
         lr_set set;
         for(auto item : in.iterable_items()) {
-            const production_rule::step *step = rules[item.rule].nth_step(item.position);
+            const production_rule &rule = rules.at(item.rule);
+            const production_rule::step *step = rule.nth_step(item.position);
             if(step && step->matches(sym)) {
-
-                add_expanded(set, lr_item(item.rule, item.position + 1));
+                set.add_expanded(lr_item(item.rule, item.position + 1), rule);
                 if(step->max_times > 1) {
                     // ...if it can be repeated:
-                    add_expanded(set, lr_item(item.rule, item.position));
+                    set.add_expanded(lr_item(item.rule, item.position), rule);
                 }
             }
         }
@@ -1800,7 +1803,9 @@ public:
                 ));
             }
             for(auto rit = strl; rit != endrl; ++rit) {
-                add_expanded(entry_set, lr_item(rit->second, 0));
+                entry_set.add_expanded(
+                    lr_item(rit->second, 0), rules.at(rit->second)
+                );
             }
         }
         add_state(lr_closure(entry_set));
