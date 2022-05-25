@@ -8,6 +8,7 @@
 
 #include "util/c_str_escape.h"
 #include "util/jerror.h"
+#include "util/src_location.h"
 #include "util/stringformat.h"
 
 #include <list>
@@ -70,6 +71,14 @@ class productions {
     // report an error at the current position in the current input
     void error(const std::string &msg) const {
         error(*inp, inp->current_position(), msg);
+    }
+
+    // call this if there's a fatal bug detected at execution time:
+    static void internal_error(
+        const std::string &msg, src_location caller = CALLER()
+    ) {
+        jerror::error(stringformat("Internal error: {} at {}", msg, caller));
+        exit(1);
     }
 
     void add_state(const lr_set &st) {
@@ -1055,11 +1064,8 @@ public:
             return state_fn(state_numi->second, fully_qualified);
 
         // if we got here, we didn't find the state in the index:
-        std::string errm = stringformat(
-            "Internal error: unindexed state for {}", state.to_str(this)
-        );
-        jerror::error(errm);
-        return "\n#error \"" + errm + "\"\n";
+        internal_error("unindexed state for {}" + state.to_str(this));
+        return "\n#error CANT GET HERE\n";
     }
 
     std::string state_fn(int state_num, bool fully_qualified = false) const {
@@ -1327,7 +1333,7 @@ public:
         const lr_set &state, const production_rule::step *right_of_dot
     ) {
         if(!right_of_dot)  // if this happens, it's a bug
-            return "\n#error \"missing right_of_dot???\"\n";
+            internal_error("missing right_of_dot?");
 
         std::string out;
 
@@ -1367,10 +1373,10 @@ public:
                 break;
             default:
                 // if we get here, it's due to a bug:
-                out += stringformat(
-                    "\n#error \"Missing/unknown grammar element (id: {} {})\"\n",
-                    type, c_str_escape(right_of_dot->to_str())
-                );
+                internal_error(stringformat(
+                    "Missing/unknown grammar element (id: {} {})",
+                    type, right_of_dot->to_str()
+                ));
                 break;
         }
 
@@ -2016,10 +2022,10 @@ public:
         return out;
     }
 
-    std::string generate_code() {
+    std::string generate_code(src_location caller = CALLER()) {
 
         if(rules.size() <= 0) {
-            error("No rules found\n");
+            internal_error("No rules found\n", caller);
         }
 
         const std::string parser_class = parser_class_name();
