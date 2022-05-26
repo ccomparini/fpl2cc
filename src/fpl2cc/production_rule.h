@@ -234,6 +234,14 @@ public:
     }
 
     code_block default_code() const {
+        if(!foldable()) {
+            // if it's not foldable, at this point we're
+            // considering the code to be too complex
+            // to come up with a default.  So return a
+            // false block:
+            return code_block();
+        }
+
         // start the code block with a comment referring to this
         // line in this source file (fpl2cc.cc), to reduce puzzlement
         // about where this mixed-generated code comes from:
@@ -255,6 +263,22 @@ public:
 
     reducer abstracted_reducer() const {
         return abs_impl;
+    }
+
+    code_block final_reduction_code() const {
+        reducer red = abstracted_reducer();
+        if(red)
+            return red.code();
+        else if(code_for_rule)
+            return code_for_rule;
+        else if(foldable())
+            return default_code();
+
+        // if none of the above apply, return a false
+        // code block.  callers can print an error or
+        // fill something in or whatever they think is
+        // appropriate.
+        return code_block();
     }
 
     void set_reducer(const reducer &red) {

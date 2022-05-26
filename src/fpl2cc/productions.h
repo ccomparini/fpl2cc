@@ -505,10 +505,10 @@ public:
 
     void set_reduce_type(const std::string &rt)    { reduce_type = rt; }
     void set_default_action(const std::string &rt) { default_action = rt; }
-    void set_post_parse(const code_block &cb)       { post_parse = cb; }
-    void set_post_reduce(const code_block &cb)      { post_reduce = cb; }
+    void set_post_parse(const code_block &cb)      { post_parse = cb; }
+    void set_post_reduce(const code_block &cb)     { post_reduce = cb; }
     void set_default_main(bool def)                { default_main = def; }
-    void add_internal(const code_block &cb)         { parser_members.push_back(cb); }
+    void add_internal(const code_block &cb)        { parser_members.push_back(cb); }
 
     std::string arg_for_directive() {
         // reads an argument to the end of the line.
@@ -576,6 +576,16 @@ public:
     void push_rule(production_rule &rule) {
         int rule_num = rules.size();
         rule.set_rulenum(rule_num);
+
+        // we set the default action for the rule here so
+        // that (1) we don't have to resolve it later
+        // and (2) authors can set a default action, define
+        // several rules for which it's a good default, then
+        // set another, etc..
+        if(!rule.code()) {
+            rule.code(default_action);
+        }
+
         rules.push_back(rule);
 
         for(int stp = 0; stp < rule.num_steps(); stp++) {
@@ -1174,29 +1184,17 @@ public:
           If none of these apply, there's no code for the rule,
           and the caller will handle it.
          */
+        code_block rule_code = rule.final_reduction_code();
+
+        // (this is the "none of these apply" case:)
+        if(!rule_code) return rule_code;
 
         std::string out = reducer_decl(rule) + " {\n";
         out += "// " + rule.to_str() + "\n";
         out += rule_metadata(rule) + "\n";
         out += "SourcePosition start_pos = args[0].position();\n";
         out += "SourcePosition end_pos = base_parser.position();\n";
-        reducer red = rule.abstracted_reducer();
-        if(red) {
-            // abstracted implementation (1):
-            out += red.format_code();
-        } else if(rule.code()) {
-            // code defined in the rule (2):
-            out += rule.code().format(false);
-        } else if(default_action) {
-            // default action (3):
-            out += default_action.format(false);
-        } else if(rule.foldable() == 1) {
-            // "folded" means just return the one param,
-            // which is the "default"
-            out += rule.default_code().format(false);
-        } else {
-            return code_block(); // i.e. false/no code
-        }
+        out += rule_code.format(false);
         out += "\n}\n";
         return code_block(out);
     }

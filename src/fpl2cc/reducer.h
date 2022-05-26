@@ -26,7 +26,7 @@ class reducer {
 
     std::string production_name;
     std::set<std::string> args;
-    code_block code;
+    code_block reduce_code;
 public:
 
     reducer() { }
@@ -38,11 +38,11 @@ public:
     ) :
         production_name(name),
         args(arg),
-        code(cd)
+        reduce_code(cd)
     { }
 
     operator bool() const {
-        return code;
+        return reduce_code;
     }
 
     bool argument_matches(const std::string &var_name) const {
@@ -53,8 +53,8 @@ public:
         return production_name;
     }
 
-    std::string format_code() const {
-        return code.format(false);
+    code_block code() const {
+        return reduce_code;
     }
 
     std::set<std::string> required_arguments() const {
@@ -73,10 +73,11 @@ public:
                 out += " " + arg;
         }
         out += ") at ";
-        out += code.location();
+        out += reduce_code.location();
         return out;
     }
 };
-}
+
+} // namespace fpl
 
 #endif // REDUCER_H

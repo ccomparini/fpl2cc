@@ -16,8 +16,6 @@ struct code_block {
 
     code_block() : line(0) { }
 
-//    static const CodeBlock none; // i.e. no code
-
     code_block(
         const std::string &cd,
         const std::string &file = CALLER_FILE(),
