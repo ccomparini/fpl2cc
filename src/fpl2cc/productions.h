@@ -692,12 +692,10 @@ public:
         return make_shared<fpl_reader>(filename, sub_errcb);
     }
 
-    // .. imports relevant rules into this and returns the name of
+    // syntax: '`' filename '`' ~ /(.production_to_import)/?
+    // imports relevant rules into this and returns the name of
     // the top level production created
     std::string parse_import(fpl_reader &src, production_rule &rule) {
-        // importing another fpl source.
-        // syntax: '`' filename /`(:production_to_import)?/
-
         std::string filename(src.parse_string());
         if(!filename.length()) {
             error(src, "no filename specified");
@@ -705,13 +703,11 @@ public:
         }
 
         // `grammarname`.production means import only the
-        // specified production. (this used to use ':' but I
-        // changed that to use for naming parameters)
+        // specified production:
         std::string prod_name;
         if(src.read_byte_equalling('.')) {
             prod_name = read_production_name(src);
         }
-
 
         productions subs(opts, open_for_import(filename));
         subs.parse_fpl();
@@ -990,6 +986,49 @@ public:
         } while(!inp->eof());
     }
 
+    // returns a set of strings representing the set of products
+    // needed to create the product passed (including the product
+    // passed)
+    std::set<std::string> dependent_products(const std::string &prod) const {
+        std::list<std::string> all_wanted = { prod};
+        std::set<std::string> out;
+
+        // NOTE I'm assuming here that we can append to a list
+        // while iterating it and have things dtrt.  I believe
+        // this is a reasonable thing to ask from std::list,
+        // but have no documentation/spec saying it's ok.
+        for(auto wanted : all_wanted) {
+            out.insert(wanted);
+
+            auto strl  = rules_for_product.lower_bound(wanted);
+            auto endrl = rules_for_product.upper_bound(wanted);
+            
+            if(strl == endrl) {
+                error(stringformat(
+                    "No rule for '{}' in {}\n",
+                    wanted, inp->filename()
+                ));
+            }
+
+            for(auto rit = strl; rit != endrl; ++rit) {
+                production_rule rule = rules[rit->second];
+
+                // any rules needed to generate the rule we just pushed are
+                // also potentially relevant:
+                for(int stepi = 0; stepi < rule.num_steps(); ++stepi) {
+                     const production_rule::step *step = rule.nth_step(stepi);
+                     if(step && !step->is_terminal()) {
+                         if(!out.count(step->production_name())) {
+                             all_wanted.push_back(step->production_name());
+                         }
+                     }
+                }
+            }
+        }
+
+        return out;
+    }
+
     // Imports the grammar from the productions specified.
     // This will include rules and whatever's deemed necessary
     // to support those rules.
@@ -1011,59 +1050,35 @@ public:
 
         // these are the names of the products whose rules (and elements)
         // we need to import:
-        std::list<std::string> all_wanted;
-        std::set<std::string> already_wanted;
         std::string import_name;
         if(pname.size()) {
             import_name = pname;
-            all_wanted.push_back(pname);
-            already_wanted.insert(pname);
         } else if(from.rules.size()) {
             // no particular production specified.  import the
             // default (first) production.
-            std::string def_prd(from.rules[0].product());
-            import_name = def_prd;
-            all_wanted.push_back(def_prd);
-            already_wanted.insert(def_prd);
+            import_name = from.rules[0].product();
         }
 
-        // NOTE I'm assuming here that we can append to a list
-        // while iterating it and have things dtrt.  I believe
-        // this is a reasonable thing to ask from std::list,
-        // but have no documentation/spec saying it's ok.
+        // get the list of all products which we'll need to
+        // import (i.e. the one we wanted to import, plus
+        // anything needed to generate that)
+        std::set<std::string> wanted = from.dependent_products(import_name);
+
+        // ... and now import the relevant rules.
+        // NOTE that we import the rules IN ORDER because
+        // changing the rule order changes precedence.
         int num_imported = 0;
-        for(auto wanted : all_wanted) {
-            // NOTE:  no scoping currently.  so rule names can
-            // collide and cause mayhem... hmm
-            auto strl  = from.rules_for_product.lower_bound(wanted);
-            auto endrl = from.rules_for_product.upper_bound(wanted);
-            if(strl == endrl) {
-                error(stringformat(
-                    "No rule for '{}' in {}\n",
-                    wanted, src_fn
-                ));
-            }
-            for(auto rit = strl; rit != endrl; ++rit) {
-                production_rule rule = from.rules[rit->second];
+        for(auto rule : from.rules) {
+            if(wanted.count(rule.product()) > 0) {
                 push_rule(rule);
                 num_imported++;
-
-                // any rules needed to generate the rule we just pushed are
-                // also relevant:
-                for(int stepi = 0; stepi < rule.num_steps(); ++stepi) {
-                     const production_rule::step *step = rule.nth_step(stepi);
-                     if(step && !step->is_terminal()) {
-                         if(!already_wanted.count(step->production_name())) {
-                             all_wanted.push_back(step->production_name());
-                             already_wanted.insert(step->production_name());
-                         }
-                     }
-                }
             }
         }
+
         if(num_imported <= 0) {
             warn(
-                stringformat("No rules imported from {}", from.inp->filename())
+                stringformat("No rules imported for {} from {}",
+                import_name, from.inp->filename())
             );
         }
 
@@ -1679,8 +1694,9 @@ public:
         std::string out("static const char *state_string(State st) {\n");
         for(auto st: states) {
             out += stringformat(
-                "    if(&{} == st) return\n{};\n",
-                state_fn(st, true), st.to_str(this, "\"    ", "\\n\"\n", true)
+                "    if(&{} == st) return \"{}\"\n{};\n",
+                state_fn(st, true), state_fn(st, false),
+                st.to_str(this, "\"    ", "\\n\"\n", true)
             );
         }
         out += "    return \"<invalid state>\";\n";
