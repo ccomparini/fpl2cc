@@ -1702,7 +1702,7 @@ public:
         std::string out("static const char *state_string(State st) {\n");
         for(auto st: states) {
             out += stringformat(
-                "    if(&{} == st) return \"{}\"\n{};\n",
+                "    if(&{} == st) return \"{}:\\n\"\n{};\n",
                 state_fn(st, true), state_fn(st, false),
                 st.to_str(this, "\"    ", "\\n\"\n", true)
             );
