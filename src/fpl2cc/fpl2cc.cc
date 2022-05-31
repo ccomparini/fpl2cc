@@ -255,7 +255,13 @@ ExitVal fpl2cc(const options &opts) {
         prds.parse_fpl();
     }
 
-    std::string output = prds.generate_code();
+    if(opts.dump_dependencies)
+        for(auto dep : prds.imported_files())
+            fprintf(stdout, "%s\n", dep.c_str());
+
+    std::string output;
+    if(opts.generate_code)
+        output = prds.generate_code();
 
     // states are generated as a side effect of generate_code,
     // which is not great, but I'm not going to fix it right now,
@@ -265,7 +271,8 @@ ExitVal fpl2cc(const options &opts) {
 
     // uhh... this is easy, if hokey:
     if(opts.out) {
-        fprintf(opts.out, "%s\n", output.c_str());
+        if(output.length())
+            fprintf(opts.out, "%s\n", output.c_str());
     } else {
         fail("no open output - fail\n");
         return ExitVal::BAD_ARGS;

@@ -25,6 +25,7 @@ class productions {
     std::string reduce_type; // default reduce type
     std::map<std::string, std::string> type_for_product; // (reduce type for particular product)
 
+    std::list<std::string> imports; // filenames
     code_block default_action;
     code_block post_parse;
     code_block post_reduce;
@@ -671,6 +672,10 @@ public:
         return src.read_re("([A-Za-z][A-Za-z0-9_]+)\\s*")[1];
     }
 
+    inline std::list<std::string> imported_files() {
+        return imports;
+    }
+
     // Attempts to open an fpl source file and associate it with a
     // reader for import.  Searches the directory this source file
     // is in, as well as any other directories in the --src-path.
@@ -681,6 +686,9 @@ public:
         // search relative to the importing fpl first:
         searchp.prepend(inp->input_dir());
         std::string filename = opts.src_path.find(fpl_name + ".fpl");
+
+        // this is for generating dependencies and such (--dump-dependencies)
+        imports.push_back(filename);
 
         // report errors in the sub-fpl in the context of
         // the importing file:
