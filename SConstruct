@@ -1,5 +1,6 @@
-from pprint import pprint
+# import pprint
 from pathlib import Path
+import subprocess
 import sys
 
 # TODO you _can_ get the target files to not be slapped into
@@ -9,7 +10,7 @@ import sys
 debugger = ''
 #debugger = 'TERM=xterm-256color /usr/bin/lldb --one-line "b debug_hook" -- '
 
-fpl_include = ' --src-path=src/fpl2cc/grammarlib '
+fpl_include_dirs = [ 'src/fpl2cc/grammarlib' ]
 
 SetOption('num_jobs', 10)
 
@@ -32,25 +33,13 @@ env = Environment(
         '#src',
         '#src/util',
     ],
+    FPLPATH = fpl_include_dirs,
     LIBPATH=[ '#lib' ],
     LIBS='jest_util',
     tools = [ 'default', 'clangxx', ],
 )
 
 
-# fake "Scanner" to make it so that cc files generated
-# by fpl files implicitly depend on fpl2cc:
-def depend_on_fpl2cc(node, env, path) :
-    return [ '#bin/fpl2cc' ]
-
-env.Append(
-    SCANNERS = Scanner(
-        # this is wrong for Fpl2jest.  sigh.
-        # can't I force the dependency in the builder?
-        function = depend_on_fpl2cc,
-        skeys = ['.fpl']
-    )
-)
 
 # action-compatible comparison function to check if all source
 # files have the same content.  used for comparing output in tests.
@@ -82,23 +71,46 @@ env.Append(BUILDERS =
         suffix = '.success',
         src_suffix = '.out') } )
 
+# scanner for fpl interdependencies (i.e. so that
+# scons can understand fpl imports):
+def fpl_scan(node, env, arg):
+
+    src = node.srcnode().get_path()
+    path = ':'.join(env['FPLPATH'])
+    imports = subprocess.check_output(
+        [ 'bin/fpl2cc', '--no-generate-code', '--dump-dependencies', '--src-path='+path, src ]
+    ).decode('utf-8').splitlines()
+    # import names are relative to the current directory,
+    # so make scons aware of that by prefixing them with "#":
+    imports = list(map(lambda fl: "#" + fl, imports))
+
+    # also, we'll want to reprocess fpls if fpl2cc changed:
+    imports.append('#bin/fpl2cc')
+
+    return imports
+
+fpl_scanner = Scanner(function = fpl_scan, skeys = ['.fpl'])
+
 # fpl -> cc builder:
-# at this point this is for testing fpl
+fpl_args = '--src-path=' + ':'.join(fpl_include_dirs) + ' $FPLOPTS $SOURCES --out $TARGET'
 env.Append(BUILDERS =
-    { 'Fpl2cc' : Builder(action = debugger + 'bin/fpl2cc ' + fpl_include + ' $FPLOPTS $SOURCES --out $TARGET',
+    { 'Fpl2cc' : Builder(action = debugger + 'bin/fpl2cc ' + fpl_args,
 	         suffix = '.cc',
+                 source_scanner = fpl_scanner,
 	         src_suffix = '.fpl') } )
 
 # fpl -> h builder:
 env.Append(BUILDERS =
-    { 'Fpl2h' : Builder(action = debugger + 'bin/fpl2cc ' + fpl_include + ' $FPLOPTS $SOURCES --out $TARGET',
+    { 'Fpl2h' : Builder(action = debugger + 'bin/fpl2cc ' + fpl_args,
 	         suffix = '.h',
+                 source_scanner = fpl_scanner,
 	         src_suffix = '.fpl') } )
 
 # fpl -> jest builder:
 env.Append(BUILDERS =
-    { 'Fpl2jest' : Builder(action = debugger + 'bin/fpl ' + fpl_include + ' $FPLOPTS $SOURCES --out $TARGET',
+    { 'Fpl2jest' : Builder(action = debugger + 'bin/fpl ' + fpl_args,
 	         suffix = '.jest',
+                 source_scanner = fpl_scanner,
 	         src_suffix = '.fpl') } )
 
 # another fake "Scanner" to make it so that headers generated
@@ -112,7 +124,6 @@ env.Append(
         skeys = ['.jemp']
     )
 )
-
 
 # jemp -> h builder
 env.Append(BUILDERS =
