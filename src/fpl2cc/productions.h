@@ -1814,11 +1814,18 @@ public:
         return out;
     }
 
+    void clear_states() {
+        states.clear();
+        state_index.clear();
+    }
+
     void generate_states(const std::list<std::string> &wanted) {
 
         if(rules.empty()) {
             error("No rules found\n");
         }
+
+        clear_states();
 
         lr_set entry_set;
         for(auto entry_prod : wanted) {
