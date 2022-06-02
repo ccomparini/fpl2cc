@@ -2070,6 +2070,7 @@ public:
 
         apply_reducers();
         generate_states(goal);
+        report_unused_rules();
     }
 
     std::string generate_code(src_location caller = CALLER()) {
@@ -2194,8 +2195,6 @@ public:
             out += main_guts.format();
             out += "}\n\n";
         }
-
-        report_unused_rules();
 
         return reformat_code(out, opts.output_fn);
     }
