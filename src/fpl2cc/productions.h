@@ -2071,6 +2071,27 @@ public:
         apply_reducers();
         generate_states(goal);
         report_unused_rules();
+
+        std::list<std::string> missing_actions;
+        for(int rnum = 0; rnum < rules.size(); rnum++) {
+            const production_rule &rule = rules[rnum];
+            if(!rule.final_reduction_code()) {
+                missing_actions.push_back(stringformat(
+                    "{}\t{}\n", rule.location(), hypothetical_reducer(rule)
+                ));
+            }
+        }
+        if(missing_actions.size() > 0) {
+            std::string msg = stringformat(
+                "missing reduce action for {} rules:\n"
+                "    original rule location\tdesired reducer\n",
+                missing_actions.size()
+            );
+            for(std::string rmsg : missing_actions) {
+                msg += "    " + rmsg;
+            }
+            error(msg);
+        }
     }
 
     std::string generate_code(src_location caller = CALLER()) {
@@ -2148,27 +2169,8 @@ public:
         out += separator_method().format();
         out += eat_separator_code();
 
-        std::list<std::string> missing_actions;
         for(int rnum = 0; rnum < rules.size(); rnum++) {
-            const production_rule &rule = rules[rnum];
-            if(code_block rc = reduce_action(rule)) {
-                out += rc.format();
-            } else {
-                missing_actions.push_back(stringformat(
-                    "{}\t{}\n", rule.location(), hypothetical_reducer(rule)
-                ));
-            }
-        }
-        if(missing_actions.size() > 0) {
-            std::string msg = stringformat(
-                "missing reduce action for {} rules:\n"
-                "    original rule location\tdesired reducer\n",
-                missing_actions.size()
-            );
-            for(std::string rmsg : missing_actions) {
-                msg += "    " + rmsg;
-            }
-            error(msg);
+            out += reduce_action(rules[rnum]).format();
         }
 
         for(lr_set state : states) {
