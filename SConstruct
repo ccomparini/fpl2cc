@@ -3,10 +3,6 @@ from pathlib import Path
 import subprocess
 import sys
 
-# TODO you _can_ get the target files to not be slapped into
-# the source tree!  Maybe?
-# https://scons.org/doc/4.3.0/HTML/scons-user.html#chap-separate
-
 debugger = ''
 #debugger = 'TERM=xterm-256color /usr/bin/lldb --one-line "b debug_hook" -- '
 
@@ -77,9 +73,16 @@ def fpl_scan(node, env, arg):
 
     src = node.srcnode().get_path()
     path = ':'.join(env['FPLPATH'])
+
+    # bootstrapping:  chuck an error telling people what to do if
+    # there's no fpl2cc, which we need for determining dependencies
+    if not Path('bin/fpl2cc').exists() :
+        raise Exception("BOOTSTRAPPING: please run:\n    scons bin/fpl2cc\n")
+        
     imports = subprocess.check_output(
         [ 'bin/fpl2cc', '--no-generate-code', '--dump-dependencies', '--src-path='+path, src ]
     ).decode('utf-8').splitlines()
+
     # import names are relative to the current directory,
     # so make scons aware of that by prefixing them with "#":
     imports = list(map(lambda fl: "#" + fl, imports))

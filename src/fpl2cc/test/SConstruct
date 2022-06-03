@@ -49,7 +49,7 @@ build_lang_exe = {
 
 # this sets up:
 #   [lang] : [lang].cc
-#   [lang].cc : [lang].fpl
+#   [lang].cc : [lang].fpl #bin/fpl2cc
 # for each language we're testing, and makes the builder for:
 #   [x].out : [x].[lang] [lang]
 for fpl in fpls :
@@ -72,14 +72,18 @@ for fpl in fpls :
             suffix = '.out',
             src_suffix = language) } )
 
-    # .. and, the language program is built from <lang>.fpl AND
-    # any <lang>.impl.* files, which can be in other languages
-    #env.Fpl2cc(language + '.cc', [ langprog + '.fpl', Glob(langprog + ".impl.*") ], FPLOPTS="--generate-main --debug-single-step")
-    env.Fpl2cc(language + '.cc', [ langprog + '.fpl', Glob(langprog + ".impl.*") ])
+    # .. and, the language program is built from <lang>.fpl
+    env.Fpl2cc(language + '.cc', [ langprog + '.fpl' ])
     # use this one to test the fpl based parser:
-    # env.Fpl2cc(language + '.cc', [ langprog + '.fpl', Glob(langprog + ".impl.*") ], FPLOPTS="--generate-main --new-parser")
-    #env.Fpl2cc(language + '.cc', [ langprog + '.fpl', Glob(langprog + ".impl.*") ], FPLOPTS="--generate-main --debug-single-step")
-    #env.Fpl2cc(language + '.cc', [ langprog + '.fpl', Glob(langprog + ".impl.*") ], FPLOPTS="--generate-main --debug")
+    #env.Fpl2cc(language + '.cc', [ langprog + '.fpl' ], FPLOPTS="--generate-main --new-parser")
+    #env.Fpl2cc(language + '.cc', [ langprog + '.fpl' ], FPLOPTS="--generate-main --debug-single-step")
+    #env.Fpl2cc(language + '.cc', [ langprog + '.fpl' ], FPLOPTS="--generate-main --debug-single-step")
+    #env.Fpl2cc(language + '.cc', [ langprog + '.fpl' ], FPLOPTS="--generate-main --debug")
+
+    # and it depends on the fpl compiler (which is ultimately
+    # what we're testing):
+    env.Depends(language + '.cc', [ '#bin/fpl2cc' ])
+
     compiler = build_lang_exe.get(language, build_default)(langprog)
 
 
