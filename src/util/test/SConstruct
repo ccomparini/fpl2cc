@@ -5,6 +5,7 @@ env.Jemp2h('jemptest.jemp')
 
 env.Program('jemptest', [ 'jemptest.cc' ])
 
+# Command(target, source, action, [key=val, ...])
 # (note $SOURCE is the path to jemptest)
 env.Command('jemptest.out', 'jemptest', '$SOURCE > $TARGET')
 
