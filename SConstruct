@@ -88,7 +88,7 @@ def fpl_scan(node, env, arg):
     imports = list(map(lambda fl: "#" + fl, imports))
 
     # also, we'll want to reprocess fpls if fpl2cc changed:
-    imports.append('#bin/fpl2cc')
+    #imports.append('#bin/fpl2cc') # XXX temporarily disabled
 
     return imports
 
@@ -117,20 +117,20 @@ env.Append(BUILDERS =
 	         src_suffix = '.fpl') } )
 
 # another fake "Scanner" to make it so that headers generated
-# from .jemp sources depend on jemplate.
+# from .jemp sources depend on jemplpl.
 # there must be a simpler way to do this...
-def depend_on_jemplate(node, env, path) :
-    return [ '#bin/jemplate' ]
+def depend_on_jemplpl(node, env, path) :
+    return [ '#bin/jemplpl' ]
 env.Append(
     SCANNERS = Scanner(
-        function = depend_on_jemplate,
+        function = depend_on_jemplpl,
         skeys = ['.jemp']
     )
 )
 
 # jemp -> h builder
 env.Append(BUILDERS =
-    { 'Jemp2h' : Builder(action = 'bin/jemplate $SOURCE > $TARGET',
+    { 'Jemp2h' : Builder(action = 'bin/jemplpl $SOURCE > $TARGET',
 	         suffix = '.h',
 	         src_suffix = '.h.jemp') } )
 
