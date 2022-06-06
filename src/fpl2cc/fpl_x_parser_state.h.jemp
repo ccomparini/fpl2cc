@@ -1,0 +1,52 @@
+@parameter: const productions &prds @
+@parameter: const productions::lr_set &state @
+@parameter: const options &opts @
+@declare reduce_item: state.reduction_item(&prds) @
+@declare sfn: prds.state_fn(state) @
+
+//
+@state.to_str(&prds, "// ")-@
+//
+void @sfn@() {
+    @/* skip any separator before doing anything else, saving the
+        number of bytes it took up.  we need to do this before
+        trying to match terminals (of course), and we use the
+        number of bytes eaten for lack-of-separator assertions.
+    */@
+    size_t b_eaten = eat_separator();
+
+    @if(opts.debug) {@
+        fprintf(stderr, "=============\n");
+        fprintf(stderr, "@sfn@: %s\n", state_string(&@prds.fq_member_name(sfn)@));
+        fprintf(stderr, "%li bytes eaten since last terminal\n", b_eaten);
+        fprintf(stderr, "%s", base_parser.to_str().c_str());
+    @}@
+
+    @for(auto trans : prds.transitions_for_state(state)) {-@
+        @-if(auto right_of_dot = trans.right_of_dot) {-@
+            @declare type: right_of_dot->gexpr.type_str()@
+            @declare str: right_of_dot->terminal_string()@
+            @declare el_id: prds.element_index.at(right_of_dot->gexpr)@
+            @declare min: right_of_dot->min_times@
+            @declare max: right_of_dot->max_times@
+            @declare next_state: prds.state_fn(trans.next_state_number, true)@
+            @- "" @if(shift_@type@("@str@", @el_id@, @min@, @max@, &@next_state@)) {
+            } else @ "" -@
+        @-}-@
+    @-}-@
+    {
+        @if(reduce_item) {-@
+            @if(opts.debug) {-@
+                fprintf(stderr, "    @sfn@ is going to reduce to a %s\n", 
+                    "@c_str_escape(reduce_item.to_str(&prds))@"
+                );
+            @-}-@
+            @fpl_x_parser_reduce_call(prds, prds.rules[reduce_item.rule], opts)@
+        @} else {-@
+            @if(opts.debug) {-@
+                fprintf(stderr, "    terminating in @sfn@ \n");
+            @}@
+            base_parser.terminate();
+        @}-@
+    }
+}

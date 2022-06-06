@@ -1,0 +1,62 @@
+@parameter: const productions &prds @
+@parameter: const production_rule &rule @
+@parameter: const options &opts @
+
+@/*
+ generates the call to the reduce function for the given rule
+*/@
+
+    int frame_start = base_parser.lr_top();
+    int pos = frame_start;  // (pos gets updated as we go)
+    @for(int stind = rule.num_steps() - 1; stind >= 0; --stind) {-@
+        @declare expr: rule.nth_step(stind)@
+        @declare elid: prds.element_index.at(expr->gexpr)@
+        @if(!expr) {-@
+            #error Bug: no expression for step @stind@ @rule.to_str()@ @rule.location()@
+        @-} else {-@
+            FPLBP::StackSlice arg_@stind@(base_parser, @elid@, @expr->max_times@, pos);
+        @}-@
+    @}-@
+    
+    @/* now one slice for all the arguments (to rule them all) */@
+    FPLBP::StackSlice args(base_parser, pos + 1, frame_start - pos);
+    
+    @/* this is the call to the reduce code: */@
+    @-prds.type_for(rule.product())@ result = @prds.rule_fn(rule)@(
+        @-for(int stind = 0; stind < rule.num_steps(); stind++) {-@
+            @declare expr: rule.nth_step(stind)@
+            @-if(!expr->skip_on_reduce()) {-@
+                @- "" -@ arg_@stind-@
+                @-if(expr->is_single()) {-@
+                    @-if(expr->is_terminal()) {-@
+                        .term_str()
+                    @-} else {-@
+                        .val()
+                    @-}-@
+                @-}-@,
+            @}-@
+        @}-@
+    args);
+    
+    @if(prds.post_reduce) {@ {
+        @prds.post_reduce.format()@
+    } @}@
+    
+    @if(opts.debug) {-@
+        fprintf(stderr, "popping %i to %i:\n%s\n",
+           frame_start, pos, args.to_str().c_str()
+        );
+    @-}-@
+    
+    base_parser.set_product(Product(result,
+        @- rule.product_element().nonterm_id_str() -@
+        , args[0].position())
+    );
+    
+    @/*
+        this is what actually pops the stack. note we pop after
+        the reduce (mainly to minimize moves, but also so the
+        stack is more intact for error/bug analysis)
+    */@
+    base_parser.lr_pop_to(pos);
+

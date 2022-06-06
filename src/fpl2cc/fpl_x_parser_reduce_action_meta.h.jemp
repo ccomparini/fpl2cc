@@ -1,0 +1,46 @@
+@parameter: const production_rule &rule@
+
+@/*
+  Rule metadata: we make this available to fpl authors for use
+  in reduce code.
+*/@
+
+    struct {
+        static const char *name() {
+            return "@c_str_escape(rule.name())@";
+        }
+        static const char *product() {
+            return "@c_str_escape(rule.product())@";
+        }
+        static int num_steps() {
+            return @rule.num_steps()@;
+        }
+        static int line_number() {
+            return @rule.line_number()@;
+        }
+        static const char *filename() {
+            return "@c_str_escape(rule.filename())@";
+        }
+        static const char *location() {
+            return "@c_str_escape(rule.location())@";
+        }
+        static const char *to_str() {
+            return "@c_str_escape(rule.to_str())@";
+        }
+        static const char *argname(unsigned int argi) {
+            static const char *an[] = {
+                @for(int sti = 0; sti < rule.num_steps(); ++sti) {-@
+                    @if(const production_rule::step *st = rule.nth_step(sti)) {-@
+                        @-if(sti > 0) {@, @}-@
+                        "@st->variable_name()@"
+                    @}-@
+                @}-@
+            };
+            if(argi < @rule.num_steps()@) {
+                return an[argi];
+            } else {
+                return "arg index out of bounds";
+            }
+        }
+    } this_rule;
+

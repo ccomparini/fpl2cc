@@ -70,6 +70,10 @@ struct grammar_element {
         return "error: " + expr + " is not a nonterminal";
     }
 
+    inline std::string type_str() const {
+        return Type_to_str(type);
+    }
+
     inline std::string to_str() const {
         const char *lb = "";
         const char *rb = "";

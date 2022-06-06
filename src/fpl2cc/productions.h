@@ -145,6 +145,13 @@ class productions {
             return rule << 16 | position;
         }
 
+        // returns the rule step which this item refers to,
+        // which will be null in the case that it's the end
+        // of (or past the end of) the rule.
+        const production_rule::step *step(const productions &prds) {
+            return prds.rules[rule].nth_step(position);
+        }
+
         std::string to_str(const productions *prds) const {
             if(!prds) return "NULL productions";
 
@@ -1053,8 +1060,8 @@ public:
     // Imports the grammar from the productions specified.
     // This will include rules and whatever's deemed necessary
     // to support those rules.
-    // returns the name of the production which this import will produce,
-    // or  ...
+    // returns the name of the production which this import will
+    // produce, or an empty string if nothing was imported.
     std::string import_grammar(
         const productions &from, const std::string &pname = ""
     ) {
@@ -1152,56 +1159,6 @@ public:
         return fn;
     }
 
-
-    std::string rule_meta_argname(const production_rule &rule) const {
-        std::string out =
-            "static const char *argname(unsigned int argi) {\n"
-            "    static const char *an[] = {\n"
-        ;
-
-        for(int sti = 0; sti < rule.num_steps(); ++sti) {
-            if(const production_rule::step *st = rule.nth_step(sti)) {
-                if(sti > 0) out += ", ";
-                out += "    \"" + st->variable_name() + "\"\n";
-            }
-        }
-        out += "    };\n";
-        out += "    if(argi < " + std::to_string(rule.num_steps()) + ") {\n";
-        out += "        return an[argi];\n";
-        out += "    } else {\n";
-        out += "        return \"arg index out of bounds\";\n";
-        out += "    }\n";
-        out += "}\n";
-        return out;
-    }
-
-    #define rule_meta_str(mem) \
-        std::string("static const char *" #mem "() {\n") +\
-            "return \"" + c_str_escape(rule.mem()) + "\";\n" \
-        "}\n"
-    #define rule_meta_int(mem) \
-        std::string("static int " #mem "() {\n") +\
-            "return " + std::to_string(rule.mem()) + ";\n" \
-        "}\n"
-    std::string rule_metadata(const production_rule &rule) const {
-        std::string out;
-        out += "struct {\n";
-        out += rule_meta_str(name);
-        out += rule_meta_str(product);
-        out += rule_meta_int(num_steps);
-        out += rule_meta_int(line_number);
-        out += rule_meta_str(filename);
-        out += rule_meta_str(location);
-        out += rule_meta_str(to_str);
-        out += rule_meta_argname(rule);
-        out += "} this_rule;\n";
-        return out;
-    }
-    #undef rule_meta_int
-    #undef rule_meta_str
-
-
-    code_block reduce_action(const production_rule &rule) const {
         /*
           A given rule will be reduced according to (in priority order):
           1) abstracted implementations (+product). this is top
@@ -1216,136 +1173,10 @@ public:
           If none of these apply, there's no code for the rule,
           and the caller will handle it.
          */
-        code_block rule_code = rule.reduce_code();
-
-        // (this is the "none of these apply" case:)
-        if(!rule_code) return rule_code;
-
-        std::string out = reducer_decl(rule) + " {\n";
-        out += "// " + rule.to_str() + "\n";
-        out += rule_metadata(rule) + "\n";
-        out += "SourcePosition start_pos = args[0].position();\n";
-        out += "SourcePosition end_pos = base_parser.position();\n";
-        out += rule_code.format(false);
-        out += "\n}\n";
-        return code_block(out);
-    }
-
-    // returns code for reduce within a given state
-    std::string production_code(
-        const lr_set &state,
-        int rule_ind
-    ) const {
-        std::string out;
-        const production_rule &rule = rules[rule_ind];
-
-        //   For the moment, production code will need to be written
-        // in c++.  Authors of the production code should provide
-        // a matching header which defines their product type,
-        // as well as including anything else they're going to need
-        //   In the spirit of jest, we should provide as much visibility
-        // into the state of the compiler as possible.  Obviously we
-        // need to pass in the generated products.  Can we show the
-        // whole stack?
-        // pass, named:
-        //  - const &parser (do this?)
-        //  - arguments from the stack:
-        //    - one argument per element (step) in the rule.
-        //      each such argument is a slice of the stack,
-        //      holding where in the stack the relevant entries
-        //      are, and how many there are.
-
-        // in c++ the order in which arguments for a function are
-        // evaluated is not deterministic (?!), so we need to make some
-        // temps for the arguments.  We go backward because the item
-        // at the top of the stack will be the last argument, and
-        // the item one down from the top of the stack the second
-        // to last, etc.
-        out += "int frame_start = base_parser.lr_top();\n";
-        out += "int pos = frame_start;\n"; // (pos gets updated as we go)
-        for(int stind = rule.num_steps() - 1; stind >= 0; --stind) {
-            const production_rule::step *expr = rule.nth_step(stind);
-            if(!expr) {
-                error(rule.location(), stringformat(
-                    "Bug: no expression for step {} in {}",
-                    stind, rule.to_str()
-                ));
-            } else {
-                out += stringformat(
-                    "FPLBP::StackSlice arg_{}(base_parser, {}, {}, pos);\n",
-                    stind, element_index.at(expr->gexpr), expr->max_times
-                );
-            }
-        }
-
-        // now one slice for all the arguments (to rule them all)
-        out += "FPLBP::StackSlice args(base_parser, pos + 1, frame_start - pos);\n";
-
-        // generates the call to the reduction rule:
-        out += "    " + type_for(rule.product()) + " result = " + rule_fn(rule) + "(";
-        for(int stind = 0; stind < rule.num_steps(); stind++) {
-            const production_rule::step *expr = rule.nth_step(stind);
-
-            if(expr->skip_on_reduce())
-                continue;  // Author has specified that this arg isn't passed
-
-            std::string argname = "arg_" + std::to_string(stind);
-            out += argname;
-            if(expr->is_single()) {
-                if(expr->is_terminal()) {
-                    out += ".term_str()";
-                } else {
-                    out += ".val()";
-                }
-            }
-            out += ", ";
-        }
-        out += " args);\n";
-
-        // we've called the reduction rule.  There might be something
-        // we're supposed to do with the result:
-        if(post_reduce) {
-            out += "\n{\n" + post_reduce.format() + "\n}\n";
-        }
-
-        if(opts.debug) {
-            out += "fprintf(stderr, \"popping %i to %i:\\n%s\\n\", "
-                   "frame_start, pos, args.to_str().c_str());\n";
-        }
-
-        out += "    base_parser.set_product(Product(result, "
-             + rule.product_element().nonterm_id_str()
-             + ", args[0].position()));\n";
-
-        // this is what actually pops the stack. note we pop after
-        // the reduce (mainly to minimize moves, but also so the
-        // stack is more intact for error/bug analysis)
-        out += "base_parser.lr_pop_to(pos);\n";
-
-        return out;
-    }
 
     std::string state_goto(const lr_set &in, const grammar_element &sym) {
         std::string out;
         return out;
-    }
-
-    std::string args_for_shift(
-        int next_state, const production_rule::step &expr
-    ) const {
-        std::string el_id(std::to_string(element_index.at(expr.gexpr)));
-        if(expr.is_terminal()) {
-            return "\"" + expr.terminal_string() + "\""
-                   ", " + el_id
-                 + ", " + std::to_string(expr.min_times)
-                 + ", " + std::to_string(expr.max_times)
-                 + ", &" + state_fn(next_state, true);
-        } else {
-            return expr.gexpr.nonterm_id_str()
-                 + ", " + std::to_string(expr.min_times)
-                 + ", " + std::to_string(expr.max_times)
-                 + ", &" + state_fn(next_state, true);
-        }
     }
 
     void reduce_reduce_conflict(int r1, int r2) const {
@@ -1364,66 +1195,6 @@ public:
            "conflict:\n    {}\n vs {}\n",
            item1.to_str(this).c_str(), item2.to_str(this).c_str()
         ));
-    }
-
-    std::string code_for_shift(const lr_transition &trans) const {
-        const production_rule::step *right_of_dot = trans.right_of_dot;
-        if(!right_of_dot)  // if this happens, it's a bug
-            internal_error("missing right_of_dot?");
-
-        int next_state = trans.next_state_number;
-        std::string out;
-
-        const grammar_element::Type type = right_of_dot->type();
-        switch(type) {
-            case grammar_element::TERM_EXACT:
-                out += "} else if(base_parser.shift_exact(";
-                out += args_for_shift(next_state, *right_of_dot) + ")) {\n";
-                break;
-            case grammar_element::TERM_REGEX:
-                out += "} else if(base_parser.shift_re(";
-                out += args_for_shift(next_state, *right_of_dot) + ")) {\n";
-                break;
-            case grammar_element::NONTERM_PRODUCTION:
-                out += "} else if(base_parser.shift_nonterm(";
-                out += args_for_shift(next_state, *right_of_dot) + ")) {\n";
-                break;
-            case grammar_element::LACK_OF_SEPARATOR:
-                // (b_eaten is number of separator bytes "eaten"
-                // since last terminal)
-                out += "} else if(!b_eaten) {\n";
-                // OK the problem here is that we _do_ need to shift the state,
-                // even though we do not need to shift the lack of separator per se.
-                // this makes me wonder about going back to recursive ascent
-                // (or another dual stack solution)
-                out += "FPLBP::Terminal term(\"<special ~>\");\n"; // XXX this is terrible
-                out += stringformat(
-                    "base_parser.lr_push(&{}, FPLBP::Product(term, {}, base_parser.position()));\n",
-                    state_fn(next_state, true), element_index.at(right_of_dot->gexpr)
-                );
-                break;
-            default:
-                // if we get here, it's due to a bug:
-                internal_error(stringformat(
-                    "Missing/unknown grammar element (id: {} {})",
-                    type, right_of_dot->to_str()
-                ));
-                break;
-        }
-
-/*
-        out += "    // transition ID: " + transition_id(
-            *right_of_dot, lr_goto(state, right_of_dot->gexpr)
-        ) + "\n";
- */
-
-        if(opts.debug) {
-            out += "fprintf(stderr, \"     shifted %s\\n\", \""
-                   + c_str_escape(right_of_dot->to_str()) +
-                   "\");\n";
-        }
-
-        return out;
     }
 
     // returns an iterable set of transitions out of the state
@@ -1490,68 +1261,8 @@ public:
         return out;
     }
 
-    std::string code_for_state(const lr_set &state) const {
-        std::string out;
-        std::string sfn = state_fn(state);
 
-        out += "//\n";
-        out += state.to_str(this, "// ");
-        out += "//\n";
-        out += "void " + sfn + "() {\n";
-        out += "size_t b_eaten = eat_separator();\n";
-        if(opts.debug) {
-            out += "fprintf(stderr, \"=============\\n\");\n";
-            out += "fprintf(stderr, \"" + sfn + ": %s\\n\", state_string(&" + fq_member_name(sfn) + "));\n";
-            out += "fprintf(stderr, \"%li bytes eaten since last terminal\\n\", b_eaten);\n";
-            out += "fprintf(stderr, \"%s\", base_parser.to_str().c_str());\n";
-        }
-
-        out += "    if(0) {\n"; // now everything past this can be "else if"
-
-        for(auto trans : transitions_for_state(state)) {
-            // } else if(...) { ... " shift/state transitions:
-            out += code_for_shift(trans);
-        }
-        out += "} else {\n";
-
-        lr_item reduce_item = state.reduction_item(this);
-        if(reduce_item) {
-            if(opts.debug) {
-                out += "fprintf(stderr, \"    " + sfn +
-                       " is going to reduce to a %s\\n\", \"" +
-                       c_str_escape(reduce_item.to_str(this)) + "\");\n";
-            }
-            out += production_code(state, reduce_item.rule);
-        } else {
-            if(opts.debug)
-                out += "fprintf(stderr, \"    terminating in " +
-                       sfn + "\\n\");\n";
-
-            // since we want to be able to do partial parses, if we
-            // don't see input we expect, it's not necessarily
-            // an error - we might have parsed whatever was wanted
-            // (potentially somewhere back in the stack) and would
-            // just need to rewind the input to jsut after whatever
-            // we wanted.  Of course, it still might be an error!
-            // So the strategy is:  terminate parsing and let the
-            // caller (of the parser) decide what to do.
-            out += "    base_parser.terminate();\n";
-        }
-
-        out += "}\n"; // end of reduce/accept section
-
-        if(opts.debug) {
-            out += "fprintf(stderr, \"=============\\n\");";
-            if(opts.single_step) {
-                out += "base_parser.debug_pause();\n";
-            }
-        }
-
-        out += "}\n"; // end of state_ function
-
-        return out;
-    }
-
+// XXX kill or move after jempify
     // reformats the generated code to fix indents and what have you.
     // this is fairly rough but does result in more or less readable
     // code for most cases.
@@ -1649,143 +1360,12 @@ public:
     // instead of "if(prd.grammar_element_id == 62)" we can
     // do "if(prd.grammar_element_id == NontermID::_decimal_constant)"
 public:
-    std::string nonterm_enum() const {
-        std::string out;
-        std::string nonterm_str_guts;
-        std::string is_terminal_guts;
 
-        out += "typedef enum {\n";
-        for(int el_id = 0; el_id < elements.size(); ++el_id) {
-            is_terminal_guts += "case " + std::to_string(el_id);
-            if(elements[el_id].type == grammar_element::NONTERM_PRODUCTION) {
-                std::string name = elements[el_id].nonterm_id_str(false);
-                out += name;
-                nonterm_str_guts += "case " + std::to_string(el_id);
-                nonterm_str_guts += ": return \"" + name + "\";\n";
-                if(el_id == 0) {
-                    // element ID 0 is a special case and counts as terminal:
-                    is_terminal_guts += ": return true;\n";
-                } else {
-                    is_terminal_guts += ": return false;\n";
-                }
-            } else {
-                // include terminals as comments.  we don't need them
-                // in the enum (and how would they be named, anyway?),
-                // but it's nice to be able to see all the grammar
-                // elements in one place:
-                out += "// " + elements[el_id].to_str();
-                is_terminal_guts += ": return true;\n";
-            }
 
-            out += " = ";
-            out += std::to_string(el_id);
-
-            // sigh.. languages which don't allow trailing comma..
-            if(el_id + 1 < elements.size())
-                out += ",\n";
-            else
-                out += "\n";
-        }
-        out += "} NontermID;\n\n";
-        out += "static std::string nonterm_str(int id) {\n";
-        out += "    switch(id) {\n";
-        out += nonterm_str_guts;
-        out += "    }\n";
-        out += "    return std::to_string(id) + \" is not a nonterm.\";\n";
-        out += "}\n\n";
-
-        out += "static bool is_terminal(int id) {\n";
-        out += "    switch(id) {\n";
-        out += is_terminal_guts;
-        out += "    }\n";
-        out += "    fprintf(stderr, \"invalid terminal id: %i\\n\", id);\n";
-        out += "    return false;\n";
-        out += "}\n\n";
-        return out;
-    }
-
-    std::string state_to_str_code() const {
-        std::string out("static std::string state_to_str(State st) {\n");
-        out += "if(!st) return \"NULL\";\n";
-        // c++ won't let you compare pointers in a switch statement.. sigh
-        for(auto st: states) {
-            out += "if(&" + state_fn(st, true) + " == st) ";
-            out += "return \"" + state_fn(st) + "\";\n";
-        }
-        out += "    return \"<not a state>\";\n";
-        out += "}\n";
-
-        return out;
-    }
-
-    std::string state_string_code() const {
-        std::string out("static const char *state_string(State st) {\n");
-        for(auto st: states) {
-            out += stringformat(
-                "    if(&{} == st) return \"{}:\\n\"\n{};\n",
-                state_fn(st, true), state_fn(st, false),
-                st.to_str(this, "\"    ", "\\n\"\n", true)
-            );
-        }
-        out += "    return \"<invalid state>\";\n";
-        out += "}\n";
-        return out;
-    }
 
     // returns the code for the target is_goal function
-    std::string is_goal() const {
-        std::string out("static bool is_goal(int id) {\n");
-        out += "    switch(id) {\n";
-        for(auto gstr : goal) {
-            out += "        case NontermID::_" + gstr + ": return true;\n";
-        }
-        out += "        default: return false;\n";
-        out += "    }\n";
-        out += "    return false;\n";
-        out += "}\n";
-        return out;
-    }
 
-    /*
-        separator_method returns a method which should return
-        the number of bytes (possibly 0) to skip in order to
-        elide whatever token separator(s) (such as spaces or
-        comments) are at the *inp pointer passed.  The method
-        will be composed from whatever's in @comment_style and
-        @separator directives.  If no such directives are specified,
-        default is space separation.
-     */
-    // "separator" might be a misnomer in all this.  it's more like
-    // anything to elide before the tokenization code sees the input.
-    // rename all the "separator" to "elide"?  (including directives)
-    code_block separator_method() const {
-        code_block out(
-            "static size_t separator_length(const utf8_byte *inp) {\n"
-        );
 
-        if(separator_code.size() == 0) {
-            // default is space separation:
-            out += code_block("return space_length(inp);\n");
-        } else {
-            for(auto sepc : separator_code) {
-                out += sepc.format_scoped();
-            }
-        }
-
-        // catchall: if nothing returned a length yet, no separator
-        out += "    return 0;\n";
-        out += "}\n";
-
-        return out;
-    }
-
-    std::string eat_separator_code() const {
-        return (
-            "size_t eat_separator() {\n"
-            "    return base_parser.eat_separator(separator_length);\n"
-            "}\n"
-        );
-    }
 
     std::string parser_class_name() const {
         std::string base;
@@ -1808,6 +1388,7 @@ public:
         return parser_class_name() + "::" + mem;
     }
 
+// XXX jempify
     std::string default_main_code() const {
         std::string out("\n\n");
 
@@ -1879,69 +1460,6 @@ public:
                 }
             }
         }
-    }
-
-    // returns the declaration for a reduce function
-    // (possibly this can go in reducer)
-    std::string reducer_decl(const production_rule &rule) const {
-        std::string rfn = rule_fn(rule);
-        std::string out;
-        out += type_for(rule.product()) + " " + rfn + "(";
-
-        // "simple" parameters:
-        // If the expression for the step has a min/max times of
-        // anything other than exactly 1 (is_single()), we pass
-        // it as a stack slice.
-        // Otherwise, if it's a terminal, pass it as a string,
-        // or (if it's the result of a reduce) as whatever the reduce
-        // type is.  This is complicated for the code generator,
-        // but simplifies life for the fpl author, especially
-        // for trivial cases.
-        int argind = 0;
-        const std::vector<production_rule::step> &steps = rule.steps();
-        for(int stind = 0; stind < steps.size(); stind++) {
-            const production_rule::step &expr = steps[stind];
-
-            // this expression might be suffixed with '^', which
-            // means it's only used for recognizing, and is not
-            // passed to the reduce function:
-            if(expr.skip_on_reduce())
-                continue;
-
-            // arg type depends on the expression:
-            // XXX consider if we always should just pass stack element
-            // for singles and slices for multiples.  stack element needs
-            // to be able to behave as whatever, then.
-            if(!expr.is_single()) {
-                // the argument is either optional or can repeat or
-                // both, so we can't pass it simply.  so pass it
-                // as a slice:
-                out += "const FPLBP::StackSlice &";
-            } else if(expr.is_terminal()) {
-                // TODO probably want to allow multiple regex captures..?
-                // XXX _must_ do so.
-                out += "std::string ";
-            } else {
-                out += reduce_type + " ";
-            }
-
-            // argument name:
-            out += rule.varname(stind);
-            out += ", ";
-
-            argind++;
-        }
-
-        // last parameter is the slice of the stack with
-        // everything we're popping.  this lets the fpl author
-        // get things like the line number for a given argument
-        // or whatever.  (actully, the "simple" positional
-        // parameters below can be implemented via this,
-        // and in the jest version might be).  It's last only
-        // because that simplifies the generating code
-        out += "const FPLBP::StackSlice &args)";
-
-        return out;
     }
 
     std::string why_cant_use_reducer(const reducer &red, const production_rule &rule) {
@@ -2122,7 +1640,12 @@ public:
     }
 
     // jemp-based output:
+    friend std::string fpl_x_parser_state(
+        const productions &, const productions::lr_set &, const options &opts);
     friend std::string fpl_x_parser(const productions &, const options &);
+    friend std::string fpl_x_parser_nonterm_enum(const productions &);
+    friend std::string fpl_x_parser_reduce_call(
+        const productions &, const production_rule &, const options &);
 
     std::string generate_code(src_location caller = CALLER()) {
         resolve(caller);
@@ -2160,6 +1683,15 @@ public:
     }
 };
 
+// TODO make an @import directive or something for jempl.
+// otherwise we need to know to include all the generated things
+// here (and in a particular order, even).  should only need
+// to put the top level one.
+#include "fpl_x_parser_nonterm_enum.h"
+#include "fpl_x_parser_reduce_action_meta.h"
+#include "fpl_x_parser_reduce_action.h"
+#include "fpl_x_parser_reduce_call.h"
+#include "fpl_x_parser_state.h"
 #include "fpl_x_parser.h"
 
 } // namespace fpl

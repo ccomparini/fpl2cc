@@ -74,11 +74,11 @@ for fpl in fpls :
 
     # .. and, the language program is built from <lang>.fpl
     env.Fpl2cc(language + '.cc', [ langprog + '.fpl' ])
+    #env.Fpl2cc(language + '.cc', [ langprog + '.fpl' ], FPLOPTS="--generate-main --debug")
     # use this one to test the fpl based parser:
     #env.Fpl2cc(language + '.cc', [ langprog + '.fpl' ], FPLOPTS="--generate-main --new-parser")
     #env.Fpl2cc(language + '.cc', [ langprog + '.fpl' ], FPLOPTS="--generate-main --debug-single-step")
     #env.Fpl2cc(language + '.cc', [ langprog + '.fpl' ], FPLOPTS="--generate-main --debug-single-step")
-    #env.Fpl2cc(language + '.cc', [ langprog + '.fpl' ], FPLOPTS="--generate-main --debug")
 
     # and it depends on the fpl compiler (which is ultimately
     # what we're testing):

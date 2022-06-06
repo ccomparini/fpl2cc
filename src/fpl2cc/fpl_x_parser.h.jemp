@@ -14,11 +14,9 @@
     @prds.goal@
  */
 
-// impl_sources things go here... what even is it?
 @for(auto fn : opts.impl_sources) {@
     @code_block::from_file(fn, opts.src_path, "(command line)", 1).format()@
 @}@
-// finished impl_sources things
 
 #include <string>
 #include "fpl2cc/fpl_reader.h"
@@ -53,12 +51,43 @@ private:
         private:
     @}@
 
+    inline bool shift_TERM_EXACT(
+        const std::string &match, int el_id, int min, int max, State new_st
+    ) {
+        return base_parser.shift_exact(match, el_id, min, max, new_st);
+    }
+
+    inline bool shift_TERM_REGEX(
+        const std::string &re, int el_id, int min, int max, State new_st
+    ) {
+        return base_parser.shift_re(re, el_id, min, max, new_st);
+    }
+
+    inline bool shift_NONTERM_PRODUCTION(
+        const std::string &, int el_id, int min, int max, State new_st
+    ) {
+        return base_parser.shift_nonterm(el_id, min, max, new_st);
+    }
+
+    inline bool shift_LACK_OF_SEPARATOR(
+        const std::string &, int el_id, int min, int max, State new_st
+    ) {
+        // eat_separator is an indirect way to check base_parser.bytes_eaten.
+        // right answer is to move bytes_eaten here.
+        if(!eat_separator()) {
+            FPLBP::Terminal term("<special ~>");
+            base_parser.lr_push(new_st, FPLBP::Product(term, el_id, base_parser.position()));
+            return true;
+        }
+        return false;
+    }
+
 public:
-    @ prds.nonterm_enum() @
+    @ fpl_x_parser_nonterm_enum(prds) @
     static std::string state_to_str(State st) {
         if(!st) return "NULL";
         // c++ won't let you compare pointers in a switch statement.. sigh
-        @for(auto st: prds.states) {@
+        @for(auto st: prds.states) {-@
             if(&@prds.state_fn(st, true)@ == st) return "@prds.state_fn(st)@";
         @}@
         // if we got here, the State (pointer) passed doesn't match any
@@ -67,7 +96,7 @@ public:
     }
 
     static const char *state_string(State st) {
-        @for(auto st: prds.states) {@
+        @for(auto st: prds.states) {-@
             if(&@prds.state_fn(st, true)@ == st) {
                 return "@prds.state_fn(st, false)@:\n"
                        @st.to_str(&prds, "\"    ", "\\n\"\n", true)@;
@@ -78,7 +107,7 @@ public:
 
     static bool is_goal(int id) {
         switch(id) {
-            @for(auto gstr : prds.goal) {@
+            @for(auto gstr : prds.goal) {-@
                 case NontermID::_@gstr@: return true;
             @}@
             default: return false;
@@ -86,17 +115,35 @@ public:
         return false;
     }
 
-    @ prds.separator_method().format() @
-    @ prds.eat_separator_code() @
+    static size_t separator_length(const utf8_byte *inp) {
+        @if(prds.separator_code.size() == 0) {-@
+            @/* set the default somewhere else XXX */@
+            return space_length(inp);
+        @}-@
+
+        @for(auto sepc : prds.separator_code) {-@
+            @sepc.format_scoped()@
+        @}-@
+
+        @/* catchall: if nothing returned a length yet, no separator */@
+        return 0;
+    }
+
+    size_t eat_separator() {
+        return base_parser.eat_separator(separator_length);
+    }
 
     // reduction rules:
     @for(auto rule : prds.rules) {@
-        @prds.reduce_action(rule).format()@
+        @if(code_block rule_code = rule.reduce_code()) {-@
+            @fpl_x_parser_reduce_action(prds, rule)@
+        @}-@
     @}@
 
+// OH HAI
     // parser states:
     @for(productions::lr_set state : prds.states) {@
-        @prds.code_for_state(state)@
+        @fpl_x_parser_state(prds, state, prds.opts)@
     @}@
 
     @prds.parser_class_name()@(fpl_reader_p src) : base_parser(src) {
