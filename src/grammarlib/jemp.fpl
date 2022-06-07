@@ -21,6 +21,12 @@ text -> fragment ;
 # template, you escape that @ by doubling it:
 '@@':at_sign -> text +{ return "@"; }+
 
+# @/*  xxx  */@ is a comment.  default is simply to remove
+# the comment contents.
+'@/*'^ /(?:[^*]|(?:\*[^\/])|(?:\*\/[^@]))*/:comment '*/@'^ -> fragment +{
+    return "";
+}+
+
 # Declares a parameter for the generated function.
 # syntax:
 #   '@parameter' <language specific param decl> '@' '\n'
