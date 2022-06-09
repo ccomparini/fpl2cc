@@ -599,7 +599,7 @@ fprintf(stderr, "whoa dude this is going to break because the char length is %lu
         return matched;
     }
 
-    // pos is the position in the input at which to look; < 0
+    // pos is the position in the input at which to look; size_t(-1)
     // means use the current read position (the default).
     // num_chars is the maximum number of utf8 chars to
     // look at.
@@ -608,9 +608,7 @@ fprintf(stderr, "whoa dude this is going to break because the char length is %lu
     // than the num_chars passed.
     // if pf_esc is set, we attempt to make the string safe
     // to pass to printf() family functions.
-    inline std::string debug_peek(
-        size_t pos = size_t(-1), int num_chars = 12
-    ) const {
+    inline std::string debug_peek(size_t pos, int num_chars) const {
         if(!buffer.data()) return "<NO INPUT>";
 
         if(pos == size_t(-1)) pos = read_pos;
@@ -635,6 +633,10 @@ fprintf(stderr, "whoa dude this is going to break because the char length is %lu
             }
         }
         return out;
+    }
+
+    inline std::string debug_peek(int num_chars = 12) const {
+        return debug_peek(size_t(-1), num_chars);
     }
 };
 
