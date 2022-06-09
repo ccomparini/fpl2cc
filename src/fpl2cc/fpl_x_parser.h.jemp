@@ -99,7 +99,12 @@ public:
         @prds.code_for_state(state)@
     @}@
 
-    @prds.parser_class_name()@(fpl_reader_p src) : base_parser(src) { }
+    @prds.parser_class_name()@(fpl_reader_p src) : base_parser(src) {
+        @if(opts.single_step) {@
+            base_parser.set_single_step(true);
+        @}@
+    }
+
     std::string to_str() { return base_parser.to_str(); }
     inline @prds.reduce_type@ parse() {
         auto result = base_parser.parse(*this);

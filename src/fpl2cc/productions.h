@@ -1164,7 +1164,7 @@ public:
         if(opts.debug) {
             out += "fprintf(stderr, \"%s\", base_parser.to_str().c_str());\n";
             if(opts.single_step) {
-                out += "getchar();\n";
+                out += "base_parser.debug_pause();\n";
             }
         }
         return out;
