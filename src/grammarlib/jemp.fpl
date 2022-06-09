@@ -17,7 +17,7 @@ text -> fragment ;
 # with '@' unless the longer strings come first
 
 # @ signs indicate some kind of substitution or other jemp
-# diretive.  If you want a plain @ in the expansion of your
+# directive.  If you want a plain @ in the expansion of your
 # template, you escape that @ by doubling it:
 '@@':at_sign -> text +{ return "@"; }+
 
@@ -27,14 +27,19 @@ text -> fragment ;
     return "";
 }+
 
-# Declares a parameter for the generated function.
+# Declares a parameter for the template.
 # syntax:
 #   '@parameter' <language specific param decl> '@' '\n'
 # Note that it must be on its own line.
 # This is necessary because many languages need to know
 # the type and/or name of each parameter in order to define
-# a function or whatever.
-'@parameter:'^ /[^@]+/:param_decl '@'^ /[ \t]*\n?/^ -> fragment ;
+# a function or whatever we're generating.
+'@parameter:'^ /[^@]+/:param_decl '@'^ eol^ -> fragment ;
+
+# declares a constant string which can be used in later expansions.
+# you'd do something like:
+#   @declare fruitbat:x + 10@
+'@declare'^ sp^ identifier:name_decl ':'^ /(?:[^@]|(?:@@))*/:value '@'^ eol^ -> fragment ;
 
 # loops and if/else are composed of these:
 '@}@'^                                         -> fragment +{ return "}"; }+
@@ -46,4 +51,15 @@ text -> fragment ;
 
 # plain non-@-sign text:
 /[^@]+/:t -> text ;
+
+# (identifiers might be used within @declare or whatever)
+/[a-zA-Z_][a-zA-Z_0-9]+/:name -> identifier ;
+
+# this is used within @declare or such, where we want
+# to skip whitespace regardless of what the fpl separator
+# is set to:
+/[ \t]+/:space -> sp ;
+
+# this is used for skipping the newline after things like @parameter
+/[ \t]*\n?/:space -> eol ;
 
