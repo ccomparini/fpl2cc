@@ -1,0 +1,83 @@
+#
+#  "pure" fpl for fpl!
+#
+
+@comment_style sh
+
+item+:items -> items ;
+
+code_block -> item ;
+directive  -> item ;
+import     -> item ;
+rule       -> item ;
+
+# +{ }+ code blocks.
+# the regex here is:
+#   begin with '+{'
+#   match 0 or more of either:
+#     '}' followed by anything not a '+', or
+#     anything not a '}'
+#   terminated with '}+
+# this has to be one regex - if you do (eg) '+{'
+# as a token and then some regex to read the guts,
+# it'll read the +{ correctly then promptly strip
+# all your #includes as comments.  ask me how I know!
+# 
+'+{' ~ /(?:(?:\}[^+])|[^}])*/:code ~ '}+' -> code_block ;
+
+# directive_comment_style  -> directive ;
+# directive_default_action -> directive ;
+# directive_default_main   -> directive ;
+# directive_grammar        -> directive ;
+# directive_internal       -> directive ;
+# directive_post_parse     -> directive ;
+# directive_produces       -> directive ;
+# directive_separator      -> directive ;
+
+'@comment_style'^  /(\S+)/:comment_style     -> directive ;
+'@default_action'^ code_block:default_action -> directive ;
+'@default_main'^   /(:?true)|(:?false)/?:default_main -> directive ;
+'@grammar'^        /(\S+)/:grammar_name      -> directive ;
+'@internal'^       code_block:internal_code  -> directive ;
+'@post_parse'^     code_block:post_parse     -> directive ;
+'@produces'^       /(\S+)/:produces          -> directive ;
+'@separator'^      code_block:separator_code -> directive ;
+
+# '@true':true   -> fpl_bool ;
+# '@false':false -> fpl_bool ;
+
+# /@\S*/                     -> error("invalid directive: {}", arg_0) XXX support this
+
+# XXX see src/fpl2cc/fpl2cc.cc parse_import, because
+# there's more to this:
+'`'^ ~ /([^`]*)/:filename ~ '`'^ -> import ;
+
+step+:steps '->'^ production_name code_block -> rule ;
+#step+:steps '->'^ production_name ';'^       -> rule ;
+
+';':no_code -> code_block ;
+
+# XXX the name "step" is inconsistent with the internal
+# naming as well (internally it's called ProdExpr)
+grammar_element quantifier? -> step ;
+
+zero_or_more -> quantifier ;
+one_or_more  -> quantifier ;
+zero_or_one  -> quantifier ;
+
+'*'^ -> zero_or_more ;
+'+'^ -> one_or_more ;
+'?'^ -> zero_or_one ;
+
+# quoted strings (exact_match) regex is:
+#   match 0 or more of:
+#     (any non-quote or non-backslash) -or- backslash followed by anything
+# .. regex is similar but delimited by slashes.
+'"'^ ~ /(?:[^"\\]|\\.)*/:exact_match ~  '"'^ -> grammar_element ;
+"'"^ ~ /(?:[^'\\]|\\.)*/:exact_match ~  "'"^ -> grammar_element ;
+'/'^ ~ /(?:[^\/\\]|\\.)*\/[m]?/:regex ~ '/'^ -> grammar_element ;
+production_name                              -> grammar_element ;
+
+/[A-Za-z][A-Za-z0-9_]*/:name -> production_name ;
+
+

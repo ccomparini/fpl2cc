@@ -51,12 +51,10 @@ public:  // XXX this is a terible hack - make a reasonable way
     );
 }+
 
-# src/fpl2cc/grammarlib/fpl.fpl:69
 +grammar_element(regex) +{
     return GrammarElement(regex, GrammarElement::Type::TERM_REGEX);
 }+
 
-# src/fpl2cc/grammarlib/fpl.fpl:67
 +grammar_element(exact_match) +{
     return GrammarElement(exact_match, GrammarElement::Type::TERM_EXACT);
 }+
@@ -67,13 +65,11 @@ public:  // XXX this is a terible hack - make a reasonable way
 +one_or_more()  +{ return quantifier(1, INT_MAX); }+
 +zero_or_one()  +{ return quantifier(0, 1      ); }+
 
-# src/fpl2cc/grammarlib/fpl.fpl:73
 @type_for step ProdExpr
 +step(grammar_element quantifier) +{
     return ProdExpr(grammar_element, quantifier.min, quantifier.max);
 }+
 
-# src/fpl2cc/grammarlib/fpl.fpl:69
 @type_for rule ProductionRule
 +rule(steps production_name code_block) +{
     // step base_parser
@@ -98,14 +94,12 @@ public:  // XXX this is a terible hack - make a reasonable way
     return CodeBlock::none;
 }+
 
-# src/fpl2cc/grammarlib/fpl.fpl:48
 +import(filename) +{
     #warning "import not implemented"
     fprintf(stderr, "import (`file`) not implemented XXX\n");
     return stringformat("@import {} fail - unimplemented\n");
 }+
 
-# src/fpl2cc/grammarlib/fpl.fpl:37
 +directive(comment_style) +{
     productions->add_comment_style(comment_style,
         start_pos.filename(), start_pos.line_number()
@@ -113,13 +107,11 @@ public:  // XXX this is a terible hack - make a reasonable way
     return "@comment_style";
 }+
 
-# src/fpl2cc/grammarlib/fpl.fpl:38
 +directive(default_action) +{
     productions->set_default_action(default_action);
     return "@default_action";
 }+
 
-# src/fpl2cc/grammarlib/fpl.fpl:39
 +directive(default_main) +{
     bool dm = false;
     if(default_main.exists()) {
@@ -129,7 +121,6 @@ public:  // XXX this is a terible hack - make a reasonable way
     return "@default_main";
 }+
 
-# src/fpl2cc/grammarlib/fpl.fpl:40
 +directive(grammar_name) +{
     #warning "@grammar not implemented"
     // XXX what we need here:
@@ -140,19 +131,16 @@ public:  // XXX this is a terible hack - make a reasonable way
     return "@grammar";
 }+
 
-# src/fpl2cc/grammarlib/fpl.fpl:41
 +directive(internal_code) +{
     productions->add_internal(internal_code);
     return "@internal";
 }+
 
-# src/fpl2cc/grammarlib/fpl.fpl:42
 +directive(post_parse) +{
     productions->set_post_parse(post_parse);
     return "@post_parse";
 }+
 
-# src/fpl2cc/grammarlib/fpl.fpl:43
 +directive(produces) +{
     productions->set_reduce_type(produces);
     return "@produces";

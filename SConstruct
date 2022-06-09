@@ -5,7 +5,7 @@ import sys
 debugger = ''
 #debugger = 'TERM=xterm-256color /usr/bin/lldb --one-line "b debug_hook" -- '
 
-fpl_include_dirs = [ 'src/fpl2cc/grammarlib' ]
+fpl_include_dirs = [ 'src/grammarlib' ]
 
 SetOption('num_jobs', 10)
 

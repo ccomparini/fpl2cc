@@ -1,0 +1,53 @@
+#
+# "pure" fpl json spec.
+#
+
+element -> json ;
+
+object   -> value ;
+array    -> value ;
+string   -> value ;
+number   -> value ;
+
+"true":true_val   -> value ;
+"false":false_val -> value ;
+"null":null_val   -> value ;
+
+# TODO replace this:
+'{'^ members? '}'^   -> object  ;
+member              -> members ;
+member ','^ members -> members ;
+# TODO with this:
+# '{' (member (',' member)*)? '}' -> object ;
+
+string ':'^ value ->  member ;
+
+# TODO replace this:
+'['^ elements? ']'^   -> array ;
+element               -> elements ;
+element ','^ elements -> elements ;
+# TODO with this:
+# '[' (value (',' value)*)? ']' -> array ;
+
+value                 -> element ;
+
+/"((?:[^"\\]|\\.)*)"/ -> string ;
+
+# json number specification appears to actually be fairly fussy.
+# From the spec, I'm inferring that:
+#  - leading 0 is disallowed unless followed by a decimal point
+#    or the number is 0
+#  - you can't have a leading '+' except when specifying exponent
+# instead of being fussy like that, let's go more accepting, and
+# maybe add warnings if we need to.
+# ACTUALLY we _do_ need to distinguish floats and ints, at least
+# the way I have things set up at the moment.
+
+
+# (2 expressions for floats is a way to make it so that just a
+# decimal point doesn't match as a float)
+/(-)?[0-9]+\.[0-9]*([eE][+-]?[0-9]+)?/:float_val -> number ;
+/(-)?\.[0-9]+([eE][+-]?[0-9]+)?/:float_val       -> number ;
+/(-)?([0-9]+)/:integer                           -> number ;
+
+
