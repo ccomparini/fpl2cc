@@ -116,7 +116,6 @@ class productions {
         // it also determines the order of the items
         // such that earlier items (in the fpl source)
         // are ordered earlier.
-// XXX why is this friend?
         friend bool operator<(const lr_item& left, const lr_item& right) {
 
             // same rule?  earlier position in the rule
@@ -292,6 +291,16 @@ class productions {
             return out;
         }
     };
+
+    struct lr_transition {
+        const production_rule::step *right_of_dot;
+        int next_state_number;
+
+        lr_transition(const production_rule::step *rod, int sn) :
+            right_of_dot(rod), next_state_number(sn) { }
+    };
+    using lr_transitions = std::vector<lr_transition>;
+
 
     void lr_closure_add_rules(
         lr_set &set, const production_rule &rule, int pos
@@ -1097,19 +1106,7 @@ public:
         return import_name;
     }
 
-    // returns the name of the function to use for the
-    // given state
-    std::string state_fn(const lr_set &state, bool fully_qualified = false) const {
-        auto state_numi = state_index.find(state.id());
-
-        if(state_numi != state_index.end())
-            return state_fn(state_numi->second, fully_qualified);
-
-        // if we got here, we didn't find the state in the index:
-        internal_error("unindexed state for {}" + state.to_str(this));
-        return "\n#error CANT GET HERE\n";
-    }
-
+    // returns the name of the function to use for the given state
     std::string state_fn(int state_num, bool fully_qualified = false) const {
         std::string fn("state_");
 
@@ -1119,6 +1116,31 @@ public:
             fn = fq_member_name(fn);
 
         return fn;
+    }
+
+    std::string state_fn(
+        const std::string &state_id,
+        bool fully_qualified = false,
+        src_location caller = CALLER()
+    ) const {
+        auto state_numi = state_index.find(state_id);
+
+        if(state_numi != state_index.end())
+            return state_fn(state_numi->second, fully_qualified);
+
+        std::string error = stringformat(
+            "{}: unindexed state for {}", caller, state_id
+        );
+        internal_error(error);
+        return "\n#error CANT GET HERE " + error + "\n";
+    }
+
+    std::string state_fn(
+        const lr_set &state,
+        bool fully_qualified = false,
+        src_location caller = CALLER()
+    ) const {
+        return state_fn(state.id(), fully_qualified, caller);
     }
 
     std::string rule_fn(const production_rule rule, bool fq = false) const {
@@ -1325,7 +1347,9 @@ public:
         return out;
     }
 
-    std::string args_for_shift(const lr_set &next_state, const production_rule::step &expr) const {
+    std::string args_for_shift(
+        int next_state, const production_rule::step &expr
+    ) const {
         std::string el_id(std::to_string(element_index.at(expr.gexpr)));
         if(expr.is_terminal()) {
             return "\"" + expr.terminal_string() + "\""
@@ -1359,19 +1383,13 @@ public:
         ));
     }
 
-    std::string code_for_shift(
-        const lr_set &state, const production_rule::step *right_of_dot
-    ) const {
+    std::string code_for_shift(const lr_transition &trans) const {
+        const production_rule::step *right_of_dot = trans.right_of_dot;
         if(!right_of_dot)  // if this happens, it's a bug
             internal_error("missing right_of_dot?");
 
+        int next_state = trans.next_state_number;
         std::string out;
-
-        // this is a redundant goto, but keeping it for now because it's
-        // easier than restructuring
-        // (XXX actually just pass in next state.  current state is only
-        // used for debug and doesn't need to go here)
-        lr_set next_state = lr_goto(state, right_of_dot->gexpr);
 
         const grammar_element::Type type = right_of_dot->type();
         switch(type) {
@@ -1417,10 +1435,73 @@ public:
  */
 
         if(opts.debug) {
-            out += "fprintf(stderr, \"    " + state_fn(state) +
-                   " shifted %s\\n\", \""
+            out += "fprintf(stderr, \"     shifted %s\\n\", \""
                    + c_str_escape(right_of_dot->to_str()) +
                    "\");\n";
+        }
+
+        return out;
+    }
+
+    // returns an iterable set of transitions out of the state
+    // passed.  use this for code generation.
+    lr_transitions transitions_for_state(const lr_set &state) const {
+        lr_transitions out;
+
+        //   NOTE:  if there's a shift/reduce conflict, we will resolve it:
+        //      - first by longest match (i.e. shift instead of reducing).
+        //        example:  if() ...  vs if() ... else ...;
+        //        if() .. else is longer so we shift.
+        //      - next by operator precedence.. XXX implement
+        std::map<int, int> transition; // grammar element id -> state number
+        std::map<int, lr_item> item_for_el_id;
+        std::vector<lr_item> optionals;
+        for(lr_item item : state.iterable_items()) {
+            const production_rule &rule = rules[item.rule];
+            const production_rule::step *right_of_dot = rule.nth_step(item.position);
+            if(!right_of_dot) {
+                lr_item reduce_item = state.reduction_item(this);
+                if(item != reduce_item) {
+                    reduce_reduce_conflict(item.rule, reduce_item.rule);
+                }
+            } else {
+                lr_set next_state = lr_goto(state, right_of_dot->gexpr);
+                int next_state_num = state_index.at(next_state.id());
+                int el_id = element_index.at(right_of_dot->gexpr);
+
+                auto existing = transition.find(el_id);
+                if(existing != transition.end()) {
+                    if(existing->second != next_state_num) {
+                        // ... shift/shift conflict, which makes no sense,
+                        // and afaict means there's a bug someplace:
+                        other_conflict(item, item_for_el_id.at(existing->first));
+                    }
+                } else {
+                    out.push_back(lr_transition(right_of_dot, next_state_num));
+                }
+
+                if(right_of_dot->is_optional())
+                    optionals.push_back(item);
+
+                transition[el_id] = next_state_num;
+                item_for_el_id[el_id] = item;
+            }
+        }
+
+        // at this point, we can't really handle grammars where there's
+        // more than one possible optional thing in a given state.  in
+        // theory, I think we could determine which optional thing to
+        // shift based on lookahead or some other hints, but for now,
+        // if this happens, we just give a warning and plow on.
+        if(optionals.size() > 1) {
+            std::string which;
+            for(auto opt : optionals) {
+                which += "    " + opt.to_str(this) + "\n";
+            }
+            warn(stringformat(
+                "Ambiguity in {}:\n{}\n",
+                state_fn(state), which
+            ));
         }
 
         return out;
@@ -1444,70 +1525,13 @@ public:
 
         out += "    if(0) {\n"; // now everything past this can be "else if"
 
-        //   NOTE:  if there's a shift/reduce conflict, we will resolve it:
-        //      - first by longest match (i.e. shift instead of reducing).
-        //        example:  if() ...  vs if() ... else ...;
-        //        if() .. else is longer so we shift.
-        //      - next by operator precedence.. XXX implement
-        //   ... I think we still want to report it.  or do we?
-        //
-
-        lr_item reduce_item;
-        std::map<int, int> transition; // grammar element id -> state number
-        std::map<int, lr_item> item_for_el_id;
-        std::vector<lr_item> optionals;
-        for(lr_item item : state.iterable_items()) {
-            const production_rule &rule = rules[item.rule];
-            const production_rule::step *right_of_dot = rule.nth_step(item.position);
-            if(!right_of_dot) {
-                if(reduce_item) {
-                    reduce_reduce_conflict(item.rule, reduce_item.rule);
-                } else {
-                    reduce_item = item;
-                }
-            } else {
-                lr_set next_state = lr_goto(state, right_of_dot->gexpr);
-                int el_id = element_index.at(right_of_dot->gexpr);
-
-                auto existing = transition.find(el_id);
-                if(existing != transition.end()) {
-                    if(existing->second == state_index.at(next_state.id())) {
-                        // already have a case for this transition.
-                        // no problem, no need to generate another copy
-                        // of the same case - just move on to the next item.
-                        continue;
-                    } else {
-                        // ... shift/shift conflict, which makes no sense,
-                        // and afaict means there's a bug someplace:
-                        other_conflict(item, item_for_el_id.at(existing->first));
-                    }
-                }
-
-                out += code_for_shift(state, right_of_dot);
-
-                if(right_of_dot->is_optional())
-                    optionals.push_back(item);
-
-                transition[el_id] = state_index.at(next_state.id());
-                item_for_el_id[el_id] = item;
-            }
+        for(auto trans : transitions_for_state(state)) {
+            // } else if(...) { ... " shift/state transitions:
+            out += code_for_shift(trans);
         }
-
-        // at this point, we can't really handle grammars where there's
-        // more than one possible optional thing in a given state.  in
-        // theory, I think we could determine which optional thing to
-        // shift based on lookahead or some other hints, but for now,
-        // if this happens, we just give a warning and plow on.
-        if(optionals.size() > 1) {
-            std::string which;
-            for(auto opt : optionals) {
-                which += "    " + opt.to_str(this) + "\n";
-            }
-            warn(stringformat("Ambiguity in {}:\n{}\n", sfn, which));
-        }
-
         out += "} else {\n";
 
+        lr_item reduce_item = state.reduction_item(this);
         if(reduce_item) {
             if(opts.debug) {
                 out += "fprintf(stderr, \"    " + sfn +
@@ -1515,7 +1539,6 @@ public:
                        c_str_escape(reduce_item.to_str(this)) + "\");\n";
             }
             out += production_code(state, reduce_item.rule);
-            //out += "    fprintf(stderr, \"%i items on stack after reduce\\n\", base_parser.lr_stack_size());\n";
         } else {
             if(opts.debug)
                 out += "fprintf(stderr, \"    terminating in " +
