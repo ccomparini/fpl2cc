@@ -1,0 +1,7 @@
+#!/bin/sh
+
+echo rebuilding src/util/jemplpl.cc
+
+# recreates jemplpl.cc from jemplpl.fpl.
+#bin/fpl2cc --src-path=src/grammarlib --debug-single-step src/util/jemplpl.fpl --out src/util/jemplpl.cc
+bin/fpl2cc --src-path=src/grammarlib src/util/jemplpl.fpl --out src/util/jemplpl.cc
