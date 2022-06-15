@@ -1152,23 +1152,6 @@ public:
         return fn;
     }
 
-    // for debugging, generate code which stops for input
-    // for each state.  user hits return to go to the next
-    // step.  this I found easier than lldb command line.
-    // I tried running lldb in visual studio code but for
-    // some reason it would hang on the first breakpoint
-    // with the subproc spinning at 100% cpu, which was not
-    // useful. so here's my punt:
-    std::string debug_single_step_code(const lr_set &st) const {
-        std::string out;
-        if(opts.debug) {
-            out += "fprintf(stderr, \"%s\", base_parser.to_str().c_str());\n";
-            if(opts.single_step) {
-                out += "base_parser.debug_pause();\n";
-            }
-        }
-        return out;
-    }
 
     std::string rule_meta_argname(const production_rule &rule) const {
         std::string out =
@@ -1517,11 +1500,11 @@ public:
         out += "void " + sfn + "() {\n";
         out += "size_t b_eaten = eat_separator();\n";
         if(opts.debug) {
-            out += "fprintf(stderr, \"%li bytes eaten since last terminal\\n\", ";
-            out += "b_eaten);\n";
+            out += "fprintf(stderr, \"=============\\n\");\n";
+            out += "fprintf(stderr, \"" + sfn + ": %s\\n\", state_string(&" + fq_member_name(sfn) + "));\n";
+            out += "fprintf(stderr, \"%li bytes eaten since last terminal\\n\", b_eaten);\n";
+            out += "fprintf(stderr, \"running %s\", base_parser.to_str().c_str());\n";
         }
-
-        out += debug_single_step_code(state);
 
         out += "    if(0) {\n"; // now everything past this can be "else if"
 
@@ -1553,6 +1536,13 @@ public:
             // So the strategy is:  terminate parsing and let the
             // caller (of the parser) decide what to do.
             out += "    base_parser.terminate();\n";
+        }
+
+        if(opts.debug) {
+            out += "fprintf(stderr, \"=============\\n\");";
+            if(opts.single_step) {
+                out += "base_parser.debug_pause();\n";
+            }
         }
 
         out += "}\n"; // end of reduce/accept section
