@@ -53,12 +53,39 @@ std::string _stringformat(const std::list<T> &list, const char *j = ", ") {
     return out;
 }
 
+class stringformat_post_processor {
+    // {::n} -> translate newlines to "\n"
+    static std::string n(const std::string &in) {
+        std::string out;
+        size_t last_pos = 0;
+        size_t pos = in.find("\n");
+        for( ; pos != std::string::npos; pos = in.find("\n", last_pos)) {
+            out += in.substr(last_pos, pos - last_pos);
+            out += "\\n";
+            last_pos = pos + 1;
+        }
+        out += in.substr(last_pos);
+
+        return out;
+    }
+
+public:
+    static std::string process(char fmt, const std::string &in) {
+        switch(fmt) {
+            case 'n': return n(in);
+        }
+        // .. would be nice to warn about missing format here....
+        return in;
+    }
+};
+
 template <typename... Args>
 std::string stringformat(std::string_view fmt, Args&&... args) {
 
     // ok this works at all - string convert each argument,
     // before and regardless of if it's going to be used.
-    // not my fave structure, but it's not unreasonable
+    // not my fave structure, not least because it prevents
+    // but it's not unreasonable
     // to expect to have to convert each argument anyway.
     // in fact it might be worth warning if there are extra
     // (or not enough) arguments.
@@ -87,28 +114,54 @@ std::string stringformat(std::string_view fmt, Args&&... args) {
                 // '{{' evaluates to a single '{' (it's how you escape '{')
                 ++ind;
                 out += '{';
-            } else if(fmt[ind + 1] == '}') {
-                // positional substitution:
-                ++ind; // (eat the '}')
+            } else {
+                // parse the contents of the {}:
+                // Within {}, let's say the _future_ format is:
+                //  [ variable name ] [':' [ to-string function ] [':' [ post processing ] ] ]
+                // But, NOTE: presently, because we can't see the names
+                // of the parameters and we've already converted everything
+                // to string, the only one of these we support is the post
+                // processing part.  I'm implementing that part now because
+                // I specifically want it (for killing newlines).
+                size_t ts_ind = 0; // pos of to-string function, if any
+                size_t pp_ind = 0; // pos of post processing function, if any
+                while(fmt[ind] && (fmt[ind] != '}')) {
+                     if(fmt[ind] == ':') {
+                         if(!ts_ind)
+                             ts_ind = ind + 1;
+                         else if(!pp_ind)
+                             pp_ind = ind + 1;
+                         // else for now we're ignoring spurious ':'
+                     }
+                     ind++;
+                }
+
                 if(argi < num_args) {
-                    out += str_arg[argi];
+                    std::string sub = str_arg[argi];
+                    if(ts_ind) {
+                        while(fmt[ts_ind]) {
+                            // (no to-string function support presently,
+                            // but it would go here)
+                            ts_ind++;
+                            if(fmt[ts_ind] == ':' || fmt[ts_ind] == '}')
+                                break;
+                        }
+                    }
+                    if(pp_ind) {
+                        while(fmt[pp_ind]) {
+                            sub = stringformat_post_processor::process(
+                                fmt[pp_ind], sub
+                            );
+                            pp_ind++;
+                            if(fmt[pp_ind] == ':' || fmt[pp_ind] == '}')
+                                break;
+                        }
+                    }
+                    out += sub;
                 } else {
                     out += "(missing arg " + std::to_string(argi) + ")";
                 }
                 argi++;
-            } else {
-                
-                // it's not clear to me how named arguments can/should work
-                // for this in c++, (I guess it could alternate argname, value)
-                // so... blowing off non-positional substitutions for now. 
-/*
-                size_t pend = fmt.find("}", ind);
-                if(pend == npos) {
-                    // no closing '}'.. I guess just plow on and .. copy
-                    // this is another reason to go with the simpler % format.
-                } else {
-                }
- */
             }
         } else if((fmt[ind] == '}') && (fmt[ind + 1] == '}')) {
             // turn '}}' into a single '}' so that we can balance
