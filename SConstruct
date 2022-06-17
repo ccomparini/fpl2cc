@@ -47,7 +47,7 @@ def sources_are_same(target, source, env):
         with open(fn.abspath) as f: contents = f.readlines()
         if last_contents is not None:
             if contents != last_contents:
-                sys.stderr.write("MISMATCH: {a} {b}\n".format(a=fn.path, b=last_fn.path))
+                sys.stderr.write("MISMATCH: {a} {b}\n".format(a=last_fn.path, b=fn.path))
                 return 1
         last_contents = contents
         last_fn = fn
