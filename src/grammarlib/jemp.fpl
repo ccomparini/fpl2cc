@@ -41,10 +41,16 @@ text -> fragment ;
 #   @declare fruitbat:x + 10@
 '@declare'^ sp^ identifier:name_decl ':'^ /(?:[^@]|(?:@@))*/:value '@'^ eol^ -> fragment ;
 
-# loops and if/else are composed of these:
-'@}@'^                                         -> fragment +{ return "}"; }+
-'@'^ ~   /[^@]+\{/:control_statement ~ /@\n?/^ -> fragment ;
-'@'^ ~ /\}[^@]+\{/:control_statement ~ /@\n?/^ -> fragment ; # eg "} else {"
+# Control statements (loops and if/else) are identified
+# by ending with an opening or closing curly brace.
+# This means you must always use curly braces on control
+# statements. eg:
+# @if(something) {@
+#   something is true 
+# @} else {@
+#   something is false 
+# @}@
+'@'^ ~ /[^@]*[{}]/:control_statement ~ /@\n?/^ -> fragment ;
 
 # substitute a variable into the output:
 '@'^ ~ /[^@]+/:variable '@'^ -> fragment ;
