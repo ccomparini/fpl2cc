@@ -1503,7 +1503,7 @@ public:
             out += "fprintf(stderr, \"=============\\n\");\n";
             out += "fprintf(stderr, \"" + sfn + ": %s\\n\", state_string(&" + fq_member_name(sfn) + "));\n";
             out += "fprintf(stderr, \"%li bytes eaten since last terminal\\n\", b_eaten);\n";
-            out += "fprintf(stderr, \"running %s\", base_parser.to_str().c_str());\n";
+            out += "fprintf(stderr, \"%s\", base_parser.to_str().c_str());\n";
         }
 
         out += "    if(0) {\n"; // now everything past this can be "else if"
@@ -1538,14 +1538,14 @@ public:
             out += "    base_parser.terminate();\n";
         }
 
+        out += "}\n"; // end of reduce/accept section
+
         if(opts.debug) {
             out += "fprintf(stderr, \"=============\\n\");";
             if(opts.single_step) {
                 out += "base_parser.debug_pause();\n";
             }
         }
-
-        out += "}\n"; // end of reduce/accept section
 
         out += "}\n"; // end of state_ function
 
