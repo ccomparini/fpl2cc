@@ -770,7 +770,7 @@ public:
                     type     = grammar_element::Type::TERM_REGEX;
                     break;
                 case '~':
-                    // lack-of-space pseudo-terminal (or assertion?)
+                    // lack-of-separator assertion:
                     src.read_byte();
                     expr_str = "~";
                     type     = grammar_element::Type::LACK_OF_SEPARATOR;

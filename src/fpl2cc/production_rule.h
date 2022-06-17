@@ -234,6 +234,12 @@ public:
     }
 
     code_block default_code() const {
+        // XXX  bug:
+        // the following should work, but does not (apparently because of
+        // the optionalness on leading_ws).  It should work because there's
+        // exactly one argument - the terminal '@-')
+        //  leading_ws?^ '@-' -> subst_start ;
+        // actually the bug is at the caller of this, or in foldable().
         if(!foldable()) {
             // if it's not foldable, at this point we're
             // considering the code to be too complex
