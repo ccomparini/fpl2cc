@@ -1,0 +1,13 @@
+uses "libc";
+
+// this is a line comment
+
+/* and this is a block comment */
+
+message:string = "hi world\n";
+
+/*
+#libc.write(fd = libc.stdout, buf = message, count = message.length);
+ */
+
+

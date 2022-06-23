@@ -159,6 +159,7 @@ src_subdirs = [
     'util/test/',
     'fpl2cc/',
     'fpl2cc/test/',
+    'grammarlib/test/',
     'compiler/',
 ]
 

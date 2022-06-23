@@ -119,6 +119,8 @@ def run_and_capture_action(program, interactive=False):
 
         strcommand = ' '.join(command) # for error messages, etc.
 
+        print(f"Going to run:\n    {strcommand}\n", file=sys.stderr);
+
         if interactive:
             returncode, pout, perr = run_interactively(command)
         else:
