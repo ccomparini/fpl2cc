@@ -61,7 +61,9 @@ private:
             (handlers.back())(msg, caller);
         } else {
             std::cerr << msg;
-            if(chan <= error_channel) {
+            if(chan > error_channel) {
+                std::cerr << ensure_nl(stringformat(" at {}", caller));
+            } else {
                 std::cerr << ensure_nl(stringformat("Aborting at {}", caller));
                 exit(2112);
             }
