@@ -8,6 +8,7 @@
 #include <string>
 
 #include "util/fs.h"
+#include "util/jerror.h"
 #include "util/src_location.h"
 #include "util/stringformat.h"
 #include "util/to_hex.h"
@@ -136,10 +137,7 @@ class fpl_reader {
         return empty_match;
     }
 
-    inline size_t bytes_left() const {
-        return buffer.length() - read_pos;
-    }
-
+private:
     // returns true if the position passed would be eof.
     // throws an error (and returns true) if the position
     // is entirely outside the buffer
@@ -239,7 +237,11 @@ public:
         buffer(input),
         on_error(ecb),
         read_pos(0)
-    { }
+    {
+        // for better or worse, we explicitly end the
+        // input buffer with a \0:
+        buffer.push_back('\0');
+    }
 
     fpl_reader(const std::string &infn, ErrorCallback ecb = &default_fail) :
         input_filename(infn),
@@ -249,8 +251,17 @@ public:
     {
     }
 
-    inline int current_position() const {
+    inline size_t current_position() const {
         return read_pos;
+    }
+
+    // total bytes buffered as of now
+    inline size_t total_bytes() const {
+        return buffer.length();
+    }
+
+    inline size_t bytes_left() const {
+        return total_bytes() - current_position();
     }
 
     // returns the 1-based line number for the position passed.
@@ -295,11 +306,9 @@ public:
         return in;
     }
 
-    inline bool eof() const {
-        return eof(read_pos);
+    inline bool eof(src_location caller = CALLER()) const {
+        return eof(read_pos, caller);
     }
-
-public:
 
     inline utf8_byte peek(int offset = 0) const {
         return *inpp(offset);
@@ -329,7 +338,6 @@ public:
     // counts as a newline (which covers unix newlines and some other
     // old fashioned newlines).
     // If at isn't pointing to a newline, returns 0.
-private:
     inline size_t newline_length(size_t at) const {
         if(at >= buffer.length())
             return 0;
@@ -356,14 +364,15 @@ private:
         return newline_length(at - buffer.data());
     }
 
-    // Returns the length of the encoding of the character at *in, in bytes.
+    // Returns the length in bytes of the encoding of the character at the
+    // position passed.
     // For purposes of this function, a character is a single utf-8 encoded
     // character, or a multi-ascii-character newline, such as is used by
     // ms dos and descendants.
     // If the pointer passed points to the middle of a character, returns
     // the length of the remaining bytes (or tries to - GIGO, at this point).
     // Returns 0 if given a NULL pointer.
-    size_t char_length(size_t pos) const {
+    int char_length(size_t pos) const {
         if(size_t nll = newline_length(pos))
             return nll;
 
@@ -384,18 +393,17 @@ private:
         // count bytes until the start of a new character,
         // which we can identify by the top 2 bits being
         // anything other than 0b10:
-// XXX test this case
-        size_t len = 0;
+        int len = 0;
         for( ; pos + len < buffer.length(); ++len) {
             // 0xc0 = 0b11000000
-            if((buffer[pos + len] & 0xc0) != 0xc0)
+            // 0x80 = 0b10000000
+            if((buffer[pos + len] & 0xc0) != 0x80) {
                 break;
+            }
         }
 
         return len;
     }
-
-public:
 
     inline void go_to(size_t position) {
         read_pos = position;
@@ -446,12 +454,12 @@ public:
     // current input byte, consuming the delimiters.  for example,
     // if the current input is on the single quote at the start of:
     //        'fruitbat'; # hi this is a line of code
-    // this read the "'" and infer that that's the delimiter, then
-    // read through the next "'", returning a string containing
-    // "fruitbat", leaving the read pointer on the ';'.
+    // this reads the "'" and infers that that's the delimiter, then
+    // reads through the next "'", returning a string containing
+    // "fruitbat", and leaving the read pointer on the ';'.
     //
     // If there's no closing delimiter, it'll return everything up
-    // to the end of input, which is kinda lame.
+    // to the end of input and leave the read pointer there.
     //
     // Backslash can be used to escape delimiters, but the backslash
     // will be included in the returned string.  Arguably, that's
@@ -469,9 +477,12 @@ public:
     //     (may change, but more likely will deprecate the whole thing)
     //
     inline std::string parse_string(src_location caller = CALLER()) {
-if(char_length(read_pos) > 1) {
-fprintf(stderr, "whoa dude this is going to break because the char length is %lu", char_length(read_pos));
-}
+        if(char_length(read_pos) > 1) {
+            jerror::warning(stringformat(
+                "parsing string starting at non-character (pos {}, '{}')",
+                read_pos, debug_peek(read_pos)
+            ), caller);
+        }
         const utf8_byte end_byte = read_byte();
         const char *start = inpp_as_char();
 
@@ -523,9 +534,9 @@ fprintf(stderr, "whoa dude this is going to break because the char length is %lu
         return std::string((char *)start, end - start);
     }
 
-    // XXX this is only ever used in boolean context, so don't return a ptr
-    // the caller knows what it matched anyway, since the caller passed it.
-    inline const utf8_byte *read_exact_match(const std::string &match) {
+    // attempts to read characters exactly matching the string passed.
+    // returns true if it did, false otherwise.
+    inline bool read_exact_match(const std::string &match) {
         const utf8_byte *result = NULL;
 
         size_t ml = match.length();
@@ -588,10 +599,8 @@ fprintf(stderr, "whoa dude this is going to break because the char length is %lu
                 on_error(stringformat(
                     "/{}/ <- {} (caller: {})", re, err.what(), caller
                 ));
+                matched = no_match();
             }
-// XXX wait what?  we _can _ get here on matches of "0 bytes".  we don't want to return true in such cases. investigate.
-// fprintf(stderr, "/%s/ matched %li bytes!  specifically: (%s)\n", re.c_str(), matched.length(), matched.str().c_str());
-            // (matched is now set to whatever was matched, if anything)
         } else {
             // (we are at eof - no match)
             matched = no_match();

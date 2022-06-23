@@ -5,6 +5,12 @@ import os
 Import('env')
 env = env.Clone()
 
+env.Program('reader', [ 'reader.cc' ])
+env.Command('reader.out', 'reader', '$SOURCE > $TARGET')
+env.CompareOut('reader.success', [ 'reader.expect', 'reader.out' ])
+
+#
+# fpl tests:
 #
 # dependencies:
 #   [src language] : [src language].cc
