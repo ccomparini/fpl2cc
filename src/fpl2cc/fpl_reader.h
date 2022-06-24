@@ -325,7 +325,7 @@ public:
             nl = "\n";
 
         return stringformat("Error {} near «{}»: {}{}",
-            location_str(pos), debug_peek(pos), msg, nl
+            location_str(pos), debug_peek(pos, 12), msg, nl
         );
     }
 
@@ -480,7 +480,7 @@ public:
         if(char_length(read_pos) > 1) {
             jerror::warning(stringformat(
                 "parsing string starting at non-character (pos {}, '{}')",
-                read_pos, debug_peek(read_pos)
+                read_pos, debug_peek(read_pos, 12)
             ), caller);
         }
         const utf8_byte end_byte = read_byte();
@@ -617,7 +617,7 @@ public:
     // than the num_chars passed.
     // if pf_esc is set, we attempt to make the string safe
     // to pass to printf() family functions.
-    inline std::string debug_peek(size_t pos, int num_chars) const {
+    inline std::string debug_peek(size_t pos, int num_chars = 12) const {
         if(!buffer.data()) return "<NO INPUT>";
 
         if(pos == size_t(-1)) pos = read_pos;
