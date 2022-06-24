@@ -6,6 +6,7 @@
 #include "reducer.h"
 
 #include "util/c_str_escape.h"
+#include "util/jerror.h"
 #include "util/stringformat.h"
 
 #include <string>
@@ -47,6 +48,10 @@ public:
             return gexpr.compare(other) == 0;
         }
 
+        inline bool is_named() const {
+            return variable_name().length() > 0;
+        }
+       
         inline std::string variable_name() const {
             if(varname.length()) {
                 return varname;
@@ -122,6 +127,7 @@ public:
 private:
     std::string prod;
     std::vector<step> rsteps;
+    std::set<std::string> step_vars; // for finding conflicts
     code_block   code_for_rule; // inlined reduce code, if any
     reducer      abs_impl;      // abstracted implementation, if any
     std::string file;
@@ -152,8 +158,18 @@ public:
         return rule_fn();
     }
 
-    void add_step(step step) {
-        rsteps.push_back(step);
+    void add_step(step st) {
+        if(st.is_named()) {
+            const std::string name = st.variable_name();
+            if(step_vars.contains(name)) {
+                jerror::warning(stringformat(
+                    "duplicate name '{}' in step {} {}",
+                    name, rsteps.size(), location()
+                ));
+            }
+            step_vars.insert(name);
+        }
+        rsteps.push_back(st);
     }
 
     inline int num_steps() const { return rsteps.size(); }
@@ -215,22 +231,22 @@ public:
     }
 
     // returns the variable name for the given step number.
-    // rudely asserts if the step isn't valid
-    std::string varname(int stepi) const {
+    // throws an error if the step isn't valid
+    std::string varname(int stepi, src_location caller = CALLER()) const {
         if(const step *st = nth_step(stepi)) {
-            std::string name = st->variable_name();
-            if(name.length() == 0) {
-                name = "arg_" + std::to_string(stepi);
-            }
-            return name;
+            // if the step has a particular name, use that:
+            if(st->is_named())
+                return st->variable_name();
+
+            // otherwise just name it arg_x:
+            return "arg_" + std::to_string(stepi);
         }
 
         std::string error = stringformat(
-            "BUG: invalid step number {} in rule {}\n", stepi, to_str()
-        ).c_str();
-
-        assert(error.c_str());
-        return error;
+            "invalid step number {} in rule {}\n", stepi, to_str()
+        );
+        jerror::error(error);
+        return error; // because we need to return something
     }
 
     code_block default_code() const {

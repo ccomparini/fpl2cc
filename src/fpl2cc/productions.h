@@ -15,6 +15,7 @@
 #include <list>
 #include <map>
 #include <string>
+#include <time.h> // for profiling
 
 namespace fpl {
 
@@ -1495,11 +1496,13 @@ public:
         return out;
     }
 
-    // determines goal(s), generates states, matches up reducers, etc.
+    // determines goal(s), generates states, matches up reducers, 
+    // reports errors, etc.
     // call this before generating code.
     void resolve(src_location caller = CALLER()) {
+//fprintf(stderr, "%lu entering resolve()...\n", time(nullptr));
         if(rules.size() <= 0) {
-            internal_error("No rules found\n", caller);
+            error("No rules found\n");
         }
 
         goal = opts.entry_points;
@@ -1512,27 +1515,8 @@ public:
         apply_reducers();
         generate_states(goal);
         report_unused_rules();
-
-        std::list<std::string> missing_actions;
-        for(int rnum = 0; rnum < rules.size(); rnum++) {
-            const production_rule &rule = rules[rnum];
-            if(!rule.reduce_code()) {
-                missing_actions.push_back(stringformat(
-                    "{}\t{}\n", rule.location(), hypothetical_reducer(rule)
-                ));
-            }
-        }
-        if(missing_actions.size() > 0) {
-            std::string msg = stringformat(
-                "missing reduce action for {} rules:\n"
-                "    original rule location\tdesired reducer\n",
-                missing_actions.size()
-            );
-            for(std::string rmsg : missing_actions) {
-                msg += "    " + rmsg;
-            }
-            error(msg);
-        }
+        check_actions();
+//fprintf(stderr, "%lu finished resolve()...\n", time(nullptr));
     }
 
     // jemp-based output:
@@ -1575,6 +1559,31 @@ public:
                     rind, rule.product(), rule.location()
                 ));
             }
+        }
+    }
+
+    void check_actions() const {
+        std::list<std::string> missing_actions;
+
+        for(int rnum = 0; rnum < rules.size(); rnum++) {
+            const production_rule &rule = rules[rnum];
+            if(!rule.reduce_code()) {
+                missing_actions.push_back(stringformat(
+                    "{}\t{}\n", rule.location(), hypothetical_reducer(rule)
+                ));
+            }
+        }
+
+        if(missing_actions.size() > 0) {
+            std::string msg = stringformat(
+                "missing reduce action for {} rules:\n"
+                "    original rule location\tdesired reducer\n",
+                missing_actions.size()
+            );
+            for(std::string rmsg : missing_actions) {
+                msg += "    " + rmsg;
+            }
+            error(msg);
         }
     }
 };
