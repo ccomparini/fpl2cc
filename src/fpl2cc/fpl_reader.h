@@ -450,21 +450,40 @@ public:
         return false;
     }
 
-    // reads and returns the string of characters delimited by the
-    // current input byte, consuming the delimiters.  for example,
-    // if the current input is on the single quote at the start of:
+    // given the first byte of a potential string, returns
+    // the byte to expect to use for the end of that string.
+    // this is a helper for parse_string(), below.
+    utf8_byte string_end_delimiter(utf8_byte start) {
+        switch(start) {
+            case '\'': return '\'';
+            case '"':  return '"';
+            case '`':  return '`';
+            case '/':  return '/'; // used for regex
+        }
+        return '\0';
+    }
+
+    //
+    // Reads and returns the string of characters delimited by the
+    // start-of-string delimiter at the current input position.
+    //
+    // For example, if the current input is on the single quote
+    // at the start of:
     //        'fruitbat'; # hi this is a line of code
     // this reads the "'" and infers that that's the delimiter, then
     // reads through the next "'", returning a string containing
     // "fruitbat", and leaving the read pointer on the ';'.
     //
+    // End delimiters (and any other byte!) can be escaped with a
+    // backslash.  Note, however, that we always leave the backslash
+    // in - otherwise it would hide things like newlines encoded as
+    // '\n' from callers.
+    //
+    // If the initial character doesn't look like anything which
+    // can be used as a string delimiter, we return an empty string.
+    // 
     // If there's no closing delimiter, it'll return everything up
     // to the end of input and leave the read pointer there.
-    //
-    // Backslash can be used to escape delimiters, but the backslash
-    // will be included in the returned string.  Arguably, that's
-    // a bug, but it matches the behavior of what this is replacing
-    // so I'm just keeping it for now.  ship it.
     //
     // Caveats:
     //   - there's a good chance I'm going to deprecate/remove this
@@ -473,17 +492,18 @@ public:
     //     actually read a std::string with an embedded '\0' (though
     //     you probably don't want to)
     //   - at the moment, this is all byte oriented, so it probably
-    //     won't handle any non-ascii delimiters in a way you'd expect.
-    //     (may change, but more likely will deprecate the whole thing)
+    //     won't handle any non-ascii delimiters
     //
+    
     inline std::string parse_string(src_location caller = CALLER()) {
-        if(char_length(read_pos) > 1) {
-            jerror::warning(stringformat(
-                "parsing string starting at non-character (pos {}, '{}')",
-                read_pos, debug_peek(read_pos, 12)
-            ), caller);
+        const size_t start_position = current_position();
+        const utf8_byte end_byte = string_end_delimiter(read_byte());
+        if(!end_byte) {
+            // if end_byte is '\0' it means we're not starting on
+            // a valid delimiter
+            go_to(start_position); // (rewind)
+            return "";
         }
-        const utf8_byte end_byte = read_byte();
         const char *start = inpp_as_char();
 
         // read_byte() returns 0 at (or past) end of input,
@@ -491,11 +511,12 @@ public:
         // is just going to cause mayhem, so we count any 0
         // as end of input.
         while(utf8_byte in = read_byte()) {
-             if(in == end_byte)
-                 break;
+            if(in == end_byte) {
+                break;
+            }
 
-             if(in == '\\')
-                 read_byte(); // next byte is escaped - just skip
+            if(in == '\\')
+                read_byte(); // next byte is escaped - just skip
         }
 
         const char *end = inpp_as_char();
