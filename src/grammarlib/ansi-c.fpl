@@ -156,7 +156,7 @@ declaration_specifiers ';'                      -> declaration ;
 declaration_specifiers init_declarator_list ';' -> declaration ;
 # static_assert_declaration                       -> declaration ; # nixed for simplicity
 
-declaration_specifiers
+# declaration_specifiers # ... oops what was this?
 storage_class_specifier declaration_specifiers -> declaration_specifiers ;
 storage_class_specifier                        -> declaration_specifiers ;
 type_specifier declaration_specifiers          -> declaration_specifiers ;
@@ -168,7 +168,7 @@ function_specifier                             -> declaration_specifiers ;
 alignment_specifier declaration_specifiers     -> declaration_specifiers ;
 alignment_specifier                            -> declaration_specifiers ;
 
-init_declarator_list
+# init_declarator_list # ... oops.. what was this?
 init_declarator                          -> init_declarator_list ;
 init_declarator_list ',' init_declarator -> init_declarator_list ;
 
@@ -369,14 +369,14 @@ statement   -> block_item ;
 ';'            -> expression_statement ;
 expression ';' -> expression_statement ;
 
-'if' '(' expression ')' statement 'else' statement -> selection_statement ;
+'if' '(' expression ')' statement:when_true 'else' statement:when_false -> selection_statement ;
 'if' '(' expression ')' statement                  -> selection_statement ;
 'switch' '(' expression ')' statement              -> selection_statement ;
 
 'while' '(' expression ')' statement                              -> iteration_statement ;
 'do' statement 'while' '(' expression ')' ';'                     -> iteration_statement ;
-'for' '(' expression_statement expression_statement ')' statement -> iteration_statement ;
-'for' '(' expression_statement expression_statement expression ')' statement -> iteration_statement ;
+#'for' '(' expression_statement expression_statement ')' statement -> iteration_statement ;
+'for' '(' expression_statement:init expression_statement:condition expression?:advancement ')' statement -> iteration_statement ;
 'for' '(' declaration expression_statement ')' statement            -> iteration_statement ;
 'for' '(' declaration expression_statement expression ')' statement -> iteration_statement ;
 
