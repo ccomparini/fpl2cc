@@ -7,7 +7,7 @@
 
     struct {
         static const char *name() {
-            return "@c_str_escape(rule.name())@";
+            return "@rule.rule_fn()@";
         }
         static const char *product() {
             return "@c_str_escape(rule.product())@";

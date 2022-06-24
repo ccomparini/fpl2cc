@@ -154,9 +154,6 @@ public:
     // makes a better rule_meta method; probably a better
     // name in general, but I'm keeping rule_fn for now
     // because it's more grepable.
-    std::string name() const {
-        return rule_fn();
-    }
 
     void add_step(step st) {
         if(st.is_named()) {
