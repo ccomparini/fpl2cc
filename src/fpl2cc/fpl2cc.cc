@@ -167,6 +167,41 @@ void fail_reader_adapter(const std::string &msg) {
     fail(msg, "(fpl_reader)");
 }
 
+// 
+// Writes a make-style dependency file, which can be used by ninja (or scons,
+// or I suppose, make) to know what other fpls are imported.
+//  https://clang.llvm.org/docs/ClangCommandLineReference.html#dependency-file-generation
+//  https://ninja-build.org/manual.html#ref_headers
+//  https://scons.org/doc/production/HTML/scons-user.html#idm46358248900448
+//
+// the format appears to be old-school make lines, with newlines escaped.
+//  eg:
+//    some_grammar.cc: /foo/bar/some_grammar.fpl\
+//               /grammalib/json.fpl
+// (with some_grammar.cc being exactly at start of line, because space
+// is significant in make)
+void write_depfile(const productions &prds, const options &opts) {
+
+    FILE *depf = fopen(opts.depfile.c_str(), "w");
+    if(!depf) {
+        fail(stringformat(
+            "can't open dependency file '{}' for write: {}",
+            opts.depfile, strerror(errno)
+        ));
+    } else {
+        // we only process one .fpl at this point, so all dependencies
+        // are assumed to go under that:
+        fprintf(depf, "%s:", opts.output_fn.c_str());
+
+        fprintf(depf, " %s", opts.src_fpl.c_str());
+
+        for(auto dep : prds.imported_files()) {
+            fprintf(depf, "\\\n %s", dep.c_str());
+        }
+        fprintf(depf, "\n\n");
+    }
+}
+
 // self generated parser class:
 //#include "fpl_parser.h"
 
@@ -189,13 +224,13 @@ ExitVal fpl2cc(const options &opts) {
         prds.parse_fpl();
     }
 
-    // OH hai!  turns out there's already a standard for this,
-    // which we should support (and which will make this drop
-    // into ninja relatively easily):
-    //  https://clang.llvm.org/docs/ClangCommandLineReference.html#dependency-file-generation
+    // (see also opts.depfile)
     if(opts.dump_dependencies)
         for(auto dep : prds.imported_files())
             fprintf(stdout, "%s\n", dep.c_str());
+
+    if(opts.depfile.length())
+        write_depfile(prds, opts);
 
     std::string output;
     if(opts.generate_code)

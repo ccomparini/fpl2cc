@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 import subprocess
 import sys
 
@@ -34,7 +35,13 @@ env = Environment(
     tools = [ 'default', 'clangxx', ],
 )
 
+def read_dependencies(senv):
+    for dirpath, dirnames, filenames in os.walk('.'):
+        for filename in filenames:
+            if filename.endswith('.deps'):
+                senv.ParseDepends(os.path.join(dirpath, filename))
 
+read_dependencies(env)
 
 # action-compatible comparison function to check if all source
 # files have the same content.  used for comparing output in tests.
@@ -66,54 +73,25 @@ env.Append(BUILDERS =
         suffix = '.success',
         src_suffix = '.out') } )
 
-# scanner for fpl interdependencies (i.e. so that
-# scons can understand fpl imports):
-def fpl_scan(node, env, arg):
 
-    src = node.srcnode().get_path()
-    path = ':'.join(env['FPLPATH'])
-
-    # bootstrapping:  chuck an error telling people what to do if
-    # there's no fpl2cc, which we need for determining dependencies
-    if not Path('bin/fpl2cc').exists() :
-        return [ '#bin/fpl2cc' ]
-        #raise Exception("BOOTSTRAPPING: please run:\n    scons bin/fpl2cc\n")
-
-    imports = subprocess.check_output(
-        [ 'bin/fpl2cc', '--no-generate-code', '--dump-dependencies', '--src-path='+path, src ]
-    ).decode('utf-8').splitlines()
-
-    # import names are relative to the current directory,
-    # so make scons aware of that by prefixing them with "#":
-    imports = list(map(lambda fl: "#" + fl, imports))
-
-    # also, we'll want to reprocess fpls if fpl2cc changed:
-    imports.append('#bin/fpl2cc')
-
-    return imports
-
-fpl_scanner = Scanner(function = fpl_scan, skeys = ['.fpl'])
 
 # fpl -> cc builder:
-fpl_args = '--src-path=' + ':'.join(fpl_include_dirs) + ' $FPLOPTS $SOURCES --out $TARGET'
+fpl_args = '--src-path=' + ':'.join(fpl_include_dirs) + ' $FPLOPTS $SOURCES --out $TARGET --depfile .deps'
 env.Append(BUILDERS =
     { 'Fpl2cc' : Builder(action = debugger + 'bin/fpl2cc ' + fpl_args,
 	         suffix = '.cc',
-                 source_scanner = fpl_scanner,
 	         src_suffix = '.fpl') } )
 
 # fpl -> h builder:
 env.Append(BUILDERS =
     { 'Fpl2h' : Builder(action = debugger + 'bin/fpl2cc ' + fpl_args,
 	         suffix = '.h',
-                 source_scanner = fpl_scanner,
 	         src_suffix = '.fpl') } )
 
 # fpl -> jest builder:
 env.Append(BUILDERS =
     { 'Fpl2jest' : Builder(action = debugger + 'bin/fpl ' + fpl_args,
 	         suffix = '.jest',
-                 source_scanner = fpl_scanner,
 	         src_suffix = '.fpl') } )
 
 # another fake "Scanner" to make it so that headers generated

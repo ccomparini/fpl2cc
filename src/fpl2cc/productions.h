@@ -694,7 +694,9 @@ public:
         return src.read_re("([A-Za-z][A-Za-z0-9_]+)\\s*")[1];
     }
 
-    inline std::list<std::string> imported_files() {
+    inline std::list<std::string> imported_files() const {
+        // hopefully the compiler inlines this and doesn't copy all
+        // these strings...
         return imports;
     }
 
