@@ -99,18 +99,6 @@ void warn(const std::string &msg, src_location caller = CALLER()) {
  TODO/fix
 
 Thu Apr 14 08:54:41 PDT 2022
-  o figure out line number and filename and make them more available
-    at runtime somehow.  ideally you could get the start and end of
-    the whole rule match.  (add this to stack slice?)
-  - name steps on the "pure";  (maybe also name the products!)
-    - default is the name of the production, if it's a nonterm
-    - detect if a step name is used more than once & warn or something
-    - instead of "return xxx", reduce code always (automatically)
-      ends with "return <product name>;", so the explicit code just
-      assigns the product variable.  OH BUT that doesn't quite
-      work in c++ because some things might not have default constructors.
-      (also might not want default construction to happen etc. sigh)
-
   - separate stack for arguments.  this will allow ejected params
     to not be stored in the first place and simplify argument passing.
     Also lets us go back to recursive ascent (potentially)
@@ -128,12 +116,8 @@ Thu Apr 14 08:54:41 PDT 2022
       - -> expression ( fpl ) for sub-parsers!
         i.e. ... see grammarlib/strf.fpl
       - some way to do errors in pure fpl
-  - fix param maps
 
   Abstract the target language/application:
-    x default rule action is to call a handler named after the rule.
-      instantiators of the parser can install the handler
-    x add param maps to normalize across handlers
   - error handling and messaging is _terrible_ right now (with
     the default, anyway)
   - bug:  if everything in your fpl grammar is optional, it generates
@@ -141,7 +125,10 @@ Thu Apr 14 08:54:41 PDT 2022
     eg:
       foo* -> done ;
       'a' -> foo ;
-    (this still true?^^)
+    .. actually similar issue on regexes which match 0-length, if match
+    count is > 1 - it'll keep looping on a 0 length match, because
+    0 length doesn't advance the read pointer, which means it'll match
+    again (and again and again...)
   - get jest in here :D
   - lots of stuff is misnamed:
     - "num_args" should be count or size or something sensible
@@ -155,6 +142,7 @@ Thu Apr 14 08:54:41 PDT 2022
     the current buffering framework doesn't allow that, though.
   - precedence.  maybe an @prec (... )? or ^other_rule?
   o document the fpl (see docs dir)
+    - docs suck and are out of date.  probably want to inline them
 
  */
 
@@ -170,36 +158,6 @@ the type of thing produced (string/grammar_element) and typically
 a code block (string).  Each item has a minimum and maximum
 number of times to match (default 1; may be 0, 1, or, in the
 max case, infinite).
-
- */
-
-/*
-TODO imports:
-
-What's the goal?  at the moment, the idea is to be able to use imports
-as a way to separate the grammar from the production code.  So you
-can have a "pure" grammar (i.e. no target-language code) and import
-that into the fpl for a particular "application" (of that grammar).
-
-A secondary possible goal is (the original import goal) of being able
-to have sub-grammars for code organization and/or embedded languages
-eg, one could do fpl code blocks as:
-
-  '+{' `cpp.fpl` '}+' -> code_block ;
-
-.. and have it correctly deal with string-embedded '}+' etc.  Or, if
-the application is syntax highlighting, ... you get the idea.
-
-For the first goal, the syntax ideally would be to just import
-the embedded language and not have to assign it to any particular
-resulting product (though one still could...?  perhaps the reduce
-for that product could do the translation?  but then it would want
-to be passed a tree, which is not inherently unreasonable..)
-
-Either way, the sub Products (or at least the reader) needs to be
-kept around for this to work with the whole minimizing copies thing.
-Which might or might not even be worth it... hmm.  timing would be
-good.
 
  */
 
@@ -231,6 +189,10 @@ ExitVal fpl2cc(const options &opts) {
         prds.parse_fpl();
     }
 
+    // OH hai!  turns out there's already a standard for this,
+    // which we should support (and which will make this drop
+    // into ninja relatively easily):
+    //  https://clang.llvm.org/docs/ClangCommandLineReference.html#dependency-file-generation
     if(opts.dump_dependencies)
         for(auto dep : prds.imported_files())
             fprintf(stdout, "%s\n", dep.c_str());
