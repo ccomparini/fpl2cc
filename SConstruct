@@ -73,18 +73,32 @@ env.Append(BUILDERS =
         suffix = '.success',
         src_suffix = '.out') } )
 
+def depend_on_fpl2cc(target, source, env) :
+    # make fpl2cc a dependency of each source (.fpl) file passed
+    # (not a source dependency!).  This is because fpl2cc must be
+    # built -before- the source (.fpl) file is processed.  If we
+    # simply add fpl2cc to the source dependency list, scons thinks
+    # it can process the fpl in parallel with building fpl2cc,
+    # which leads to races and (usually) the fpl file being
+    # processed using the prior version of fpl2cc.
+    for src in source :
+        Depends(src, '#bin/fpl2cc') # deliberate: .fpl file depends on fpl2cc
+    return target, source
+
 
 
 # fpl -> cc builder:
 fpl_args = '--src-path=' + ':'.join(fpl_include_dirs) + ' $FPLOPTS $SOURCES --out $TARGET --depfile .deps'
 env.Append(BUILDERS =
     { 'Fpl2cc' : Builder(action = debugger + 'bin/fpl2cc ' + fpl_args,
+                 emitter = depend_on_fpl2cc,
 	         suffix = '.cc',
 	         src_suffix = '.fpl') } )
 
 # fpl -> h builder:
 env.Append(BUILDERS =
     { 'Fpl2h' : Builder(action = debugger + 'bin/fpl2cc ' + fpl_args,
+                 emitter = depend_on_fpl2cc,
 	         suffix = '.h',
 	         src_suffix = '.fpl') } )
 
