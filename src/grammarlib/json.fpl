@@ -20,7 +20,7 @@ member ','^ members -> members ;
 # TODO with this:
 # '{' (member (',' member)*)? '}' -> object ;
 
-string ':'^ value ->  member ;
+string:key ':'^ value -> member ;
 
 # TODO replace this:
 '['^ elements? ']'^   -> array ;
