@@ -309,14 +309,8 @@ public:
             return red.code();
         else if(code_for_rule)
             return code_for_rule;
-        else if(foldable())
-            return default_code();
 
-        // if none of the above apply, return a false
-        // code block.  callers can print an error or
-        // fill something in or whatever they think is
-        // appropriate.
-        return code_block();
+        return default_code();
     }
 
     void set_reducer(const reducer &red) {
