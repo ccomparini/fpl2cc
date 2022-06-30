@@ -46,10 +46,10 @@ text+:chunks -> fragment ;
 #   @declare fruitbat: x + 10@
 '@declare'^ sp^ identifier:name_decl ':'^ /(?:[^@]|(?:@@))*/:value '@'^ /\n?/^ -> fragment ;
 
-leading_ws?^ '@-' -> subst_start +{ return "@-"; }+ # shouldn't be necessary - fix when fpl bug is fixed
+leading_ws?^ '@-' -> subst_start ;
 '@'               -> subst_start ;
 
-'-@' trailing_ws?^ -> subst_end +{ return "-@"; }+ # again shouldn't be necessary
+'-@' trailing_ws?^ -> subst_end ;
 '@'                -> subst_end ;
 
 # template authors may wish to elide leading or trailing space,

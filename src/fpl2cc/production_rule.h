@@ -242,32 +242,44 @@ public:
         std::string error = stringformat(
             "invalid step number {} in rule {}\n", stepi, to_str()
         );
-        jerror::error(error);
+        jerror::error(error, caller);
         return error; // because we need to return something
     }
 
+    // returns the index of the step to use for the default
+    // return value, or -1 if there's no single suitable step
+    // for a default.
+    int default_return_step() const {
+        int stepi =  0;
+        int def   = -1;
+        for(stepi = 0; const step *st = nth_step(stepi); stepi++) {
+            // to be a default return value, the step must
+            // single and not ejected (for the moment, anyway -
+            // if I get the return type stuff straightened out,
+            // maybe we can handle optionals..)
+            if((st->min_times == 1) && (st->max_times == 1) && (!st->eject)) {
+                if(def == -1)
+                    def = stepi;
+                else // more than one candidate -> no default
+                    return -1;
+            }
+        }
+        return def;
+    }
+
     code_block default_code() const {
-        // XXX  bug:
-        // the following should work, but does not (apparently because of
-        // the optionalness on leading_ws).  It should work because there's
-        // exactly one argument - the terminal '@-')
-        //  leading_ws?^ '@-' -> subst_start ;
-        // actually the bug is at the caller of this, or in foldable().
-        if(!foldable()) {
-            // if it's not foldable, at this point we're
-            // considering the code to be too complex
-            // to come up with a default.  So return a
-            // false block:
+        int def_st = default_return_step();
+        if(def_st < 0) {
+            // no suitable result, so return a "false" code block:
             return code_block();
         }
 
         // start the code block with a comment referring to this
-        // line in this source file (fpl2cc.cc), to reduce puzzlement
+        // line in this source file, to reduce puzzlement
         // about where this mixed-generated code comes from:
         std::string code("// " THIS_LINE "\n");
 
-        // the default now is to just return the first parameter:
-        code += "return " + varname(0) + ";\n";
+        code += "return " + varname(def_st) + ";\n";
 
         return code;
     }
