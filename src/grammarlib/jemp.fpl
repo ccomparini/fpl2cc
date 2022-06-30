@@ -17,8 +17,8 @@
 # fragment is the "digest" of a section of the template.
 fragment+:fragments -> complete ;
 
-# arbitrary text is a fragment:
-text -> fragment ;
+# arbitrary text is concatenated to a fragment:
+text+:chunks -> fragment ;
 
 # @ signs indicate some kind of substitution or other jemp
 # directive.  If you want a plain @ in the expansion of your
