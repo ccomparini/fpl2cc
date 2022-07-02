@@ -21,7 +21,7 @@
         @declare argname: rule.varname(stind)@
         @-if(!expr.skip_on_reduce()) {-@
             @if(!expr.is_single()) {-@
-                const FPLBP::StackSlice &@argname@,@ ""-@
+                const StackSlice &@argname@,@ ""-@
             @-} else if(expr.is_terminal()) {-@
                 std::string @argname@,@ ""-@
             @-} else {-@
@@ -30,7 +30,7 @@
         @-}-@
     @-}-@
     @/* the last argument is a slice containing everything: */@
-    const FPLBP::StackSlice &args
+    const StackSlice &args
 ) {
     // @rule.to_str()@
     @fpl_x_parser_reduce_action_meta(rule)@
@@ -41,7 +41,7 @@
         useful?
     */@
     const SourcePosition start_pos = args[0].position();
-    const SourcePosition end_pos = base_parser.position();
+    const SourcePosition end_pos = position();
 
     @rule.reduce_code().format(false)@
 }

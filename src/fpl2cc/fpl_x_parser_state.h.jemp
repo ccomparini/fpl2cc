@@ -19,7 +19,7 @@ void @sfn@() {
         fprintf(stderr, "=============\n");
         fprintf(stderr, "@sfn@: %s\n", state_string(&@prds.fq_member_name(sfn)@));
         fprintf(stderr, "%li bytes eaten since last terminal\n", b_eaten);
-        fprintf(stderr, "%s", base_parser.to_str().c_str());
+        fprintf(stderr, "%s", to_str().c_str());
     @}@
 
     @for(auto trans : prds.transitions_for_state(state)) {-@
@@ -46,7 +46,7 @@ void @sfn@() {
             @if(opts.debug) {-@
                 fprintf(stderr, "    terminating in @sfn@ \n");
             @}@
-            base_parser.terminate();
+            terminate();
         @}-@
     }
 }
