@@ -199,6 +199,8 @@ void write_depfile(const productions &prds, const options &opts) {
             fprintf(depf, "\\\n %s", dep.c_str());
         }
         fprintf(depf, "\n\n");
+
+        fclose(depf);
     }
 }
 
