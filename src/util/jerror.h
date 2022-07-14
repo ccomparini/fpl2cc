@@ -1,6 +1,7 @@
 #ifndef JERROR_H
 #define JERROR_H
 
+#include <functional>
 #include <list>
 #include <iostream>
 #include <string>

@@ -1,4 +1,4 @@
-from pathlib import Path
+import distutils.sysconfig
 import os
 import subprocess
 import sys
@@ -8,12 +8,35 @@ debugger = ''
 
 fpl_include_dirs = [ 'src/grammarlib' ]
 
+# figure out some sensible way to set this.
+# 10 is great on my ~2015 macbook pro, but utterly destroys my
+# dinky amazon lightsail instance.
+#SetOption('num_jobs', 4)
 SetOption('num_jobs', 10)
 
 ccflags = ''
 if debugger : ccflags += " -g"
 else        : ccflags += " -O2"
 ccflags += " -std=c++20 -Wno-parentheses"
+
+# if you tell scons:
+#    tools = [ 'default', 'clangxx', ],
+# .. it seems to  always try to use clangxx.  not sure why.
+# what we want is to use clang if it's available, but otherwise
+# use default (i.e. probably gnu).
+def toolset():
+    # let's try asking python what it was compiled with,
+    # and seeing if it looks like clang.  this should be
+    # faster than searching the PATH or whatever for a compiler
+    # and then running the compiler to see what it is...
+    cxx = distutils.sysconfig.get_config_var('CXX')
+    if 'clang' in cxx:
+        # .. you still need 'default' here or scons gets twisted
+        return [ 'default', 'clangxx' ]
+
+    # ok, probably no clang.  use default.
+    return [ 'default' ]
+
 
 #    PLATFORM=platform,
 #    BINDIR="#export/foo/bin",
@@ -32,8 +55,9 @@ env = Environment(
     FPLPATH = fpl_include_dirs,
     LIBPATH=[ '#lib' ],
     LIBS='jest_util',
-    tools = [ 'default', 'clangxx', ],
+    tools = toolset(),
 )
+
 
 def read_dependencies(senv):
     for dirpath, dirnames, filenames in os.walk('.'):
@@ -47,7 +71,8 @@ read_dependencies(env)
 # files have the same content.  used for comparing output in tests.
 # prints an error message and returns 1 (= fail) if there's
 # a mismatch.
-# Otherwise, creates the target file(s) and returns 0 (= success)
+# Otherwise, creates/touches the target file(s) and returns 0
+# (= success)
 def sources_are_same(target, source, env):
     last_contents = None
     for fn in source:
@@ -59,8 +84,12 @@ def sources_are_same(target, source, env):
         last_contents = contents
         last_fn = fn
 
+    # success, so "touch" all targets (i.e. make them exist
+    # and  set the utime to the current time).
+    # (typically there's only one target file, called xxx.success...)
     for fn in target:
-        Path(fn.abspath).touch()
+        with open(fn.abspath, 'a'):
+            os.utime(fn.abspath, None)
     return 0
 
 # CompareOut is a "builder" which compares the source files (actually
