@@ -84,7 +84,6 @@ for fpl in fpls :
     # use this one to test the fpl based parser:
     #env.Fpl2cc(language + '.cc', [ langprog + '.fpl' ], FPLOPTS="--generate-main --new-parser")
     #env.Fpl2cc(language + '.cc', [ langprog + '.fpl' ], FPLOPTS="--generate-main --debug-single-step")
-    #env.Fpl2cc(language + '.cc', [ langprog + '.fpl' ], FPLOPTS="--generate-main --debug-single-step")
 
     # and it depends on the fpl compiler (which is ultimately
     # what we're testing):

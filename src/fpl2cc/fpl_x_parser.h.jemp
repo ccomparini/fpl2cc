@@ -705,6 +705,9 @@ public:
         while(!stop_parsing) {
             State st = current_state();
             (this->*st)();
+            @if(opts.debug) {@
+                debug_pause();
+            @}@
         }
     }
 

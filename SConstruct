@@ -14,10 +14,9 @@ fpl_include_dirs = [ 'src/grammarlib' ]
 #SetOption('num_jobs', 4)
 SetOption('num_jobs', 10)
 
-ccflags = ''
+ccflags = "-std=c++20 -Wno-parentheses"
 if debugger : ccflags += " -g"
 else        : ccflags += " -O2"
-ccflags += " -std=c++20 -Wno-parentheses"
 
 # if you tell scons:
 #    tools = [ 'default', 'clangxx', ],
