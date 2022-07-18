@@ -51,7 +51,7 @@ public:
 private:
     using handler_stack = std::list<callback>;
 
-    static handler_stack channels[NUM_CHANNELS];
+    static inline handler_stack channels[NUM_CHANNELS];
 
     static void on_msg(
         channel chan, const std::string &msg, src_location caller
