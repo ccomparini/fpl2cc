@@ -9,9 +9,6 @@
 // The good thing is maybe I can fpl up the jest string formatting
 // and slap it in here.
 
-inline std::string _stringformat(const std::string &s) {
-    return s;
-}
 
 inline std::string _stringformat(const char * s) {
     return std::string(s);
@@ -35,12 +32,27 @@ inline std::string to_string(const std::string &in) {
     return in;
 }
 
+// the next 2 templates are c++ hackery to detect if a thing
+// passed has a to_str() method:
+template <typename T, typename = int>
+struct _has_to_str : std::false_type { };
+template <typename T>
+struct _has_to_str <T, decltype(&T::to_str, 0)> : std::true_type { };
+
 template<typename T>
 std::string _stringformat(T in, const std::string &opts = "") {
-    using namespace std;
-    return to_string(in);
+    // if the thing passed has a to_str() method, use that:
+    if constexpr (_has_to_str<T>::value) {
+        return in.to_str();
+    } else {
+        // otherwise use whatever to_string will work:
+        using namespace std;
+        return to_string(in);
+    }
 }
 
+// stringformat for lists - stringifies the elements and joins them,
+// putting the string pssed between each element
 template<typename T>
 std::string _stringformat(const std::list<T> &list, const char *j = ", ") {
     std::string out;
