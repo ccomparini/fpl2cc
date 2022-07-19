@@ -3,11 +3,15 @@ env = env.Clone()
 
 env.Jemp2h('jemptest.jemp')
 
-env.Program('jemptest', [ 'jemptest.cc' ])
+for tprog in ('jemptest', 'stringformattest') :
+    env.Program(tprog, [ tprog + '.cc' ])
 
-# Command(target, source, action, [key=val, ...])
-# (note $SOURCE is the path to jemptest)
-env.Command('jemptest.out', 'jemptest', '$SOURCE > $TARGET')
+    # Run the test:
+    #    Command(target, source, action, [key=val, ...])
+    # (note $SOURCE is the path to the tprog)
+    env.Command(tprog + '.out', tprog, '$SOURCE > $TARGET')
 
-env.CompareOut('jemptest.success', [ 'jemptest.expect', 'jemptest.out' ])
+    # compare the output of the test to the expected output;
+    # .success file is/becomes up to date if output matched
+    env.CompareOut(tprog + '.success', [ tprog + '.out', tprog + '.expect' ])
 

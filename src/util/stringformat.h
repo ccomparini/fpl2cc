@@ -1,7 +1,7 @@
 #ifndef STRINGFORMAT_H
 #define STRINGFORMAT_H
 
-#include "to_hex.h"
+#include <cstdlib>
 #include <list>
 
 // OK SO #include<format> doen't seem to exist on my machine.
@@ -94,14 +94,13 @@ public:
 template <typename... Args>
 std::string stringformat(std::string_view fmt, Args&&... args) {
 
+    const int num_args = sizeof...(args);
     // ok this works at all - string convert each argument,
     // before and regardless of if it's going to be used.
-    // not my fave structure, not least because it prevents
-    // but it's not unreasonable
-    // to expect to have to convert each argument anyway.
-    // in fact it might be worth warning if there are extra
-    // (or not enough) arguments.
-    const int num_args = sizeof...(args);
+    // it sucks because we can't determine how to format
+    // a given argument before we format it.  is this why
+    // clang isn't shiping with an implementation?
+    // ok whatevs shipit.
     const std::string str_arg[] = { _stringformat(args) ... };
 
     // possibly better syntax.  see the notes file.
@@ -132,13 +131,19 @@ std::string stringformat(std::string_view fmt, Args&&... args) {
                 //  [ variable name ] [':' [ to-string function ] [':' [ post processing ] ] ]
                 // But, NOTE: presently, because we can't see the names
                 // of the parameters and we've already converted everything
-                // to string, the only one of these we support is the post
-                // processing part.  I'm implementing that part now because
-                // I specifically want it (for killing newlines).
+                // to string.  So let's allow numeric parameter index instead
+                // of the variable name.
                 size_t ts_ind = 0; // pos of to-string function, if any
                 size_t pp_ind = 0; // pos of post processing function, if any
+                long arg_num = argi;
                 while(fmt[ind] && (fmt[ind] != '}')) {
-                     if(fmt[ind] == ':') {
+                     if(fmt[ind] >= '0' && fmt[ind] <= '9') {
+                         size_t num_len = 1; // (there's at least one digit)
+                         const char *istart = fmt.data() + ind;
+                         char       *iend   = const_cast<char *>(istart + 1);
+                         arg_num = strtol(istart, &iend, 10);
+                         ind += iend - istart;
+                     } else if(fmt[ind] == ':') {
                          if(!ts_ind)
                              ts_ind = ind + 1;
                          else if(!pp_ind)
@@ -148,12 +153,12 @@ std::string stringformat(std::string_view fmt, Args&&... args) {
                      ind++;
                 }
 
-                if(argi < num_args) {
-                    std::string sub = str_arg[argi];
+                if(arg_num < num_args) {
+                    std::string sub = str_arg[arg_num];
                     if(ts_ind) {
                         while(fmt[ts_ind]) {
-                            // (no to-string function support presently,
-                            // but it would go here)
+                            if(fmt[ts_ind] == 'x')
+
                             ts_ind++;
                             if(fmt[ts_ind] == ':' || fmt[ts_ind] == '}')
                                 break;
@@ -171,7 +176,7 @@ std::string stringformat(std::string_view fmt, Args&&... args) {
                     }
                     out += sub;
                 } else {
-                    out += "(missing arg " + std::to_string(argi) + ")";
+                    out += "(missing arg " + std::to_string(arg_num) + ")";
                 }
                 argi++;
             }
