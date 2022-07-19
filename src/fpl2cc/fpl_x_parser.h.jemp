@@ -1,6 +1,7 @@
 @parameter: const productions &prds @
 @parameter: const options &opts @
 @declare class_name: prds.parser_class_name()@
+@realign: #line {} "{}" @
 
 #ifndef @class_name@_H
 #define @class_name@_H
@@ -142,7 +143,7 @@ public:
                     // doesn't fit std::to_string, the fpl author
                     // should include a to_string function for it.
                     using namespace std;
-                    out += stringformat(" (value: {})", red);
+                    out += stringformat(" (value: «{}»)", red);
                 }
             } else {
                 out = "null product";

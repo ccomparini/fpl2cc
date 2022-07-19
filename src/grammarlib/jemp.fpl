@@ -44,7 +44,20 @@ text+:chunks -> fragment ;
 # or expressions. For example, to set "fruitbat" to 10 more
 # than the current value of x, you might do:
 #   @declare fruitbat: x + 10@
-'@declare'^ sp^ identifier:name_decl ':'^ /(?:[^@]|(?:@@))*/:value '@'^ /\n?/^ -> fragment ;
+'@declare'^ /\s*/^ identifier:name_decl ':'^ /(?:[^@]|(?:@@))*/:value '@'^ /\n?/^ -> fragment ;
+
+# Tells the jemp processor to use the given text as the format
+# string in a call to stringformat() whenever it appears that
+# the source line number might not align with the destination.
+# Format parameters:
+#    {0}: the line number
+#    {1}: the name of the source file
+# 
+# So for example, if you're generating c/c++ code, you might do:
+#   @realign:  #line {0} "{1}" @
+# .. so that errors or whatever will be reported in the .jemp source
+# instead of in the generated location(s).
+'@realign:'^ /\s*/^ text:realign '@'^ /\n?/^ -> fragment ;
 
 leading_ws?^ '@-' -> subst_start ;
 '@'               -> subst_start ;
@@ -85,6 +98,10 @@ leading_ws?^ '@-' -> subst_start ;
 # @} else {@
 #   something is false 
 # @}@
+# (note: the above is 3 "control statements" - if, else, and the closing })
+# we -don't- eject the subst_end so that we can use its
+# location to realign line numbers. (though hmm can
+# we just have the end of match somehow?)
 subst_start^ /(?:[^-{}@]|-[^@]|[{}][^-@])*[{}]/:control_statement subst_end^ -> fragment ;
 
 # substitute a variable into the output
