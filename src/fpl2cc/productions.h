@@ -1518,10 +1518,12 @@ public:
         generate_states(goal);
         report_unused_rules();
         check_actions();
-//fprintf(stderr, "%lu finished resolve()...\n", time(nullptr));
     }
 
     // jemp-based output:
+    //  this friends thing is horrible.  can we make them members?
+    //  problem then is that the generated code format is then
+    //  even more tightly bound to this class....
     friend std::string fpl_x_parser_state(
         const productions &, const productions::lr_set &, const options &opts);
     friend std::string fpl_x_parser(const productions &, const options &);
@@ -1590,15 +1592,6 @@ public:
     }
 };
 
-// TODO make an @import directive or something for jempl.
-// otherwise we need to know to include all the generated things
-// here (and in a particular order, even).  should only need
-// to put the top level one.
-#include "fpl_x_parser_nonterm_enum.h"
-#include "fpl_x_parser_reduce_action_meta.h"
-#include "fpl_x_parser_reduce_action.h"
-#include "fpl_x_parser_reduce_call.h"
-#include "fpl_x_parser_state.h"
 #include "fpl_x_parser.h"
 
 } // namespace fpl

@@ -837,7 +837,7 @@ private:
     }
 
 public:
-    @ fpl_x_parser_nonterm_enum(prds) @
+    @#fpl_x_parser_nonterm_enum(prds)@
     static std::string state_to_str(State st) {
         if(!st) return "NULL";
         // c++ won't let you compare pointers in a switch statement.. sigh
@@ -891,13 +891,13 @@ public:
     // reduction rules:
     @for(auto rule : prds.rules) {@
         @if(code_block rule_code = rule.reduce_code()) {-@
-            @fpl_x_parser_reduce_action(prds, rule)@
+            @#fpl_x_parser_reduce_action(prds, rule)@
         @}-@
     @}@
 
     // parser states:
     @for(productions::lr_set state : prds.states) {@
-        @fpl_x_parser_state(prds, state, prds.opts)@
+        @#fpl_x_parser_state(prds, state, prds.opts)@
     @}@
 
 

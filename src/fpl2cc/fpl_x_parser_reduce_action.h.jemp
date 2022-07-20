@@ -33,7 +33,7 @@
     const StackSlice &args
 ) {
     // @rule.to_str()@
-    @fpl_x_parser_reduce_action_meta(rule)@
+    @#fpl_x_parser_reduce_action_meta(rule)@
 
     @/*
         these were meant to make it easier for rule

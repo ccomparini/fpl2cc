@@ -41,7 +41,7 @@ void @sfn@() {
                     "@c_str_escape(reduce_item.to_str(&prds))@"
                 );
             @-}-@
-            @fpl_x_parser_reduce_call(prds, prds.rules[reduce_item.rule], opts)@
+            @#fpl_x_parser_reduce_call(prds, prds.rules[reduce_item.rule], opts)@
         @} else {-@
             @if(opts.debug) {-@
                 fprintf(stderr, "    terminating in @sfn@ \n");

@@ -89,6 +89,9 @@ leading_ws?^ '@-' -> subst_start ;
 # case..
 /[ \t]*\n/:ws  -> trailing_ws ;
 
+# you can call another template with the "@#other_template(x, y ,z)@...
+subst_start^ /#\s*/^ identifier:jempl_name /(?:[^-@]|-[^@])+/:jempl_args subst_end^ -> fragment ;
+
 # Control statements (loops and if/else) are identified
 # by ending with an opening or closing curly brace.
 # This means you must always use curly braces on control
