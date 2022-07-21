@@ -3,6 +3,7 @@
 @parameter: const options &opts @
 @declare reduce_item: state.reduction_item(&prds) @
 @declare sfn: prds.state_fn(state) @
+@realign: #line {} "{}" @
 
 //
 @state.to_str(&prds, "// ")-@

@@ -1,4 +1,5 @@
 @parameter: const production_rule &rule@
+@realign: #line {} "{}" @
 
 @/*
   Rule metadata: we make this available to fpl authors for use

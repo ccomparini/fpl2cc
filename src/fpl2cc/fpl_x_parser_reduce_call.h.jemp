@@ -1,6 +1,7 @@
 @parameter: const productions &prds @
 @parameter: const production_rule &rule @
 @parameter: const options &opts @
+@realign: #line {} "{}" @
 
 @/*
  generates the call to the reduce function for the given rule

@@ -2,6 +2,7 @@
 @parameter: const production_rule &rule@
 @declare return_type: prds.type_for(rule.product())@
 @declare steps: rule.steps()@
+@realign: #line {} "{}" @
 
 @return_type@ @rule.rule_fn()@(
     @/* arguments are a little complicated:
