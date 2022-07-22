@@ -13,6 +13,7 @@
 inline std::string _stringformat(const char * s) {
     return std::string(s);
 }
+
 inline std::string _stringformat(char * s) {
     return std::string(s);
 }
@@ -157,7 +158,6 @@ std::string stringformat(std::string_view fmt, Args&&... args) {
                     std::string sub = str_arg[arg_num];
                     if(ts_ind) {
                         while(fmt[ts_ind]) {
-                            if(fmt[ts_ind] == 'x')
 
                             ts_ind++;
                             if(fmt[ts_ind] == ':' || fmt[ts_ind] == '}')
