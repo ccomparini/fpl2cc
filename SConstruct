@@ -75,7 +75,7 @@ read_dependencies(env)
 def sources_are_same(target, source, env):
     last_contents = None
     for fn in source:
-        with open(fn.abspath) as f: contents = f.readlines()
+        with open(fn.abspath, mode='rb') as f: contents = f.read()
         if last_contents is not None:
             if contents != last_contents:
                 sys.stderr.write("MISMATCH: {a} {b}\n".format(a=last_fn.path, b=fn.path))
