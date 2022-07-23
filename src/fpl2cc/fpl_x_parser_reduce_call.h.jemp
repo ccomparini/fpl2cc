@@ -1,12 +1,22 @@
 @parameter: const productions &prds @
 @parameter: const production_rule &rule @
-@parameter: const options &opts @
+@parameter: const fpl_options &opts @
+@declare num_params: rule.num_reduce_params()@
 @realign: #line {} "{}" @
 
 @/*
- generates the call to the reduce function for the given rule
+ generates the call to the reduce function for the given rule.
+ Note: the StackSlices passed for normal arguments get (effectively)
+ downcast to the (hopefully) appropriate specialization.
 */@
 
+
+    /* figure out the stack slices for each argument. */
+    /* we have to do this outside the call because parameter evaluation */
+    /* order is not defined in c++ and we're (pseudo-)popping the stack */
+    /* at the moment, we create a stack slice even for things we're */
+    /* not going to pass to the reduce function.  wasteful, but easy. */
+    /* at some point ideally we won't even push them... */
     int frame_start = lr_top();
     int pos = frame_start;  // (pos gets updated as we go)
     @for(int stind = rule.num_steps() - 1; stind >= 0; --stind) {-@
@@ -15,29 +25,16 @@
         @if(!expr) {-@
             #error Bug: no expression for step @stind@ @rule.to_str()@ @rule.location()@
         @-} else {-@
-            StackSlice arg_@stind@(*this, @elid@, @expr->max_times@, pos);
+            StackSliceSpecialization<@prds.type_for(expr->gexpr)@> arg_@stind@(*this, @elid@, @expr->max_times@, pos);
         @}-@
     @}-@
     
-    @/* now one slice for all the arguments (to rule them all) */@
-    StackSlice args(*this, pos + 1, frame_start - pos);
-    
     /* this is the call to the reduce code: */
-    @-prds.type_for(rule.product())@ result = @prds.rule_fn(rule)@(
-        @-for(int stind = 0; stind < rule.num_steps(); stind++) {-@
-            @declare expr: rule.nth_step(stind)@
-            @-if(!expr->skip_on_reduce()) {-@
-                @- "" -@ arg_@stind-@
-                @-if(expr->is_single()) {-@
-                    @-if(expr->is_terminal()) {-@
-                        .term_str()
-                    @-} else {-@
-                        .val()
-                    @-}-@
-                @-}-@,
-            @}-@
-        @}-@
-    args);
+    @-prds.type_for(rule.product())@ result = @prds.rule_fn(rule) -@ (
+        @-for(int pind = 0; pind < num_params; pind++) {-@
+            @- pind?",":"" -@ arg_@-rule.reduce_param_step_num(pind)-@
+        @-}-@
+    );
     
     @if(prds.post_reduce) {@ {
         @prds.post_reduce.format()@
@@ -45,13 +42,13 @@
     
     @if(opts.debug) {-@
         fprintf(stderr, "popping %i to %i:\n%s\n",
-           frame_start, pos, args.to_str().c_str()
+           frame_start, pos, arg_0[0].to_str().c_str()
         );
     @-}-@
 
     set_product(Product(result,
         @- rule.product_element().nonterm_id_str() -@
-        , args[0].position())
+        , arg_0[0].position())
     );
     
     @/*

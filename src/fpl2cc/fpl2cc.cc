@@ -18,8 +18,11 @@
 #include "util/fs.h"
 #include "util/src_location.h"
 
-#include "options.h"
+#include "fpl_options.h"
 #include "productions.h"
+
+#define VERSION_MAJ 0
+#define VERSION_MIN 9
 
 using namespace fpl;
 
@@ -58,7 +61,6 @@ void warn(const std::string &msg, src_location caller = CALLER()) {
    <exprs to match> -> <production name> ;
                    or
    <exprs to match> -> <production name> <code_block>
-                   or
 
   In the first case, the ; tells it to reduce using a default/stub
   function, OR if an implementation file has been specified, to call
@@ -180,7 +182,7 @@ void fail_reader_adapter(const std::string &msg) {
 //               /grammalib/json.fpl
 // (with some_grammar.cc being exactly at start of line, because space
 // is significant in make)
-void write_depfile(const productions &prds, const options &opts) {
+void write_depfile(const productions &prds, const fpl_options &opts) {
 
     FILE *depf = fopen(opts.depfile.c_str(), "w");
     if(!depf) {
@@ -208,7 +210,7 @@ void write_depfile(const productions &prds, const options &opts) {
 //#include "fpl_parser.h"
 
 // returns an exit()-appropriate status (i.e. 0 on success)
-ExitVal fpl2cc(const options &opts) {
+ExitVal fpl2cc(const fpl_options &opts) {
     if(opts.src_fpl.size() == 0)
         fail("Error:  no source fpl specified");
     auto inp = make_shared<fpl_reader>(opts.src_fpl, fail_reader_adapter);
@@ -259,7 +261,7 @@ ExitVal fpl2cc(const options &opts) {
 int main(int argc, const char** argv) {
     jerror::handler erhand(jerror::error_channel, fail);
     jerror::handler wahand(jerror::warning_channel, warn);
-    options opts(argc, argv);
+    fpl_options opts(argc, argv, VERSION_MAJ, VERSION_MIN);
     ExitVal status = ExitVal::FAIL;
 
     if(opts.errors.size()) {

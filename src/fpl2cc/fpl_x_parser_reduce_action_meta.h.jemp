@@ -32,7 +32,6 @@
             static const char *an[] = {
                 @for(int sti = 0; sti < rule.num_steps(); ++sti) {-@
                     @if(const production_rule::step *st = rule.nth_step(sti)) {-@
-                        @-if(sti > 0) {@, @}-@
                         "@st->variable_name()@"
                     @}-@
                 @}-@

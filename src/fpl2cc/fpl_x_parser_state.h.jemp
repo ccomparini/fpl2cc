@@ -1,6 +1,6 @@
 @parameter: const productions &prds @
 @parameter: const productions::lr_set &state @
-@parameter: const options &opts @
+@parameter: const fpl_options &opts @
 @declare reduce_item: state.reduction_item(&prds) @
 @declare sfn: prds.state_fn(state) @
 @realign: #line {} "{}" @

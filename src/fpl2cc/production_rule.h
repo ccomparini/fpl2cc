@@ -127,6 +127,7 @@ public:
 private:
     std::string prod;
     std::vector<step> rsteps;
+    std::vector<int> psteps; // index of step for parameter number
     std::set<std::string> step_vars; // for finding conflicts
     code_block   code_for_rule; // inlined reduce code, if any
     reducer      abs_impl;      // abstracted implementation, if any
@@ -156,16 +157,34 @@ public:
     // because it's more grepable.
 
     void add_step(step st) {
-        if(st.is_named()) {
+        int stepi = rsteps.size();
+
+        // if this step will be passed to the reduce function....
+        if(!st.skip_on_reduce()) {
+            // ... then we need a name for the variable representing it.
+            // if the step already knows what its variable name should be,
+            // we just use that, but otherwise assign it a name based on
+            // it's index within the set of steps for this rule:
+            if(!st.variable_name().length()) {
+                st.varname = "arg_" + std::to_string(stepi);
+            }
+
+            // .. and now make sure that that name doesn't collide with
+            // the name of another step:
             const std::string name = st.variable_name();
             if(step_vars.contains(name)) {
                 jerror::warning(stringformat(
                     "duplicate name '{}' in step {} {}",
-                    name, rsteps.size(), location()
+                    name, stepi, location()
                 ));
             }
             step_vars.insert(name);
+
+            // and, finally, register the index of the step for the
+            // nth parameter:
+            psteps.push_back(stepi);
         }
+
         rsteps.push_back(st);
     }
 
@@ -174,11 +193,31 @@ public:
     // the result of a given step may or may not be passed
     // to the reduction code.  this tells how many are.
     inline int num_reduce_params() const {
-        int num = 0;
-        for(auto st : rsteps) {
-            if(!st.skip_on_reduce()) num++;
+        return psteps.size();
+    }
+
+    inline const std::set<std::string> reduce_params() const {
+        return step_vars;
+    }
+
+    inline int reduce_param_step_num(
+        unsigned int pind, src_location ca = CALLER()
+    ) const {
+        if(pind >= psteps.size()) {
+            jerror::error(stringformat(
+                "index {} out of bounds in {}", pind, ca
+            ));
+            pind = 0; // so that there's some chance we don't go out of bounds
         }
-        return num;
+        return psteps[pind];
+    }
+
+    // ..and this is how you can get the step for a given parameter
+    // (by parameter position)
+    inline const step &reduce_param(
+        unsigned int index, src_location ca = CALLER()
+    ) const {
+        return rsteps[reduce_param_step_num(index, ca)];
     }
 
     // returns NULL if index is out of bounds
@@ -227,24 +266,6 @@ public:
         return filename() + ":" + std::to_string(line_number());
     }
 
-    // returns the variable name for the given step number.
-    // throws an error if the step isn't valid
-    std::string varname(int stepi, src_location caller = CALLER()) const {
-        if(const step *st = nth_step(stepi)) {
-            // if the step has a particular name, use that:
-            if(st->is_named())
-                return st->variable_name();
-
-            // otherwise just name it arg_x:
-            return "arg_" + std::to_string(stepi);
-        }
-
-        std::string error = stringformat(
-            "invalid step number {} in rule {}\n", stepi, to_str()
-        );
-        jerror::error(error, caller);
-        return error; // because we need to return something
-    }
 
     // returns the index of the step to use for the default
     // return value, or -1 if there's no single suitable step
@@ -279,7 +300,8 @@ public:
         // about where this mixed-generated code comes from:
         std::string code("// " THIS_LINE "\n");
 
-        code += "return " + varname(def_st) + ";\n";
+// XXX doh... this needs to be jemp'd as well, or something.
+        code += "return " + rsteps[def_st].variable_name() + ".val();\n";
 
         return code;
     }

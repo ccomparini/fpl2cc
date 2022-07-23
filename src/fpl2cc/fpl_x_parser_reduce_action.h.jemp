@@ -1,37 +1,14 @@
 @parameter: const productions &prds@
 @parameter: const production_rule &rule@
 @declare return_type: prds.type_for(rule.product())@
-@declare steps: rule.steps()@
+@declare num_params: rule.num_reduce_params()@
 @realign: #line {} "{}" @
 
 @return_type@ @rule.rule_fn()@(
-    @/* arguments are a little complicated:
-        - if there's any repetition or optionalness, we
-          pass it as a stack slice so as to handle such
-          repetition/optionalness
-        - if it's a single thing (no repetion/optional),
-          it's passed as ... the appropriate thing for
-          the argument being passed
-        This is.. going to be subject to change, because:
-          - we want regex captures for terminals
-          - we want the same amount of introspection ability on
-            single items as on repeats/optionals
-    */@
-    @-for(int stind = 0; stind < steps.size(); stind++) {-@
-        @declare expr: steps[stind]@
-        @declare argname: rule.varname(stind)@
-        @-if(!expr.skip_on_reduce()) {-@
-            @if(!expr.is_single()) {-@
-                const StackSlice &@argname@,@ ""-@
-            @-} else if(expr.is_terminal()) {-@
-                std::string @argname@,@ ""-@
-            @-} else {-@
-                @prds.type_for(expr.gexpr.expr)@ @argname@,@ ""-@
-            @-}-@
-        @-}-@
+    @-for(int pind = 0; pind < num_params; pind++) {-@
+        @declare step: rule.reduce_param(pind) @
+        @- pind?", ":"" -@ StackSliceSpecialization<@prds.type_for(step.gexpr)@> @step.variable_name()-@
     @-}-@
-    @/* the last argument is a slice containing everything: */@
-    const StackSlice &args
 ) {
     // @rule.to_str()@
     @#fpl_x_parser_reduce_action_meta(rule)@
@@ -40,9 +17,10 @@
         these were meant to make it easier for rule
         code to report errors or such, but are they
         useful?
-    */@
+Let's say no. authors can look at the actual arguments passed.
     const SourcePosition start_pos = args[0].position();
     const SourcePosition end_pos = position();
+    */@
 
     @rule.reduce_code().format(false)@
 }

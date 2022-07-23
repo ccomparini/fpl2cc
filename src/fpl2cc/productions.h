@@ -2,7 +2,7 @@
 #define PRODUCTIONS_H
 
 #include "code_block.h"
-#include "options.h"
+#include "fpl_options.h"
 #include "production_rule.h"
 #include "reducer.h"
 
@@ -20,15 +20,16 @@
 namespace fpl {
 
 class productions;
-std::string fpl_x_parser(const productions &, const options &);
+std::string fpl_x_parser(const productions &, const fpl_options &);
 
 class productions {
 
     fpl_reader_p  inp;
-    const options opts;
+    const fpl_options opts;
 
     std::string reduce_type; // default reduce type
     std::map<std::string, std::string> type_for_product; // (reduce type for particular product)
+    std::set<std::string> all_types; // for deduplication
 
     std::list<std::string> imports; // filenames
     code_block default_action;
@@ -430,7 +431,7 @@ public:
 
 // XXX this is currently stupid in that you pass the fpl_reader
 // but then you have to make a separate call to parse it.  fix that.
-    productions(const options &op, fpl_reader_p src) :
+    productions(const fpl_options &op, fpl_reader_p src) :
         inp(src), opts(op), default_main(false)
     {
         // element 0 is a null element and can be used to
@@ -441,11 +442,6 @@ public:
             grammar_element("_fpl_null", grammar_element::NONTERM_PRODUCTION)
         );
 
-        // default the reduce type to string.
-        // this will (mostly?) work with defaults if
-        // you just want to sketch out a grammar and
-        // not have to specify any particular code.
-        reduce_type = "std::string";
     }
 
     // returns the name of the type expected as the result
@@ -456,6 +452,19 @@ public:
             return tf->second;
         }
         return reduce_type;
+    }
+
+    // and this returns the type to use for a particular grammar
+    // element, which covers terminals as well:
+    std::string type_for(const grammar_element &ge) const {
+        if(ge.is_terminal()) {
+            return "Terminal";
+        }
+        // there's no type for assertions, presently.  bool
+        // would make sense, but it's already covered by the
+        // fact of a match so ... hmm optional assertions?
+        // anyway at this point assume it's a production:
+        return type_for(ge.expr);
     }
 
     // expects/scans a +{ }+ code block for the named directive.
@@ -526,12 +535,19 @@ public:
         ));
     }
 
-    void set_reduce_type(const std::string &rt)    { reduce_type = rt; }
+    void set_reduce_type(const std::string &rt) {
+        reduce_type = rt;
+    }
     void set_default_action(const std::string &rt) { default_action = rt; }
     void set_post_parse(const code_block &cb)      { post_parse = cb; }
     void set_post_reduce(const code_block &cb)     { post_reduce = cb; }
     void set_default_main(bool def)                { default_main = def; }
     void add_internal(const code_block &cb)        { parser_members.push_back(cb); }
+
+    void add_type_for(const std::string &prod, const std::string &type) {
+        type_for_product[prod] = type;
+        all_types.insert(type);
+    }
 
     std::string arg_for_directive() {
         // reads an argument to the end of the line.
@@ -576,7 +592,7 @@ public:
         } else if(dir == "post_reduce") {
             post_reduce = code_for_directive(dir);
         } else if(dir == "produces") {
-            reduce_type = arg_for_directive();
+            set_reduce_type(arg_for_directive());
         } else if(dir == "separator") {
             add_separator_code(
                 code_for_directive(dir, code_source::INLINE_OR_LIB)
@@ -587,7 +603,7 @@ public:
             inp->eat_separator();
             std::string type = inp->read_re(".*")[0];
             if(prod.length() && type.length()) {
-                type_for_product[prod] = type;
+                add_type_for(prod, type);
             } else {
                 error("type_for expects <product name> = <type>");
             }
@@ -684,6 +700,14 @@ public:
         }
     }
 
+    // returns true or false
+    static inline bool is_production_name_char(const char ch) {
+        return (ch == '_')              ||
+               (ch >= 'A' && ch <= 'Z') ||
+               (ch >= 'a' && ch <= 'z') ||
+               (ch >= '0' && ch <= '9');
+    }
+
     // production names must start with a letter, and
     // thereafter may contain letters, digits, or underscores.
     static inline std::string read_production_name(fpl_reader &src) {
@@ -746,7 +770,7 @@ public:
         if(!subs.reduce_type.length()) {
             // the imported fpl doesn't specify that it produces any
             // particular type(s), so we tell it to produce what we want:
-            subs.reduce_type = reduce_type;
+            subs.set_reduce_type(reduce_type);
         }
 
         return import_grammar(subs, prod_name);
@@ -828,7 +852,6 @@ public:
             if(type != grammar_element::Type::NONE) {
                 if(expr_str.length() >= 1) {
                     production_rule::step expr(expr_str, type);
-                    // XXX awkward
                     if(type == grammar_element::Type::LACK_OF_SEPARATOR)
                         expr.eject = true;
                     read_quantifier(src, expr);
@@ -852,9 +875,8 @@ public:
          // code is within "+{" "}+" brackets.
          // we don't know anything about the grammar of the code
          // within the brackets (presently), so you will derail
-         // it if you put unmatched +{ or }+ in a comment or
-         // string or whatever.  sorry.  try not to do that.
-         // matched +{ }+ it will handle ok.
+         // it if you put +{ or }+ in a comment or string or whatever.
+         // sorry.  try not to do that.
          src.eat_separator();
 
          size_t start = src.current_position();
@@ -930,6 +952,87 @@ public:
         return args;
     }
 
+    inline bool maybe_name_start(const std::string &str, size_t pos) {
+        // start of string definitely could be the start of a name
+        if(pos == 0) return true;
+        
+        char ch_before = str[pos - 1];
+        if(is_production_name_char(ch_before)) {
+             // apparently we're within the name of another variable - 
+             // eg at "bar" within  "foobar":
+            return false;
+        } else {
+            // the character before the one we're looking at isn't
+            // part of a normal variable name, but it might be something
+            // indicating a member of something else (eg foo.bar or foo->bar)
+            if(ch_before == '.') return false; // foo.bar
+
+            if(ch_before == '>') {
+                // check for ->bar vs possible 2>bar
+                return pos < 2 || str[pos - 2] != '-';
+            }
+        }
+        return true;
+    }
+
+    //
+    // mangle arguments as follows:
+    //  <argname>\[([0-9+])\] -> <argname>.val($1)
+    //  <argname>[^@] -> <argname>.val()
+    //  <argname>@ -> argname.
+    // This means that the stack slice looks like an array of whatever
+    // type is expected for that variable, but it's a magic array
+    // where the name itself resolves to the first element (so that
+    // simple things like wcalc can just deal in the arg names),
+    // but, if you want metadata about the argument you can access it
+    // via the "@" pseudo operator.
+    //
+    // MODIFIES THE code STRING PASSED
+    void mangle_stack_slice_args(std::string &code, const std::set<std::string> args) {
+        for(auto arg : args) {
+            const size_t argl = arg.length();
+            size_t pos = 0;
+            while((pos = code.find(arg, pos)) != std::string::npos) {
+                // we found something matching the name of the arg, but
+                // make sure it matches the _start_ of the arg:
+                size_t endp = pos + argl;
+                if(maybe_name_start(code, pos)) {
+                    // now check what comes right after:
+                    if(code[endp] == '@') {
+                        // author wants metadata: just change the '@' to '.',
+                        // and we'll expect it to result in a call to
+                        // whatever the method in the stack slice is:
+                        code[endp] = '.';
+                    } else if(code[endp] == '[') {
+                        size_t end_brace = endp + 1;
+                        while(code[end_brace] && code[end_brace] != ']')
+                            end_brace++;
+                        if(code[end_brace] != ']') {
+                            // XXX better error message:
+                            jerror::error("no end brace found..\n");
+                        }
+                        size_t subl = end_brace - endp - 1;
+                        std::string subs = stringformat(
+                            ".val({})", code.substr(endp + 1, subl)
+                        );
+                        code.replace(endp, end_brace - endp + 1, subs);
+                        endp += subs.length();
+                    } else if(!is_production_name_char(code[endp])) {
+                        // plain production name - default to 0th element:
+                        std::string subs = ".val()";
+                        code.insert(endp, subs);
+                        endp += subs.length();
+                    } // else it's not something to expand
+                }
+                pos = endp;
+            }
+        }
+    }
+
+    //
+    // "abstracted" reducers - these are functions which might match
+    // one or more rules, filling in or overriding the reduce action(s)
+    // for those rules.
     //
     // +<production_name> <argdecl> <code_block>
     //
@@ -947,6 +1050,7 @@ public:
 
         auto args = parse_argdecl();
         auto code = read_code(*inp);
+        mangle_stack_slice_args(code.code, args); // XXX peeking inside code_block
 
         if(!code) {
              error(stringformat(
@@ -1003,13 +1107,16 @@ public:
                     // if it's ';' we read it and move on;  otherwise
                     // it's a code block for the rule.
                     if(!inp->read_byte_equalling(';')) {
-                        rule.code(read_code(*inp));
-                        if(!rule.code()) {
+                        auto code = read_code(*inp);
+                        if(!code) {
                             error(stringformat(
                                 "expected ';' or code block for rule {}",
                                 rule.to_str()
                             ));
                         }
+                        // XXX peeking inside code_block
+                        mangle_stack_slice_args(code.code, rule.reduce_params());
+                        rule.code(code);
                     }
 
                     push_rule(rule);
@@ -1502,9 +1609,26 @@ public:
     // reports errors, etc.
     // call this before generating code.
     void resolve(src_location caller = CALLER()) {
-//fprintf(stderr, "%lu entering resolve()...\n", time(nullptr));
         if(rules.size() <= 0) {
             error("No rules found\n");
+        }
+
+        if(reduce_type.length() == 0) {
+            // since we haven't been told otherwise, make
+            // std::string the default reduce type:
+            set_reduce_type("std::string");
+        }
+
+        // if there are any products which don't have a specific
+        // reduce type, make sure the default reduce type in
+        // in the set of all types:
+        for(auto prr : rules_for_product) {
+            if(!type_for_product.contains(prr.first)) {
+                all_types.insert(type_for(prr.first));
+                // any others will have the same default, so
+                // no need to do any more:
+                break;
+            }
         }
 
         goal = opts.entry_points;
@@ -1525,11 +1649,14 @@ public:
     //  problem then is that the generated code format is then
     //  even more tightly bound to this class....
     friend std::string fpl_x_parser_state(
-        const productions &, const productions::lr_set &, const options &opts);
-    friend std::string fpl_x_parser(const productions &, const options &);
+        const productions &,
+        const productions::lr_set &,
+        const fpl_options &opts
+    );
+    friend std::string fpl_x_parser(const productions &, const fpl_options &);
     friend std::string fpl_x_parser_nonterm_enum(const productions &);
     friend std::string fpl_x_parser_reduce_call(
-        const productions &, const production_rule &, const options &);
+        const productions &, const production_rule &, const fpl_options &);
 
     std::string generate_code(src_location caller = CALLER()) {
         resolve(caller);
