@@ -77,7 +77,6 @@ public:
             return min_times == 0;
         }
 
-    // XXX this is actually going to mean don't put on the stack in the first place
         inline bool skip_on_reduce() const {
             return eject;
         }

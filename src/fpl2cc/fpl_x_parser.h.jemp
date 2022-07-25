@@ -168,12 +168,6 @@ public:
                     // doesn't fit std::to_string, the fpl author
                     // should include a to_string function for it.
                     using namespace std;
-                    // XXX we need product specializations if we're to
-                    // get the value.  or something.  Maybe need to
-                    // move this up and never talk about Products outside
-                    // stack slices.
-                    //out += stringformat(" (value: «{}»)", red);
-
                     @-for(auto type : prds.all_types) {-@
                         if(std::holds_alternative<@type@>(var())) {
                             out += stringformat(
@@ -914,7 +908,6 @@ public:
 
     static size_t separator_length(const utf8_byte *inp) {
         @if(prds.separator_code.size() == 0) {-@
-            @/* set the default somewhere else XXX */@
             return space_length(inp);
         @}-@
 

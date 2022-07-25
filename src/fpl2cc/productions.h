@@ -1513,9 +1513,6 @@ public:
 
         for(int stepi = 0; stepi < rule.num_steps(); ++stepi) {
             const production_rule::step *step = rule.nth_step(stepi);
-            // what if there's an unnamed step?
-            // this will "just work", but will it be
-            // confusing?
             if(step && red.argument_matches(step->variable_name()))
                 cnt++;
         }
