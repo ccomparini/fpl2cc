@@ -538,72 +538,6 @@ public:
         }
     };
 
-    bool shift_exact(
-        const std::string &match,
-        int el_id, int min, int max, State new_st
-    ) {
-        // if there's a product (nonterminal) up next,
-        // we don't want to shift a terminal.
-        if(last_product)
-            return false;
-
-        // never match optional terminals at eof, because they
-        // will always match
-        if((min == 0) && eof())
-            return false;
-
-        const SourcePosition &pos = position();
-        if(reader->read_exact_match(match)) {
-            lr_push(new_st, Product(Terminal(match), el_id, pos));
-            bytes_eaten = 0;
-            return true;
-        }
-        return false;
-    }
-
-    bool shift_re(
-        const std::string &re,
-        int el_id, int min, int max, State new_st
-    ) {
-        // (as with shift_exact, above)
-        if(last_product)
-            return false;
-
-        // as with exact matches, we never match at end of file,
-        // even if (in the regex case) the regex can match an
-        // empty string.  this prevents weird looping at end of
-        // file.
-// XXX but wait, if we're here, how can we be accepting 0 of them?
-// need a proper test case.  is it regex match of empty string?
-// maybe check that at compile time.
-        if((min == 0) && eof())
-            return false;
-
-        const SourcePosition pos = position();
-        std::cmatch match = reader->read_re(re.c_str());
-
-        // XXX bug:  if there's a 0-byte match but max == INF,
-        // the parser ends up looping infinitely reading 0
-        // bytes and saying "ok yeah that matched".
-        if(!match.empty()) { // note 0-byte match is considered not empty
-            Terminal term(match);
-            lr_push(new_st, Product(term, el_id, pos));
-            bytes_eaten = 0;
-            return true;
-        }
-
-        return false;
-    }
-
-    bool shift_nonterm(int el_id, int min, int max, State new_st) {
-        if(last_product && el_id == last_product.grammar_element_id()) {
-            lr_push(new_st, last_product);
-            last_product = Product();
-            return true;
-        }
-        return false;
-    }
-
     void set_product(const Product &pr) {
         if(last_product) {
             // if this happens, it's almost certainly a bug in fpl2cc
@@ -847,19 +781,67 @@ private:
     inline bool shift_TERM_EXACT(
         const std::string &match, int el_id, int min, int max, State new_st
     ) {
-        return shift_exact(match, el_id, min, max, new_st);
+        // if there's a product (nonterminal) up next,
+        // we don't want to shift a terminal.
+        if(last_product)
+            return false;
+
+        // never match optional terminals at eof, because they
+        // will always match
+        if((min == 0) && eof())
+            return false;
+
+        const SourcePosition &pos = position();
+        if(reader->read_exact_match(match)) {
+            lr_push(new_st, Product(Terminal(match), el_id, pos));
+            bytes_eaten = 0;
+            return true;
+        }
+        return false;
     }
 
     inline bool shift_TERM_REGEX(
         const std::string &re, int el_id, int min, int max, State new_st
     ) {
-        return shift_re(re, el_id, min, max, new_st);
+        // (again, don't match if there's a product up next)
+        if(last_product)
+            return false;
+
+        // as with exact matches, we never match at end of file,
+        // even if (in the regex case) the regex can match an
+        // empty string.  this prevents weird looping at end of
+        // file.
+// XXX but wait, if we're here, how can we be accepting 0 of them?
+// need a proper test case.  is it regex match of empty string?
+// maybe check that at compile time.
+        if((min == 0) && eof())
+            return false;
+
+        const SourcePosition pos = position();
+        std::cmatch match = reader->read_re(re.c_str());
+
+        // XXX bug:  if there's a 0-byte match but max == INF,
+        // the parser ends up looping infinitely reading 0
+        // bytes and saying "ok yeah that matched".
+        if(!match.empty()) { // note 0-byte match is considered not empty
+            Terminal term(match);
+            lr_push(new_st, Product(term, el_id, pos));
+            bytes_eaten = 0;
+            return true;
+        }
+
+        return false;
     }
 
     inline bool shift_NONTERM_PRODUCTION(
         const std::string &, int el_id, int min, int max, State new_st
     ) {
-        return shift_nonterm(el_id, min, max, new_st);
+        if(last_product && el_id == last_product.grammar_element_id()) {
+            lr_push(new_st, last_product);
+            last_product = Product();
+            return true;
+        }
+        return false;
     }
 
     inline bool shift_LACK_OF_SEPARATOR(
@@ -897,10 +879,6 @@ public:
         return std::to_string(id) + " is not a nonterm.";
     }
 
-    @/*
-    axe this one, if possible.  there are more than just
-    terminal/nonterminal at this point
-    */@
     static bool is_terminal(int id) {
         switch(id) {
             @for(int el_id = 0; el_id < prds.elements.size(); ++el_id) {-@
