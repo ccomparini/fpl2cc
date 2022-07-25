@@ -599,7 +599,7 @@ public:
             );
         } else if(dir == "type_for") {
             inp->eat_separator();
-            std::string prod = read_production_name();
+            std::string prod = read_production_name(*inp);
             inp->eat_separator();
             std::string type = inp->read_re(".*")[0];
             if(prod.length() && type.length()) {
@@ -711,7 +711,10 @@ public:
     // production names must start with a letter, and
     // thereafter may contain letters, digits, or underscores.
     static inline std::string read_production_name(fpl_reader &src) {
-        return src.read_re("[A-Za-z][A-Za-z0-9_]*")[0];
+        std::cmatch nm = src.read_re("[a-zA-Z][a-zA-Z_0-9]*");
+        if(!nm.length())
+            return "";
+        return nm[0];
     }
 
     static inline std::string read_directive(fpl_reader &src) {
@@ -909,16 +912,6 @@ public:
          return code_block(code_str, src.filename(), src.line_number(start));
     }
 
-    // reads and returns the production name from the current
-    // reader.
-    // on error, returns a 0-length string
-    std::string read_production_name() {
-        std::cmatch nm = inp->read_re("[a-zA-Z][a-zA-Z_0-9]*");
-        if(!nm.length())
-            return "";
-        return nm[0];
-    }
-
     // argument declaration for a reduction code block:
     //
     //   '(' (argument ','?)* ')' -> argdecl ;
@@ -930,7 +923,7 @@ public:
             error("expected start of argument declaration '('");
         } else {
             while(!inp->read_byte_equalling(')')) {
-                std::string name = read_production_name();
+                std::string name = read_production_name(*inp);
                 if(!name.length()) {
                     error("invalid production name");
                     break;
@@ -1042,7 +1035,7 @@ public:
             return;
         }
 
-        std::string name = read_production_name();
+        std::string name = read_production_name(*inp);
         if(name.length() == 0) {
             error("expected production name after '+'");
             return;
