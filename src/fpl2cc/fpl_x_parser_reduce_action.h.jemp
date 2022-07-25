@@ -13,15 +13,6 @@
     // @rule.to_str()@
     @#fpl_x_parser_reduce_action_meta(rule)@
 
-    @/*
-        these were meant to make it easier for rule
-        code to report errors or such, but are they
-        useful?
-Let's say no. authors can look at the actual arguments passed.
-    const SourcePosition start_pos = args[0].position();
-    const SourcePosition end_pos = position();
-    */@
-
     @rule.reduce_code().format(false)@
 }
 
