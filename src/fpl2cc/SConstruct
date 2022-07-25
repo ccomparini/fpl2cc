@@ -4,7 +4,6 @@ env = env.Clone()
 
 env.Jemp2h('fpl_x_parser.h.jemp')
 # these are used within fpl_x_parser.h.jemp:
-env.Jemp2h('fpl_x_parser_nonterm_enum.h.jemp')
 env.Jemp2h('fpl_x_parser_reduce_action.h.jemp')
 env.Jemp2h('fpl_x_parser_reduce_action_meta.h.jemp')
 env.Jemp2h('fpl_x_parser_reduce_call.h.jemp')
