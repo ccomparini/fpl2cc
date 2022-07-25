@@ -939,17 +939,6 @@ public:
 
 };
 
-// so that we can stringformat stack slice specializations. sigh.
-// XXX might not be needed now!
-@-for(auto type : prds.all_types) {-@
-    std::string to_string(const @class_name@::StackSliceSpecialization<@type@> &ss) {
-        return ss.to_str();
-    }
-@-}-@
-std::string to_string(const @class_name@::StackSliceSpecialization<@class_name@::Terminal> &ss) {
-    return ss.to_str();
-}
-
 #endif // header guard
 
 @if(opts.generate_main || prds.default_main) {@
