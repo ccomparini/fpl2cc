@@ -153,6 +153,16 @@ public:
 
         SourcePosition position() const { return pos; }
 
+        std::string type_name() const {
+            if(std::holds_alternative<Terminal>(red)) return "Terminal";
+            @-for(auto type : prds.all_types) {-@
+                if(std::holds_alternative<@type@>(red)) return "@type@";
+            @-}-@
+            // can't get here?
+            jerror::error("Unknown type for product");
+            return "unknown type";
+        }
+
         // this is for debug and similar:
         std::string to_str() const {
             std::string out;
@@ -163,11 +173,6 @@ public:
                     out += "»";
                 } else {
                     out += nonterm_str(element_id);
-                    // std::to_string works for stuff like ints.
-                    // if whatever the type of reduce value is
-                    // doesn't fit std::to_string, the fpl author
-                    // should include a to_string function for it.
-                    using namespace std;
                     @-for(auto type : prds.all_types) {-@
                         if(std::holds_alternative<@type@>(var())) {
                             out += stringformat(
@@ -183,12 +188,15 @@ public:
             return out;
         }
 
+        // phase out if possible, because this only supports the
+        // top reduce_type and that's wacky.
         @prds.reduce_type@ val(const std::string &caller = CALLER()) const {
-            if(is_terminal()) {
+            if(!std::holds_alternative<@prds.reduce_type@>(red)) {
                 jerror::error(stringformat(
-                    "FAILULAR: asking for value of terminal «{}» at {}\n",
-                    term_str(), caller
+                    "FAILULAR: product holds type {} and not @prds.reduce_type@ at {}\n",
+                    type_name(), caller
                 ));
+                return @prds.reduce_type@();
             }
             return std::get<@prds.reduce_type@>(red);
         }
@@ -475,7 +483,13 @@ public:
             if(ind < 0) ind += size; // negative indexes are relative to end
 
             if((ind >= 0) && (ind < size)) {
-                return owner.lr_stack[base_index + ind].product;
+                unsigned int sind = base_index + ind;
+                if(sind > owner.lr_stack.size())
+                    jerror::error(stringformat( 
+                        "stack slice access out of stack range. {} + {} = {} > {}\n",
+                        base_index, ind, sind, owner.lr_stack.size()
+                    ));
+                return owner.lr_stack[sind].product;
             } else {
                 return Product();
             }
@@ -502,6 +516,7 @@ public:
         }
     };
 
+    // call this like:  prod_type_name(typeid(...));
     static std::string prod_type_name(const std::type_info &tinf) {
         @-for(auto type : prds.all_types) {@
             if(std::type_index(typeid(@type@)) == std::type_index(tinf)) {
