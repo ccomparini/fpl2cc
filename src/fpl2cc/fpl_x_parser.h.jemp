@@ -536,6 +536,24 @@ public:
         static std::string type_name() {
             return prod_type_name(typeid(ReduceType));
         }
+
+        std::string concatenate() const {
+            std::string out;
+            for(int ind = 0; ind < count(); ind++) {
+                out += to_string(val(ind));
+            }
+            return out;
+        }
+
+        std::string join(const std::string &jv) const {
+            std::string out;
+            for(int ind = 0; ind < count(); ind++) {
+                out += to_string(val(ind));
+                if(ind < count() - 1)
+                    out += jv;
+            }
+            return out;
+        }
     };
 
     void set_product(const Product &pr) {
