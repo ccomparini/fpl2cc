@@ -155,7 +155,7 @@ public:
 
         // this is for debug and similar:
         std::string to_str() const {
-            std::string out = "SOME PRODUCT ";
+            std::string out;
             if(element_id > 0) {
                 if(is_terminal()) {
                     out += "terminal " + std::to_string(element_id) + " «";
