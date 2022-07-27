@@ -196,7 +196,8 @@ public:
                     "FAILULAR: product holds type {} and not @prds.reduce_type@ at {}\n",
                     type_name(), caller
                 ));
-                return @prds.reduce_type@();
+                @prds.reduce_type@ dummy;
+                return dummy;
             }
             return std::get<@prds.reduce_type@>(red);
         }
