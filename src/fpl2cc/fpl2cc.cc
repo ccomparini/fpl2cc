@@ -244,7 +244,7 @@ ExitVal fpl2cc(const fpl_options &opts) {
     // which is not great, but I'm not going to fix it right now,
     // so dump_states has to go after generate_code():
     if(opts.dump_states)
-        prds.dump_states();
+        std::cerr << prds.dump_states();
 
     // uhh... this is easy, if hokey:
     if(opts.out) {

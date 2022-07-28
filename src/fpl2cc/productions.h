@@ -291,12 +291,14 @@ class productions {
         ) const {
             std::string out;
             for(auto it : items) {
-                out.append(line_prefix);
+                out += line_prefix;
                 if(stringescape)
-                    out.append(c_str_escape(it.to_str(prds)));
+                    out += c_str_escape(it.to_str(prds));
                 else
-                    out.append(it.to_str(prds));
-                out.append(line_suffix);
+                    out += it.to_str(prds);
+
+                out += line_suffix;
+
             }
             return out;
         }
@@ -1654,12 +1656,15 @@ public:
     }
 
     // debugging:
-    void dump_states() {
+    std::string dump_states() const {
+        std::string out;
         for(int stind = 0; stind < states.size(); stind++) {
-            printf("state %i:\n%s\n",
-                stind, states[stind].to_str(this, "    ").c_str()
+            out += stringformat(
+                "state {}:\n{}\n",
+                stind, states[stind].to_str(this, "    ")
             );
         }
+        return out;
     }
 
     void report_unused_rules() const {
