@@ -1173,14 +1173,16 @@ public:
     ) {
         std::string src_fn = from.inp->filename();
 
-        // import any preamble as well, as it may be necessary for the rules.
-        // hmm.. too bad we can't scope this and/or figure out if it's necessary
-        // to import in the first place... (can we scope?)
-        // (consider either getting rid of this or making it optional - possibly
-        // we only want to be importing "pure" fpl anyway)
-        //preamble += "\n" + from.preamble;
-        for(auto primp : from.preamble)
-            add_preamble(primp);
+        // if we're importing everything, import separator and preamble
+        // code as well:
+        if(!pname.length()) {
+            for(auto sepc : from.separator_code) {
+                add_separator_code(sepc);
+            }
+
+            for(auto primp : from.preamble)
+                add_preamble(primp);
+        }
 
         // these are the names of the products whose rules (and elements)
         // we need to import:

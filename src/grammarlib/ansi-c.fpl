@@ -5,6 +5,8 @@
 #   http://www.quut.com/c/ANSI-C-grammar-y.html
 #
 
+@comment_style c
+
 # moved to top for FPL.  fpl needs this to be at the top
 # because it wants to know what it's generating. (alternately
 # one could tell it, on the command line)
