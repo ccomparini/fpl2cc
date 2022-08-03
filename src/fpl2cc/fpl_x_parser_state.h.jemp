@@ -17,10 +17,12 @@ void @sfn@() {
     size_t b_eaten = eat_separator();
 
     @if(opts.debug) {@
-        fprintf(stderr, "=============\n");
-        fprintf(stderr, "@sfn@: %s\n", state_string(&@prds.fq_member_name(sfn)@));
-        fprintf(stderr, "%li bytes eaten since last terminal\n", b_eaten);
-        fprintf(stderr, "%s", to_str().c_str());
+        std::cerr << stringformat(
+            "=============\n{}\n"
+            "{} bytes eaten since last terminal\n{}",
+            state_string(&@prds.fq_member_name(sfn)@),
+            b_eaten, to_str()
+        );
     @}@
 
     @for(auto trans : prds.transitions_for_state(state)) {-@
