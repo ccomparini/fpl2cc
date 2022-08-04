@@ -709,6 +709,14 @@ public:
         @}@
     }
 
+    bool more_to_parse() const {
+        // there's more to parse if:
+        //  - we haven't been told to stop (due to errors or whatever)
+        //  - and there's more input -or- we're not at the goal
+        return !stop_parsing
+            && ((!eof() || lr_stack.size() > 0) || !is_goal(last_product));
+    }
+
     // In an fpl parser, we do not want to require that the whole
     // input has been consumed.  this allows piecewise parsing.
     // for example, a top down parser can invoke an fpl parser
@@ -723,14 +731,14 @@ public:
     // for errors or whatever and decide what to do.
     //
     void parse_partial() {
-        cur_state = &@class_name@::state_0;
-        while(!stop_parsing) {
+        set_state(&@class_name@::state_0);
+        do {
             State st = current_state();
             (this->*st)();
             @if(opts.debug) {@
                 debug_pause();
             @}@
-        }
+        } while(more_to_parse());
     }
 
     // Parses the contents of the current reader.
@@ -790,8 +798,12 @@ public:
             ));
         } else if(!is_goal(got)) {
             error(stringformat(
-                "parsed a {}, but that's not a goal\n",
-                nonterm_str(got.grammar_element_id())
+                "parsed a {}, but that's not a goal (@prds.goal@)\n"
+		"here's what we have so far:\n{}\n"
+                "and state ({}) is/was:\n{}\n",
+                nonterm_str(got.grammar_element_id()),
+                StackSlice(*this, 0, lr_stack_size()).to_str(),
+                to_hex(&cur_state), state_str
             ));
         }
 
