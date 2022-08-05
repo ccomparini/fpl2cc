@@ -770,7 +770,7 @@ public:
         //   - we're at eof (end of input)
         //   - nothing left on the stack
         //   - result is a goal
-        std::string state_str = state_string(cur_state);
+        std::string errm;
         if(!eof()) {
             // If we're not at end of input, we stopped when we
             // didn't recognize something.  If there's currently 
@@ -780,35 +780,31 @@ public:
             // got some generally unrecognized input:
             std::string message;
             if(got) {
-                message = stringformat(
-                    "unexpected {} while parsing:\n {}",
-                    got.to_str(), state_str
-                );
+                errm = stringformat("unexpected {}", got.to_str());
             } else  {
-                message = stringformat(
-                    "unrecognised input. expected:\n{}", state_str
-                );
+                errm = "unrecognised input";
             }
             error(message);
         } else if(lr_stack_size() > 0) {
             // there's stuff on the stack after we rewound,
             // it means we recognized more than one component,
             // but nothing complete.
-            error(stringformat(
-                "incomplete input.  here's what we have so far:\n{}\n"
-                "additionally, result is:\n{}\n"
-                "and state ({}) is/was:\n{}\n",
-                StackSlice(*this, 0).to_str(),
-                got.to_str(), to_hex(&cur_state), state_str
-            ));
+            errm = "incomplete input";
         } else if(!is_goal(got)) {
+            errm = stringformat(
+                "parsed a {} = {}, but that's not a goal (@prds.goal@)",
+                nonterm_str(got.grammar_element_id()), got
+            );
+        }
+
+        if(errm.length()) {
             error(stringformat(
-                "parsed a {}, but that's not a goal (@prds.goal@)\n"
-		"here's what we have so far:\n{}\n"
-                "and state ({}) is/was:\n{}\n",
-                nonterm_str(got.grammar_element_id()),
-                StackSlice(*this, 0).to_str(),
-                to_hex(&cur_state), state_str
+                "{}\n"
+                "here's what we have so far:\n{}"
+                "{}and state was:\n{}\n",
+                errm, StackSlice(*this, 0),
+                got?stringformat("next up would have been {}\n", got):"",
+                state_string(cur_state)
             ));
         }
 
