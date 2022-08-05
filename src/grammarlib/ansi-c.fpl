@@ -19,18 +19,20 @@ string             -> primary_expression ;
 '(' expression ')' -> primary_expression ;
 generic_selection  -> primary_expression ;
 
+# XXX these constant regexes were not converted correctly:
 # HP  (0[xX])
 # H   [a-fA-F0-9]
 # IS  (((u|U)(l|L|ll|LL)?)|((l|L|ll|LL)(u|U)?))
 # {HP}{H}+{IS}?				{ return I_CONSTANT; }
 # original comment says "includes character_constant" but I'm not
 # clear on how..
-/0[xX][a-fA-F0-9](((u|U)(l|L|ll|LL)?)|((l|L|ll|LL)(u|U)?))/ -> constant ;
+/0[xX][a-fA-F0-9]+(((u|U)(l|L|ll|LL)?)|((l|L|ll|LL)(u|U)?))/ -> constant ;
 
 # D   [0-9]
 # E   ([Ee][+-]?{D}+)
 # FS  (f|F|l|L)
 # {D}+{E}{FS}?				{ return F_CONSTANT; }
+# oh errr this is just wrong... XXX
 /[0-9]+[Ee][+-]?[0-9]+(f|F|l|L)?/ -> constant ;
 
 # &enumeration_constant() will have to check whatever
