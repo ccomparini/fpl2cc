@@ -430,12 +430,17 @@ public:
         // (syntactic sugar for optionals)
         bool exists() const { return count() !=  0; }
 
-        // construct a slice with a particular base and count
-        StackSlice(@class_name@ &o, int base, int count) :
+        // construct a slice with a particular base and count.
+        // if the count is -1 or unspecified, construct a slice
+        // with the given base to the top of the stack
+        StackSlice(@class_name@ &o, int base, int count = -1) :
             base_index(base),
             size(count),
             owner(o)
         {
+            if(size == -1) {
+                size = o.lr_stack_size() - base;
+            }
         }
 
         // construct a slice by pseudo-popping a set of elements of
@@ -793,7 +798,7 @@ public:
                 "incomplete input.  here's what we have so far:\n{}\n"
                 "additionally, result is:\n{}\n"
                 "and state ({}) is/was:\n{}\n",
-                StackSlice(*this, 0, lr_stack_size()).to_str(),
+                StackSlice(*this, 0).to_str(),
                 got.to_str(), to_hex(&cur_state), state_str
             ));
         } else if(!is_goal(got)) {
@@ -802,7 +807,7 @@ public:
 		"here's what we have so far:\n{}\n"
                 "and state ({}) is/was:\n{}\n",
                 nonterm_str(got.grammar_element_id()),
-                StackSlice(*this, 0, lr_stack_size()).to_str(),
+                StackSlice(*this, 0).to_str(),
                 to_hex(&cur_state), state_str
             ));
         }
