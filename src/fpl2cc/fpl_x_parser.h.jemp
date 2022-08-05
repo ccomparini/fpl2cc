@@ -524,6 +524,13 @@ public:
         }
     };
 
+    // call within a reduce function to get a stack slice containing all
+    // the arguments to that reduce function.
+    // don't call from outside a reduce function.
+    StackSlice all_args() {
+        return StackSlice(*this, lr_arg_base + 1);
+    }
+
     // call this like:  prod_type_name(typeid(...));
     static std::string prod_type_name(const std::type_info &tinf) {
         @-for(auto type : prds.all_types) {@
