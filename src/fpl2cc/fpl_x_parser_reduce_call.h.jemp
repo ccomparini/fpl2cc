@@ -18,14 +18,15 @@
     /* not going to pass to the reduce function.  wasteful, but easy. */
     /* at some point ideally we won't even push them... */
     int frame_start = lr_top();
-    int pos = frame_start;  // (pos gets updated as we go)
+    lr_arg_base = frame_start;  // (gets updated as we create args)
     @for(int stind = rule.num_steps() - 1; stind >= 0; --stind) {-@
         @declare expr: rule.nth_step(stind)@
         @declare elid: prds.element_index.at(expr->gexpr)@
         @if(!expr) {-@
             #error Bug: no expression for step @stind@ @rule.to_str()@ @rule.location()@
         @-} else {-@
-            StackSliceSpecialization<@prds.type_for(expr->gexpr)@> arg_@stind@(*this, @elid@, @expr->max_times@, pos);
+            StackSliceSpecialization<@prds.type_for(expr->gexpr)@>
+                arg_@stind@(*this, @elid@, @expr->max_times@, lr_arg_base);
         @}-@
     @}-@
     
@@ -41,20 +42,19 @@
     } @}@
     
     @if(opts.debug) {-@
-        fprintf(stderr, "popping %i to %i:\n%s\n",
-           frame_start, pos, arg_0[0].to_str().c_str()
+        std::cerr << stringformat("popping {} to {}:\n{}\n",
+           frame_start, lr_arg_base, arg_0[0]
         );
     @-}-@
 
     set_product(Product(result,
-        @- rule.product_element().nonterm_id_str() -@
-        , arg_0[0].position())
-    );
+        @- rule.product_element().nonterm_id_str() -@, arg_0[0].position()
+    ));
     
     @/*
         this is what actually pops the stack. note we pop after
         the reduce (mainly to minimize moves, but also so the
         stack is more intact for error/bug analysis)
     */@
-    lr_pop_to(pos);
+    lr_pop_to(lr_arg_base);
 

@@ -278,6 +278,7 @@ private:
     State                   cur_state;
     Product                 last_product;
     std::vector<StackEntry> lr_stack;
+    int                     lr_arg_base; // base ind for current reduce call
     size_t                  bytes_eaten; // since last terminal
     bool                    stop_parsing;
     int                     max_errors;
@@ -301,6 +302,7 @@ public:
     @class_name@(fpl_reader_p rdr) :
         reader(rdr),
         cur_state(NULL),
+        lr_arg_base(-1),
         bytes_eaten(0),
         stop_parsing(false),
         max_errors(1),
