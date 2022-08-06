@@ -903,23 +903,20 @@ private:
     }
 
 public:
+
     typedef enum {
         @for(int el_id = 0; el_id < prds.elements.size(); ++el_id) {-@
             @declare el: prds.elements[el_id]@
-            @if(el.type == grammar_element::NONTERM_PRODUCTION) {-@
-                @el.nonterm_id_str(false)@ = @el_id@,
-            @} else {-@
-                // @el.to_str()@ = @el_id@,
-            @}-@
+            @prds.element_id_name(el_id)@, // @el_id@ @el.to_str()@
         @-}-@
-    } NontermID;
+    } ElementID;
 
     static std::string nonterm_str(int id) {
         switch(id) {
             @for(int el_id = 0; el_id < prds.elements.size(); ++el_id) {-@
                 @declare el: prds.elements[el_id]@
                 @if(el.type == grammar_element::NONTERM_PRODUCTION) {-@
-                    case @el_id@: return "@el.nonterm_id_str(false)@";
+                    case @el_id@: return "@el.nonterm_id_str()@";
                 @}-@
             @-}-@
         }
@@ -964,7 +961,7 @@ public:
     static bool is_goal(int id) {
         switch(id) {
             @for(auto gstr : prds.goal) {-@
-                case NontermID::_@gstr@: return true;
+                case ElementID::_@gstr@: return true;
             @}@
             default: return false;
         }

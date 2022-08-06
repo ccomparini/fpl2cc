@@ -29,7 +29,7 @@ void @sfn@() {
         @-if(auto right_of_dot = trans.right_of_dot) {-@
             @declare type: right_of_dot->gexpr.type_str()@
             @declare str: right_of_dot->terminal_string()@
-            @declare el_id: prds.element_index.at(right_of_dot->gexpr)@
+            @declare el_id: prds.element_id_name(right_of_dot->gexpr)@
             @declare min: right_of_dot->min_times@
             @declare max: right_of_dot->max_times@
             @declare next_state: prds.state_fn(trans.next_state_number, true)@

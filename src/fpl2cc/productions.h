@@ -42,11 +42,11 @@ class productions {
     std::list<code_block> parser_members;
     std::list<std::string> goal; // goal is any of these
 
-    std::vector<production_rule>     rules;
+    std::vector<production_rule>    rules;
     std::multimap<std::string, int> rules_for_product; // product -> rule ind
 
-    std::vector<grammar_element>     elements;
-    std::map<grammar_element, int>   element_index;
+    std::vector<grammar_element>    elements;
+    std::map<grammar_element, int>  element_index;
 
     std::list<reducer> reducers;
 
@@ -101,6 +101,19 @@ class productions {
             element_index[nge] = elements.size();
             elements.push_back(nge);
         }
+    }
+
+    // this is the name of the element for purposes of (eg) enums
+    std::string element_id_name(int el_ind) const {
+        const grammar_element el = elements[el_ind];
+        if(el.is_terminal()) {
+            return stringformat("_terminal_{}", el_ind);
+        }
+        return el.nonterm_id_str();
+    }
+
+    std::string element_id_name(grammar_element el) const {
+        return element_id_name(element_index.at(el));
     }
 
     struct lr_item {

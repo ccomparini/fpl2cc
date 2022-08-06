@@ -39,7 +39,6 @@ struct grammar_element {
         int cmp = type - other.type;
         if(cmp == 0) {
             cmp = expr.compare(other.expr);
-
         }
         return cmp;
     }
@@ -52,15 +51,11 @@ struct grammar_element {
         return (type != NONTERM_PRODUCTION);
     }
 
-    std::string nonterm_id_str(bool full_name = true) const {
+    std::string nonterm_id_str() const {
         if(type == NONTERM_PRODUCTION) {
             // always prefix with underscore as a hack to avoid
             // colliding with target language keywords:
             std::string out = "_" + expr;
-
-            if(full_name)
-                return "NontermID::" + out;
-
             return out;
         }
 
@@ -87,9 +82,12 @@ struct grammar_element {
                 rb = "/";
                 break;
             case NONTERM_PRODUCTION:
-            case LACK_OF_SEPARATOR:
                 lb = "";
                 rb = "";
+                break;
+            case LACK_OF_SEPARATOR:
+                lb = "⸢";
+                rb = "⸣";
                 break;
             default:
                 lb = "??????";
