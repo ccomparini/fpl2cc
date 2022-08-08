@@ -1,11 +1,22 @@
 
+size_t len = 0;
 if(inp[0] == '#') {
-    size_t len = 1;
+    len++;
     while(inp[len] && inp[len] != '\n') {
         len++;
     }
-    return len;
 }
 
-return 0;
+while(inp[len] && (
+    inp[len] == ' '   ||
+    inp[len] == '\t'  ||
+    inp[len] == '\n'  ||
+    inp[len] == '\v'  ||
+    inp[len] == '\f'  ||
+    inp[len] == '\r'
+)) {
+    len++;
+}
+
+return len;
 
