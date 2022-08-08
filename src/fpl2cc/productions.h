@@ -625,6 +625,13 @@ public:
             // XXX deprecated. kill this in favor of
             // having a default main in grammarlib and importing.
             default_main = true;
+        } else if(dir == "goal") {
+            std::string newgoal = arg_for_directive();
+            if(!newgoal.length()) {
+                error("can't parse the @goal");
+            } else {
+                goal.push_back(newgoal);
+            }
         } else if(dir == "grammar") {
             // import the grammar from another fpl (or a library)
             productions sub(opts, open_for_import(arg_for_directive()));
@@ -1688,7 +1695,10 @@ public:
 
         check_missing_types();
 
-        goal = opts.entry_points;
+        if(opts.entry_points.size()) {
+            goal = opts.entry_points;
+        }
+
         if(goal.empty()) {
             // no particular goal products specified, so we default
             // to whatever the first rule produces:

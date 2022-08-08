@@ -37,6 +37,7 @@ rule       -> item ;
 '@comment_style'^  /(\S+)/:comment_style     -> directive ;
 '@default_action'^ code_block:default_action -> directive ;
 '@default_main'^   /(:?true)|(:?false)/?:default_main -> directive ;
+'@goal'^           production_name           -> directive ;
 '@grammar'^        /(\S+)/:grammar_name      -> directive ;
 '@internal'^       code_block:internal_code  -> directive ;
 '@post_parse'^     code_block:post_parse     -> directive ;
