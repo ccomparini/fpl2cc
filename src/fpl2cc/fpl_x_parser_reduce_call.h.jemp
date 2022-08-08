@@ -41,20 +41,20 @@
         @prds.post_reduce.format()@
     } @}@
     
-    @if(opts.debug) {-@
-        std::cerr << stringformat("popping {} to {}:\n{}\n",
-           frame_start, lr_arg_base, arg_0[0]
-        );
-    @-}-@
-
     set_product(Product(result,
         @- rule.product_element().nonterm_id_str() -@, arg_0[0].position()
     ));
-    
+
     @/*
         this is what actually pops the stack. note we pop after
         the reduce (mainly to minimize moves, but also so the
         stack is more intact for error/bug analysis)
     */@
     lr_pop_to(lr_arg_base);
+
+    @if(opts.debug) {-@
+        std::cerr << stringformat("popped from {} to {}\n",
+           frame_start, lr_top()
+        );
+    @-}-@
 

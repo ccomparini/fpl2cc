@@ -19,7 +19,7 @@ void @sfn@() {
     @if(opts.debug) {@
         std::cerr << stringformat(
             "=============\n{}\n"
-            "{} bytes eaten since last terminal\n{}",
+            "{} bytes of separator since last terminal\n{}",
             state_string(&@prds.fq_member_name(sfn)@),
             b_eaten, to_str()
         );
@@ -34,6 +34,13 @@ void @sfn@() {
             @declare max: right_of_dot->max_times@
             @declare next_state: prds.state_fn(trans.next_state_number, true)@
             @- "" @if(shift_@type@("@str@", @el_id@, @min@, @max@, &@next_state@)) {
+                @if(opts.debug) {@
+                    std::cerr << stringformat(
+                        "   matched @el_id@ ({}) at «{}»\n"
+                        "   next state:  &@next_state@\n",
+                        "@str@", reader->debug_peek()
+                    );
+                @}@
             } else @ "" -@
         @-}-@
     @-}-@
