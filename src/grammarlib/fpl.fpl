@@ -76,7 +76,7 @@ zero_or_one  -> quantifier ;
 # .. regex is similar but delimited by slashes.
 '"'^ ~ /(?:[^"\\]|\\.)*/:exact_match ~  '"'^ -> grammar_element ;
 "'"^ ~ /(?:[^'\\]|\\.)*/:exact_match ~  "'"^ -> grammar_element ;
-'/'^ ~ /(?:[^\/\\]|\\.)*\/[m]?/:regex ~ '/'^ -> grammar_element ;
+'/'^ ~ /(?:[^\/\\]|\\.)*/:regex ~ '/'^       -> grammar_element ;
 production_name                              -> grammar_element ;
 
 /[A-Za-z][A-Za-z0-9_]*/:name -> production_name ;
