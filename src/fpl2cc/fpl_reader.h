@@ -693,7 +693,10 @@ public:
     const fpl_reader &reader()   const { return *source; }
     size_t            position() const { return offset; }
 
-    std::string debug_peek(SourcePosition to_pos = SourcePosition()) const {
+    std::string debug_peek(
+        SourcePosition to_pos = SourcePosition(),
+        int max_length = -1
+    ) const {
         int length = 12;
 
         if(!source) {
@@ -708,6 +711,10 @@ public:
                      + source->filename() + " vs "
                      + to_pos.source->filename() + "¡";
             }
+        }
+
+        if(max_length >= 0 && length > max_length) {
+            length = max_length;
         }
 
         return source->debug_peek(offset, length);
