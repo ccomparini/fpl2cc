@@ -822,7 +822,7 @@ public:
 
     void add_rule(production_rule &rule) {
         int rule_num = rules.size();
-        rule.set_rulenum(rule_num);
+        rule.set_rule_number(rule_num);
 
         // we set the default action for the rule here so
         // that (1) we don't have to resolve it later
@@ -1844,9 +1844,8 @@ public:
         apply_reducers();
         generate_states(goal);
         dump_states(opts);
-
-        report_unused_rules();
         check_actions();
+        check_rules();
     }
 
     // jemp-based output:
@@ -1902,24 +1901,67 @@ public:
         }
     }
 
-    void report_unused_rules() const {
+    void check_rule(const production_rule &rule) const {
+        for(int stepi = 0; stepi < rule.num_steps(); stepi++) {
+            auto step = rule.nth_step(stepi);
+
+            // if the step uses a special terminal scanner, that
+            // scanner's going to need to exist:
+            if(step.type() == grammar_element::TERM_CUSTOM) {
+                std::string scanner_name = step.gexpr.expr;
+                if(!scanners.count(scanner_name)) {
+                    // it is possible that the rule isn't
+                    // used, so the scanner won't be used, but
+                    // we're going to complain about it anyway
+                    // here because the code generator shouldn't
+                    // have to be bothered checking if a given
+                    // element is actually used, 
+                    error(stringformat(
+                        "use of undefined scanner &{} in rule {} {}",
+                        scanner_name, rule, rule.location()
+                    ));
+                }
+            }
+        }
+    }
+
+    void check_rules() const {
+        std::list<std::string> missing_actions;
         bool used[rules.size()];
+
         for(int rind = 0; rind < rules.size(); rind++) {
             used[rind] = false;
         }
+
+        // iterate the states to find which rules we actually use:
         for(lr_set state : states) {
             for(lr_item item : state.iterable_items()) {
-                used[item.rule] = true;
+                if(!used[item.rule]) {
+                    used[item.rule] = true;
+
+                    // turns out we do use this rule.  it'll need reduce
+                    // code from one place or another:
+                    const production_rule &rule = rules[item.rule];
+                    if(!rule.reduce_code()) {
+                        missing_actions.push_back(stringformat(
+                            "{}\t{}\n", rule.location(), hypothetical_reducer(rule)
+                        ));
+                    }
+                }
             }
         }
+
         for(int rind = 0; rind < rules.size(); rind++) {
+            const production_rule &rule = rules[rind];
+            // warn about unused rules, since they might be cruft:
             if(!used[rind]) {
-                const production_rule &rule = rules[rind];
                 warn(stringformat(
                     "Rule {} producing {} at {} is unused\n",
                     rind, rule.product(), rule.location()
                 ));
             }
+
+            check_rule(rule);
         }
     }
 
@@ -1935,6 +1977,8 @@ public:
             }
         }
 
+        // .. but if any rules are missing actions, it's an error because
+        // it means we won't know what to do if the rule matches:
         if(missing_actions.size() > 0) {
             std::string msg = stringformat(
                 "missing reduce action for {} rules:\n"
