@@ -1718,6 +1718,8 @@ public:
 
         apply_reducers();
         generate_states(goal);
+        dump_states(opts);
+
         report_unused_rules();
         check_actions();
     }
@@ -1742,7 +1744,7 @@ public:
     }
 
     // debugging:
-    std::string dump_states() const {
+    std::string states_to_string() const {
         std::string out;
         for(int stind = 0; stind < states.size(); stind++) {
             out += stringformat(
@@ -1751,6 +1753,21 @@ public:
             );
         }
         return out;
+    }
+
+    void dump_states(const fpl_options &opts) const {
+        if(opts.statedump != "") {
+            std::ofstream out(opts.statedump, std::ios::binary);
+            if(!out.is_open()) {
+                internal_error(stringformat(
+                    // wow... errno.. why am I even using c++?
+                    "can't open '{}' for dumping states: {}\n",
+                    opts.statedump, strerror(errno)
+                ));
+            } else {
+                out << states_to_string();
+            }
+        }
     }
 
     void report_unused_rules() const {

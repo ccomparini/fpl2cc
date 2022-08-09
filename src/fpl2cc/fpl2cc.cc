@@ -239,21 +239,6 @@ ExitVal fpl2cc(const fpl_options &opts) {
     if(opts.generate_code)
         output = prds.generate_code();
 
-    // states are generated as a side effect of generate_code,
-    // which is not great, but I'm not going to fix it right now,
-    // so dump_states has to go after generate_code():
-    if(opts.statedump != "") {
-        std::ofstream out(opts.statedump, std::ios::binary);
-        if(!out.is_open()) {
-            fail(stringformat(
-                // wow... errno.. why am I even using c++?
-                "can't open {} for dumping states: {}\n", strerror(errno)
-            ));
-        } else {
-            out << prds.dump_states();
-        }
-    }
-
     // uhh... this is easy, if hokey:
     if(opts.out) {
         if(output.length())
