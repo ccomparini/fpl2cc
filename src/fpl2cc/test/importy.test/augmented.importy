@@ -1,5 +1,7 @@
 {
   "c-identifier": this_is_a_c_identifier,
-  "some numbers": [ 23.4, 66, 0.9 ]
+  "some numbers": [ 23.4, 66, 0.9 ],
+  "something true": true,
+  "something false": !true
 }
 

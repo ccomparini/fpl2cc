@@ -27,6 +27,10 @@ class productions {
     fpl_reader_p  inp;
     const fpl_options opts;
 
+    // for imports and such:
+    using subgrammar_p = std::unique_ptr<productions>;
+    std::map<std::string, subgrammar_p> sub_productions; // grammar name -> productions
+
     std::string reduce_type; // default reduce type
     std::map<std::string, std::string> type_for_product; // (reduce type for particular product)
     std::set<std::string> all_types; // for deduplication
@@ -633,10 +637,8 @@ public:
                 goal.push_back(newgoal);
             }
         } else if(dir == "grammar") {
-            // import the grammar from another fpl (or a library)
-            productions sub(opts, open_for_import(arg_for_directive()));
-            sub.parse_fpl();
-            import_grammar(sub);
+            // import the grammar from another fpl:
+            import_grammar(subgrammar(arg_for_directive()));
         } else if(dir == "internal") {
             // a code block which goes in the "private" part
             // of the parser class itself.  This is either
@@ -811,13 +813,38 @@ public:
         return make_shared<fpl_reader>(filename, sub_errcb);
     }
 
-    // syntax: '`' filename '`' ~ /(.production_to_import)/?
+    // Loads (and parses) the subgrammar specifier, or fetches
+    // it from cache. Does not import anything from the subgrammar - 
+    // the idea here is basically to abstract the grammar name
+    // from the source, and to implement caching so that if you
+    // want to import multiple pieces of a given subgrammar, we
+    // don't have to read and parse the source for that multiple
+    // times.
+    const productions *subgrammar(const std::string &grammar_name) {
+        const productions *out = nullptr;
+
+        auto exsp = sub_productions.find(grammar_name);
+        if(exsp != sub_productions.end()) {
+            out = exsp->second.get();
+        } else {
+            subgrammar_p sub = make_unique<productions>(
+                opts, open_for_import(grammar_name)
+            );
+            sub->parse_fpl();
+            out = sub.get();
+            sub_productions[grammar_name] = move(sub);
+        }
+
+        return out;
+    }
+
+    // syntax: '`' grammar_name '`' ~ /(.production_to_import)/?
     // imports relevant rules into this and returns the name of
     // the top level production created
     std::string parse_import(fpl_reader &src, production_rule &rule) {
-        std::string filename(src.parse_string());
-        if(!filename.length()) {
-            error(src, "no filename specified");
+        std::string grammar_name(src.parse_string());
+        if(!grammar_name.length()) {
+            error(src, "no grammar name specified");
             return "<failed import>";
         }
 
@@ -828,10 +855,7 @@ public:
             prod_name = read_production_name(src);
         }
 
-        productions subs(opts, open_for_import(filename));
-        subs.parse_fpl();
-
-        return import_grammar(subs, prod_name);
+        return import_grammar(subgrammar(grammar_name), prod_name);
     }
 
 
@@ -1222,8 +1246,15 @@ public:
     // returns the name of the production which this import will
     // produce, or an empty string if nothing was imported.
     std::string import_grammar(
-        const productions &from, const std::string &pname = ""
+        const productions *fromp, const std::string &pname = ""
     ) {
+        if(!fromp) {
+            error(stringformat(
+                "can't import {}: no source productions.\n", pname
+            ));
+        }
+        const productions &from = *fromp;
+
         std::string src_fn = from.inp->filename();
 
         // if we're importing everything, import separator and preamble
