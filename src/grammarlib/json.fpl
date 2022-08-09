@@ -9,9 +9,11 @@ array    -> value ;
 string   -> value ;
 number   -> value ;
 
-"true":true_val   -> value ;
-"false":false_val -> value ;
 "null":null_val   -> value ;
+
+"true":true_val   -> boolean ;
+"false":false_val -> boolean ;
+boolean           -> value ;
 
 # TODO replace this:
 '{'^ members? '}'^   -> object  ;
