@@ -127,7 +127,7 @@ env.Append(BUILDERS =
 env.Append(BUILDERS =
     { 'Fpl2h' : Builder(action = debugger + 'bin/fpl2cc ' + fpl_args,
                  emitter = depend_on_fpl2cc,
-	         suffix = '.h',
+	         suffix = '_parser.h',
 	         src_suffix = '.fpl') } )
 
 # fpl -> jest builder:
