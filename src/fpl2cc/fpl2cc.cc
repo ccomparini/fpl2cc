@@ -271,7 +271,9 @@ int main(int argc, const char** argv) {
     }
 
     if(num_warnings > 0) {
-        fprintf(stderr, "fpl2cc: %i warnings\n", num_warnings);
+        std::cerr << stringformat(
+            "{}: {} warnings\n", opts.src_fpl, num_warnings
+        );
     }
 
     exit(status);
