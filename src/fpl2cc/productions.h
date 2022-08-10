@@ -813,7 +813,7 @@ public:
             if(prod.length() && type.length()) {
                 add_type_for(prod, type);
             } else {
-                error("type_for expects <product name> = <type>");
+                error("type_for expects <product name> <type>");
             }
         } else {
             error(stringformat("Unknown directive: '{}'\n", dir));
