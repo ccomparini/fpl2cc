@@ -1410,6 +1410,7 @@ public:
 
         // the main() generated here is pretty much just a test stub.
         // if people want something fancier, they can make their own.
+// XXX jemp this too
         out += "int main(int argc, const char **argv) {\n";
         out += "    if(argc < 2) {\n";
         // XXX this is weak;  make the reader able to read stdin
@@ -1708,7 +1709,7 @@ public:
 
         for(int rnum = 0; rnum < rules.size(); rnum++) {
             const production_rule &rule = rules[rnum];
-            if(!rule.reduce_code()) {
+            if(rule.needs_reducer()) {
                 missing_actions.push_back(stringformat(
                     "{}\t{}\n", rule.location(), hypothetical_reducer(rule)
                 ));

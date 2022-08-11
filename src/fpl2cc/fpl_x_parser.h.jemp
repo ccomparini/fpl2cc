@@ -552,7 +552,7 @@ public:
         StackSliceSpecialization(@class_name@ &o, int element_id, int max, int &pos) :
             StackSlice(o, element_id, max, pos) { }
 
-        // this allows you to pass the the stack slice itself from within
+        // this allows you to pass the stack slice itself from within
         // reduce functions using the at sign (eg thing@@self())
         StackSliceSpecialization<ReduceType> self() { return *this; }
 
@@ -997,9 +997,7 @@ public:
 
     // reduction rules:
     @for(auto rule : prds.rules) {@
-        @if(code_block rule_code = rule.reduce_code()) {-@
-            @#fpl_x_parser_reduce_action(prds, rule)@
-        @}-@
+        @#fpl_x_parser_reduce_action(prds, rule)@
     @}@
 
     // parser states:

@@ -227,6 +227,23 @@ public:
         return rsteps;
     }
 
+    bool needs_reducer() const {
+        if(reduce_code())
+            return false; // don't need - we have one
+
+        for(int stepi : psteps) {
+            step st = rsteps[stepi];
+
+            // if the step is either multiple or optional,
+            // someone needs to write a reducer to tell
+            // us how to handle it (for now, anyway):
+            if(!st.is_single())
+                return true;
+        }
+
+        return false;
+    }
+
     const std::string &product(const std::string &pr) {
         prod = pr;
         return prod;
@@ -252,46 +269,6 @@ public:
         return filename() + ":" + std::to_string(line_number());
     }
 
-
-    // returns the index of the step to use for the default
-    // return value, or -1 if there's no single suitable step
-    // for a default.
-    int default_return_step() const {
-        int stepi =  0;
-        int def   = -1;
-        for(stepi = 0; const step *st = nth_step(stepi); stepi++) {
-            // to be a default return value, the step must
-            // single and not ejected (for the moment, anyway -
-            // if I get the return type stuff straightened out,
-            // maybe we can handle optionals..)
-            if((st->min_times == 1) && (st->max_times == 1) && (!st->eject)) {
-                if(def == -1)
-                    def = stepi;
-                else // more than one candidate -> no default
-                    return -1;
-            }
-        }
-        return def;
-    }
-
-    code_block default_code() const {
-        int def_st = default_return_step();
-        if(def_st < 0) {
-            // no suitable result, so return a "false" code block:
-            return code_block();
-        }
-
-        // start the code block with a comment referring to this
-        // line in this source file, to reduce puzzlement
-        // about where this mixed-generated code comes from:
-        std::string code("// " THIS_LINE "\n");
-
-// XXX doh... this needs to be jemp'd as well, or something.
-        code += "return " + rsteps[def_st].variable_name() + ".val();\n";
-
-        return code;
-    }
-
     void code(const code_block &cd) {
         code_for_rule = cd;
     }
@@ -304,21 +281,23 @@ public:
         return abs_impl;
     }
 
-    // this is the _actual_ reduction code, after factoring
-    // in abstracted reducers and defaults and whatnot.
+    // returns a code_block representing any reducer specified
+    // in the fpl (eg inline or from an abstracted reducer),
+    // or a false code block if no such thing was specified.
     code_block reduce_code() const {
 
         // abstracted reducers take priority over inline code.
         // this is so that fpl authors can import grammar
         // from whatever they want, and override actions
-        // as necessary for their particular applications
+        // as necessary for their particular applications.
         reducer red = abstracted_reducer();
         if(red)
             return red.code();
         else if(code_for_rule)
             return code_for_rule;
 
-        return default_code();
+        // no specific reduce code for this rule:
+        return code_block();
     }
 
     void set_reducer(const reducer &red) {
