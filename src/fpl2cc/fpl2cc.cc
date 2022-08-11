@@ -13,7 +13,6 @@
 #include <string>
 #include <vector>
 
-#include "searchpath.h"
 #include "fpl_reader.h"
 #include "util/fs.h"
 #include "util/src_location.h"
