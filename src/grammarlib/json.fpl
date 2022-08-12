@@ -33,7 +33,7 @@ element ','^ elements -> elements ;
 
 value                 -> element ;
 
-/"((?:[^"\\]|\\.)*)"/ -> string ;
+/"((?:[^"\\]|\\.)*)"/:src -> string ;
 
 # json number specification appears to actually be fairly fussy.
 # From the spec, I'm inferring that:
