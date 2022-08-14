@@ -125,14 +125,14 @@ public:
 
 private:
     std::string prod;
-    std::vector<step> rsteps;
-    std::vector<int> psteps; // index of step for parameter number
-    std::set<std::string> step_vars; // for finding conflicts
-    code_block   code_for_rule; // inlined reduce code, if any
-    reducer      abs_impl;      // abstracted implementation, if any
-    std::string file;
-    int         line;
-    int         rulenum;
+    std::vector<step>     rsteps;
+    std::vector<int>      psteps;        // index of step for parameter number
+    std::set<std::string> step_vars;     // for finding conflicts
+    code_block            code_for_rule; // inlined reduce code, if any
+    reducer               abs_impl;      // abstracted implementation, if any
+    std::string           file;
+    int                   line;
+    int                   rulenum;
 
 public:
 
@@ -150,10 +150,6 @@ public:
     std::string rule_fn() const {
         return stringformat("rule_{}", rulenum);
     }
-
-    // makes a better rule_meta method; probably a better
-    // name in general, but I'm keeping rule_fn for now
-    // because it's more grepable.
 
     void add_step(step st) {
         int stepi = rsteps.size();

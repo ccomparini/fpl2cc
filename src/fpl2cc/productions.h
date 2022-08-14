@@ -1137,7 +1137,7 @@ public:
     // needed to create the product passed (including the product
     // passed)
     std::set<std::string> dependent_products(const std::string &prod) const {
-        std::list<std::string> all_wanted = { prod};
+        std::list<std::string> all_wanted = { prod };
         std::set<std::string> out;
 
         // NOTE I'm assuming here that we can append to a list
@@ -1627,8 +1627,8 @@ public:
         }
 
         // if there are any products which don't have a specific
-        // reduce type, make sure the default reduce type in
-        // in the set of all types:
+        // reduce type, make sure the default reduce type is in
+        // the set of all types:
         for(auto prr : rules_for_product) {
             if(!type_for_product.contains(prr.first)) {
                 all_types.insert(type_for(prr.first));
