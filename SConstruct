@@ -1,4 +1,4 @@
-import distutils.sysconfig
+import sysconfig
 import os
 import subprocess
 import sys
@@ -28,7 +28,7 @@ def toolset():
     # and seeing if it looks like clang.  this should be
     # faster than searching the PATH or whatever for a compiler
     # and then running the compiler to see what it is...
-    cxx = distutils.sysconfig.get_config_var('CXX')
+    cxx = sysconfig.get_config_var('CXX')
     if 'clang' in cxx:
         # .. you still need 'default' here or scons gets twisted
         return [ 'default', 'clangxx' ]
