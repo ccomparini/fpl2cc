@@ -214,13 +214,36 @@ public:
         return nullptr;
     }
 
-    bool foldable() const {
+    // if this rule could potentially be a type alias,
+    // returns the name of the product to which it could
+    // be aliased.
+    // otherwise returns an empty string.
+    std::string potential_type_alias() const {
 
-        // the rule is "foldable" if it has exactly one step
-        // and that step is not optional, repeated, or ejected.
-        if(num_steps() != 1) return false;
-        const step *st = nth_step(0);
-        return (st->min_times == 1) && (st->max_times == 1) && (!st->eject);
+        // the rule is a potential alias if it has
+        // exactly one reduce parameter.... 
+        if(num_reduce_params() == 1) {
+            const step &rp = reduce_param(0);
+            // and it's not optional or multiple.
+            // multiples need to be represented with a different
+            // type (eg array of x instead of x), and optionals
+            // would only work if there's a way to guarantee a
+            // default or something is created in the absence
+            // of anything, which, at present, there is not.
+            // ACTUALLY optional might work!  try it.
+            //  x? -> foo ;  if the reducer is actually called, a custom
+            // reducer could fill in the default for the x.
+            // huh what if you had
+            //  x? -> x ;
+            // ... for filling in defaults.  the mind reels. try it.
+            if(rp.is_single() && !rp.is_optional()) {
+                // for now it has to be a nonterminal too:
+                if(!rp.is_terminal()) {
+                    return rp.production_name();
+                }
+            }
+        }
+        return "";
     }
 
     const std::vector<step> &steps() const {

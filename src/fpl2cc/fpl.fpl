@@ -31,7 +31,7 @@ typedef std::variant<
  */
 }+
 
-#@produces Productions *
+@produces Productions *
 
 
 @internal +{

@@ -30,6 +30,7 @@ class productions {
     std::string reduce_type; // default reduce type
     std::map<std::string, std::string> type_for_product; // (reduce type for particular product)
     std::set<std::string> all_types; // for deduplication
+    std::set<std::string> alias_candidates; // type names
 
     std::list<std::string> imports; // filenames
     code_block default_action;
@@ -459,6 +460,32 @@ public:
 
     }
 
+    // if there's only one way to make a given product, the
+    // type for that product can be "inherited" from the way
+    // to make it.
+    // this is used for type inferrence in cases where there's
+    // no explicit type for a given product.
+    std::string inherited_type(const std::string &product) const {
+        auto strl  = rules_for_product.lower_bound(product);
+        auto endrl = rules_for_product.upper_bound(product);
+
+        std::string in_type;
+
+        for(auto rit = strl; rit != endrl; ++rit) {
+            const production_rule &rule = rules[rit->second];
+            const std::string alias = rule.potential_type_alias();
+            if(in_type == "") {
+                in_type = alias;
+            } else if(in_type != alias) {
+                // apparently there's more than one way to make
+                // this product, so we can't simply alias
+                return "";
+            }
+        }
+
+        return in_type;
+    }
+
     // returns the name of the type expected as the result
     // of reducing to the product type indicated:
     std::string type_for(const std::string &product) const {
@@ -466,6 +493,16 @@ public:
         if(tf != type_for_product.end()) {
             return tf->second;
         }
+
+        // SO.  what can inherited_type types?
+        //   - if we are produced from only one other production,
+        //     we can use that type.  (terminals too? terminal aliasing?)
+        std::string inherited = inherited_type(product);
+        if(inherited != "")
+            return type_for(inherited);
+
+        // last resort, use the @produces type. (possibly this part
+        // could be implemented using the inheritance, above)
         return reduce_type;
     }
 
@@ -551,6 +588,7 @@ public:
     }
 
     void set_reduce_type(const std::string &rt) {
+        all_types.insert(rt);
         reduce_type = rt;
     }
     void set_default_action(const std::string &rt) { default_action = rt; }
@@ -664,7 +702,7 @@ public:
         //                       # don't do "or" we'd have to duplicate
         //                       # rules or somehting to fold
         //    boolean '|' boolean => bexpr ; # ...
-        // .. so anyway I guess we're justing findind fold candidates here.
+        // .. so anyway I guess we're just finding fold candidates here.
         // OH ONE INTERESTING THING:  if a parameter is ejected,
         // it can be folded into a rule where the same param is ejected:
         //      foo^ => bar ;
@@ -785,11 +823,6 @@ public:
 
         productions subs(opts, open_for_import(filename));
         subs.parse_fpl();
-        if(!subs.reduce_type.length()) {
-            // the imported fpl doesn't specify that it produces any
-            // particular type(s), so we tell it to produce what we want:
-            subs.set_reduce_type(reduce_type);
-        }
 
         return import_grammar(subs, prod_name);
     }
@@ -1613,6 +1646,38 @@ public:
         return out;
     }
 
+    void check_missing_types() {
+        std::set<std::string> missing_types;
+        int num_rules = 0;
+        for(auto prr : rules_for_product) {
+            const std::string &prodn = prr.first;
+            if(type_for(prodn) == "") {
+                missing_types.insert(prodn);
+                num_rules++;
+            }
+        }
+
+        if(missing_types.size()) {
+            std::string msg = stringformat(
+                "missing type for {} product(s) ({} rules):\n",
+                missing_types.size(), num_rules
+            );
+            for(auto prod : missing_types) {
+                auto strl  = rules_for_product.lower_bound(prod);
+                auto endrl = rules_for_product.upper_bound(prod);
+                std::string rulestr;
+                for(auto rit = strl; rit != endrl; ++rit) {
+                    const production_rule &rule = rules[rit->second];
+                    rulestr += stringformat(
+                        "        {} {}\n", rule.location(), rule
+                    );
+                }
+                msg += stringformat("    {}:\n{}", prod, rulestr);
+            }
+            error(msg);
+        }
+    }
+
     // determines goal(s), generates states, matches up reducers, 
     // reports errors, etc.
     // call this before generating code.
@@ -1621,23 +1686,7 @@ public:
             error("No rules found\n");
         }
 
-        if(reduce_type.length() == 0) {
-            // since we haven't been told otherwise, make
-            // std::string the default reduce type:
-            set_reduce_type("std::string");
-        }
-
-        // if there are any products which don't have a specific
-        // reduce type, make sure the default reduce type is in
-        // the set of all types:
-        for(auto prr : rules_for_product) {
-            if(!type_for_product.contains(prr.first)) {
-                all_types.insert(type_for(prr.first));
-                // any others will have the same default, so
-                // no need to do any more:
-                break;
-            }
-        }
+        check_missing_types();
 
         goal = opts.entry_points;
         if(goal.empty()) {
