@@ -30,15 +30,6 @@ public:
               eject(false)
         { }
 
-        friend bool operator<(const step& left, const step& right) {
-            if(left.gexpr.compare(right.gexpr) == 0) {
-                if(left.min_times == right.min_times)
-                    return left.max_times < right.max_times;
-                else
-                    return left.min_times < right.min_times;
-            }
-            return left.gexpr < right.gexpr;
-        }
 
         inline bool is_single() const {
             return((min_times == 1) && (max_times == 1));
