@@ -1,6 +1,8 @@
 #ifndef STRINGFORMAT_H
 #define STRINGFORMAT_H
 
+#include "to_hex.h"
+
 #include <cstdlib>
 #include <list>
 
@@ -40,15 +42,47 @@ struct _has_to_str : std::false_type { };
 template <typename T>
 struct _has_to_str <T, decltype(&T::to_str, 0)> : std::true_type { };
 
+template <typename T, typename = void>
+struct _to_string_exists_for
+    : std::false_type
+{};
+
+template <typename T>
+struct _to_string_exists_for<T,
+    std::void_t<decltype(to_string(std::declval<T>()))>>
+    : std::true_type
+{};
+
+template <typename T, typename = void>
+struct _std_to_string_exists_for
+    : std::false_type
+{};
+
+template <typename T>
+struct _std_to_string_exists_for<T,
+    std::void_t<decltype(std::to_string(std::declval<T>()))>>
+    : std::true_type
+{};
+
 template<typename T>
 std::string _stringformat(T in, const std::string &opts = "") {
-    // if the thing passed has a to_str() method, use that:
-    if constexpr (_has_to_str<T>::value) {
+    if constexpr (std::is_convertible_v<T, std::string> or
+                  std::is_convertible_v<T, std::string_view>) {
+        // it's either already a string or directly convertible
+        return in;
+    } else if constexpr (_has_to_str<T>::value) {
+        // it has a to_str method, so use that:
         return in.to_str();
-    } else {
-        // otherwise use whatever to_string will work:
-        using namespace std;
+    } else if constexpr (_to_string_exists_for<T>::value) {
+        // second choice is a supplied to_string
         return to_string(in);
+    } else if constexpr (_std_to_string_exists_for<T>::value) {
+        // ... or std::to_string.  can't figure out how to make it
+        // find this with just one xxx_exists_for.  moving on:
+        return std::to_string(in);
+    } else {
+        // otherwise the best we can do is hex dump:
+        return "0x" + to_hex(in);
     }
 }
 

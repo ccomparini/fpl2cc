@@ -1,3 +1,5 @@
 here's arg 1: zero
 to string function: called to_str()!
+just data (to hex): 0x000102030405060708090a0b0c0d0e0f10111213141516
 converting newlines: \nyay\n
+list: string 1, things, and stuff

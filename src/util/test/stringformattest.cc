@@ -2,13 +2,25 @@
     a rough stringformat test.
  */
 
-#include <iostream>
 #include "stringformat.h"
+
+#include <iostream>
+#include <variant>
 
 struct i_has_to_str {
     std::string to_str() { return "called to_str()!"; }
 };
 
+struct just_data {
+    static const char max_size = 23;
+    char stuff[max_size];
+
+    just_data() {
+        for(char ind = 0; ind < max_size; ind++) {
+            stuff[ind] = ind;
+        }
+    }
+};
 
 int main() {
     std::cout << stringformat(
@@ -18,7 +30,27 @@ int main() {
     i_has_to_str foo;
     std::cout << stringformat("to string function: {}\n", foo);
 
+    just_data bar;
+    std::cout << stringformat("just data (to hex): {}\n", bar);
+
+    std::variant<
+        i_has_to_str,
+        just_data
+    > bat;
+    bat = bar;
+
+    // convert but don't write the variant version because the
+    // formatted string  will depend on the implementation of
+    // variant.  as long as the stringformat runs we'll consider
+    // it ok.
+    std::string converted_variant = stringformat("{}", bat);
+
     std::cout << stringformat("converting newlines: {::n}\n", "\nyay\n");
+
+    std::list<std::string> buncha_strings = {
+        "string 1", "things", "and stuff"
+    };
+    std::cout << stringformat("list: {}\n", buncha_strings);
 
     return 0;
 }
