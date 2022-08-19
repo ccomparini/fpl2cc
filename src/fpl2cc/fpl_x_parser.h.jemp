@@ -1011,7 +1011,7 @@ public:
 #endif // header guard
 
 @if(opts.generate_main || prds.default_main) {@
-    @prds.default_main_code()@
+    @#fpl_default_main(prds)@
 @} else if(prds.main_guts) {@
     int main(int argc, const char **argv) {
         @prds.main_guts.format()@

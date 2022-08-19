@@ -13,15 +13,15 @@
  */
 
 static fpl_reader_p test_reader() {
-    utf8_buffer input((utf8_byte *)
+    const char *arbitrary = 
         "£23 is the cost. ¡that's 892ƒ for you!\n"
         "达科他盗龙成为了当时仅存的驰龙科之一。"
         "化石发现地位于一个含多个物种的骨层上，"
         "尽管后来发现正模标本和参考标本中部分骨骼属于甲鱼，"
         "但还没有对其潜"
         "ᚻᛖ ᚳᚹᚫᚦ ᚦᚫᛏ ᚻᛖ ᛒᚢᛞᛖ ᚩᚾ ᚦᚫᛗ ᛚᚪᚾᛞᛖ ᚾᚩᚱᚦᚹᛖᚪᚱᛞᚢᛗ ᚹᛁᚦ ᚦᚪ ᚹᛖᛥᚫ"
-        "\r\n👍"
-    );
+        "\r\n👍";
+    utf8_buffer input((utf8_byte *)arbitrary, strlen(arbitrary));
 
     return std::make_shared<fpl_reader>(
         input, "reader.cc-arbitrary_utf8_text"

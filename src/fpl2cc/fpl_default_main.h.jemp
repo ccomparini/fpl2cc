@@ -1,0 +1,24 @@
+@parameter: const productions &prds @
+
+#include "jerror.h"
+#include <iostream>
+
+// default main.
+// the main() generated here is pretty much just a test stub.
+// if people want something fancier, they can make their own.
+int main(int argc, const char **argv) {
+
+    fpl_reader_p inp;
+    if(argc >= 2) {
+        inp = std::make_shared<fpl_reader>(argv[1]);
+    } else {
+        inp = std::make_shared<fpl_reader>(std::cin, "<stdin>");
+    }
+
+    @prds.parser_class_name()@ parser(inp);
+
+    auto result = parser.parse();
+    return parser.error_count()?-1:0;
+}
+
+

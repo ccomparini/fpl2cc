@@ -14,37 +14,56 @@
 #include "util/to_hex.h"
 
 typedef unsigned char utf8_byte;
-typedef std::basic_string<utf8_byte> utf8_buffer;
+struct utf8_buffer : public std::basic_string<utf8_byte> {
+    utf8_buffer() { }
+
+    utf8_buffer(const utf8_byte *src, size_t num_bytes) {
+        assign(src, num_bytes);
+    }
+
+    utf8_buffer(const std::string &fn) {
+        slurp_file(fn);
+    }
+
+    utf8_buffer(std::istream &in) {
+        slurp_stream(in);
+    }
+
+    void slurp_file(const std::string &fn) {
+        std::ifstream in(fn);
+        if(!in.is_open()) {
+            jerror::error(stringformat(
+                "can't open '{}': {}\n", fn, std::string(strerror(errno))
+            ));
+        }
+
+        in.seekg(0, std::ios::end);
+        size_t filesize = in.tellg();
+        in.seekg(0, std::ios::beg);
+
+        utf8_byte buf[filesize + 1];
+        in.read(reinterpret_cast<char *>(buf), filesize + 1);
+        buf[filesize] = '\0';
+        assign(buf, filesize + 1);
+    }
+
+    void slurp_stream(std::istream &in) {
+        const size_t bufsize = 2<<16;
+        utf8_byte buf[bufsize];
+        while(!in.eof()) {
+            in.read((char *)buf, bufsize - 1);
+            buf[bufsize - 1] = '\0';
+            *this += buf;
+        }
+    }
+};
+
 
 class fpl_reader;
 using fpl_reader_p = std::shared_ptr<fpl_reader>;
 using fpl_reader_p_c = std::shared_ptr<const fpl_reader>;
 
 using ErrorCallback = std::function<void(const std::string &error)>;
-
-// returns a utf8 buffer containing the contents
-// of the file indicated by the filename passed.
-utf8_buffer slurp_file(const std::string &fn, ErrorCallback err) {
-    // I hope that this is inlined and doesn't end up making
-    // extra copies of dest...
-    utf8_buffer dest;
-    std::ifstream in(fn);
-    if(!in.is_open()) {
-        err(stringformat(
-            "can't open '{}': {}\n", fn, std::string(strerror(errno))
-        ));
-    }
-
-    in.seekg(0, std::ios::end);
-    size_t filesize = in.tellg();
-    in.seekg(0, std::ios::beg);
-
-    utf8_byte buf[filesize + 1];
-    in.read(reinterpret_cast<char *>(buf), filesize + 1);
-    buf[filesize] = '\0';
-    dest.assign(buf, filesize + 1);
-    return dest;
-}
 
 using LengthCallback = std::function<size_t(const utf8_byte *inp)>;
 
@@ -229,6 +248,17 @@ public:
     }
 
     fpl_reader(
+        std::istream &input,
+        const std::string &infn,
+        ErrorCallback ecb = &default_fail
+    ) :
+        input_filename(infn),
+        buffer(input),
+        on_error(ecb),
+        read_pos(0) {
+    }
+
+    fpl_reader(
         utf8_buffer &input,
         const std::string &infn,
         ErrorCallback ecb = &default_fail
@@ -236,8 +266,7 @@ public:
         input_filename(infn),
         buffer(input),
         on_error(ecb),
-        read_pos(0)
-    {
+        read_pos(0) {
         // for better or worse, we explicitly end the
         // input buffer with a \0:
         buffer.push_back('\0');
@@ -245,10 +274,9 @@ public:
 
     fpl_reader(const std::string &infn, ErrorCallback ecb = &default_fail) :
         input_filename(infn),
-        buffer(slurp_file(infn, ecb)),
+        buffer(infn),
         on_error(ecb),
-        read_pos(0)
-    {
+        read_pos(0) {
     }
 
     inline size_t current_position() const {

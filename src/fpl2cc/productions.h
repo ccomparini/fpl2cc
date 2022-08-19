@@ -1476,32 +1476,6 @@ public:
         return parser_class_name() + "::" + mem;
     }
 
-    std::string default_main_code() const {
-        std::string out("\n\n");
-
-        // the main() generated here is pretty much just a test stub.
-        // if people want something fancier, they can make their own.
-// XXX jemp this too
-        out += "int main(int argc, const char **argv) {\n";
-        out += "    if(argc < 2) {\n";
-        // XXX this is weak;  make the reader able to read stdin
-        // XXX oh I think we can now.  yay.
-        out += "        fpl_reader::default_fail(\n";
-        out += "            \"Please provide a source file name.\\n\"\n";
-        out += "        );\n";
-        out += "    }\n";
-        // XXX this is also weak; handle more than one source
-        out += "    fpl_reader_p inp = std::make_shared<fpl_reader>(argv[1]);\n";
-        out +=      parser_class_name() + " parser(inp);\n";
-        out += "    using namespace std;\n";
-        out += "    auto result = parser.parse();\n";
-        //out += "    printf(\" %s\\n\", to_string(result).c_str());\n";
-        //out += "    fprintf(stderr, \"parser state:\\n%s\\n\", parser.to_str().c_str());\n";
-        out += "    return parser.error_count()?-1:0;\n";
-        out += "}\n\n";
-
-        return out;
-    }
 
     void clear_states() {
         states.clear();
