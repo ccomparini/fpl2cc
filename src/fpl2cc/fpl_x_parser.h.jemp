@@ -80,8 +80,9 @@ public:
         // group indicated by the index passed.
         // for example, if the regex /(.)y(.*)/ matched the string "dyad",
         // capgroup(0) would be "d" and capgroup(1) would be "ad".
+        // default is the 0th capgroup.
         // returns the empty string for any non-existent capture groups.
-        std::string capgroup(int capi) const {
+        std::string capgroup(int capi = 0) const {
             if(capi + 1 < matches.size()) {
                 return matches[capi + 1];
             }
