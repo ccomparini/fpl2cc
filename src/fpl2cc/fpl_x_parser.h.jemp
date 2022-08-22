@@ -351,7 +351,6 @@ public:
 
 
 private:
-    // XXX this is only used at termination.  simplify; move
     StackEntry lr_pop() {
         StackEntry popped;
         if(lr_stack.size() > 0) {
@@ -527,7 +526,8 @@ public:
 
     // call within a reduce function to get a stack slice containing all
     // the arguments to that reduce function.
-    // don't call from outside a reduce function.
+    // don't call from outside a reduce function.  it gets initialized
+    // just before the call. (pass it instead?)
     StackSlice all_args() {
         return StackSlice(*this, lr_arg_base + 1);
     }
@@ -641,45 +641,6 @@ public:
         stop_parsing = true;
     }
 
-    // rewind the stack/input to the latest goal
-    // production.  this is something we used to
-    // do to support partial parses.  it may or may
-    // not be useful, actually, but I'm keeping it
-    // for the moment so that if a particular partial
-    // parse application wanted to act in the old way,
-    // it could call this after parse_partial().
-    void rewind_to_goal() {
-        // Rewind to the last goal production (if there is one),
-        // because:
-        //   1) everything above what we wanted is stuff which didn't
-        //      parse to anything useful, but might be something later
-        //      scans want.  Later scans might be with a different
-        //      parser - rewinding helps support that.
-        //   2) if there's more stuff on the stack below whatever we
-        //      wanted, that's probably a parse error but it's for
-        //      callers to determine and deal with it as they see fit
-        if(!is_goal(last_product)) {
-            size_t rewind_to = reader->current_position();
-
-            while(lr_stack.size() > 0) {
-                StackEntry se = lr_pop();
-                if(is_goal(se.product)) {
-                    last_product = se.product;
-// XXX what if we're in a different file?
-                    rewind_to = se.position();
-                    break;
-                }
-            }
-
-            // if we did remove things from the stack, we need to
-            // reset the read position to just before whatever
-            // we removed from the stack so that callers can know
-            // where parsing stopped (and possibly continue with
-            // some other parsing strategy):
-            reader->go_to(rewind_to);
-        }
-    }
-
     // rewind to the point just after the last nonterminal.
     // this is used after termination to unwind such that the
     // read position is just after the last successfully parsed
@@ -732,6 +693,22 @@ public:
             && ((!eof() || lr_stack.size() > 0) || !is_goal(last_product));
     }
 
+    // resets the state of the parser, discarding anything on
+    // the stack.
+    // does _not_ reset the input position, so as to allow
+    // mixed-parser parses.
+    void reset() {
+        @if(opts.debug) {@
+            std::cerr << "resetting @class_name@!!!\n";
+        @}@
+        lr_stack.clear();
+        set_state(&@class_name@::state_0);
+        last_product     = Product();
+        bytes_eaten      = 0;
+        stop_parsing     = false;
+        num_errors       = 0;
+    }
+
     // In an fpl parser, we do not want to require that the whole
     // input has been consumed.  this allows piecewise parsing.
     // for example, a top down parser can invoke an fpl parser
@@ -746,7 +723,6 @@ public:
     // for errors or whatever and decide what to do.
     //
     void parse_partial() {
-        set_state(&@class_name@::state_0);
         do {
             State st = current_state();
             (this->*st)();
@@ -756,6 +732,26 @@ public:
         } while(more_to_parse());
     }
 
+    // Attempts to parse a goal from the current input.
+    // If we didn't parse a goal, input remains at the
+    // position from the start of parse.
+    // Any additional input after the goal is left and may be
+    // parsed with additional passes of this or another parser.
+    // If whatever we parsed was a goal, we return that and
+    // reset the result to a false product.   Otherwise,
+    // we return a false product.
+    const Product parse_goal() {
+        reset();
+        parse_partial();
+        rewind_to_nonterm();
+        Product got = result();
+        if(is_goal(got)) {
+            last_product = Product();
+            return got;
+        }
+        return Product();
+    }
+
     // Parses the contents of the current reader.
     // Input contents are assumed to be complete.
     // Calls error() if any parse errors were detected.
@@ -763,6 +759,9 @@ public:
     // which might mean returning a default of whatever
     // the reduce type is.
     @prds.reduce_type@ parse() {
+        // we're parsing from initial state...
+        reset();
+
         // errors should be handed up to the caller somehow,
         // but for now I'm going to let callers use parse_partial
         // and figure out errors if that's what they want.
