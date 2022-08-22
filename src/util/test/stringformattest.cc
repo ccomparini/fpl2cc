@@ -5,6 +5,9 @@
 #include "stringformat.h"
 
 #include <iostream>
+#include <list>
+#include <map>
+#include <tuple>
 #include <variant>
 
 struct i_has_to_str {
@@ -51,6 +54,18 @@ int main() {
         "string 1", "things", "and stuff"
     };
     std::cout << stringformat("list: {}\n", buncha_strings);
+
+    std::list<bool> bools = { true, true, false };
+
+    std::tuple<bool, std::string> tuppy = { true, "foo" };
+    std::cout << stringformat("tuple: {}\n", tuppy);
+
+    std::map<std::string, int> some_map = {
+        { "foo", 1 },
+        { "bar", 2 },
+        { "bat", 3 },
+    };
+    std::cout << stringformat("map: {}\n", some_map);
 
     return 0;
 }

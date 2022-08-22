@@ -35,12 +35,28 @@ inline std::string to_string(const std::string &in) {
     return in;
 }
 
+// this must be declared BEFORE the most general _stringformat,
+// or else it never gets matched, but since it calls the
+// more general one, the definition is later
+template <typename T, typename U>
+std::string _stringformat(std::pair<T, U> &x);
+
+// some alternative syntax models I think the WG21 should
+// consider for templates:
+//   http://shakespearelang.sourceforge.net/report/shakespeare/shakespeare.html
+//   https://www.dangermouse.net/esoteric/chef.html
+
 // the next 2 templates are c++ hackery to detect if a thing
 // passed has a to_str() method:
 template <typename T, typename = int>
-struct _has_to_str : std::false_type { };
+struct _has_to_str
+    : std::false_type
+{};
+
 template <typename T>
-struct _has_to_str <T, decltype(&T::to_str, 0)> : std::true_type { };
+struct _has_to_str <T, decltype(&T::to_str, 0)>
+    : std::true_type
+{};
 
 template <typename T, typename = void>
 struct _to_string_exists_for
@@ -64,8 +80,24 @@ struct _std_to_string_exists_for<T,
     : std::true_type
 {};
 
+template <typename T, typename = int>
+struct _is_iterable
+    : std::false_type
+{};
+
+// uhh let's say it's iterable if it has a "begin" method
+// (or, sloppily, anything called "begin")
+// or actually apparently... gah I hate c++.
+// just try to make something work at all.  std::begin.
+// whatevs.  shipit.
+template <typename T>
+//struct _is_iterable <T, decltype(&T::begin, 0)> // apparently begin doesn't count as a member?
+struct _is_iterable <T, decltype(std::begin(std::declval<T&>()), 0)>
+    : std::true_type
+{};
+
 template<typename T>
-std::string _stringformat(T in, const std::string &opts = "") {
+std::string _stringformat(T &in, const std::string &opts = "") {
     if constexpr (std::is_convertible_v<T, std::string> or
                   std::is_convertible_v<T, std::string_view>) {
         // it's either already a string or directly convertible
@@ -80,25 +112,48 @@ std::string _stringformat(T in, const std::string &opts = "") {
         // ... or std::to_string.  can't figure out how to make it
         // find this with just one xxx_exists_for.  moving on:
         return std::to_string(in);
+    } else if constexpr (_is_iterable<T>::value) {
+        // or if it's iterable, recursively compose something
+        // from its elements:
+        std::string out;
+        for(auto el = in.begin(); el != in.end(); ++el) {
+            if(std::next(el) == in.end())
+                out += _stringformat(*el);
+            else
+                out += _stringformat(*el) + ", ";
+        }
+        return "{ " + out + " }";
     } else {
         // otherwise the best we can do is hex dump:
         return "0x" + to_hex(in);
     }
 }
 
-// stringformat for lists - stringifies the elements and joins them,
-// putting the string pssed between each element
-template<typename T>
-std::string _stringformat(const std::list<T> &list, const char *j = ", ") {
+template<typename... Args>
+std::string _stringformat(std::tuple<Args...> &in) {
+    // I read online someplace that std::pair was a special case
+    // of std::tuple, so I was hoping this would cover std::map
+    // entries, but of course it doesn't.  why would I expect
+    // any generality?  whatevs.  leaving it because it does
+    // work for std::tuple.
     std::string out;
-    for(auto el = list.begin(); el != list.end(); ++el) {
-        if(std::next(el) == list.end())
-            out += _stringformat(*el);
-        else
-            out += _stringformat(*el) + j;
-    }
-    return out;
+    std::apply([&out](auto &&... args) {
+        const int num_args = sizeof...(args);
+        const std::string str_arg[] = { _stringformat(args) ... };
+        for(int argn = 0; argn < num_args; argn++) {
+            if(argn > 0) {
+                out += ", ";
+            }
+            out += str_arg[argn];
+        }
+    }, in);
+    return "( " + out + " )";
 }
+
+template <typename T, typename U>
+std::string _stringformat(std::pair<T, U> &x) {;
+    return _stringformat(x.first) + " => " + _stringformat(x.second);
+};
 
 class stringformat_post_processor {
     // {::n} -> translate newlines to "\n"
