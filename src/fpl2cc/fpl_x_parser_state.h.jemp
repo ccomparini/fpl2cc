@@ -54,7 +54,7 @@ void @sfn@() {
             @#fpl_x_parser_reduce_call(prds, prds.rules[reduce_item.rule], opts)@
         @} else {-@
             @if(opts.debug) {-@
-                fprintf(stderr, "    terminating in @sfn@ \n");
+                std::cerr <<  "    terminating in @sfn@ \n";
             @}@
             terminate();
         @}-@
