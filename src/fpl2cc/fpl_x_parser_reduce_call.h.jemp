@@ -26,7 +26,7 @@
             #error Bug: no expression for step @stind@ @rule.to_str()@ @rule.location()@
         @-} else {-@
             StackSliceSpecialization<@prds.type_for(expr->gexpr)@>
-                arg_@stind@(*this, @elid@, @expr->max_times@, lr_arg_base);
+                arg_@stind@(*this, @elid@, @expr->multiple@, lr_arg_base);
         @}-@
     @}-@
     

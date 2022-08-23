@@ -20,19 +20,17 @@ public:
         grammar_element gexpr;
         std::string varname; // if set, name of this expression in reduce code
 
-        int min_times;
-        int max_times;
+        bool optional;
+        bool multiple;
 
         bool eject; // if set, don't pass this to reduce code
 
         step(const std::string &str, grammar_element::Type tp)
-            : gexpr(str,tp), min_times(1), max_times(1),
-              eject(false)
+            : gexpr(str,tp), optional(false), multiple(false), eject(false)
         { }
 
-
         inline bool is_single() const {
-            return((min_times == 1) && (max_times == 1));
+            return !(optional || multiple);
         }
 
         inline bool matches(const grammar_element &other) const {
@@ -65,7 +63,7 @@ public:
         }
 
         inline bool is_optional() const {
-            return min_times == 0;
+            return optional;
         }
 
         inline bool skip_on_reduce() const {
@@ -92,16 +90,12 @@ public:
         inline std::string to_str() const {
             std::string out(gexpr.to_str());
 
-            if((min_times != 1) || (max_times != 1)) {
-                out += "{";
-                out += std::to_string(min_times);
-                out += ",";
-                if(max_times == INT_MAX) {
-                    out += "∞";
-                } else {
-                    out += std::to_string(max_times);
-                }
-                out += "}";
+            if(optional && multiple) {
+                out += "*";
+            } else if(optional) {
+                out += "?";
+            } else if(multiple) {
+                out += "+";
             }
 
             if(varname.length())

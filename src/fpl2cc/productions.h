@@ -404,7 +404,7 @@ class productions {
                     // only need to keep looking for following symbols
                     // if the current one is optional. so, if this expr
                     // is not optional, we're done with this item:
-                    if(right_of_dot->min_times > 0) {
+                    if(!right_of_dot->is_optional()) {
                         break;
                     }
                     pos++;
@@ -428,7 +428,7 @@ class productions {
             const production_rule::step *step = rule.nth_step(item.position);
             if(step && step->matches(sym)) {
                 set.add_expanded(lr_item(item.rule, item.position + 1), rule);
-                if(step->max_times > 1) {
+                if(step->multiple) {
                     // ...if it can be repeated:
                     set.add_expanded(lr_item(item.rule, item.position), rule);
                 }
@@ -751,23 +751,23 @@ public:
     static void read_quantifier(fpl_reader &src, production_rule::step &expr) {
         switch(src.peek()) {
             case '*':
-                expr.min_times = 0;
-                expr.max_times = INT_MAX;
+                expr.optional = true;
+                expr.multiple = true;
                 src.skip_bytes(1);
                 break;
             case '+':
-                expr.min_times = 1;
-                expr.max_times = INT_MAX;
+                expr.optional = false;
+                expr.multiple = true;
                 src.skip_bytes(1);
                 break;
             case '?':
-                expr.min_times = 0;
-                expr.max_times = 1;
+                expr.optional = true;
+                expr.multiple = false;
                 src.skip_bytes(1);
                 break;
             default:
-                expr.min_times = 1;
-                expr.max_times = 1;
+                expr.optional = false;
+                expr.multiple = false;
                 break;
         }
     }

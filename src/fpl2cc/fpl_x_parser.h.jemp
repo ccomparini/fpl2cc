@@ -454,7 +454,8 @@ public:
         // (we only remove from the stack after the reduction rule
         // is executed).  This is so that you can call this multiple
         // times for multiple arguments.
-        StackSlice(@class_name@ &o, int element_id, int max, int &pos) :
+// XXX comment makes less sense now that it's passing boolean multiple
+        StackSlice(@class_name@ &o, int element_id, bool multiple, int &pos) :
             size(0),
             owner(o)
         {
@@ -467,7 +468,7 @@ public:
                 pos--;
                 size++;
 
-                if(size >= max) break;
+                if(!multiple) break;
             }
             base_index = pos + 1;
         }
@@ -550,8 +551,8 @@ public:
 
     template<typename ReduceType>
     struct StackSliceSpecialization : public StackSlice {
-        StackSliceSpecialization(@class_name@ &o, int element_id, int max, int &pos) :
-            StackSlice(o, element_id, max, pos) { }
+        StackSliceSpecialization(@class_name@ &o, int element_id, bool multiple, int &pos) :
+            StackSlice(o, element_id, multiple, pos) { }
 
         // this allows you to pass the stack slice itself from within
         // reduce functions using the at sign (eg thing@@self())
@@ -835,17 +836,19 @@ private:
     @}@
 
     inline bool shift_TERM_EXACT(
-        const std::string &match, int el_id, int min, int max, State new_st
+        const std::string &match, int el_id, State new_st
     ) {
         // if there's a product (nonterminal) up next,
         // we don't want to shift a terminal.
         if(last_product)
             return false;
 
+/*
         // never match optional terminals at eof, because they
         // will always match
         if((min == 0) && eof())
             return false;
+ */
 
         const SourcePosition &pos = position();
         if(reader->read_exact_match(match)) {
@@ -857,7 +860,7 @@ private:
     }
 
     inline bool shift_TERM_REGEX(
-        const std::string &re, int el_id, int min, int max, State new_st
+        const std::string &re, int el_id, State new_st
     ) {
         // (again, don't match if there's a product up next)
         if(last_product)
@@ -867,18 +870,20 @@ private:
         // even if (in the regex case) the regex can match an
         // empty string.  this prevents weird looping at end of
         // file.
+/*
 // XXX but wait, if we're here, how can we be accepting 0 of them?
 // need a proper test case.  is it regex match of empty string?
 // maybe check that at compile time.
         if((min == 0) && eof())
             return false;
+ */
 
         const SourcePosition pos = position();
         std::cmatch match = reader->read_re(re.c_str());
 
-        // XXX bug:  if there's a 0-byte match but max == INF,
-        // the parser ends up looping infinitely reading 0
-        // bytes and saying "ok yeah that matched".
+        // XXX bug:  if there's a 0-byte match but multiple
+        // is allowed, the parser ends up looping infinitely
+        // reading 0 bytes and saying "ok yeah that matched".
         if(!match.empty()) { // note 0-byte match is considered not empty
             Terminal term(match);
             lr_push(new_st, Product(term, el_id, pos));
@@ -890,7 +895,7 @@ private:
     }
 
     inline bool shift_NONTERM_PRODUCTION(
-        const std::string &, int el_id, int min, int max, State new_st
+        const std::string &, int el_id, State new_st
     ) {
         if(last_product && el_id == last_product.grammar_element_id()) {
             lr_push(new_st, last_product);
@@ -901,7 +906,7 @@ private:
     }
 
     inline bool shift_LACK_OF_SEPARATOR(
-        const std::string &, int el_id, int min, int max, State new_st
+        const std::string &, int el_id, State new_st
     ) {
         if(!bytes_eaten) {
             Terminal term("⦑lack-of-separator⦒");
