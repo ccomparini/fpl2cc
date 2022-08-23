@@ -34,7 +34,6 @@ class productions {
     std::string reduce_type; // default reduce type
     std::map<std::string, std::string> type_for_product; // (reduce type for particular product)
     std::set<std::string> all_types; // for deduplication
-    std::set<std::string> alias_candidates; // type names
 
     std::list<std::string> imports; // filenames
     code_block default_action;
