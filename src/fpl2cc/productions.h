@@ -613,6 +613,27 @@ public:
         return inp->read_re("[ \\t]*([^@\\x0a-\\x0d]+)[ \\t]*\n")[1];
     }
 
+    void add_goal(const std::string raw_goal) {
+        // the goal is either simply a production name,
+        // or grammar_name.production_name.  so see which:
+        size_t grammar_end = raw_goal.find('.');
+        if(grammar_end != std::string::npos) {
+            // if the dot is at the start or end, we're missing
+            // either the production or the grammar:
+            if(grammar_end >= raw_goal.length() || grammar_end == 0) {
+                error(stringformat("invalid goal '{}'\n", raw_goal));
+            }
+
+            std::string grammar_name = raw_goal.substr(0, grammar_end);
+            std::string production   = raw_goal.substr(grammar_end + 1);
+            import_grammar(subgrammar(grammar_name), production);
+            goal.push_back(production);
+        } else {
+            // it's a simple goal name:
+            goal.push_back(raw_goal);
+        }
+    }
+
     void parse_directive(const std::string &dir) {
         if(dir == "comment_style") {
             // this is a near synonym with @separator
@@ -634,7 +655,7 @@ public:
             if(!newgoal.length()) {
                 error("can't parse the @goal");
             } else {
-                goal.push_back(newgoal);
+                add_goal(newgoal);
             }
         } else if(dir == "grammar") {
             // import the grammar from another fpl:
