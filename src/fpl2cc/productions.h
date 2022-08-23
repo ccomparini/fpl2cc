@@ -428,7 +428,7 @@ class productions {
             const production_rule::step *step = rule.nth_step(item.position);
             if(step && step->matches(sym)) {
                 set.add_expanded(lr_item(item.rule, item.position + 1), rule);
-                if(step->multiple) {
+                if(step->qty.multiple) {
                     // ...if it can be repeated:
                     set.add_expanded(lr_item(item.rule, item.position), rule);
                 }
@@ -751,23 +751,23 @@ public:
     static void read_quantifier(fpl_reader &src, production_rule::step &expr) {
         switch(src.peek()) {
             case '*':
-                expr.optional = true;
-                expr.multiple = true;
+                expr.qty.optional = true;
+                expr.qty.multiple = true;
                 src.skip_bytes(1);
                 break;
             case '+':
-                expr.optional = false;
-                expr.multiple = true;
+                expr.qty.optional = false;
+                expr.qty.multiple = true;
                 src.skip_bytes(1);
                 break;
             case '?':
-                expr.optional = true;
-                expr.multiple = false;
+                expr.qty.optional = true;
+                expr.qty.multiple = false;
                 src.skip_bytes(1);
                 break;
             default:
-                expr.optional = false;
-                expr.multiple = false;
+                expr.qty.optional = false;
+                expr.qty.multiple = false;
                 break;
         }
     }

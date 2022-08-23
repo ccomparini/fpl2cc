@@ -20,17 +20,20 @@ public:
         grammar_element gexpr;
         std::string varname; // if set, name of this expression in reduce code
 
-        bool optional;
-        bool multiple;
+        struct quantifier {
+            bool optional;
+            bool multiple;
+            quantifier() : optional(false), multiple(false) { }
+        } qty;
 
         bool eject; // if set, don't pass this to reduce code
 
         step(const std::string &str, grammar_element::Type tp)
-            : gexpr(str,tp), optional(false), multiple(false), eject(false)
+            : gexpr(str,tp), eject(false)
         { }
 
         inline bool is_single() const {
-            return !(optional || multiple);
+            return !(qty.optional || qty.multiple);
         }
 
         inline bool matches(const grammar_element &other) const {
@@ -63,7 +66,7 @@ public:
         }
 
         inline bool is_optional() const {
-            return optional;
+            return qty.optional;
         }
 
         inline bool skip_on_reduce() const {
@@ -90,11 +93,11 @@ public:
         inline std::string to_str() const {
             std::string out(gexpr.to_str());
 
-            if(optional && multiple) {
+            if(qty.optional && qty.multiple) {
                 out += "*";
-            } else if(optional) {
+            } else if(qty.optional) {
                 out += "?";
-            } else if(multiple) {
+            } else if(qty.multiple) {
                 out += "+";
             }
 
