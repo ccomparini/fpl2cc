@@ -695,7 +695,7 @@ public:
         }
     }
 
-    void push_rule(production_rule &rule) {
+    void add_rule(production_rule &rule) {
         int rule_num = rules.size();
         rule.set_rulenum(rule_num);
 
@@ -1212,7 +1212,7 @@ public:
                         rule.code(code);
                     }
 
-                    push_rule(rule);
+                    add_rule(rule);
                 }
             }
         } while(!inp->eof());
@@ -1311,7 +1311,7 @@ public:
         int num_imported = 0;
         for(auto rule : from.rules) {
             if(wanted.count(rule.product()) > 0) {
-                push_rule(rule);
+                add_rule(rule);
                 num_imported++;
             }
         }
