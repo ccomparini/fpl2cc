@@ -5,6 +5,7 @@
 
 #include <cstdlib>
 #include <list>
+#include <tuple>
 
 // OK SO #include<format> doen't seem to exist on my machine.
 // let the reinvention commence.
