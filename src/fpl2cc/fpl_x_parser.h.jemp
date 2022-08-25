@@ -612,13 +612,18 @@ public:
     // this is more or less debugging
     std::string to_str() const {
         std::string out;
-        
-        out += stringformat("next up: {::n}\n", last_product);
-        out += stringformat(
-            "input ({}:{::n}): «{}»\n",
-            reader->filename(), reader->current_position(),
-            reader->debug_peek(32)
-        );
+
+        std::string next_up;
+        if(last_product) {
+            next_up = last_product.to_str();
+        } else {
+            next_up = stringformat(
+                "«{}» ({}:{::n})",
+                reader->debug_peek(32),
+                reader->filename(), reader->current_position()
+            );
+        }
+        out += stringformat("next up: {::n}\n", next_up);
         out += stringformat("stack ({} items)\n", lr_stack.size());
         for(int sind = lr_stack.size() - 1; sind >= 0; --sind) {
             out += stringformat(
@@ -727,9 +732,6 @@ public:
         do {
             State st = current_state();
             (this->*st)();
-            @if(opts.debug) {@
-                debug_pause();
-            @}@
         } while(more_to_parse());
     }
 
@@ -843,19 +845,26 @@ private:
         if(last_product)
             return false;
 
-/*
-        // never match optional terminals at eof, because they
-        // will always match
-        if((min == 0) && eof())
-            return false;
- */
+        @if(opts.debug) {@
+            std::cerr << stringformat(
+                "maybe shift '{}' to {}? ",
+                element_str(el_id), state_to_str(new_st)
+            );
+        @}@
 
         const SourcePosition &pos = position();
         if(reader->read_exact_match(match)) {
+            @if(opts.debug) {@
+                std::cerr << "yes\n";
+            @}@
             lr_push(new_st, Product(Terminal(match), el_id, pos));
             bytes_eaten = 0;
             return true;
         }
+
+        @if(opts.debug) {@
+            std::cerr << "no\n";
+        @}@
         return false;
     }
 
@@ -866,17 +875,12 @@ private:
         if(last_product)
             return false;
 
-        // as with exact matches, we never match at end of file,
-        // even if (in the regex case) the regex can match an
-        // empty string.  this prevents weird looping at end of
-        // file.
-/*
-// XXX but wait, if we're here, how can we be accepting 0 of them?
-// need a proper test case.  is it regex match of empty string?
-// maybe check that at compile time.
-        if((min == 0) && eof())
-            return false;
- */
+        @if(opts.debug) {@
+            std::cerr << stringformat(
+                "maybe shift /{}/ to {}? ",
+                element_str(el_id), state_to_str(new_st)
+            );
+        @}@
 
         const SourcePosition pos = position();
         std::cmatch match = reader->read_re(re.c_str());
@@ -885,23 +889,41 @@ private:
         // is allowed, the parser ends up looping infinitely
         // reading 0 bytes and saying "ok yeah that matched".
         if(!match.empty()) { // note 0-byte match is considered not empty
+            @if(opts.debug) {@
+                std::cerr << "yes\n";
+            @}@
             Terminal term(match);
             lr_push(new_st, Product(term, el_id, pos));
             bytes_eaten = 0;
             return true;
         }
 
+        @if(opts.debug) {@
+            std::cerr << "no\n";
+        @}@
         return false;
     }
 
     inline bool shift_NONTERM_PRODUCTION(
         const std::string &, int el_id, State new_st
     ) {
+        @if(opts.debug) {@
+            std::cerr << stringformat(
+                "maybe shift {} to {}? ",
+                element_str(el_id), state_to_str(new_st)
+            );
+        @}@
         if(last_product && el_id == last_product.grammar_element_id()) {
+            @if(opts.debug) {@
+                std::cerr << "yes\n";
+            @}@
             lr_push(new_st, last_product);
             last_product = Product();
             return true;
         }
+        @if(opts.debug) {@
+            std::cerr << "no\n";
+        @}@
         return false;
     }
 
@@ -925,6 +947,8 @@ public:
         @-}-@
     } ElementID;
 
+    // deprecated.  use element_str instead (which handles terminals
+    // as well)
     static std::string nonterm_str(int id) {
         switch(id) {
             @for(int el_id = 0; el_id < prds.elements.size(); ++el_id) {-@
@@ -935,6 +959,18 @@ public:
             @-}-@
         }
         return std::to_string(id) + " is not a nonterm.";
+    }
+
+    // returns a string describing the element matching the ID
+    // passed. this is for debugging.
+    static std::string element_str(int id) {
+        switch(id) {
+            @for(int el_id = 0; el_id < prds.elements.size(); ++el_id) {-@
+                @declare el: prds.elements[el_id]@
+                case @el_id@: return "@c_str_escape(el.expr)@";
+            @-}-@
+        }
+        return stringformat("¡unknown element id {}!", id);
     }
 
     static bool is_terminal(int id) {

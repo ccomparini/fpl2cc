@@ -18,11 +18,12 @@ void @sfn@() {
 
     @if(opts.debug) {@
         std::cerr << stringformat(
-            "=============\n{}\n"
-            "{} bytes of separator since last terminal\n{}",
-            state_string(&@prds.fq_member_name(sfn)@),
-            b_eaten, to_str()
+            "=============\n"
+            "{}\n{} bytes of separator since last terminal\nstate:{}\n--\n",
+            *this, b_eaten,
+            state_string(&@prds.fq_member_name(sfn)@)
         );
+        debug_pause();
     @}@
 
     @for(auto trans : prds.transitions_for_state(state)) {-@

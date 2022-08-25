@@ -100,7 +100,6 @@ struct grammar_element {
         out += expr;
         out += rb;
 
-
         return out;
     }
 };
