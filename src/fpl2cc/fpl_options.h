@@ -25,7 +25,7 @@ struct fpl_options {
     bool help;
     bool single_step;
     std::string depfile;
-    bool dump_states;
+    std::string statedump;
     bool dump_dependencies;
 
     bool new_parser;
@@ -50,6 +50,30 @@ struct fpl_options {
         }
     }
 
+    // for some options, we allow the user to specify
+    // just a filename extension (by starting the name
+    // with a '.'), in which case the full filename
+    // will be based on the output_fn.
+    std::string infer_filename(const std::string &spec) {
+        if(spec[0] != '.') {
+            // assume it's a full filename:
+            return spec;
+        } else {
+            // starts with a "." so it's a filename extension:
+            if(!output_fn.length()) {
+                error("can't infer file name: no output specified");
+            } else {
+                std::filesystem::path pt(output_fn);
+                pt.remove_filename();
+                std::string bn = std::filesystem::path(output_fn).stem();
+                return pt.string() + bn + spec;
+            }
+        }
+        // theoretically, we can't get here:
+        error("mass confusion in infer_filename");
+        return "";
+    }
+
     // janky, but good enough:
     // (move to some kind of json spec to describe options in
     // general)
@@ -63,7 +87,6 @@ struct fpl_options {
         generate_main(false),
         help(false),
         single_step(false),
-        dump_states(false),
         dump_dependencies(false),
         new_parser(false)
     {
@@ -98,8 +121,6 @@ struct fpl_options {
                     } else if(opt == "debug-single-step") {
                         debug = true;
                         single_step = true;
-                    } else if(opt == "debug-dump-states") {
-                        dump_states = true;
                     } else if(opt == "depfile") {
                         SCAN_VALUE();
                         if(val.empty())
@@ -138,6 +159,11 @@ struct fpl_options {
                     } else if(opt == "src-path") {
                         SCAN_VALUE();
                         src_path.append(val);
+                    } else if(opt == "statedump") {
+                        SCAN_VALUE();
+                        if(val.empty())
+                            errors.push_back("--statedump requires filename");
+                        statedump = val;
                     } else {
                         error("Unknown option: --" + opt);
                     }
@@ -155,16 +181,8 @@ struct fpl_options {
         // consider the depfile name to be the extension and use the
         // fpl base name.  this makes it easier to jam into scons,
         // which basically wants a separate depfile per source.
-        if(depfile[0] == '.') {
-            if(!output_fn.length()) {
-                error("can't infer depfile name: no output specified");
-            } else {
-                std::filesystem::path pt(output_fn);
-                pt.remove_filename();
-                std::string bn = std::filesystem::path(output_fn).stem();
-                depfile = pt.string() + bn + depfile;
-            }
-        }
+        depfile = infer_filename(depfile);
+        statedump = infer_filename(statedump);
 
         // if no output filename was specified, write to stdout:
         if(!output_fn.length()) {
@@ -193,7 +211,6 @@ struct fpl_options {
             "Options:\n"
             "\t--debug - emebed debug blather in target code\n"
             "\t--debug-single-step - as above plus pauses\n"
-            "\t--debug-dump-states - print generated states\n"
             "\t--depfile=<fn> - generate ninja/make depend file\n"
             "\t--dump-dependencies - print import dependencies\n"
             "\t--goal=<product> - specify a target production\n"
@@ -201,7 +218,8 @@ struct fpl_options {
             "\t--help - show this page\n"
             "\t--no-generate-code - parse (and other options) only\n"
             "\t--out=<fn> - write to fn instead of stdout\n"
-            "\t--src-path=<path> - search the dirs given (':' delimited)\n",
+            "\t--src-path=<path> - search the dirs given (':' delimited)\n"
+            "\t--statedump=<fn> - dump generated states to file\n",
             version()
         );
     }
