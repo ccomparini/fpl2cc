@@ -216,21 +216,7 @@ class productions {
         // are identical (within these productions) or not.
         std::string id() const {
             if(_id_cache.length() == 0) {
-                // I hate assert but it's been bugging me that the size of
-                // the rule/position could change and cause this to break, so:
-                const int len_each = 2*(sizeof(lr_item::rule) + sizeof(lr_item::position));
-                assert(8 == len_each);
-                const int len = items.size()*len_each + 1;
-                char buf[len];
-                char *bw = buf;
-                for(auto it : items) {
-                    snprintf(
-                        bw, len_each+1, "%04x%04x", it.rule, it.position
-                    );
-                    bw += len_each;
-                }
-                buf[len - 1] = '\0';
-                _id_cache = std::string(buf);
+                _id_cache = bs_to_hex(items, "-");
             }
             return _id_cache;
         }
