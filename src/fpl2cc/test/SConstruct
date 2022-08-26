@@ -80,8 +80,7 @@ for fpl in fpls :
             src_suffix = language) } )
 
     # .. and, the language program is built from <lang>.fpl
-    #env.Fpl2cc(language + '.cc', [ langprog + '.fpl' ])
-    env.Fpl2cc(language + '.cc', [ langprog + '.fpl' ], FPLOPTS="--statedump .states")
+    env.Fpl2cc(language + '.cc', [ langprog + '.fpl' ])
     #env.Fpl2cc(language + '.cc', [ langprog + '.fpl' ], FPLOPTS="--debug")
     #env.Fpl2cc(language + '.cc', [ langprog + '.fpl' ], FPLOPTS="--generate-main --debug")
     #env.Fpl2cc(language + '.cc', [ langprog + '.fpl' ], FPLOPTS="--debug-single-step")

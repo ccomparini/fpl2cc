@@ -116,7 +116,7 @@ def depend_on_fpl2cc(target, source, env) :
 
 
 # fpl -> cc builder:
-fpl_args = '--src-path=' + ':'.join(fpl_include_dirs) + ' $FPLOPTS $SOURCES --out $TARGET --depfile .deps'
+fpl_args = '--src-path=' + ':'.join(fpl_include_dirs) + ' $FPLOPTS $SOURCES --out $TARGET --depfile .deps --statedump .states'
 env.Append(BUILDERS =
     { 'Fpl2cc' : Builder(action = debugger + 'bin/fpl2cc ' + fpl_args,
                  emitter = depend_on_fpl2cc,
