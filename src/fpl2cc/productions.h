@@ -30,6 +30,7 @@ class productions {
     // for imports and such:
     using subgrammar_p = std::unique_ptr<productions>;
     std::map<std::string, subgrammar_p> sub_productions; // grammar name -> productions
+    std::set<std::string> exported_products; // exported to that of which this is a sub
 
     std::string reduce_type; // default reduce type
     std::map<std::string, std::string> type_for_product; // (reduce type for particular product)
@@ -826,8 +827,8 @@ public:
     // want to import multiple pieces of a given subgrammar, we
     // don't have to read and parse the source for that multiple
     // times.
-    const productions *subgrammar(const std::string &grammar_name) {
-        const productions *out = nullptr;
+    productions *subgrammar(const std::string &grammar_name) {
+        productions *out = nullptr;
 
         auto exsp = sub_productions.find(grammar_name);
         if(exsp != sub_productions.end()) {
@@ -838,7 +839,7 @@ public:
             );
             sub->parse_fpl();
             out = sub.get();
-            sub_productions[grammar_name] = move(sub);
+            sub_productions[grammar_name] = std::move(sub);
         }
 
         return out;
@@ -1251,15 +1252,17 @@ public:
     // to support those rules.
     // returns the name of the production which this import will
     // produce, or an empty string if nothing was imported.
+    // NOTE the grammar passed isn't const because we also use
+    // it as a scratch pad to prevent redundant imports.
     std::string import_grammar(
-        const productions *fromp, const std::string &pname = ""
+        productions *fromp, const std::string &pname = ""
     ) {
         if(!fromp) {
             error(stringformat(
                 "can't import {}: no source productions.\n", pname
             ));
         }
-        const productions &from = *fromp;
+        productions &from = *fromp;
 
         std::string src_fn = from.inp->filename();
 
@@ -1282,6 +1285,7 @@ public:
         } else if(from.rules.size()) {
             // no particular production specified.  import the
             // default (first) production.
+            // (should this use goals, now?  probably, yes)
             import_name = from.rules[0].product();
         }
 
@@ -1293,15 +1297,22 @@ public:
         // ... and now import the relevant rules.
         // NOTE that we import the rules IN ORDER because
         // changing the rule order changes precedence.
-        int num_imported = 0;
+        // (hence we don't do this via rules_for_product)
+        int num_found = 0;
         for(auto rule : from.rules) {
             if(wanted.count(rule.product()) > 0) {
-                add_rule(rule);
-                num_imported++;
+                num_found++;
+                if(from.exported_products.count(rule.product()) == 0) {
+                    add_rule(rule);
+                } // else rules for this product are already imported
             }
         }
 
-        if(num_imported <= 0) {
+        for(auto got : wanted) {
+            from.exported_products.insert(got);
+        }
+
+        if(num_found <= 0) {
             warn(
                 stringformat("No rules imported for {} from {}",
                 import_name, from.inp->filename())
