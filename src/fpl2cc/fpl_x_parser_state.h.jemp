@@ -18,10 +18,9 @@ void @sfn@() {
 
     @if(opts.debug) {@
         std::cerr << stringformat(
-            "=============\n"
-            "{}\n{} bytes of separator since last terminal\nstate:{}\n--\n",
-            *this, b_eaten,
-            state_string(&@prds.fq_member_name(sfn)@)
+            "======= @sfn@ =======\n"
+            "{}\n{}\n--\n",
+            state_string(&@prds.fq_member_name(sfn)@), *this
         );
         debug_pause();
     @}@
@@ -46,9 +45,8 @@ void @sfn@() {
     {
         @if(reduce_item) {-@
             @if(opts.debug) {-@
-                fprintf(stderr, "    @sfn@ is going to reduce to a %s\n", 
-                    "@c_str_escape(reduce_item.to_str(&prds))@"
-                );
+                std::cerr << "    @sfn@ is going to reduce to a "
+                             "@c_str_escape(reduce_item.to_str(&prds))@";
             @-}-@
             @#fpl_x_parser_reduce_call(prds, prds.rules[reduce_item.rule], opts)@
         @} else {-@
@@ -58,4 +56,7 @@ void @sfn@() {
             terminate();
         @}-@
     }
+    @if(opts.debug) {-@
+        std::cerr << "======= @sfn@ end =======\n";
+    @}@
 }

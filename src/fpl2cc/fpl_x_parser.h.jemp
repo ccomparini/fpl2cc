@@ -624,14 +624,15 @@ public:
             );
         }
         out += stringformat("next up: {::n}\n", next_up);
+        out += stringformat(
+            "{} bytes of separator since last terminal\n", bytes_eaten
+        );
         out += stringformat("stack ({} items)\n", lr_stack.size());
         for(int sind = lr_stack.size() - 1; sind >= 0; --sind) {
             out += stringformat(
                 "    [{}] {}\n", sind, lr_stack_entry(sind).to_str()
             );
         }
-        out += "\n";
-
         return out;
     }
 
