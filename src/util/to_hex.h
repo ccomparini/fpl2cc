@@ -23,11 +23,12 @@ std::string to_hex(const T &inst) {
 }
 
 template<class TT>
-std::string bs_to_hex(const TT &in) {
+std::string bs_to_hex(const TT &in, const std::string &separator = " ") {
     std::string out;
     for(auto el : in) {
+        if(out.length())
+            out += separator;
         out += to_hex(el);
-        out += ' ';
     }
     return out;
 }
