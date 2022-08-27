@@ -1173,11 +1173,11 @@ public:
                     // the production (including the "->").
                     // read what the expressions above produce:
                     inp->eat_separator();
-                    std::cmatch pname = inp->read_re("[A-Za-z][A-Za-z0-9_]+");
+                    std::string pname = read_production_name(*inp);
                     if(!pname.length()) {
                         error("invalid production name\n");
                     } else {
-                        rule.product(pname[0]);
+                        rule.product(pname);
                     }
 
                     inp->eat_separator();
