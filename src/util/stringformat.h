@@ -157,6 +157,54 @@ std::string _stringformat(std::pair<T, U> &x) {;
 };
 
 class stringformat_post_processor {
+    // {::c} -> columnate output (on tabs)
+    static std::string c(const std::string &in) {
+        std::list<int> colwidths;
+
+        // find out the starts and widths of the columns:
+        int cw = 0;
+        colwidths.push_back(0);
+        auto col = colwidths.begin();
+        for(size_t pos = 0; pos < in.length(); ++pos) {
+            cw++; // (the column terminator counts as part of the column)
+            // tab, newline, or end of string ends the column:
+            if(in[pos] == '\t' || in[pos] == '\n' || (pos + 1 >= in.length())) {
+                if(cw > *col) {
+                    *col = cw;
+                }
+
+                if(std::next(col) == colwidths.end())
+                    colwidths.push_back(0);
+
+                // .. and newline puts us back to the first column:
+                if(in[pos] == '\n') col = colwidths.begin();
+                else                col = std::next(col);
+                cw = 0;
+            }
+        }
+
+        std::string out;
+        auto colw = colwidths.begin();
+        for(size_t pos = 0; pos < in.length(); pos++) {
+            size_t eoc = in.find_first_of("\t\n", pos);
+            if(eoc == std::string::npos) eoc = in.length();
+
+            out += in.substr(pos, eoc - pos);
+            for(int pad = 0; pad < *colw - (eoc - pos); ++pad)
+                out += " ";
+
+            if(in[eoc] == '\n' || std::next(colw) == colwidths.end()) {
+                colw = colwidths.begin();
+                out += "\n";
+            } else {
+                colw = std::next(colw);
+            }
+
+            pos = eoc;
+        }
+        return out;
+    }
+
     // {::n} -> translate newlines to "\n"
     static std::string n(const std::string &in) {
         std::string out;
@@ -175,6 +223,7 @@ class stringformat_post_processor {
 public:
     static std::string process(char fmt, const std::string &in) {
         switch(fmt) {
+            case 'c': return c(in);
             case 'n': return n(in);
         }
         // .. would be nice to warn about missing format here....

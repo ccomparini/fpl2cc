@@ -67,6 +67,17 @@ int main() {
     };
     std::cout << stringformat("map: {}\n", some_map);
 
+    // tab columnation:  this might not be the awesomest
+    // interface, actually, because you probably want to
+    // columnate the arguments or .. something.  anyway
+    // it'll work for now:
+    std::cout << stringformat("{::c}\n",
+        "a\tb\tc\n"
+        "deeeee\n"
+        "\te\teff\tgee\thaitch\n"
+        "\t\teye"
+    );
+
     return 0;
 }
 
