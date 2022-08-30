@@ -189,14 +189,15 @@ class stringformat_post_processor {
             size_t eoc = in.find_first_of("\t\n", pos);
             if(eoc == std::string::npos) eoc = in.length();
 
-            out += in.substr(pos, eoc - pos);
-            for(int pad = 0; pad < *colw - (eoc - pos); ++pad)
-                out += " ";
+            size_t len = eoc - pos;
+            out += in.substr(pos, len);
 
             if(in[eoc] == '\n' || std::next(colw) == colwidths.end()) {
-                colw = colwidths.begin();
                 out += "\n";
+                colw = colwidths.begin();
             } else {
+                for(int pad = 0; pad < *colw - len; ++pad)
+                    out += " ";
                 colw = std::next(colw);
             }
 
