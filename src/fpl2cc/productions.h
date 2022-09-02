@@ -173,7 +173,10 @@ class productions {
             return prds.rules[rule].nth_step(position);
         }
 
-        std::string to_str(const productions *prds) const {
+        std::string to_str(
+            const productions *prds,
+            const lr_set *state = nullptr
+        ) const {
             if(!prds) return "NULL productions";
 
             const production_rule &rl = prds->rules[rule];
@@ -193,6 +196,20 @@ class productions {
             }
             if(step == position)
                 out += "•";
+
+            if(state) {
+                auto st = rl.nth_step(position);
+                if(!st) {
+                    out += stringformat("\t-> (reduce)");
+                } else {
+                    for(auto trans : prds->transitions_for_state(*state)) {
+                        auto rod = trans.right_of_dot;
+                        if(rod && rod->gexpr == st->gexpr) {
+                            out += stringformat("\t-> state {}", trans.next_state_number);
+                        }
+                    }
+                }
+            }
 
             return out;
         }
@@ -297,9 +314,9 @@ class productions {
             for(auto it : items) {
                 out += line_prefix;
                 if(stringescape)
-                    out += c_str_escape(it.to_str(prds));
+                    out += c_str_escape(it.to_str(prds, this));
                 else
-                    out += it.to_str(prds);
+                    out += it.to_str(prds, this);
 
                 out += line_suffix;
 
