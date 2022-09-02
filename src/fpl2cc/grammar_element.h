@@ -47,6 +47,10 @@ struct grammar_element {
         return left.compare(right) < 0;
     }
 
+    friend bool operator==(const grammar_element& left, const grammar_element& right) {
+        return left.compare(right) == 0;
+    }
+
     inline bool is_terminal() const {
         return (type != NONTERM_PRODUCTION);
     }
