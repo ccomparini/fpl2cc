@@ -29,6 +29,8 @@ struct grammar_element {
         return "invalid grammar_element::Type";
     }
 
+    grammar_element() : expr(""), type(Type::NONE) { }
+
     grammar_element(const std::string &str, Type tp)
         : expr(str), type(tp) { }
 
@@ -51,8 +53,13 @@ struct grammar_element {
         return left.compare(right) == 0;
     }
 
+    // XXX phase out:
     inline bool is_terminal() const {
-        return (type != NONTERM_PRODUCTION);
+        return !is_nonterminal();
+    }
+
+    inline bool is_nonterminal() const {
+        return (type == NONTERM_PRODUCTION);
     }
 
     std::string nonterm_id_str() const {

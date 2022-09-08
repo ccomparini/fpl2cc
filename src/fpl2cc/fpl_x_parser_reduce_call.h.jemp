@@ -21,12 +21,12 @@
     lr_arg_base = frame_start;  // (gets updated as we create args)
     @for(int stind = rule.num_steps() - 1; stind >= 0; --stind) {-@
         @declare expr: rule.nth_step(stind)@
-        @declare elid: prds.element_index.at(expr->gexpr)@
+        @declare elid: prds.element_index.at(expr.gexpr)@
         @if(!expr) {-@
             #error Bug: no expression for step @stind@ @rule.to_str()@ @rule.location()@
         @-} else {-@
-            StackSliceSpecialization<@prds.type_for(expr->gexpr)@>
-                arg_@stind@(*this, @elid@, @expr->qty.multiple@, lr_arg_base);
+            StackSliceSpecialization<@prds.type_for(expr.gexpr)@>
+                arg_@stind@(*this, @elid@, @expr.qty.multiple@, lr_arg_base);
         @}-@
     @}-@
     

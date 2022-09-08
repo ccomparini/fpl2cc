@@ -1,7 +1,6 @@
 @parameter: const productions &prds @
 @parameter: const productions::lr_set &state @
 @parameter: const fpl_options &opts @
-@declare reduce_item: state.reduction_item(&prds) @
 @declare sfn: prds.state_fn(state) @
 @realign: #line {} "{}" @
 
@@ -25,24 +24,24 @@ void @sfn@() {
         debug_pause();
     @}@
 
-    @for(auto trans : prds.transitions_for_state(state)) {-@
-        @-if(auto right_of_dot = trans.right_of_dot) {-@
-            @declare type: right_of_dot->gexpr.type_str()@
-            @declare str: right_of_dot->terminal_string()@
-            @declare el_id: prds.element_id_name(right_of_dot->gexpr)@
-            @declare next_state: prds.state_fn(trans.next_state_number, true)@
-            @- "" @if(shift_@type@("@str@", @el_id@, &@next_state@)) {
-                @if(opts.debug) {@
-                    std::cerr << stringformat(
-                        "   matched @el_id@ ({}) at «{}»\n"
-                        "   next state:  &@next_state@\n",
-                        "@str@", reader->debug_peek()
-                    );
-                @}@
-            } else @ "" -@
-        @-}-@
+    @for(auto trans : state.transitions(prds)) {-@
+        @declare right_of_dot: trans.right_of_dot@
+        @declare type: right_of_dot.type_str()@
+        @declare str: c_str_escape(right_of_dot.expr)@
+        @declare el_id: prds.element_id_name(right_of_dot)@
+        @declare next_state: prds.state_fn(trans.next_state_number, true)@
+        @- "" @if(shift_@type@("@str@", @el_id@, &@next_state@)) {
+            @if(opts.debug) {@
+                std::cerr << stringformat(
+                    "   matched @el_id@ ({}) at «{}»\n"
+                    "   next state:  &@next_state@\n",
+                    "@str@", reader->debug_peek()
+                );
+            @}@
+        } else @ "" -@
     @-}-@
     {
+        @declare reduce_item: state.reduction_item() @
         @if(reduce_item) {-@
             @if(opts.debug) {-@
                 std::cerr << "    @sfn@ is going to reduce to a "

@@ -31,9 +31,7 @@
         static const char *argname(unsigned int argi) {
             static const char *an[] = {
                 @for(int sti = 0; sti < rule.num_steps(); ++sti) {-@
-                    @if(const production_rule::step *st = rule.nth_step(sti)) {-@
-                        "@st->variable_name()@"
-                    @}-@
+                    "@rule.nth_step(sti).variable_name()@"
                 @}-@
             };
             if(argi < @rule.num_steps()@) {

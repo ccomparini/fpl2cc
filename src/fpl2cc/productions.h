@@ -11,6 +11,7 @@
 #include "util/reformat_code.h"
 #include "util/src_location.h"
 #include "util/stringformat.h"
+#include "util/to_hex.h"
 
 #include <list>
 #include <map>
@@ -56,17 +57,31 @@ class productions {
     std::list<reducer> reducers;
 
     class lr_set;
-    std::vector<lr_set> states;
-    std::map<std::string, int> state_index; // keyed by set id
 
+    std::vector<lr_set> states;
+    std::map<std::string, int32_t> state_index; // set id -> index in states
 
     static void warn(const std::string &msg) { jerror::warning(msg); };
+
+    static std::string format_error_message(
+        const std::string &location,
+        const std::string &msg
+    ) {
+        const char *nl = "";
+        if(msg[msg.length() - 1] != '\n')
+            nl = "\n";
+
+        return stringformat("Error {}: {}{}", location, msg, nl);
+    }
 
     // report an error relative to the file for the reader passed
     static void error(
         const fpl_reader &rdr, size_t pos, const std::string &msg
     ) {
-        jerror::error(rdr.format_error_message(pos, msg).c_str());
+        std::string location = stringformat(
+            "{} near «{}»", rdr.location_str(pos), rdr.debug_peek(pos, 12)
+        );
+        jerror::error(format_error_message(location, msg));
     }
 
     // report an error at the given SourcePosition
@@ -85,19 +100,17 @@ class productions {
         error(*inp, inp->current_position(), msg);
     }
 
+    // report an error at a possibly-not-input-file location:
+    void error(const std::string &loc, const std::string &msg) const {
+        jerror::error(format_error_message(loc, msg));
+    }
+
     // call this if there's a fatal bug detected at execution time:
     static void internal_error(
         const std::string &msg, src_location caller = CALLER()
     ) {
         jerror::error(stringformat("Internal error: {} at {}", msg, caller));
         exit(1);
-    }
-
-    void add_state(const lr_set &st) {
-        state_index.insert(
-            std::make_pair(st.id(), states.size())
-        );
-        states.push_back(st);
     }
 
     // records the fact that the given grammar element exists
@@ -111,10 +124,10 @@ class productions {
     // this is the name of the element for purposes of (eg) enums
     std::string element_id_name(int el_ind) const {
         const grammar_element el = elements[el_ind];
-        if(el.is_terminal()) {
-            return stringformat("_terminal_{}", el_ind);
+        if(el.is_nonterminal()) {
+            return el.nonterm_id_str();
         }
-        return el.nonterm_id_str();
+        return stringformat("_terminal_{}", el_ind);
     }
 
     std::string element_id_name(grammar_element el) const {
@@ -128,21 +141,19 @@ class productions {
         // can be encoded as a rule ID and the step
         // within that rule:
         uint16_t rule;     // offset into rules (i.e. rule number)
-        uint16_t position; // offset into rule->steps
+        uint16_t countdown; // offset from end of rule; 0 == reduce
 
         static const uint16_t no_rule = 0xffff;
 
-        // this allows lr_items to be used as keys
-        // in things like std::map.
-        // it also determines the order of the items
-        // such that earlier items (in the fpl source)
-        // are ordered earlier.
+        // this allows lr_items to be used as keys in things like
+        // std::map, as well as helping determine precedence by
+        // putting earlier rules earlier.
         friend bool operator<(const lr_item& left, const lr_item& right) {
 
             // same rule?  earlier position in the rule
             // comes first.
             if(left.rule == right.rule)
-                return left.position < right.position;
+                return right.countdown < left.countdown;
 
             // otherwise items from earlier rules come earlier.
             return left.rule < right.rule;
@@ -154,59 +165,67 @@ class productions {
         }
 
         // constructs a false item:
-        lr_item() : rule(no_rule), position(0) { }
+        lr_item() : rule(no_rule), countdown(0) { }
 
-        lr_item(int rl, int pos) : rule(rl), position(pos) { }
+        lr_item(int rl, int ctd) : rule(rl), countdown(ctd) { }
+
+        // returns an lr_item representing the item following
+        // this one, or a false lr_item if we're at the end of
+        // the rule.
+        lr_item next_in_rule() const {
+            if(countdown > 0) {
+                return lr_item(rule, countdown - 1);
+            }
+
+            return lr_item();
+        }
 
         static lr_item from_id(uint32_t id) {
             return lr_item((id >> 16) & 0xffff, id & 0xffff);
         }
 
         uint32_t id() const {
-            return rule << 16 | position;
+            return rule << 16 | countdown;
         }
 
         // returns the rule step which this item refers to,
-        // which will be null in the case that it's the end
+        // which will be false in the case that it's the end
         // of (or past the end of) the rule.
-        const production_rule::step *step(const productions &prds) {
-            return prds.rules[rule].nth_step(position);
+        production_rule::step step(const productions &prds) const {
+            return prds.rules[rule].nth_from_end(countdown);
         }
 
         std::string to_str(
-            const productions *prds,
+            const productions *prds = nullptr,
             const lr_set *state = nullptr
         ) const {
-            if(!prds) return "NULL productions";
+            // we can always show (rule number):(how many steps are left):
+            std::string out = stringformat("({}:{})", rule, countdown);
 
-            const production_rule &rl = prds->rules[rule];
+            if(prds) {
+                // if we have a suitable products pointer, we can
+                // also show what this item is used to produce and
+                // where it is in the rule:
+                const production_rule &rl = prds->rules[rule];
+                out = stringformat("{} {}:\t", rl.product(), out);
 
-            const int bs = 40;
-            char buf[bs];
-            snprintf(buf, bs, "%s (rule %i):", rl.product_c_str(), rule);
-            buf[bs - 1] = '\0';
-            std::string out(buf);
+                for(int stepi = rl.num_steps(); stepi >= 0; --stepi) {
+                    if(stepi == countdown) out += " •";
+                    else                   out += " ";
 
-            int step;
-            for(step = 0; step < rl.num_steps(); ++step) {
-                if(step == position)
-                    out += "•";
-                out += " ";
-                out += rl.nth_step(step)->to_str();
-            }
-            if(step == position)
-                out += "•";
+                    production_rule::step step = rl.nth_from_end(stepi);
+                    if(step)
+                        out += step.to_str();
+                }
 
-            if(state) {
-                auto st = rl.nth_step(position);
-                if(!st) {
-                    out += stringformat("\t-> (reduce)");
-                } else {
-                    for(auto trans : prds->transitions_for_state(*state)) {
-                        auto rod = trans.right_of_dot;
-                        if(rod && rod->gexpr == st->gexpr) {
-                            out += stringformat("\t-> state {}", trans.next_state_number);
-                        }
+                if(state) {
+                    // .. and if we also know the state for the rule, we
+                    // can show what to do after matching the item:
+                    int32_t next_stn = state->next_state(step(*prds));
+                    if(next_stn >= 0) {
+                        out += stringformat("\t-> state {}", next_stn);
+                    } else {
+                        out += stringformat("\t-> (reduce)");
                     }
                 }
             }
@@ -215,11 +234,20 @@ class productions {
         }
     };
 
+    struct lr_transition {
+        grammar_element right_of_dot;
+        int32_t         next_state_number;
+        lr_transition(const grammar_element &ge, int32_t ns)
+            : right_of_dot(ge), next_state_number(ns) {
+        }
+    };
+
     // an lr_set is a set of lr items.
     // each state is represented by an lr_set.
     class lr_set {
         mutable std::string _id_cache;
         std::set<lr_item> items;
+        std::map<grammar_element, int32_t> next_state_for_el;
     public:
 
         lr_set() { }
@@ -247,66 +275,116 @@ class productions {
             return items.size();
         }
 
+        int32_t next_state(const grammar_element &ge) const {
+            auto nsi = next_state_for_el.find(ge);
+            if(nsi != next_state_for_el.end()) {
+                return nsi->second;
+            }
+            return -1;
+        }
+
+        int32_t next_state(const production_rule::step &st) const {
+            return next_state(st.gexpr);
+        }
+
+        // returns an iterable set of transitions out of the state
+        // passed.  use this for code generation.
+        using lr_transitions = std::vector<lr_transition>;
+        lr_transitions transitions(const productions &prds) const {
+            lr_transitions out;
+            out.reserve(next_state_for_el.size());
+
+            for(lr_item item : iterable_items()) {
+                 if(item.countdown > 0) {
+                     auto step = item.step(prds);
+                     out.push_back(lr_transition(
+                         step.gexpr, next_state(step)
+                     ));
+                 }
+            }
+            return out;
+        }
+ 
         void add_item(const lr_item &it) {
             items.insert(it);
         }
 
-        // adds the given lr_item to the lr_set, plus any other
-        // related items to cover optionalness.
-        // (repetition is handled in the goto)
-        // the rule passed is the rule in the productions for the item
-        // (i.e. the rule in which we're expanding)
-        void add_expanded(const lr_item &it, const production_rule &rule) {
+        // Recorsively adds all items for whatever can come after the
+        // item passed.  This includes handling repetition, optionalness,
+        // and items needed to match the start of nonterminals.
+        // Callers will need to deal with handling multiple-match items,
+        // since this only adds to this state (and multiple-match requires
+        // adding to the next state).
+        void add_expanded(const lr_item &it, const productions &prds) {
             if(!it) return;
 
-            for(int pos = it.position; pos <= rule.num_steps(); pos++) {
-                add_item(lr_item(it.rule, pos));
-                const production_rule::step *expr = rule.nth_step(pos);
-                if(!expr || !expr->is_optional()) {
-                    // end of rule or the items is not optional so we
-                    // don't need to look after:
-                    break;
-                }
-            }
-        }
+            // don't re-add if it's already there to avoid inappropriate
+            // recursion.  this does mean that if the item was added via
+            // add_item, we won't be adding any followers; i.e. we're
+            // expecting they've already been added.
+            if(items.count(it) > 0) return;
 
-        void add_set(const lr_set &set) {
-            for(auto it : set.items) {
-                //items.insert(it);
-                add_item(it);
+            const production_rule &rule = prds.rules[it.rule];
+
+            for(int ctd = it.countdown; ctd >= 0; ctd--)  {
+                production_rule::step expr = rule.nth_from_end(ctd);
+                add_item(lr_item(it.rule, ctd));
+
+                // if it's a nonterm, we need to add each thing which
+                // can start that nonterm so that the generated state
+                // can correctly recognize things which will make that
+                // nonterm:
+                if(expr.is_nonterminal()) {
+                    const std::string &pname = expr.production_name();
+                    auto strl  = prds.rules_for_product.lower_bound(pname);
+                    auto endrl = prds.rules_for_product.upper_bound(pname);
+                    if(strl == endrl) {
+                        error(rule.location(), stringformat(
+                            "Nothing produces '{}'\n", pname
+                        ));
+                    }
+                    for(auto rit = strl; rit != endrl; ++rit) {
+                        const production_rule &prule = prds.rules[rit->second];
+                        lr_item start_item(rit->second, prule.num_steps());
+                        if(items.count(start_item) == 0) {
+                            // recursively add rule starts:
+                            add_expanded(
+                                lr_item(rit->second, prule.num_steps()), prds
+                            );
+                        }
+                    }
+                }
+
+                // last, if the current step is optional, we'll look
+                // at the next step.  otherwise, we're done:
+                if(!expr.is_optional())
+                    break;
             }
         }
 
         // returns an lr_item representing the reduction for
         // this set/state, or a false-valued lr_item if there's
         // no such reduction.
-        lr_item reduction_item(const productions *prds) const {
+        lr_item reduction_item() const {
             for(auto it : items) {
-                const production_rule &rl = prds->rules[it.rule];
-                if(rl.num_steps() == it.position) {
+                // It's possible that there's more than one item
+                // with countdown == 0.  We're not worrying about
+                // that here, though - the implied conflict should
+                // have been reported when generating states.
+                // We do return the first such item, though, to
+                // make it so that the conflict is resolved by
+                // rule order.
+                if(it.countdown == 0) {
                     return it;
                 }
             }
-            return lr_item(); // no reduction here
-        }
-
-        // returns true if this state only reduces
-        bool reduce_only(const productions *prods) const {
-            for(lr_item item : iterable_items()) {
-                const production_rule &rule = prods->rules[item.rule];
-                if(rule.nth_step(item.position)) {
-                    // this item is not at the end of the rule,
-                    // so it's some kind of shift, so this is
-                    // not pure reduce.
-                    return false;
-                }
-            }
-            return true;
+            // (no such item)
+            return lr_item();
         }
 
         std::string to_str(
-            const productions *prds,
-            const std::string &line_prefix = "",
+            const productions *prds = nullptr,
+            const std::string &line_prefix = "    ",
             const std::string &line_suffix = "\n",
             bool stringescape = false
         ) const {
@@ -321,133 +399,151 @@ class productions {
                 out += line_suffix;
 
             }
-            return out;
+            // columnate the output:
+            return stringformat("{::c}", out);
         }
-    };
 
-    struct lr_transition {
-        const production_rule::step *right_of_dot;
-        int next_state_number;
-
-        lr_transition(const production_rule::step *rod, int sn) :
-            right_of_dot(rod), next_state_number(sn) { }
-    };
-    using lr_transitions = std::vector<lr_transition>;
-
-
-    void lr_closure_add_rules(
-        lr_set &set, const production_rule &rule, int pos
-    ) const {
-        const production_rule::step *right_of_dot = rule.nth_step(pos);
-
-        if(right_of_dot && !right_of_dot->is_terminal()) {
-            // The thing to the right of the dot is a product,
-            // so we need to add items for each rule that can
-            // produce that (per the aho/sethi/ullman pg 222,
-            // rule #2, closure procedure).
-            std::string pname = right_of_dot->production_name();
-            auto strl  = rules_for_product.lower_bound(pname);
-            auto endrl = rules_for_product.upper_bound(pname);
-
-            if(strl == endrl) {
-                error(rule.location(), stringformat(
-                    "Nothing produces «{}»\n", pname
-                ));
-            }
-
-            for(auto rit = strl; rit != endrl; ++rit) {
-                set.add_expanded(
-                    // (these are always position 0)
-                    lr_item(rit->second, 0), rules.at(rit->second)
-                );
-            }
-        }
-    }
-
-    // based on the closure algorithm on page 222 of Aho, Sethi, Ullman
-    // (1988), but with the addition of support for the *+?! operators
-    // in fpl.
-    //  http://www.cs.ecu.edu/karl/5220/spr16/Notes/Bottom-up/lr0item.html
-    //   1) All members of S are in the closure(S).
-    //   2) Suppose closure(S) contains item A → α⋅Bβ, where B is a nonterminal.
-    //      Find all productions B → γ1, …, B → γn with B on the left-hand side.
-    //      Add LR(0) items B → ⋅γ1, … B → ⋅γn to closure(S).
-    //  What is the point of the closure? LR(0) item E → E + ⋅ T indicates that the
-    //  parser has just finished reading an expression followed by a + sign. In
-    //  fact, E + are the top two symbols on the stack.
-    //  Now, the parser is looking to see if there is a T next. (It does not
-    //  predict that there is a T next. It is just considering that as a
-    //  possibility.) But that means it should be looking for something that
-    //  is the right-hand side of a production for T. So we add items for T
-    //  with the dot at the beginning.
-    lr_set lr_closure(const lr_set &in) const {
-        lr_set set = in;
-        int last_size;
-        do {
-            last_size = set.size();
-            // NOTE this could be a lot more efficient if we started
-            // at element (last_size - 1)...
-            for(auto &item: set.iterable_items()) {
-                // support for *+?!
-                //   - the "*" and "?" cases:  since the expression is
-                //     optional, we do need to consider what's after
-                //     it as another possible start to a given match.
-                //   - the "+" case is no different from the default
-                //     here, since this deals only with the first
-                //     successor symbol.
-                //   x "!" is complicated, so I got rid of it
-                const production_rule &rule = rules[item.rule];
-                int pos = item.position;
-                const production_rule::step *right_of_dot;
-                // while loop here handles positions at eof (= NULL)
-                // as well helping handle optional expressions
-                // (i.e. expressions with "*" and "?"):
-                while(right_of_dot = rule.nth_step(pos)) {
-                    lr_closure_add_rules(set, rule, pos);
-
-                    // only need to keep looking for following symbols
-                    // if the current one is optional. so, if this expr
-                    // is not optional, we're done with this item:
-                    if(!right_of_dot->is_optional()) {
-                        break;
+        // returns a multimap of (grammar_element -> lr_item).
+        // for use in generating states.
+        // items for the ends of rules will be indexed under
+        // grammar element type == NONE.
+        std::multimap<grammar_element, lr_item> items_per_element(
+            const productions &prds
+        ) const {
+            // inline function?  this is like.. index_items or something
+            std::multimap<grammar_element, lr_item> items_for_el;
+            lr_item default_item = lr_item();
+            for(auto item : items) {
+                if(item.countdown == 0) {
+                    if(default_item) {
+                        prds.conflict(default_item, item, this);
+                    } else {
+                        default_item = item;
                     }
-                    pos++;
+                    items_for_el.insert(
+                        std::make_pair(grammar_element(), item)
+                    );
+                } else {
+                    const production_rule &rule = prds.rules.at(item.rule);
+                    auto step = rule.nth_from_end(item.countdown);
+                    if(!step) {
+                        internal_error(rule.location(), stringformat(
+                            "missing step for item {}?",
+                            item.to_str(&prds, this)
+                        ));
+                    }
+                    items_for_el.insert(std::make_pair(step.gexpr, item));
                 }
             }
-        } while(set.size() > last_size); // i.e. until we add no more
-
-        return set;
-    }
-
-
-    // "goto" operation from page 224 Aho, Sethi and Ullman,
-    // augmented to allow repetition (eg from * and + operators).
-    // given a current state and a lookahead item, returns
-    // the next state (i.e. the set of items which might appear
-    // next)
-    lr_set lr_goto(const lr_set &in, const grammar_element &sym) const {
-        lr_set set;
-        for(auto item : in.iterable_items()) {
-            const production_rule &rule = rules.at(item.rule);
-            const production_rule::step *step = rule.nth_step(item.position);
-            if(step && step->matches(sym)) {
-                set.add_expanded(lr_item(item.rule, item.position + 1), rule);
-                if(step->qty.multiple) {
-                    // ...if it can be repeated:
-                    set.add_expanded(lr_item(item.rule, item.position), rule);
-                }
-            }
+            return items_for_el;
         }
-        return lr_closure(set);
-    }
 
-    // used for detecting conflicts
-    std::string transition_id(const production_rule::step &pexp, const lr_set &to) {
-        char buf[40]; // 40 is arbitrarily larger than the 5 we'll need
-        snprintf(buf, 40, "%0x_", element_index[pexp.gexpr]);
-        std::string out(buf);
-        out += to.id();
-        return out;
+        // recursively generates any following states, adding them
+        // to the productions passed.
+        void generate_states(
+            productions &prds,
+            src_location caller = CALLER()
+        ) {
+
+            if(next_state_for_el.size() > 0)
+                return; // (already generated)
+
+            /*
+              possibilities per item, in priority order:
+               - item is directly end of rule, in which case the next state
+                 is the rule end state.  
+               - item's symbol matches more than one item, or item is multiple,
+                 in which case we need a non-leaf state for it
+               - item has more than one follow-on, or item's follow on is multiple,
+                 in which case we need a non-leaf state for it (as above)
+               - item has exactly one follow-on in which case the next
+                 state is the reduce state for the follow-on.
+
+            this might be a lot of frib just to skip some intermediates and
+            have things be either leaf or non-leaf.
+
+              maybe multimap the elements to items (skipping end items) first,
+              then for each element:
+               - if there's just one, and it's a straight-to-end (no multi,
+                 single follow-on) then that element points to end-of-rule
+               - otherwise create a non-leaf state and do the recursive add.
+            */
+            auto items_for_el = items_per_element(prds);
+            if(items_for_el.size() == 0) {
+                jerror::warning(stringformat(
+                    "empty state for set? set: [{}] ({})\n", *this, caller
+                ));
+                return;
+            }
+
+            auto done = items_for_el.end();
+            auto trit = items_for_el.begin();
+            while(trit != done) {
+                // make an lr_set for all the items matching the
+                // input element:
+                lr_set next_state;
+                const grammar_element &cur_el = trit->first;
+                for( ; trit != done && trit->first == cur_el; ++trit) {
+                    if(cur_el.type != grammar_element::Type::NONE) {
+                        const lr_item item = trit->second;
+                        auto          step = item.step(prds);
+
+                        // if the item is multiple-match, it can follow
+                        // itself:
+                        if(step.is_multiple()) {
+                            next_state.add_expanded(item, prds);
+                        }
+
+                        next_state.add_expanded(item.next_in_rule(), prds);
+                    }
+                }
+
+                if(next_state.items.size()) {
+                    // (a state for that lr_set may or may not yet exist)
+                    if(prds.state_index.count(next_state.id()) > 0) {
+                        // the destination state already exists, so use it:
+                        next_state_for_el[cur_el]
+                            = prds.state_index[next_state.id()];
+                    } else {
+                        // .. doesn't exist yet.  make it:
+                        int32_t new_state_num = prds.add_state(next_state);
+
+                        next_state_for_el[cur_el] = new_state_num;
+                        prds.states[new_state_num].generate_states(prds);
+                    }
+                }
+            } // all elements handled
+        }
+    };
+
+    // adds lr_items representing the start(s) of each existing rule
+    // for the product passed.  (rules may have multiple starts
+    // due to optionals - eg 'a'? 'b' -> c could start with 'a'
+    // or 'b'.
+    void add_starts_for_product(
+        lr_set &set,
+        const std::string &pname,
+        const std::string &context
+    ) const {
+        auto strl  = rules_for_product.lower_bound(pname);
+        auto endrl = rules_for_product.upper_bound(pname);
+
+        if(strl == endrl) {
+            error(context, stringformat(
+                "Nothing produces '{}'\n", pname
+            ));
+        }
+        
+        for(auto rit = strl; rit != endrl; ++rit) {
+            const production_rule &subrule = rules[rit->second];
+            set.add_expanded(
+                // (items here are always referring to the start
+                // of the rule, and since items count down to the
+                // end of the rule, start position is num_steps().
+                lr_item(rit->second, subrule.num_steps()),
+                *this
+            );
+        }
     }
 
 public:
@@ -501,9 +597,8 @@ public:
             return tf->second;
         }
 
-        // SO.  what can inherited_type types?
-        //   - if we are produced from only one other production,
-        //     we can use that type.  (terminals too? terminal aliasing?)
+        // if we are produced from only one other production,
+        // we can use that type.  (terminals too? terminal aliasing?)
         std::string inherited = inherited_type(product);
         if(inherited != "")
             return type_for(inherited);
@@ -714,7 +809,7 @@ public:
         rules.push_back(rule);
 
         for(int stp = 0; stp < rule.num_steps(); stp++) {
-            record_element(rule.nth_step(stp)->gexpr);
+            record_element(rule.nth_step(stp).gexpr);
         }
         record_element(rule.product_element());
 
@@ -965,7 +1060,6 @@ public:
                     rule.add_step(expr);
                     num_read++;
                 } else {
-                    // XXX show the type in some non-numeric way here
                     error(src, stringformat(
                         "expected type {} = {} but got .. nothing?\n",
                         grammar_element::Type_to_str(type), type
@@ -1251,10 +1345,10 @@ public:
                 // any rules needed to generate the rule we just pushed are
                 // also potentially relevant:
                 for(int stepi = 0; stepi < rule.num_steps(); ++stepi) {
-                     const production_rule::step *step = rule.nth_step(stepi);
-                     if(step && !step->is_terminal()) {
-                         if(!out.count(step->production_name())) {
-                             all_wanted.push_back(step->production_name());
+                     production_rule::step step = rule.nth_step(stepi);
+                     if(step && !step.is_terminal()) {
+                         if(!out.count(step.production_name())) {
+                             all_wanted.push_back(step.production_name());
                          }
                      }
                 }
@@ -1405,86 +1499,25 @@ public:
         return out;
     }
 
-    void reduce_reduce_conflict(int r1, int r2) const {
-        warn(stringformat(
-            "reduce/reduce conflict:\n    {} line {}\n vs {} at {}\n",
-            rules[r1].to_str().c_str(), rules[r1].location().c_str(),
-            rules[r2].to_str().c_str(), rules[r2].location().c_str()
-        ));
-    }
 
-    // reports what is probably a shift/shift conflict,
-    // which would probably only happen due to a bug in
-    // this program...
-    void other_conflict(lr_item item1, lr_item item2) const {
-        warn(stringformat(
-           "conflict:\n    {}\n vs {}\n",
-           item1.to_str(this).c_str(), item2.to_str(this).c_str()
-        ));
-    }
+    void conflict(lr_item item1, lr_item item2, const lr_set *state) const {
+        std::string indent = "    ";
+        const production_rule &rule1 = rules[item1.rule];
+        const production_rule &rule2 = rules[item2.rule];
 
-    // returns an iterable set of transitions out of the state
-    // passed.  use this for code generation.
-    lr_transitions transitions_for_state(const lr_set &state) const {
-        lr_transitions out;
-
-        //   NOTE:  if there's a shift/reduce conflict, we will resolve it:
-        //      - first by longest match (i.e. shift instead of reducing).
-        //        example:  if() ...  vs if() ... else ...;
-        //        if() .. else is longer so we shift.
-        //      - next by operator precedence.. XXX implement
-        std::map<int, int> transition; // grammar element id -> state number
-        std::map<int, lr_item> item_for_el_id;
-        std::vector<lr_item> optionals;
-        for(lr_item item : state.iterable_items()) {
-            const production_rule &rule = rules[item.rule];
-            const production_rule::step *right_of_dot = rule.nth_step(item.position);
-            if(!right_of_dot) {
-                lr_item reduce_item = state.reduction_item(this);
-                if(item != reduce_item) {
-                    reduce_reduce_conflict(item.rule, reduce_item.rule);
-                }
-            } else {
-                lr_set next_state = lr_goto(state, right_of_dot->gexpr);
-                int next_state_num = state_index.at(next_state.id());
-                int el_id = element_index.at(right_of_dot->gexpr);
-
-                auto existing = transition.find(el_id);
-                if(existing != transition.end()) {
-                    if(existing->second != next_state_num) {
-                        // ... shift/shift conflict, which makes no sense,
-                        // and afaict means there's a bug someplace:
-                        other_conflict(item, item_for_el_id.at(existing->first));
-                    }
-                } else {
-                    out.push_back(lr_transition(right_of_dot, next_state_num));
-                }
-
-                if(right_of_dot->is_optional())
-                    optionals.push_back(item);
-
-                transition[el_id] = next_state_num;
-                item_for_el_id[el_id] = item;
-            }
+        std::string in_state;
+        if(state) {
+            in_state = stringformat(
+                " in state {}", state_index.at(state->id())
+            );
         }
 
-        // at this point, we can't really handle grammars where there's
-        // more than one possible optional thing in a given state.  in
-        // theory, I think we could determine which optional thing to
-        // shift based on lookahead or some other hints, but for now,
-        // if this happens, we just give a warning and plow on.
-        if(optionals.size() > 1) {
-            std::string which;
-            for(auto opt : optionals) {
-                which += "    " + opt.to_str(this) + "\n";
-            }
-            warn(stringformat(
-                "Ambiguity in {}:\n{}\n",
-                state_fn(state), which
-            ));
-        }
-
-        return out;
+        warn(stringformat(
+            "conflict{}:\n{}    {} at {}\n{} vs {} at {}\n",
+            in_state,
+            indent, rule1, rule1.location(),
+            indent, rule2, rule2.location()
+        ));
     }
 
 public:
@@ -1510,52 +1543,64 @@ public:
         return parser_class_name() + "::" + mem;
     }
 
-
     void clear_states() {
         states.clear();
         state_index.clear();
     }
 
-    void generate_states(const std::list<std::string> &wanted) {
+    // returns the state number for the lr_set passed
+    int32_t add_state(const lr_set &st) {
+        // that state's already been added, so just return
+        // the existing state number:
+        if(state_index.count(st.id()) > 0) {
+            return state_index[st.id()];
+        }
 
+        int32_t state_num = states.size();
+        state_index.insert(
+            std::make_pair(st.id(), states.size())
+        );
+        states.push_back(st);
+        return state_num;
+    }
+
+    int32_t end_state_for_rule(int32_t rule) {
+        lr_item end_item(rule, 0);
+
+        auto rsi = state_index.find(lr_set(end_item).id());
+        if(rsi != state_index.end())
+            return rsi->second;
+
+        // end state hasn't been created yet.  create it:
+        return add_state(end_item);
+    }
+
+    void ye_new_generate_states(const std::list<std::string> &wanted) {
         if(rules.empty()) {
             error("No rules found\n");
         }
 
         clear_states();
 
-        lr_set entry_set;
-        for(auto entry_prod : wanted) {
-            auto strl  = rules_for_product.lower_bound(entry_prod);
-            auto endrl = rules_for_product.upper_bound(entry_prod);
-            if(strl == endrl) {
-                error(stringformat(
-                    "Can't find rule for goal '{}'\n", entry_prod
-                ));
-            }
-            for(auto rit = strl; rit != endrl; ++rit) {
-                entry_set.add_expanded(
-                    lr_item(rit->second, 0), rules.at(rit->second)
-                );
-            }
-        }
-        add_state(lr_closure(entry_set));
+        lr_set ns;
+        for(auto prodname : wanted)
+            add_starts_for_product(ns, prodname, "initial goal set");
 
-        // Aho, Sethi, and Ullman page 224... uhh, modified.
-        const auto no_set = state_index.end();
-        int latest_set = 0;
-        while(latest_set < states.size()) {
-            lr_set set = states[latest_set++];
-
-            for(auto elem : elements) {
-                lr_set state = lr_goto(set, elem);
-                if(state.size() > 0) {
-                    if(state_index.find(state.id()) == no_set) {
-                        add_state(state);
-                    }
-                }
-            }
+        states.reserve(1000); // XXX this prevents crashing, which makes me think memory trasher (actually looks like it's memory being moved while there are refs to existing.. eeyyeaahhh...)
+        int32_t start_state = add_state(ns);
+        if(start_state != 0) {
+            warn(stringformat(
+                "somehow starting state is {} instead of 0\n", start_state
+            ));
         }
+
+        states[start_state].generate_states(*this);
+    }
+
+    // clears any existing states and generates the states (and transitions)
+    // needed to parse the product(s) passed
+    void generate_states(const std::list<std::string> &wanted) {
+        ye_new_generate_states(wanted);
     }
 
     std::string why_cant_use_reducer(const reducer &red, const production_rule &rule) {
@@ -1570,10 +1615,10 @@ public:
         // don't match steps in the rule:
         std::set<std::string> unknown_vars = red.required_arguments();
         for(int stepi = 0; stepi < rule.num_steps(); ++stepi) {
-            const production_rule::step *step = rule.nth_step(stepi);
+            production_rule::step step = rule.nth_step(stepi);
             if(step) {
                 // this one matches, so remove it from the set:
-                unknown_vars.erase(step->variable_name());
+                unknown_vars.erase(step.variable_name());
             }
         }
         int num_unk = unknown_vars.size();
@@ -1602,8 +1647,8 @@ public:
         int cnt = 0;
 
         for(int stepi = 0; stepi < rule.num_steps(); ++stepi) {
-            const production_rule::step *step = rule.nth_step(stepi);
-            if(step && red.argument_matches(step->variable_name()))
+            production_rule::step step = rule.nth_step(stepi);
+            if(step && red.argument_matches(step.variable_name()))
                 cnt++;
         }
         return cnt;

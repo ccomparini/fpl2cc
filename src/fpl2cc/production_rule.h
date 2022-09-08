@@ -28,12 +28,27 @@ public:
 
         bool eject; // if set, don't pass this to reduce code
 
+        step() : gexpr("", grammar_element::Type::NONE), eject(true) {
+        }
+
         step(const std::string &str, grammar_element::Type tp)
             : gexpr(str,tp), eject(false)
         { }
 
+        operator bool() const {
+            return gexpr.type != grammar_element::Type::NONE;
+        }
+
         inline bool is_single() const {
             return !(qty.optional || qty.multiple);
+        }
+
+        inline bool is_optional() const {
+            return qty.optional;
+        }
+
+        inline bool is_multiple() const {
+            return qty.multiple;
         }
 
         inline bool matches(const grammar_element &other) const {
@@ -61,12 +76,13 @@ public:
             return gexpr.type;
         }
 
+        // XXX deprecated:
         inline bool is_terminal() const {
             return gexpr.is_terminal();
         }
 
-        inline bool is_optional() const {
-            return qty.optional;
+        inline bool is_nonterminal() const {
+            return gexpr.is_nonterminal();
         }
 
         inline bool skip_on_reduce() const {
@@ -81,14 +97,6 @@ public:
             }
         }
 
-        // returns a c-source-code-ready string for the terminal
-        inline std::string terminal_string() const {
-            if(is_terminal()) {
-                return c_str_escape(gexpr.expr);
-            } else {
-                return "[NOT TERMINAL]";
-            }
-        }
 
         inline std::string to_str() const {
             std::string out(gexpr.to_str());
@@ -203,12 +211,16 @@ public:
         return rsteps[reduce_param_step_num(index, ca)];
     }
 
-    // returns NULL if index is out of bounds
-    const step *nth_step(unsigned int index) const {
+    // returns a false step if index is out of bounds
+    step nth_step(unsigned int index) const {
         if(index < rsteps.size()) {
-            return &rsteps[index];
+            return rsteps[index];
         }
-        return nullptr;
+        return step();
+    }
+
+    step nth_from_end(unsigned int index) const {
+        return nth_step(rsteps.size() - index);
     }
 
     // if this rule could potentially be a type alias,
@@ -227,15 +239,9 @@ public:
             // would only work if there's a way to guarantee a
             // default or something is created in the absence
             // of anything, which, at present, there is not.
-            // ACTUALLY optional might work!  try it.
-            //  x? -> foo ;  if the reducer is actually called, a custom
-            // reducer could fill in the default for the x.
-            // huh what if you had
-            //  x? -> x ;
-            // ... for filling in defaults.  the mind reels. try it.
             if(rp.is_single() && !rp.is_optional()) {
                 // for now it has to be a nonterminal too:
-                if(!rp.is_terminal()) {
+                if(rp.is_nonterminal()) {
                     return rp.production_name();
                 }
             }
