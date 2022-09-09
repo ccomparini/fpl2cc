@@ -25,6 +25,7 @@ syn match	fplAtDirective	"@main"
 syn match	fplAtDirective	"@post_parse.*"
 syn match	fplAtDirective	"@post_reduce.*"
 syn match	fplAtDirective	"@produces.*"
+syn match	fplAtDirective	"@scanner.*"
 syn match	fplAtDirective	"@separator.*"
 syn match	fplAtDirective	"@type_for.*"
 
@@ -43,6 +44,7 @@ syn match	fplImport	"`.*`"
 syn region	fplExpression	start="/" end="/" skip=+\\/+
 syn region	fplExpression	start=+"+ end=+"+
 syn region	fplExpression	start=+'+ end=+'+
+syn match	fplExpression	"&"
 syn match	fplExpression	"\~"
 
 " expression suffixes:

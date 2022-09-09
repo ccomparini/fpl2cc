@@ -61,13 +61,9 @@ public:
             matches.push_back(src);
         }
 
-        Terminal(const std::cmatch &src) {
-            for(auto srcm : src)
-                matches.push_back(srcm);
-        }
 
-        Terminal(const utf8_byte *p, int l = 0) {
-            if(p) matches.push_back(std::string((const char *)p, 0, l));
+        template<typename Iter>
+        Terminal(Iter begin, Iter end) : matches(begin, end) {
         }
 
         std::string to_str() const {
@@ -838,109 +834,32 @@ private:
         private:
     @}@
 
-    inline bool shift_TERM_EXACT(
-        const std::string &match, int el_id, State new_st
-    ) {
-        // if there's a product (nonterminal) up next,
-        // we don't want to shift a terminal.
-        if(last_product)
-            return false;
-
-        @if(opts.debug) {@
-            std::cerr << stringformat(
-                "maybe shift '{}' to {}? ",
-                element_str(el_id), state_to_str(new_st)
-            );
-        @}@
-
-        const SourcePosition &pos = position();
-        if(reader->read_exact_match(match)) {
-            @if(opts.debug) {@
-                std::cerr << "yes\n";
-            @}@
-            lr_push(new_st, Product(Terminal(match), el_id, pos));
-            bytes_eaten = 0;
-            return true;
+    @/* custom scanners:
+        these are expected to return something iterable.
+        an empty iterable indicates no match; otherwise
+        the generated Terminal will contain the items
+        returned.
+    */@
+    @for(auto &[scanner_name, scanner_code] : prds.scanners) {@
+        #line @scanner_code.line@ "@scanner_code.source_file@"
+        auto custom_scanner_@scanner_name@(fpl_reader &input) {
+            @scanner_code.format()@
         }
+    @}@
 
-        @if(opts.debug) {@
-            std::cerr << "no\n";
+    @/* "shift" methods.  these check for the relevant element and,
+        if there's a match, change the state to the state passed.
+    */@
+    @for(auto element : prds.elements) {@
+        @if(element.is_nonterminal()) {@
+            @#fpl_x_parser_shift_nonterm(prds, element, opts)@
+        @} else {@
+            // (terminals and assertions - everything else)
+            @#fpl_x_parser_shift_term(prds, element, opts)@
         @}@
-        return false;
-    }
+    @}@
 
-    inline bool shift_TERM_REGEX(
-        const std::string &re, int el_id, State new_st
-    ) {
-        // (again, don't match if there's a product up next)
-        if(last_product)
-            return false;
 
-        @if(opts.debug) {@
-            std::cerr << stringformat(
-                "maybe shift /{}/ to {}? ",
-                element_str(el_id), state_to_str(new_st)
-            );
-        @}@
-
-        const SourcePosition pos = position();
-        std::cmatch match = reader->read_re(re.c_str());
-
-        // XXX bug:  if there's a 0-byte match but multiple
-        // is allowed, the parser ends up looping infinitely
-        // reading 0 bytes and saying "ok yeah that matched".
-        if(!match.empty()) { // note 0-byte match is considered not empty
-            @if(opts.debug) {@
-                std::cerr << "yes\n";
-            @}@
-            Terminal term(match);
-            lr_push(new_st, Product(term, el_id, pos));
-            bytes_eaten = 0;
-            return true;
-        }
-
-        @if(opts.debug) {@
-            std::cerr << "no\n";
-        @}@
-        return false;
-    }
-
-    inline bool shift_NONTERM_PRODUCTION(
-        const std::string &, int el_id, State new_st
-    ) {
-        @if(opts.debug) {@
-            std::cerr << stringformat(
-                "maybe shift {} to {}? ",
-                element_str(el_id), state_to_str(new_st)
-            );
-        @}@
-        if(last_product && el_id == last_product.grammar_element_id()) {
-            @if(opts.debug) {@
-                std::cerr << "yes\n";
-            @}@
-            lr_push(new_st, last_product);
-            last_product = Product();
-            return true;
-        }
-        @if(opts.debug) {@
-            std::cerr << "no\n";
-        @}@
-        return false;
-    }
-
-    inline bool shift_LACK_OF_SEPARATOR(
-        const std::string &, int el_id, State new_st
-    ) {
-        if(last_product)
-           return false;
-
-        if(!bytes_eaten) {
-            Terminal term("⦑lack-of-separator⦒");
-            lr_push(new_st, Product(term, el_id, position()));
-            return true;
-        }
-        return false;
-    }
 
 public:
 

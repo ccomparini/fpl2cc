@@ -30,7 +30,7 @@ void @sfn@() {
         @declare str: c_str_escape(right_of_dot.expr)@
         @declare el_id: prds.element_id_name(right_of_dot)@
         @declare next_state: prds.state_fn(trans.next_state_number, true)@
-        @- "" @if(shift_@type@("@str@", @el_id@, &@next_state@)) {
+        @- "" @if(shift_@type@_@el_id@(&@next_state@)) {
             @if(opts.debug) {@
                 std::cerr << stringformat(
                     "   matched @el_id@ ({}) at «{}»\n"

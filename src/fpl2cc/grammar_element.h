@@ -7,8 +7,9 @@ struct grammar_element {
     std::string expr; // either a string, regex, or name of product
     typedef enum {
         NONE,
-        TERM_EXACT,
-        TERM_REGEX,
+        TERM_EXACT,  // exact string match
+        TERM_REGEX,  // regular expression match
+        TERM_CUSTOM, // custom code for matching terminal
         NONTERM_PRODUCTION,
         LACK_OF_SEPARATOR, // pseudoterminal indicating no separator
         _TYPE_CAP
@@ -20,8 +21,9 @@ struct grammar_element {
             "NONE",
             "TERM_EXACT",
             "TERM_REGEX",
+            "TERM_CUSTOM",
             "NONTERM_PRODUCTION",
-            "LACK_OF_SEPARATOR",
+            "LACK_OF_SEPARATOR", // convert to TERM_CUSTOM?
         };
         if(t > NONE && t < _TYPE_CAP) {
             return strs[t];
@@ -91,6 +93,10 @@ struct grammar_element {
             case TERM_REGEX:
                 lb = "/";
                 rb = "/";
+                break;
+            case TERM_CUSTOM:
+                lb = "&";
+                rb = "";
                 break;
             case NONTERM_PRODUCTION:
                 lb = "";

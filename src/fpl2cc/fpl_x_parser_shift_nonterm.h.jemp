@@ -1,0 +1,29 @@
+@parameter: const productions &prds @
+@parameter: const grammar_element &el @
+@parameter: const fpl_options &opts @
+@declare el_id: prds.element_id_name(el)@
+
+bool shift_NONTERM_PRODUCTION_@el_id@(State new_st) {
+    @if(opts.debug) {@
+        std::cerr << stringformat(
+            "maybe shift @el_id@ to {}? ",
+            state_to_str(new_st)
+        );
+    @}@
+
+    if(last_product && @el_id@ == last_product.grammar_element_id()) {
+        @if(opts.debug) {@
+            std::cerr << "yes\n";
+        @}@
+
+        lr_push(new_st, last_product);
+        last_product = Product();
+        return true;
+    }
+
+    @if(opts.debug) {@
+        std::cerr << "no\n";
+    @}@
+    return false;
+}
+

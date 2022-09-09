@@ -47,6 +47,7 @@ class productions {
     std::list<code_block> preamble;
     std::list<code_block> parser_members;
     std::list<std::string> goal; // goal is any of these
+    std::map<std::string, code_block> scanners;
 
     std::vector<production_rule>    rules;
     std::multimap<std::string, int> rules_for_product; // product -> rule ind
@@ -621,14 +622,18 @@ public:
         return type_for(ge.expr);
     }
 
+// XXX maybe fix the code and then this comment:
     // expects/scans a +{ }+ code block for the named directive.
     // the named directive is essentially for error reporting.
+    // the intent is that at some point this can scan regexes
+    // or whatever more portable thing.
     enum code_source{
         INLINE = 1,
         LIB    = 2,
         REGEX  = 4,
 
-        INLINE_OR_LIB = 3,
+        INLINE_OR_LIB = INLINE | LIB,
+        ANY           = INLINE | LIB | REGEX
     };
     inline code_block code_for_directive(
         const std::string &dir, code_source allowed_src = INLINE
@@ -636,9 +641,11 @@ public:
 
         code_block code;
         if(allowed_src | INLINE) {
+            // try "regular" +{ }+ code blocks:
             code = read_code(*inp);
         }
 
+// XXX oh yeah hey uhh... this used?  try it!
         if(!code && (allowed_src | LIB)) {
             // expect the name of a file with the code:
             std::string fn = inp->read_re("\\s*(.+)\\s*")[1];
@@ -652,6 +659,7 @@ public:
 
         std::string errm;
         if(!code && (allowed_src | REGEX)) {
+// XXX this error is never seen
             errm = "XXX FIXME ALLOW REGEX LENGTH";
         }
 
@@ -702,6 +710,23 @@ public:
     void add_type_for(const std::string &prod, const std::string &type) {
         type_for_product[prod] = type;
         all_types.insert(type);
+    }
+
+    void parse_scanner() {
+        std::string name = read_identifier(*inp);
+        if(name == "") {
+            error("expected name of scanner");
+        }
+
+        if(scanners.count(name)) {
+            const code_block &existing = scanners[name];
+            warn(stringformat(
+                "scanner {} overwrites existing scanner at {}\n",
+                name, existing.location()
+            ));
+        }
+
+        scanners[name] = code_for_directive("scanner", code_source::ANY);
     }
 
     std::string arg_for_directive() {
@@ -774,6 +799,8 @@ public:
             post_reduce = code_for_directive(dir);
         } else if(dir == "produces") {
             set_reduce_type(arg_for_directive());
+        } else if(dir == "scanner") {
+            parse_scanner();
         } else if(dir == "separator") {
             add_separator_code(
                 code_for_directive(dir, code_source::INLINE_OR_LIB)
@@ -889,13 +916,17 @@ public:
                (ch >= '0' && ch <= '9');
     }
 
-    // production names must start with a letter, and
-    // thereafter may contain letters, digits, or underscores.
-    static inline std::string read_production_name(fpl_reader &src) {
+    // identifiers must start with a letter, and thereafter may
+    // contain letters, digits, or underscores.
+    static inline std::string read_identifier(fpl_reader &src) {
         std::cmatch nm = src.read_re("[a-zA-Z][a-zA-Z_0-9]*");
         if(!nm.length())
             return "";
         return nm[0];
+    }
+
+    static inline std::string read_production_name(fpl_reader &src) {
+        return read_identifier(src);
     }
 
     static inline std::string read_directive(fpl_reader &src) {
@@ -1004,6 +1035,11 @@ public:
                 case '/':
                     expr_str = src.parse_string();
                     type     = grammar_element::Type::TERM_REGEX;
+                    break;
+                case '&':
+                    src.read_byte(); // (read the '&')
+                    expr_str = read_identifier(src);
+                    type     = grammar_element::Type::TERM_CUSTOM;
                     break;
                 case '~':
                     // lack-of-separator assertion:
@@ -1272,6 +1308,22 @@ public:
             } else if(inp->read_byte_equalling('@')) {
                 std::string directive = read_directive(*inp);
                 parse_directive(directive);
+/*
+            } else if(inp->read_byte_equalling('&')) {
+                // either defining or calling a scan function:
+
+                // OK scan functions:
+                //   - some defaults will be imported yay. like &default.
+                //   - ideally they could be regex as well (but maybe do that
+                //     in the body parse and use the same thing for separators)
+                // maybe for the moment it would make sense to have an @ directive
+                // to define them?
+                //  @token foo... let's do that.
+                // no matter how we slice it, this is going to make
+                // target-language portability issues, but perhaps
+                // those can be managable.
+ */
+                
             } else if(inp->read_byte_equalling('}')) {
                 // likely what happened is someone put a }+ inside
                 // a code block.  anyway a floating end brace is
@@ -1809,7 +1861,14 @@ public:
     friend std::string fpl_x_parser(const productions &, const fpl_options &);
     friend std::string fpl_x_parser_nonterm_enum(const productions &);
     friend std::string fpl_x_parser_reduce_call(
-        const productions &, const production_rule &, const fpl_options &);
+        const productions &, const production_rule &, const fpl_options &
+    );
+    friend std::string fpl_x_parser_shift_term(
+        const productions &prds, const grammar_element &el, const fpl_options &
+    );
+    friend std::string fpl_x_parser_shift_nonterm(
+        const productions &prds, const grammar_element &el, const fpl_options &
+    );
 
     std::string generate_code(src_location caller = CALLER()) {
         resolve(caller);
