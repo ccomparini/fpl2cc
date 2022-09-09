@@ -931,6 +931,9 @@ private:
     inline bool shift_LACK_OF_SEPARATOR(
         const std::string &, int el_id, State new_st
     ) {
+        if(last_product)
+           return false;
+
         if(!bytes_eaten) {
             Terminal term("⦑lack-of-separator⦒");
             lr_push(new_st, Product(term, el_id, position()));
