@@ -102,8 +102,8 @@ class productions {
     }
 
     // report an error at a possibly-not-input-file location:
-    void error(const std::string &loc, const std::string &msg) const {
-        jerror::error(format_error_message(loc, msg));
+    static void error(const std::string &where, const std::string &msg) {
+        jerror::error(format_error_message(where, msg));
     }
 
     // call this if there's a fatal bug detected at execution time:

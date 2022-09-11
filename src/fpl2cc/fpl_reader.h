@@ -17,11 +17,11 @@ typedef unsigned char utf8_byte;
 struct utf8_buffer : public std::basic_string<utf8_byte> {
     utf8_buffer() { }
 
-    utf8_buffer(const utf8_byte *src, size_t num_bytes) {
+    explicit utf8_buffer(const utf8_byte *src, size_t num_bytes) {
         assign(src, num_bytes);
     }
 
-    utf8_buffer(const std::string &fn) {
+    explicit utf8_buffer(const std::string &fn) {
         slurp_file(fn);
     }
 
@@ -247,7 +247,7 @@ public:
         exit(1);
     }
 
-    fpl_reader(
+    explicit fpl_reader(
         std::istream &input,
         const std::string &infn,
         ErrorCallback ecb = &default_fail
@@ -258,7 +258,7 @@ public:
         read_pos(0) {
     }
 
-    fpl_reader(
+    explicit fpl_reader(
         utf8_buffer &input,
         const std::string &infn,
         ErrorCallback ecb = &default_fail
@@ -272,7 +272,10 @@ public:
         buffer.push_back('\0');
     }
 
-    fpl_reader(const std::string &infn, ErrorCallback ecb = &default_fail) :
+    explicit fpl_reader(
+        const std::string &infn,
+        ErrorCallback ecb = &default_fail
+    ) :
         input_filename(infn),
         buffer(infn),
         on_error(ecb),
