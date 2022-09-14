@@ -1531,26 +1531,10 @@ public:
         return fn;
     }
 
-        /*
-          A given rule will be reduced according to (in priority order):
-          1) abstracted implementations (+product). this is top
-             priority so that you can use the grammer defined by
-             non-"pure" fpl and just override anything you need to
-             without having to change the grammar fpl
-             (reducer_for(...))
-          2) code defined in the rule
-          3) @default_action
-          4) folding rules with only one step (i.e. treating them
-             as aliases)
-          If none of these apply, there's no code for the rule,
-          and the caller will handle it.
-         */
-
     std::string state_goto(const lr_set &in, const grammar_element &sym) {
         std::string out;
         return out;
     }
-
 
     void conflict(lr_item item1, lr_item item2, const lr_set *state) const {
         std::string indent = "    ";
