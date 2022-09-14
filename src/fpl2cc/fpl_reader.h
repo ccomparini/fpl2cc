@@ -209,7 +209,9 @@ private:
     // or 0 if pos is before the start of the buffer
     // or the number of the last line in the file if pos
     // is past the end of the buffer.
-    inline int calc_line_number(size_t at, const std::string &caller = CALLER()) const {
+    inline int calc_line_number(
+        size_t at, int *off, const std::string &caller = CALLER()
+    ) const {
 
         if(at >= buffer.length()) {
             fprintf(stderr, "%s", stringformat(
@@ -230,12 +232,19 @@ private:
         // counter and updating it on every read.
         // (if it turns out not to be fast enough, make an index)
         int line_no = 1;
+        int chars_this_line = 0;
         size_t pos;
         for(pos = 0; pos < at; pos += char_length(pos)) {
             if(newline_length(pos)) {
+                chars_this_line = 0;
                 line_no++;
             }
+            chars_this_line++;
         }
+
+        if(off) 
+            *off = chars_this_line;
+
         return line_no;
     }
 
@@ -298,13 +307,17 @@ public:
     // returns the 1-based line number for the position passed.
     // positions past the end of the file evaluate to the last
     // line in the file.
-    inline int line_number(size_t pos, src_location &caller = CALLER()) const {
-        return calc_line_number(pos, caller);
+    // if the offset pointer passed is non-null, the utf-8 char
+    // offset within the line is saved there.
+    inline int line_number(
+        size_t pos, int *offset = nullptr, src_location &caller = CALLER()
+    ) const {
+        return calc_line_number(pos, offset, caller);
     }
 
     // as above, but returns the current input line number
     inline int line_number(src_location &caller = CALLER()) const {
-        return line_number(read_pos, caller);
+        return line_number(read_pos, nullptr, caller);
     }
 
     inline const std::string &filename() const {
@@ -312,7 +325,9 @@ public:
     }
 
     inline std::string location_str(size_t offset) const {
-        return filename() + ":" + std::to_string(line_number(offset));
+        int ch;
+        int ln = line_number(offset, &ch);
+        return stringformat("{}:{}:{}", filename(), ln, ch);
     }
 
     std::string base_name() const {
