@@ -449,9 +449,7 @@ public:
         // "pseudo-popping" means reading from and updating the "pos"
         // integer passsed, instead of actually popping from the stack
         // (we only remove from the stack after the reduction rule
-        // is executed).  This is so that you can call this multiple
-        // times for multiple arguments.
-// XXX comment makes less sense now that it's passing boolean multiple
+        // is executed).
         StackSlice(@class_name@ &o, int element_id, bool multiple, int &pos) :
             size(0),
             owner(o)

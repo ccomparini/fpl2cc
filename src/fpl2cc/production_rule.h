@@ -124,7 +124,7 @@ private:
     std::vector<step>     rsteps;
     std::vector<int>      psteps;        // index of step for parameter number
     std::set<std::string> step_vars;     // for finding conflicts
-    code_block            code_for_rule; // inlined reduce code, if any
+    code_block            code_for_rule; // reduce code, if known yet
     reducer               abs_impl;      // abstracted implementation, if any
     std::string           file;
     int                   line;
@@ -185,8 +185,9 @@ public:
 
     inline int num_steps() const { return rsteps.size(); }
 
-    // the result of a given step may or may not be passed
-    // to the reduction code.  this tells how many are.
+    // the result of a given step may or may not be passed to the
+    // reduction code (for example, "ejected" parameters are not
+    // passed).  this tells how many are actually passed.
     inline int num_reduce_params() const {
         return psteps.size();
     }
