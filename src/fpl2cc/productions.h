@@ -224,9 +224,9 @@ class productions {
                     // can show what to do after matching the item:
                     int32_t next_stn = state->next_state(step(*prds));
                     if(next_stn >= 0) {
-                        out += stringformat("\t-> state {}", next_stn);
+                        out += stringformat("\t=> state {}", next_stn);
                     } else {
-                        out += stringformat("\t-> (reduce)");
+                        out += stringformat("\t=> (reduce)");
                     }
                 }
             }
