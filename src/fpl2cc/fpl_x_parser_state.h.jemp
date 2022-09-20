@@ -45,12 +45,12 @@ void @sfn@() {
         @if(reduce_item) {-@
             @if(opts.debug) {-@
                 std::cerr << "    @sfn@ is going to reduce to a "
-                             "@c_str_escape(reduce_item.to_str(&prds))@";
+                             "@c_str_escape(reduce_item.to_str(&prds))@\n";
             @-}-@
             @#fpl_x_parser_reduce_call(prds, prds.rules[reduce_item.rule], opts)@
         @} else {-@
             @if(opts.debug) {-@
-                std::cerr <<  "    terminating in @sfn@ \n";
+                std::cerr <<  "    terminating in @sfn@\n";
             @}@
             terminate();
         @}-@
