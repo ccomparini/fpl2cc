@@ -282,12 +282,10 @@ public:
 
     void lr_push(State st, Product pr) {
         lr_stack.push_back(StackEntry(st, pr));
-        cur_state = st;
     }
 
 private:
     fpl_reader_p            reader; // XXX must be non-null
-    State                   cur_state;
     Product                 last_product;
     std::vector<StackEntry> lr_stack;
     int                     lr_arg_base; // base ind for current reduce call
@@ -313,7 +311,6 @@ public:
 
     @class_name@(fpl_reader_p rdr) :
         reader(rdr),
-        cur_state(NULL),
         lr_arg_base(-1),
         bytes_eaten(0),
         stop_parsing(false),
@@ -369,12 +366,6 @@ private:
             lr_stack.pop_back();
         } // else popped is a "false" entry
 
-        if(lr_stack.size() == 0) {
-            // we've popped back down to the initial state:
-            cur_state = &@class_name@::state_0;
-        } else {
-            cur_state = lr_stack[lr_stack.size() - 1].state;
-        }
 
         return popped;
     }
@@ -411,11 +402,6 @@ public:
 
     // "pops" and discards down to the new top specified
     inline int lr_pop_to(int new_top) {
-        if(new_top >= 0) {
-            cur_state = lr_stack[new_top].state;
-        } else {
-            cur_state = &@class_name@::state_0;
-        }
         lr_stack.resize(new_top + 1);
         return lr_top();
     }
@@ -612,12 +598,14 @@ public:
         last_product = pr;
     }
 
-    void set_state(State st) {
-        cur_state = st;
-    }
 
     State current_state() const {
-        return cur_state;
+        int st = lr_stack.size() - 1;
+        if(st >= 0) {
+            return lr_stack[st].state;
+        } else {
+            return &@class_name@::state_0;
+        }
     }
 
     // this is more or less debugging
@@ -680,7 +668,6 @@ public:
         }
 
         if(last_popped) {
-            cur_state = last_popped.state;
             reader->go_to(rewind_to);
         }
     }
@@ -720,7 +707,7 @@ public:
             std::cerr << "resetting @class_name@!!!\n";
         @}@
         lr_stack.clear();
-        set_state(&@class_name@::state_0);
+        //set_state(&@class_name@::state_0);
         last_product     = Product();
         bytes_eaten      = 0;
         stop_parsing     = false;
@@ -828,7 +815,7 @@ public:
                 "{}and state was:\n{}\n",
                 errm, StackSlice(*this, 0),
                 got?stringformat("next up would have been {}\n", got):"",
-                state_string(cur_state)
+                state_string(current_state())
             ));
         }
 
