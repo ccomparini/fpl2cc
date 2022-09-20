@@ -29,18 +29,18 @@
                 arg_@stind@(*this, @elid@, @expr.qty.multiple@, lr_arg_base);
         @}-@
     @}-@
-    
+
     /* this is the call to the reduce code: */
     @-prds.type_for(rule.product())@ result = @prds.rule_fn(rule) -@ (
         @-for(int pind = 0; pind < num_params; pind++) {-@
             @- pind?",":"" -@ arg_@-rule.reduce_param_step_num(pind)-@
         @-}-@
     );
-    
+
     @if(prds.post_reduce) {@ {
         @prds.post_reduce.format()@
     } @}@
-    
+
     set_product(Product(result,
         @- rule.product_element().nonterm_id_str() -@, arg_0[0].position()
     ));
