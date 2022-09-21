@@ -449,26 +449,6 @@ class productions {
             if(next_state_for_el.size() > 0)
                 return; // (already generated)
 
-            /*
-              possibilities per item, in priority order:
-               - item is directly end of rule, in which case the next state
-                 is the rule end state.  
-               - item's symbol matches more than one item, or item is multiple,
-                 in which case we need a non-leaf state for it
-               - item has more than one follow-on, or item's follow on is multiple,
-                 in which case we need a non-leaf state for it (as above)
-               - item has exactly one follow-on in which case the next
-                 state is the reduce state for the follow-on.
-
-            this might be a lot of frib just to skip some intermediates and
-            have things be either leaf or non-leaf.
-
-              maybe multimap the elements to items (skipping end items) first,
-              then for each element:
-               - if there's just one, and it's a straight-to-end (no multi,
-                 single follow-on) then that element points to end-of-rule
-               - otherwise create a non-leaf state and do the recursive add.
-            */
             auto items_for_el = items_per_element(prds);
             if(items_for_el.size() == 0) {
                 jerror::warning(stringformat(
@@ -489,8 +469,8 @@ class productions {
                         const lr_item item = trit->second;
                         auto          step = item.step(prds);
 
-                        // if the item is multiple-match, it can follow
-                        // itself:
+                        // if the item is multiple-match ('*' or '+'
+                        // after it), it can follow itself:
                         if(step.is_multiple()) {
                             next_state.add_expanded(item, prds);
                         }
@@ -1585,7 +1565,7 @@ public:
     }
 
     // returns the state number for the lr_set passed
-    int32_t add_state(const lr_set &st) {
+    int32_t add_state(const lr_set &st, src_location caller = CALLER()) {
         // that state's already been added, so just return
         // the existing state number:
         if(state_index.count(st.id()) > 0) {
@@ -1593,6 +1573,25 @@ public:
         }
 
         int32_t state_num = states.size();
+
+        if(state_num >= states.capacity()) {
+            // this is hokey, but when I changed state creation
+            // to be a recursive member of lr_set, I found out the
+            // hard way that on realloc, the this pointer of any
+            // lr_sets already added were going to be invalidated
+            // (obvious in retrospect).  We only warn here because
+            // there's no inherent reason this will cause failure,
+            // though it will invalidate pointers and iterators, etc.
+            // 
+            // this needs a better fix.  it's espcially rude because
+            // there's nothing the fpl author can do about it if they
+            // this.  moving on for now.
+            warn(stringformat(
+                "exceeding hypothetical max number of states ({}) at {}",
+                states.capacity(), caller
+            ));
+        }
+
         state_index.insert(
             std::make_pair(st.id(), states.size())
         );
@@ -1611,7 +1610,9 @@ public:
         return add_state(end_item);
     }
 
-    void ye_new_generate_states(const std::list<std::string> &wanted) {
+    // clears any existing states and generates the states (and transitions)
+    // needed to parse the product(s) passed
+    void generate_states(const std::list<std::string> &wanted) {
         if(rules.empty()) {
             error("No rules found\n");
         }
@@ -1622,7 +1623,7 @@ public:
         for(auto prodname : wanted)
             add_starts_for_product(ns, prodname, "initial goal set");
 
-        states.reserve(1000); // XXX this prevents crashing, which makes me think memory trasher (actually looks like it's memory being moved while there are refs to existing.. eeyyeaahhh...)
+        states.reserve(2000); // errf - this is the effective max states
         int32_t start_state = add_state(ns);
         if(start_state != 0) {
             warn(stringformat(
@@ -1631,12 +1632,6 @@ public:
         }
 
         states[start_state].generate_states(*this);
-    }
-
-    // clears any existing states and generates the states (and transitions)
-    // needed to parse the product(s) passed
-    void generate_states(const std::list<std::string> &wanted) {
-        ye_new_generate_states(wanted);
     }
 
     std::string why_cant_use_reducer(const reducer &red, const production_rule &rule) {
