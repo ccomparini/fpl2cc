@@ -105,8 +105,8 @@ public:
             Terminal
         >;
 
-        Var red;
     private:
+        Var red;
 
         int  element_id;
 
