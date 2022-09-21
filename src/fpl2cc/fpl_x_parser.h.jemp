@@ -903,7 +903,7 @@ public:
     static std::string state_to_str(State st) {
         if(!st) return "NULL";
         // c++ won't let you compare pointers in a switch statement.. sigh
-        @for(auto st: prds.states) {-@
+        @for(int st = 0; st < prds.num_states(); st++) {-@
             if(&@prds.state_fn(st, true)@ == st) return "@prds.state_fn(st)@";
         @}@
         // if we got here, the State (pointer) passed doesn't match any
@@ -912,10 +912,12 @@ public:
     }
 
     static const char *state_string(State st) {
-        @for(auto st: prds.states) {-@
+        @for(int st = 0; st < prds.num_states(); st++) {-@
             if(&@prds.state_fn(st, true)@ == st) {
                 return "@prds.state_fn(st, false)@:\n"
-                       @st.to_str(&prds, "\"    ", "\\n\"\n", true)@;
+                       @prds.states.at(st).to_str(
+                           &prds, "\"    ", "\\n\"\n", true
+                       )@;
             }
         @}@
         return "<invalid state>";
@@ -955,8 +957,8 @@ public:
     @}@
 
     // parser states:
-    @for(productions::lr_set state : prds.states) {@
-        @#fpl_x_parser_state(prds, state, prds.opts)@
+    @for(int stn = 0; stn < prds.num_states(); stn++) {@
+        @#fpl_x_parser_state(prds, prds.states.at(stn), prds.opts)@
     @}@
 
 

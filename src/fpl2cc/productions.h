@@ -59,8 +59,8 @@ class productions {
 
     class lr_set;
 
-    std::vector<lr_set> states;
-    std::map<std::string, int32_t> state_index; // set id -> index in states
+    std::map<int32_t, lr_set> states;  // keyed by state number
+    std::map<std::string, int32_t> state_index; // set id -> state number
 
     static void warn(const std::string &msg) { jerror::warning(msg); };
 
@@ -1559,6 +1559,10 @@ public:
         return parser_class_name() + "::" + mem;
     }
 
+    int num_states() const {
+        return states.size();
+    }
+
     void clear_states() {
         states.clear();
         state_index.clear();
@@ -1574,28 +1578,11 @@ public:
 
         int32_t state_num = states.size();
 
-        if(state_num >= states.capacity()) {
-            // this is hokey, but when I changed state creation
-            // to be a recursive member of lr_set, I found out the
-            // hard way that on realloc, the this pointer of any
-            // lr_sets already added were going to be invalidated
-            // (obvious in retrospect).  We only warn here because
-            // there's no inherent reason this will cause failure,
-            // though it will invalidate pointers and iterators, etc.
-            // 
-            // this needs a better fix.  it's espcially rude because
-            // there's nothing the fpl author can do about it if they
-            // this.  moving on for now.
-            warn(stringformat(
-                "exceeding hypothetical max number of states ({}) at {}",
-                states.capacity(), caller
-            ));
-        }
 
         state_index.insert(
             std::make_pair(st.id(), states.size())
         );
-        states.push_back(st);
+        states[state_num] = st;
         return state_num;
     }
 
@@ -1623,7 +1610,6 @@ public:
         for(auto prodname : wanted)
             add_starts_for_product(ns, prodname, "initial goal set");
 
-        states.reserve(2000); // errf - this is the effective max states
         int32_t start_state = add_state(ns);
         if(start_state != 0) {
             warn(stringformat(
@@ -1859,7 +1845,7 @@ public:
         for(int stind = 0; stind < states.size(); stind++) {
             out += stringformat(
                 "state {}:\n{}\n",
-                stind, states[stind].to_str(this, "    ")
+                stind, states.at(stind).to_str(this, "    ")
             );
         }
         return out;
@@ -1913,7 +1899,8 @@ public:
         }
 
         // iterate the states to find which rules we actually use:
-        for(lr_set state : states) {
+        for(auto num_state : states) {
+            auto state = num_state.second;
             for(lr_item item : state.iterable_items()) {
                 if(!used[item.rule]) {
                     used[item.rule] = true;
