@@ -319,11 +319,6 @@ class productions {
         void add_expanded(const lr_item &it, const productions &prds) {
             if(!it) return;
 
-            // don't re-add if it's already there to avoid inappropriate
-            // recursion.  this does mean that if the item was added via
-            // add_item, we won't be adding any followers; i.e. we're
-            // expecting they've already been added.
-            if(items.count(it) > 0) return;
 
             const production_rule &rule = prds.rules[it.rule];
 
@@ -497,10 +492,11 @@ class productions {
         }
     };
 
-    // adds lr_items representing the start(s) of each existing rule
-    // for the product passed.  (rules may have multiple starts
+    // Adds lr_items representing the start(s) of each existing rule
+    // for the product passed.  Rules may have multiple starts
     // due to optionals - eg 'a'? 'b' -> c could start with 'a'
     // or 'b'.
+    // This is used for setting up the initial parsing goals.
     void add_starts_for_product(
         lr_set &set,
         const std::string &pname,
