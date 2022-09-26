@@ -124,7 +124,15 @@ class productions {
     }
 
     // this is the name of the element for purposes of (eg) enums
-    std::string element_id_name(int el_ind) const {
+    std::string element_id_name(
+        int el_ind, src_location caller = CALLER()
+    ) const {
+        if(el_ind < 0 || el_ind >= elements.size()) {
+            jerror::error(stringformat(
+                "bad element id ({}) at {}\n", el_ind, caller
+            ));
+        }
+
         const grammar_element el = elements[el_ind];
         if(el.is_nonterminal()) {
             return el.nonterm_id_str();
@@ -132,8 +140,15 @@ class productions {
         return stringformat("_terminal_{}", el_ind);
     }
 
-    std::string element_id_name(grammar_element el) const {
-        return element_id_name(element_index.at(el));
+    std::string element_id_name(
+        grammar_element el, src_location caller = CALLER()
+    ) const {
+        auto eli = element_index.find(el);
+        if(eli == element_index.end()) {
+            // return the "null" element:
+            return element_id_name(0, caller);
+        }
+        return element_id_name(eli->second);
     }
 
     struct lr_item {
