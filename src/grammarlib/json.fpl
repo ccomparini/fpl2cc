@@ -15,12 +15,18 @@ number   -> value ;
 "false":false_val -> boolean ;
 boolean           -> value ;
 
-# TODO replace this:
+# TODO replace this with the parens stuff, below
 '{'^ members? '}'^   -> object  ;
 member              -> members ;
 member ','^ members -> members ;
-# TODO with this:
-# '{'^ (member (','^ member)*)? '}'^ -> object ;
+# SO.  ideally +object would see member*:members as its
+# arguments.  how can this be made so?
+# one way is the reduce for each subexpression simply
+# returns the unejected member.
+# AHH but the outer subexpression actually has 2 arguments,
+# the second of which is assumed to be reduced.
+# so this is presently busted:
+#'{'^ (member (','^ member)*)?:members '}'^ -> object ;
 
 string:key ':'^ value -> member ;
 
@@ -29,7 +35,7 @@ string:key ':'^ value -> member ;
 element               -> elements ;
 element ','^ elements -> elements ;
 # TODO with this:
-# '['^ (value (','^ value)*)? ']'^ -> array ;
+# '['^ (value (','^ value)*)?:elements ']'^ -> array ;
 
 value                 -> element ;
 

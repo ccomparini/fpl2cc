@@ -51,6 +51,7 @@ class productions {
 
     std::vector<production_rule>    rules;
     std::multimap<std::string, int> rules_for_product; // product -> rule ind
+    int anon_product_count; // used to generate unique ids for anonymous rules
 
     std::vector<grammar_element>    elements;
     std::map<grammar_element, int>  element_index;
@@ -528,7 +529,7 @@ public:
 // XXX this is currently stupid in that you pass the fpl_reader
 // but then you have to make a separate call to parse it.  fix that.
     productions(const fpl_options &op, fpl_reader_p src) :
-        inp(src), opts(op), default_main(false)
+        inp(src), opts(op), default_main(false), anon_product_count(0)
     {
         // element 0 is a null element and can be used to
         // indicate missing/uninitialized elements or such.
@@ -984,8 +985,53 @@ public:
         return import_grammar(subgrammar(grammar_name), prod_name);
     }
 
+    std::string make_sub_prod_name() {
+        return stringformat("_subexpression_{]", anon_product_count++);
+    }
 
-    int read_expressions(fpl_reader &src, production_rule &rule) {
+    // returns the name of the production representing the subexpression,
+    // or an empty string on failure.
+    // (may also toss errors on failure)
+    std::string parse_subexpression(fpl_reader &src) {
+        std::string subname;
+        if(!src.read_byte_equalling('(')) {
+            error("expected subexpression");
+        } else {
+            // subexpressions are implemented as sub rules,
+            // so we need to make a rule:
+            production_rule subrule(src.filename(), src.line_number());
+            subname = make_sub_prod_name();
+            subrule.product(subname);
+            parse_expressions(src, subrule);
+            if(!src.read_byte_equalling(')')) {
+                error(src, stringformat(
+                    "expected ')' for subexpression starting at {}\n",
+                    subrule.location()
+                ));
+            }
+
+            // OK plan:
+            //   - subexpression matches as a rule
+            //   - subexpression contents are seen by the containing
+            //     rule as flattened into 1 (or more if we can do skips)
+            //     arguments to the reduce function.
+            // eg:
+            //   '('^ (el (',', el)*)? ')'^ -> arg_list ;
+            //
+            //   '{'^ (key '=>' el (', ' $)*)? '}'^ hmmm commas here? interestin.
+            //   maybe it's not worth supporting more than one anyway.
+            //   though it would be nice to be able to do the above...
+            // For the moment, we'll just support one
+            // 
+            //add_type_for(
+
+            add_rule(subrule);
+        }
+
+        return subname;
+    }
+
+    int parse_expressions(fpl_reader &src, production_rule &rule) {
         int num_read = 0;
         bool done = false;
         do {
@@ -1023,21 +1069,26 @@ public:
                     expr_str = "~";
                     type     = grammar_element::Type::LACK_OF_SEPARATOR;
                     break;
+                case '(':
+                    expr_str = parse_subexpression(src);
+                    if(expr_str.length()) {
+                        type = grammar_element::Type::NONTERM_PRODUCTION;
+                    } // else 
+                    break;
+                case ')':
+                    // end of a subrule, or else a stray ')'
+                    done = true;
+                    break;
                 case '-':
-                    src.read_byte();
-                    if(src.read_byte_equalling('>')) {
-                        // just scanned "->", so we're done:
-                        done = true;
-                    } else {
-                        error(src, "unexpected '-'");
-                    }
+                    // end of rule steps (expressions), or else stray '-'
+                    done = true;
                     break;
                 case '`':
                     // parse/import the sub-fpl, and use whatever it produces:
                     expr_str = parse_import(src, rule);
                     type     = grammar_element::Type::NONTERM_PRODUCTION;
                     break;
-                case '}':
+                case /*{*/ '}':
                     // this can happen, especially if there's a '}+'
                     // embedded in a code block.
                     if(src.read_byte_equalling('+'))
@@ -1065,10 +1116,10 @@ public:
             if(type != grammar_element::Type::NONE) {
                 if(expr_str.length() >= 1) {
                     production_rule::step expr(expr_str, type);
-                    if(type == grammar_element::Type::LACK_OF_SEPARATOR)
-                        expr.eject = true;
                     read_quantifier(src, expr);
                     read_suffix(src, expr);
+                    if(type == grammar_element::Type::LACK_OF_SEPARATOR)
+                        expr.eject = true;
                     rule.add_step(expr);
                     num_read++;
                 } else {
@@ -1284,22 +1335,6 @@ public:
             } else if(inp->read_byte_equalling('@')) {
                 std::string directive = read_directive(*inp);
                 parse_directive(directive);
-/*
-            } else if(inp->read_byte_equalling('&')) {
-                // either defining or calling a scan function:
-
-                // OK scan functions:
-                //   - some defaults will be imported yay. like &default.
-                //   - ideally they could be regex as well (but maybe do that
-                //     in the body parse and use the same thing for separators)
-                // maybe for the moment it would make sense to have an @ directive
-                // to define them?
-                //  @token foo... let's do that.
-                // no matter how we slice it, this is going to make
-                // target-language portability issues, but perhaps
-                // those can be managable.
- */
-                
             } else if(inp->read_byte_equalling('}')) {
                 // likely what happened is someone put a }+ inside
                 // a code block.  anyway a floating end brace is
@@ -1307,16 +1342,26 @@ public:
                 error("unmatched '}'\n");
             } else {
                 production_rule rule(inp->filename(), inp->line_number());
-                if(read_expressions(*inp, rule)) {
+                if(parse_expressions(*inp, rule)) {
                     // .. we've read the expressions/steps leading to
-                    // the production (including the "->").
                     // read what the expressions above produce:
                     inp->eat_separator();
+                    if(!inp->read_exact_match("->")) {
+                        error("expected '->' after parsing rule expressions");
+                    }
+                    inp->eat_separator();
+
                     std::string pname = read_production_name(*inp);
                     if(!pname.length()) {
                         error("invalid production name\n");
                     } else {
                         rule.product(pname);
+
+                        // if there's no explicit goal, default
+                        // to the product for the first explicit
+                        // rule parsed:
+                        if(goal.empty())
+                            goal = { pname };
                     }
 
                     inp->eat_separator();
@@ -1412,8 +1457,9 @@ public:
                 add_separator_code(sepc);
             }
 
-            for(auto primp : from.preamble)
+            for(auto primp : from.preamble) {
                 add_preamble(primp);
+            }
         }
 
         // these are the names of the products whose rules (and elements)
@@ -1681,7 +1727,7 @@ public:
                 std::string why_not = why_cant_use_reducer(red, rule);
                 if(why_not.length()) {
                     why_no_match += stringformat(
-                        "\n        {}: {}", rule.to_str(), why_not
+                        "\n        {} {}: {}", rule, rule.location(), why_not
                     );
                     continue;
                 }
@@ -1702,7 +1748,7 @@ public:
                     // overrode an existing reducer, ... hmm maybe...grrr
                     if(mc == existing_mc) {
                         warn(stringformat("{} overrides equally good {} on {}",
-                            red.to_str(), existing.to_str(), rule.to_str()
+                            red, existing, rule
                         ));
                     }
                 }
