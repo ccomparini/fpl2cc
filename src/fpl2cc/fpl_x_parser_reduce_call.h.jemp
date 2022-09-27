@@ -10,13 +10,13 @@
  downcast to the (hopefully) appropriate specialization.
 */@
 
-
-    /* figure out the stack slices for each argument. */
-    /* we have to do this outside the call because parameter evaluation */
-    /* order is not defined in c++ and we're (pseudo-)popping the stack */
-    /* at the moment, we create a stack slice even for things we're */
-    /* not going to pass to the reduce function.  wasteful, but easy. */
-    /* at some point ideally we won't even push them... */
+    @/* figure out the stack slices for each argument.
+        we have to do this outside the call because parameter evaluation
+        order is not defined in c++ and we're (pseudo-)popping the stack.
+        at the moment, we create a stack slice even for things we're
+        not going to pass to the reduce function.  wasteful, but easy.
+        at some point ideally we won't even push them...
+    */@
     int frame_start = lr_top();
     int lr_arg_base = frame_start;  // (gets updated as we create args)
     @for(int stind = rule.num_steps() - 1; stind >= 0; --stind) {-@
@@ -30,7 +30,7 @@
         @}-@
     @}-@
 
-    /* this is the call to the reduce code: */
+    @/* this is the call to the reduce code: */@
     @-prds.type_for(rule.product())@ result = @prds.rule_fn(rule) -@ (
         @-for(int pind = 0; pind < num_params; pind++) {-@
             @- pind?",":"" -@ arg_@-rule.reduce_param_step_num(pind)-@

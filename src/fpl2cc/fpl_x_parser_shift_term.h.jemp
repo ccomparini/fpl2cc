@@ -36,10 +36,12 @@ bool shift_@el.type_str()@_@el_id@(State new_st) {
         }
     @} else if(el.type == grammar_element::TERM_REGEX) {@
         std::cmatch match = reader->read_re("@match_str@");
-        // XXX bug:  if there's a 0-byte match but multiple
-        // is allowed, the parser ends up looping infinitely
-        // reading 0 bytes and saying "ok yeah that matched".
-        if(!match.empty()) { // note 0-byte match is considered not empty
+        @/* XXX bug:  if there's a 0-byte match but multiple
+            is allowed, the parser ends up looping infinitely
+            reading 0 bytes and saying "ok yeah that matched".
+            Note: 0-byte match is considered not empty.
+        */@
+        if(!match.empty()) {
             result = Terminal(match.begin(), match.end());
         }
     @} else if(el.type == grammar_element::TERM_CUSTOM) {@
