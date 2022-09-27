@@ -52,9 +52,11 @@ struct utf8_buffer : public std::basic_string<utf8_byte> {
         utf8_byte buf[bufsize];
         while(!in.eof()) {
             in.read((char *)buf, bufsize - 1);
-            buf[bufsize - 1] = '\0';
+            size_t bytes_read = in.gcount();
+            buf[bytes_read] = '\0';
             *this += buf;
         }
+        *this += '\0';
     }
 };
 
