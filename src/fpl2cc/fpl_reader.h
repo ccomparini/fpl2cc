@@ -158,7 +158,6 @@ class fpl_reader {
         return empty_match;
     }
 
-private:
     // returns true if the position passed would be eof.
     // throws an error (and returns true) if the position
     // is entirely outside the buffer
