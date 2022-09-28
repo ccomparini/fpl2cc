@@ -43,7 +43,7 @@ void fail(const std::string &msg, src_location caller = CALLER()) {
 
 static int num_warnings = 0;
 void warn(const std::string &msg, src_location caller = CALLER()) {
-    // indent warnings so that errors stand out:
+    // (indent warnings so that errors stand out)
     if(msg[msg.length() - 1] != '\n') {
         fprintf(stderr, "    warning: %s\n", msg.c_str());
     } else {
@@ -210,9 +210,15 @@ void write_depfile(const productions &prds, const fpl_options &opts) {
 
 // returns an exit()-appropriate status (i.e. 0 on success)
 ExitVal fpl2cc(const fpl_options &opts) {
-    if(opts.src_fpl.size() == 0)
-        fail("Error:  no source fpl specified");
-    auto inp = make_shared<fpl_reader>(opts.src_fpl, fail_reader_adapter);
+    std::shared_ptr<fpl_reader> inp;
+
+    if(opts.src_fpl.size() == 0) {
+        inp = make_shared<fpl_reader>(
+            std::cin, "<stdin>", fail_reader_adapter
+        );
+    } else {
+        inp = make_shared<fpl_reader>(opts.src_fpl, fail_reader_adapter);
+    }
 
     // parse the input file into a set of productions:
     productions prds(opts, inp); // XXX don't pass inp here
