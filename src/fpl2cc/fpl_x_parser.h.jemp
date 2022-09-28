@@ -97,7 +97,7 @@ public:
     };
 
     class Product {
-    public:
+        struct false_product { };
         using Var = std::variant<
             @-for(auto type : prds.all_types) {-@
                 @type@,
@@ -105,7 +105,6 @@ public:
             Terminal
         >;
 
-    private:
         Var red;
 
         int  element_id;
