@@ -245,13 +245,12 @@ ExitVal fpl2cc(const fpl_options &opts) {
     if(opts.generate_code)
         output = prds.generate_code();
 
-    // uhh... this is easy, if hokey:
     if(opts.out) {
+        // uhh... this is easy, if hokey:
         if(output.length())
             fprintf(opts.out, "%s\n", output.c_str());
     } else {
-        fail("no open output - fail\n");
-        return ExitVal::BAD_ARGS;
+        std::cout << output;
     }
 
     return ExitVal::OK;

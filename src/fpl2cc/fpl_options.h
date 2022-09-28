@@ -149,13 +149,6 @@ struct fpl_options {
                         if(val.empty())
                             errors.push_back("--out requires a value");
                         output_fn = val;
-                        out = fopen(output_fn.c_str(), "w");
-                        if(!out) {
-                            error(
-                                "--out: can't open '" + output_fn + "' for write: " +
-                                strerror(errno)
-                            );
-                        }
                     } else if(opt == "src-path") {
                         SCAN_VALUE();
                         src_path.append(val);
@@ -177,18 +170,35 @@ struct fpl_options {
             #undef SCAN_VALUE
         }
 
+        // if no output filename was specified, base it on the input name,
+        // or write to stdout:
+        if(!output_fn.length()) {
+            if(src_fpl.length() == 0) {
+                output_fn = "«stdout»";
+                out       = stdout;
+            } else {
+                std::filesystem::path pt(src_fpl);
+                pt.replace_extension("cc");
+                output_fn = pt.filename();
+            }
+        }
+
+        if(!out) {
+            out = fopen(output_fn.c_str(), "w");
+            if(!out) {
+                error(
+                    "--out: can't open '" + output_fn + "' for write: " +
+                    strerror(errno)
+                );
+            }
+        }
+
         // special case for depfiles:  if the name begins with a ".",
         // consider the depfile name to be the extension and use the
         // fpl base name.  this makes it easier to jam into scons,
         // which basically wants a separate depfile per source.
         depfile = infer_filename(depfile);
         statedump = infer_filename(statedump);
-
-        // if no output filename was specified, write to stdout:
-        if(!output_fn.length()) {
-            output_fn = "«stdout»";
-            out       = stdout;
-        }
     }
 
     std::string src_filename() const {
