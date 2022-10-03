@@ -510,8 +510,10 @@ public:
         inline std::string to_str() const {
             std::string out;
             for(int ind = 0; ind < size; ++ind) {
-                out += std::to_string(ind) + " (abs " + std::to_string(base_index + ind) + "): ";
-                out += product(ind).to_str() + "\n";
+                out += stringformat(
+                    "{} (abs {}): {::n}\n",
+                    ind, base_index + ind, product(ind)
+                );
             }
             return out;
         }
