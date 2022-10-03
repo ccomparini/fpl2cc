@@ -756,7 +756,6 @@ public:
         // and figure out errors if that's what they want.
 
         parse_partial();
-        rewind_to_nonterm();
         Product got = result();
 
         // consume any additional "separators" (eg whitespace,
