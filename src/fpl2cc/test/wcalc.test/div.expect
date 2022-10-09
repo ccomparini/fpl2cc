@@ -1,1 +1,4 @@
-result: 0.884615
+returncode = 0
+stderr = ""
+stdout = "result: 0.884615
+"

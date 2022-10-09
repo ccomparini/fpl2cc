@@ -1,21 +1,24 @@
-object {
- "id" = 1,
-"species" = "Cacatua galerita",
-"whatshelookslike" = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAIhSURBVDjLY/j//z8DJZhhGBlgZ2fHnZWVVdra2vpu3rx5/2tqah7m5OSYA7EEkH0XJAaSA6kBqUUxwMjIiM3Hx6dr4sSJ/1+8ePH/7t27/w8ePPi/sbHxXnV19aGbN2/+AIkdOXLkP0gNSC1ID9wAQ0NDv+Li4g9Xr159FxERsc3b2/tPamrq/0mTJv2vrKz8D2KDxEByK1aseAhSC9KD7IKupqam75MnT0739/fnsre3/7x3797/586d+3/o0KH/a9eu/Z8xx+Jf6nzD/yA1ILUgPXADdHV1M9PT099PmzatJCgoaKejo+MvNze3/4GBgWAMYifMMPrfuDnqf/gMjf8gtSA9cAM0gcDX1/d6b2/v+1WrVr1dt27d//yltv9zF1n8T19g8j9pruH/mvWh/1ednvi/ZLX/f9c+iX+a2hpacAPU1NSYgc428PLyup+SkvIlOzv7e/Zi8/8bzk37v/bsFLDGFacn/J+wp+T/wuNd/zOWuv03bWf/rdvMyIgzfpOB/gVp7tuV/79zR/b/1m1p/xs2J/5v2pr+f8ah5v8xC2z+q9Yz/MRpQPRszf8rT034v/RE7/+Fx7r+zzvaATQk6//0Q03/05Z6/FesZbguXcnAidOAwOmKfz0nSv917hf9a93N/zduvtX/aQcb/ictdvsvX8twUbKSgZ2kpKzdzPg6fqHzf/lqhjNAzWwk5wWgk1/LVTP/F61kYEEWBwAP7or0z//OfQAAAABJRU5ErkJggg==",
-"email" = "eimrie0@example.org",
-"bitcoin_account" = "19nnMimmQEwDd2TPU4bX1oC7vD3X7zoKyP",
-"subspecies" = array { object {
- "id" = 2,
-"species" = "Ephipplorhynchus senegalensis",
-"whatshelookslike" = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAI9SURBVDjLpVNfSFNRHP7u3MiHZqJCumZZamVRaSas0V40i4gKeoreIjKI3iK40GsPEpQEIRRBj/17kYKMSodlZk8rmy42mUjjLrfVnPt/77nn9jt3NSFfFH/w8f3OOfd+v3/nSIZhYD1mwTrN+s8JBoOXNU0bIBTJcoVCIZ3P5+OEL7lcLkacIg4R3sqyzFYI0Ad36UcQZI/Hc3/NGWQyGRtFHSahp2spQRoLsx/EzmzICxJA9Z7j0HUOZkKHxnQwTYdKrGlizUxWS35ECBibremyopiKGAwX4Ia51omFL/Z0zk2f9DEW+L08hRaHHZFYFq1bqjC/kMbuxiqElSXsbapGKJJCe0sNAvNJdO2qM/dEhqrKIHlnVcogg0g8ayqLAxGRiSjlUowytzfX4uDOWoz6ohiZisPCWCml7o4GHO10UK0cJ12NKKo6znqaUFA5zvc0Q0m8R0i5hYev+3Dpzml8mnls9kN65c8ajso85qJLYExEXo4qMtCIo79GUGH3obPtEJw1rfBOD2HS/wHFpBtWs8sU9dThrXgyGsa57h0rRtU3cB1nuo5Bt+g40NCLdzPP4drnxrOhYVhVjYHZOD5/T2BbvR0f/QtmhznnJaYpxBajsEkbcaLtoil4recBXn4bpLMXsBZVlghkjbr/5lvy/96BZHoR08oEvirjkHsfof/NBVRWbIAk2QxpNa/RddVx07l90w33/iNore9A6KcPE1PjiMylbkurfc4k0k90hWAniJs3OHlPkf8A2YeC/G6HEpkAAAAASUVORK5CYII=",
-"email" = "kmanilow1@example.org",
-"bitcoin_account" = "1G9hj7RKZptqo96vo7sDqHPdMhATEvQCf2"}
+returncode = 0
+stderr = ""
+stdout = "object {
+ \"id\" = 1,
+\"species\" = \"Cacatua galerita\",
+\"whatshelookslike\" = \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAIhSURBVDjLY/j//z8DJZhhGBlgZ2fHnZWVVdra2vpu3rx5/2tqah7m5OSYA7EEkH0XJAaSA6kBqUUxwMjIiM3Hx6dr4sSJ/1+8ePH/7t27/w8ePPi/sbHxXnV19aGbN2/+AIkdOXLkP0gNSC1ID9wAQ0NDv+Li4g9Xr159FxERsc3b2/tPamrq/0mTJv2vrKz8D2KDxEByK1aseAhSC9KD7IKupqam75MnT0739/fnsre3/7x3797/586d+3/o0KH/a9eu/Z8xx+Jf6nzD/yA1ILUgPXADdHV1M9PT099PmzatJCgoaKejo+MvNze3/4GBgWAMYifMMPrfuDnqf/gMjf8gtSA9cAM0gcDX1/d6b2/v+1WrVr1dt27d//yltv9zF1n8T19g8j9pruH/mvWh/1ednvi/ZLX/f9c+iX+a2hpacAPU1NSYgc428PLyup+SkvIlOzv7e/Zi8/8bzk37v/bsFLDGFacn/J+wp+T/wuNd/zOWuv03bWf/rdvMyIgzfpOB/gVp7tuV/79zR/b/1m1p/xs2J/5v2pr+f8ah5v8xC2z+q9Yz/MRpQPRszf8rT034v/RE7/+Fx7r+zzvaATQk6//0Q03/05Z6/FesZbguXcnAidOAwOmKfz0nSv917hf9a93N/zduvtX/aQcb/ictdvsvX8twUbKSgZ2kpKzdzPg6fqHzf/lqhjNAzWwk5wWgk1/LVTP/F61kYEEWBwAP7or0z//OfQAAAABJRU5ErkJggg==\",
+\"email\" = \"eimrie0@example.org\",
+\"bitcoin_account\" = \"19nnMimmQEwDd2TPU4bX1oC7vD3X7zoKyP\",
+\"subspecies\" = array { object {
+ \"id\" = 2,
+\"species\" = \"Ephipplorhynchus senegalensis\",
+\"whatshelookslike\" = \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAI9SURBVDjLpVNfSFNRHP7u3MiHZqJCumZZamVRaSas0V40i4gKeoreIjKI3iK40GsPEpQEIRRBj/17kYKMSodlZk8rmy42mUjjLrfVnPt/77nn9jt3NSFfFH/w8f3OOfd+v3/nSIZhYD1mwTrN+s8JBoOXNU0bIBTJcoVCIZ3P5+OEL7lcLkacIg4R3sqyzFYI0Ad36UcQZI/Hc3/NGWQyGRtFHSahp2spQRoLsx/EzmzICxJA9Z7j0HUOZkKHxnQwTYdKrGlizUxWS35ECBibremyopiKGAwX4Ia51omFL/Z0zk2f9DEW+L08hRaHHZFYFq1bqjC/kMbuxiqElSXsbapGKJJCe0sNAvNJdO2qM/dEhqrKIHlnVcogg0g8ayqLAxGRiSjlUowytzfX4uDOWoz6ohiZisPCWCml7o4GHO10UK0cJ12NKKo6znqaUFA5zvc0Q0m8R0i5hYev+3Dpzml8mnls9kN65c8ajso85qJLYExEXo4qMtCIo79GUGH3obPtEJw1rfBOD2HS/wHFpBtWs8sU9dThrXgyGsa57h0rRtU3cB1nuo5Bt+g40NCLdzPP4drnxrOhYVhVjYHZOD5/T2BbvR0f/QtmhznnJaYpxBajsEkbcaLtoil4recBXn4bpLMXsBZVlghkjbr/5lvy/96BZHoR08oEvirjkHsfof/NBVRWbIAk2QxpNa/RddVx07l90w33/iNore9A6KcPE1PjiMylbkurfc4k0k90hWAniJs3OHlPkf8A2YeC/G6HEpkAAAAASUVORK5CYII=\",
+\"email\" = \"kmanilow1@example.org\",
+\"bitcoin_account\" = \"1G9hj7RKZptqo96vo7sDqHPdMhATEvQCf2\"}
 , object {
- "id" = 3,
-"species" = "Phasianus colchicus",
-"whatshelookslike" = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAK3SURBVDjLpZNNSFRRFMfP+5zxY2a0l81Mg6NDiosKRKFNYC6kIERpUaSbVuGmja0yp5A0aRG0CdolIa5CAqmNEzQQfoCamhDT4ETNjDOWOOW8eR8z7753u/eBE6LUogeXw7v3/H/nnnPuYTDG8D8f/y+Hb8lkM8swV03TPIUQeu1yuWa8Xq+5f8787Qaf4/F7Ho/ngdPhsP9VVQVZlrOapp1tbW3dtTcp4Ki1vLb2cCubxaVSCeu6jokQEwDO5XJ4dXX159zCgpP6sUdFjs7Pj0uSdLdOkoAAgEQEAqHRQRAEqHa7a4j4FvU9BIhGo2MBn28o4PVCsVi0ASR3IDWwbT6fhxqPBwyEhg4BNqemRltMc7jR7bYjUvG+kC7DMOx9UlQoGsaxA4DtcHjUJ4rhOp4Hc2ICrJUVW0xF+2Jq3QQuFwqgKEq8DNjs7x9whkJhJ8kZLS4CSiaBmZwEiEQOiGn+lmVBLBYDpVDosts4Fww6fN3derC3F4ylJUCZDFikXRYpnEmL19EBWk8PFOdfQv7dJGipBCAHv8ug0uOLs+gRL3Ncw0lRBEyKg1KpspBCqOWmpwl0GTCfhrZrN8EROg3ax1np0/vIWKRLUNhfmlbSslmwcjkwSW7lpShgEUuf6o/1GWi6cAWciSgwL/qg8ssraGyQOMzgQX6nUPgWX1/fqPP7z1T4/Yy6sVG+gcCyINAO4BI4fSGAy7f/zMCIHziLabSf8tPa2uPtTU0fmltafBUYC2o6DU4iRnt7kCUFTPtiu+f7bkhVyTdQ1LZBJQA5z0EsAVvlWXhSXV17orLyeVsg0OlhGLdObpBRVSulqr31XY5zoqtquF5CPM+mQd5B8PU7Zxo6vn9gmEZEkfFwXHsFy3aaGCdKlvV2UNdlejZ3PXhHyWUGOJNpMDm8RVTPLs2i8d9nr6w0wqZqDgAAAABJRU5ErkJggg==",
-"email" = "fmcmakin2@example.org",
-"bitcoin_account" = "149Zo6caynjvcAQrC9kHDTe3VmthZ8oKxN"}
+ \"id\" = 3,
+\"species\" = \"Phasianus colchicus\",
+\"whatshelookslike\" = \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAK3SURBVDjLpZNNSFRRFMfP+5zxY2a0l81Mg6NDiosKRKFNYC6kIERpUaSbVuGmja0yp5A0aRG0CdolIa5CAqmNEzQQfoCamhDT4ETNjDOWOOW8eR8z7753u/eBE6LUogeXw7v3/H/nnnPuYTDG8D8f/y+Hb8lkM8swV03TPIUQeu1yuWa8Xq+5f8787Qaf4/F7Ho/ngdPhsP9VVQVZlrOapp1tbW3dtTcp4Ki1vLb2cCubxaVSCeu6jokQEwDO5XJ4dXX159zCgpP6sUdFjs7Pj0uSdLdOkoAAgEQEAqHRQRAEqHa7a4j4FvU9BIhGo2MBn28o4PVCsVi0ASR3IDWwbT6fhxqPBwyEhg4BNqemRltMc7jR7bYjUvG+kC7DMOx9UlQoGsaxA4DtcHjUJ4rhOp4Hc2ICrJUVW0xF+2Jq3QQuFwqgKEq8DNjs7x9whkJhJ8kZLS4CSiaBmZwEiEQOiGn+lmVBLBYDpVDosts4Fww6fN3derC3F4ylJUCZDFikXRYpnEmL19EBWk8PFOdfQv7dJGipBCAHv8ug0uOLs+gRL3Ncw0lRBEyKg1KpspBCqOWmpwl0GTCfhrZrN8EROg3ax1np0/vIWKRLUNhfmlbSslmwcjkwSW7lpShgEUuf6o/1GWi6cAWciSgwL/qg8ssraGyQOMzgQX6nUPgWX1/fqPP7z1T4/Yy6sVG+gcCyINAO4BI4fSGAy7f/zMCIHziLabSf8tPa2uPtTU0fmltafBUYC2o6DU4iRnt7kCUFTPtiu+f7bkhVyTdQ1LZBJQA5z0EsAVvlWXhSXV17orLyeVsg0OlhGLdObpBRVSulqr31XY5zoqtquF5CPM+mQd5B8PU7Zxo6vn9gmEZEkfFwXHsFy3aaGCdKlvV2UNdlejZ3PXhHyWUGOJNpMDm8RVTPLs2i8d9nr6w0wqZqDgAAAABJRU5ErkJggg==\",
+\"email\" = \"fmcmakin2@example.org\",
+\"bitcoin_account\" = \"149Zo6caynjvcAQrC9kHDTe3VmthZ8oKxN\"}
 }
 }
 
+"

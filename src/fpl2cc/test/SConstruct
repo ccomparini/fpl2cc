@@ -16,12 +16,12 @@ env.CompareOut('reader.success', [ 'reader.expect', 'reader.out' ])
 # dependencies:
 #   [src language] : [src language].cc
 #   [src language].cc : [src language].fpl
-#   [src language].test/[test name].out: [src language].test/[test name].[src language] [src language]
-#   [src language].test/[test name].success: [src language].test/[test name].expect [src language].test/[test name].out
+#   [src language].test/[test name].result: [src language].test/[test name].[src language] [src language]
+#   [src language].test/[test name].success: [src language].test/[test name].expect [src language].test/[test name].result
 #
 # So each test language is defined by an .fpl file,
 # and then each test consists of a source file for that language and
-# a .expect file with the corresponding expected output.
+# a .expect file with the corresponding expected .result file.
 # This lets us black-box test the fpl compiler for various cases.
 #
 # references (these were hard to find):
@@ -32,7 +32,6 @@ env.CompareOut('reader.success', [ 'reader.expect', 'reader.out' ])
 #
 
 
-
 # each language we might be using to test will have an fpl,
 # so the set of fpl files determines the set of languages
 # we're going to use:
@@ -40,10 +39,9 @@ fpls = Glob('*.fpl')
 
 def build_default(lprog) :
     return env.Program(lprog, [ lprog + '.cc' ])
-    
+
 def build_json_exe(lprog) :
     return env.Program(lprog, [ lprog + '.cc' ], LIBS = 'jest')
-    
 
 # functions for generating the executable for a given language.
 # if a given language executable needs particular libraries
@@ -58,7 +56,7 @@ build_lang_exe = {
 #   [lang] : [lang].cc
 #   [lang].cc : [lang].fpl #bin/fpl2cc
 # for each language we're testing, and makes the builder for:
-#   [x].out : [x].[lang] [lang]
+#   [x].result : [x].[lang] [lang]
 for fpl in fpls :
     langprog, foo = os.path.splitext(fpl.get_abspath())
     language = os.path.basename(langprog)
@@ -75,8 +73,8 @@ for fpl in fpls :
     # .. and now create a builder for running the language program:
     env.Append(BUILDERS =
         { 'FPLTestLang_' + language : Builder(
-            action = langprog + ' $SOURCE > $TARGET',
-            suffix = '.out',
+            action = run_and_capture_action(langprog),
+            suffix = '.result',
             src_suffix = language) } )
 
     # .. and, the language program is built from <lang>.fpl
@@ -95,9 +93,9 @@ for fpl in fpls :
 test_dirs = Glob('*.test')
 
 # sets up:
-#   [lang].test/[t].success: [lang].test/[t].expect [lang].test/[t].out
+#   [lang].test/[t].success: [lang].test/[t].expect [lang].test/[t].result
 # and the invocation of the generated language program:
-#   [x].out : [lang] [x].[lang]
+#   [x].result : [lang] [x].[lang]
 # for each "expect" file.
 for test_dir in test_dirs :
     language, foo = os.path.splitext(test_dir.name)
@@ -107,10 +105,10 @@ for test_dir in test_dirs :
         test_name, foo = os.path.splitext(expected.get_path())
         src_file = test_name + '.' + language
         success_file = test_name + '.success'
-        out_file  = test_name + '.out'
-        env.Depends(out_file, [ language ])
-        getattr(env, 'FPLTestLang_' + language)(out_file, [ src_file ])
-        env.CompareOut(success_file, [ expected, out_file ])
+        result_file  = test_name + '.result'
+        env.Depends(result_file, [ language ])
+        getattr(env, 'FPLTestLang_' + language)(result_file, [ src_file ])
+        env.CompareOut(success_file, [ expected, result_file ])
 
 
 

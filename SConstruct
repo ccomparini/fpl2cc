@@ -1,7 +1,6 @@
-import sysconfig
 import os
-import subprocess
 import sys
+import sysconfig
 
 debugger = ''
 #debugger = 'TERM=xterm-256color /usr/bin/lldb --one-line "b debug_hook" -- '
@@ -86,7 +85,7 @@ def sources_are_same(target, source, env):
     # success, so "touch" all targets (i.e. make them exist
     # and  set the utime to the current time).
     # (typically there's only one target file, called xxx.success...)
-    for fn in target:
+    for fn in target :
         with open(fn.abspath, 'a'):
             os.utime(fn.abspath, None)
     return 0

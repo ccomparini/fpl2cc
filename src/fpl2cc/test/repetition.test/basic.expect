@@ -1,4 +1,6 @@
-======
+returncode = 0
+stderr = ""
+stdout = "======
 empty block
 block with bar, bat, bell
 a_statement
@@ -10,3 +12,4 @@ one percent
 #x#x#x#x#
 #x#
 ======
+"
