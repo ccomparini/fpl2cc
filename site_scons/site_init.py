@@ -25,6 +25,9 @@ def run_and_capture_action(program):
 
     """
 
+    if isinstance(program, str):
+        program = [ program ]
+
     def run_and_cap(target, source, env):
         if len(target) != 1:
             raise ValueError("run_and_capture must have exactly 1 target")
@@ -37,7 +40,7 @@ def run_and_capture_action(program):
         if os.path.isfile(target_fn):
             os.remove(target_fn)
 
-        command = [ program ] + [f.abspath for f in source]
+        command = program + [f.abspath for f in source]
         cap = subprocess.run(command, capture_output=True, timeout=10)
 
         with open(target_fn, mode='w', encoding='utf-8') as outf:
