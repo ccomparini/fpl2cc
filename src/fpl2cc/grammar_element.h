@@ -10,8 +10,9 @@ struct grammar_element {
         TERM_EXACT,  // exact string match
         TERM_REGEX,  // regular expression match
         TERM_CUSTOM, // custom code for matching terminal
-        NONTERM_PRODUCTION,
         LACK_OF_SEPARATOR, // pseudoterminal indicating no separator
+        NONTERM_PRODUCTION,    // the result of reducing a rule
+        NONTERM_SUBEXPRESSION, // parenthesized expression
         _TYPE_CAP
     } Type;
     Type type;
@@ -22,10 +23,11 @@ struct grammar_element {
             "TERM_EXACT",
             "TERM_REGEX",
             "TERM_CUSTOM",
-            "NONTERM_PRODUCTION",
             "LACK_OF_SEPARATOR", // convert to TERM_CUSTOM?
+            "NONTERM_PRODUCTION",
+            "NONTERM_SUBEXPRESSION",
         };
-        if(t > NONE && t < _TYPE_CAP) {
+        if(t >= NONE && t < _TYPE_CAP) {
             return strs[t];
         }
         return "invalid grammar_element::Type";
@@ -55,17 +57,13 @@ struct grammar_element {
         return left.compare(right) == 0;
     }
 
-    // XXX phase out:
-    inline bool is_terminal() const {
-        return !is_nonterminal();
-    }
 
     inline bool is_nonterminal() const {
-        return (type == NONTERM_PRODUCTION);
+        return (type >= NONTERM_PRODUCTION);
     }
 
     std::string nonterm_id_str() const {
-        if(type == NONTERM_PRODUCTION) {
+        if(is_nonterminal()) {
             // always prefix with underscore as a hack to avoid
             // colliding with target language keywords:
             std::string out = "_" + expr;
@@ -98,13 +96,17 @@ struct grammar_element {
                 lb = "&";
                 rb = "";
                 break;
+            case LACK_OF_SEPARATOR:
+                lb = "⸢";
+                rb = "⸣";
+                break;
             case NONTERM_PRODUCTION:
                 lb = "";
                 rb = "";
                 break;
-            case LACK_OF_SEPARATOR:
-                lb = "⸢";
-                rb = "⸣";
+            case NONTERM_SUBEXPRESSION:
+                lb = "(";
+                rb = ")";
                 break;
             default:
                 lb = "??????";

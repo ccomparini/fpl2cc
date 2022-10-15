@@ -41,7 +41,6 @@
     @}@
 @}@
 
-
 class @class_name@ {
 public:
     void state(); // this just facilitates the "using State"
@@ -99,6 +98,7 @@ public:
     class Product {
         struct false_product { };
         using Var = std::variant<
+            false_product,
             @-for(auto type : prds.all_types) {-@
                 @type@,
             @-}-@
@@ -107,52 +107,34 @@ public:
 
         Var red;
 
-        int  element_id;
-
-        SourcePosition pos;
-
     public:
-        // Note:  this is relying on element id 0 being a null/error element.
-        Product() : element_id(0) {
-        };
+        // creates a false-valued Product:
+        Product() : red(false_product()) { }
 
-        Product(Terminal tm, int el_id, const SourcePosition &position) :
-            red(tm), element_id(el_id), pos(position) {
-            if(!is_terminal()) {
-                jerror::error(stringformat(
-                    "FAIL: {} ain't no terminal\n", el_id
-                ));
-            }
-        };
+        Product(Terminal tm) : red(tm) { }
 
         // type-specific constructors:
         @-for(auto type : prds.all_types) {-@
-            Product(@type@ result, int el_id, const SourcePosition &p) :
-                red(result), element_id(el_id), pos(p) {
-
-                if(is_terminal()) {
-                    jerror::error(stringformat(
-                        "FAIL: {} is a terminal\n", el_id
-                    ));
-                }
-            };
+            Product(@type@ result) : red(result) { }
         @-}-@
 
         const Var &var() const { return red; }
 
         operator bool() const {
-            return element_id != 0;
+            return !std::holds_alternative<false_product>(red);
         }
 
-        int grammar_element_id() const { return element_id; }
-        bool is_terminal() const { return @class_name@::is_terminal(element_id); }
-
-        SourcePosition position() const { return pos; }
 
         std::string type_name() const {
-            if(std::holds_alternative<Terminal>(red)) return "Terminal";
+            if(std::holds_alternative<false_product>(red))
+                return "<no type>";
+
+            if(std::holds_alternative<Terminal>(red))
+                return "Terminal";
+
             @-for(auto type : prds.all_types) {-@
-                if(std::holds_alternative<@type@>(red)) return "@type@";
+                if(std::holds_alternative<@type@>(red))
+                    return "@type@";
             @-}-@
             // can't get here?
             jerror::error("Unknown type for product");
@@ -160,6 +142,12 @@ public:
         }
 
         std::string var_str() const {
+            if(std::holds_alternative<false_product>(red))
+                return "<null product>";
+
+            if(std::holds_alternative<Terminal>(var()))
+                return stringformat("{}", std::get<Terminal>(var()));
+
             @-for(auto type : prds.all_types) {-@
                 if(std::holds_alternative<@type@>(var())) {
                     // using stringformat here because it supports
@@ -167,8 +155,6 @@ public:
                     return stringformat("{}", std::get<@type@>(var()));
                 }
             @-}@
-            if(std::holds_alternative<Terminal>(var()))
-                return stringformat("{}", std::get<Terminal>(var()));
 
             jerror::error("Unknown type for product");
             return "unknown type";
@@ -177,26 +163,7 @@ public:
         // this is for debug and similar:
         std::string to_str() const {
             std::string out;
-            if(element_id > 0) {
-                if(is_terminal()) {
-                    out += "terminal " + std::to_string(element_id) + " «";
-                    out += std::get<Terminal>(var()).to_str();
-                    out += "»";
-                } else {
-                    out += nonterm_str(element_id);
-                    @-for(auto type : prds.all_types) {-@
-                        if(std::holds_alternative<@type@>(var())) {
-                            out += stringformat(
-                                " (value: «{}»)", std::get<@type@>(var())
-                            );
-                        } else 
-                    @}-@
-                    { out += "<unknown type>"; }
-                }
-            } else {
-                out = "null product";
-            }
-            return out;
+            return stringformat("{} «{}»", type_name(), var_str());
         }
 
         // phase out if possible, because this only supports the
@@ -213,80 +180,107 @@ public:
             return std::get<@prds.reduce_type@>(red);
         }
 
-        std::string term_str() const {
-            if(is_terminal())
-                return std::get<Terminal>(red).to_str();
-
-            return stringformat("{} is not a terminal", nonterm_str(element_id));
-        }
-
         std::string capgroup(int capi) const {
-            if(is_terminal())
+            if(std::holds_alternative<Terminal>(red))
                 return std::get<Terminal>(red).capgroup(capi);
             return "";
         }
     };
 
+    // This is an lr stack entry (as opposed to a param stack entry).
+    // In the new dual stack scheme, you would use one of these to
+    // refer to the param stack, however.
     struct StackEntry {
-        State   state;
-        Product product;
+        State          state;
+        int            element_id;
+        SourcePosition pos;        // start of match in source code
+        int            param_ind;  // offset in param_stack
 
-        StackEntry(State st, Product pr) :
+        StackEntry(State st, int el_id, SourcePosition p, int pind) :
             state(st),
-            product(pr) {
+            element_id(el_id),
+            pos(p),
+            param_ind(pind) {
         }
 
         // creates a "false" stack entry:
-        StackEntry() : state(NULL) {
+        StackEntry() : state(NULL), element_id(-1), param_ind(0) {
         }
 
         StackEntry(const StackEntry &) = default;
 
-        inline operator bool() const {
+        operator bool() const {
             return state != NULL;
         }
 
-        inline int grammar_element_id() const {
-            return product.grammar_element_id();
+        int grammar_element_id() const {
+            return element_id;
         }
 
-        inline SourcePosition position() const {
-            return product.position();
+        SourcePosition position() const {
+            return pos;
         }
 
-        inline int line_number() const {
+        int line_number() const {
             return position().line_number();
         }
 
-        inline std::string filename() const {
+        std::string filename() const {
             return position().filename();
         }
 
-        std::string to_str() const {
-            std::string line_no = "line " + std::to_string(line_number());
+        bool is_nonterminal() const {
+            return @class_name@::is_nonterminal(element_id);
+        }
 
-            return stringformat("{}, {::n} ({})", 
+/*
+XXX
+kill:  this no longer makes sense;  products are in the argument stack.
+but, this is used in rewind, which is interesting and indicates bugs
+because what if there are multiple products?
+probably need to make the argument stack 3 point.
+ */
+        Product product(const @class_name@ &owner) const {
+            if(param_ind >= 0 && param_ind < owner.param_stack.size()) {
+                return owner.param_stack[param_ind];
+            }
+            return Product();
+        }
+
+        std::string to_str() const {
+            return stringformat("{} {} param[{}] ({})",
                 state_to_str(state),
-                product.to_str(),
-                product.position()
+                element_str(element_id),
+                param_ind,  // need the owner to get the product
+                position()
             );
         }
-
-        // Shortcuts to access products/terminals:
-        std::string capgroup(int capi) const {
-            return product.capgroup(capi);
-        }
-
     };
 
-    void lr_push(State st, Product pr) {
-        lr_stack.push_back(StackEntry(st, pr));
+    // Pushes an element to the lr or parameter stacks as appropriate.
+    // "ejected" elements (those marked with a '^' in fpl source) are
+    // not pushed to the param stack.
+// XXX ALSO maybe don't push to lr if doing so would be redundant.
+// but how to tell?
+    void lr_push(
+        int element_id, bool eject, const SourcePosition &pos, Product pr
+    ) {
+        lr_stack.push_back(StackEntry(
+            cur_state, element_id, pos, param_stack.size()
+        ));
+
+        if(!eject) {
+            param_stack.push_back(pr);
+        }
     }
 
 private:
-    fpl_reader_p            reader; // XXX must be non-null
+    fpl_reader_p            reader;      // (must be non-null)
+    State                   cur_state;
+    int                     last_product_id; // (element id)
     Product                 last_product;
     std::vector<StackEntry> lr_stack;
+    std::vector<Product>    param_stack;
     size_t                  bytes_eaten; // since last terminal
     bool                    stop_parsing;
     int                     max_errors;
@@ -309,6 +303,8 @@ public:
 
     @class_name@(fpl_reader_p rdr) :
         reader(rdr),
+        cur_state(&@class_name@::state_0),
+        last_product_id(0),
         bytes_eaten(0),
         stop_parsing(false),
         max_errors(1),
@@ -320,7 +316,9 @@ public:
         @}@
 
         // reserve more than we'll need so we don't have to realloc:
+// XXX check what happens when this overflows
         lr_stack.reserve(1000);
+        param_stack.reserve(1000);
     }
 
     // debugging:
@@ -354,56 +352,78 @@ public:
         return reader->eof();
     }
 
-
-private:
-    StackEntry lr_pop() {
-        StackEntry popped;
-        if(lr_stack.size() > 0) {
-            popped = lr_stack.back();
-            lr_stack.pop_back();
-        } // else popped is a "false" entry
-
-
-        return popped;
-    }
-
 public:
 
-    inline std::string filename() const {
+    std::string filename() const {
         return reader->filename();
     }
 
-    inline int line_number() const {
+    int line_number() const {
         return reader->line_number();
     }
 
-    inline int line_number(size_t pos) const {
+    int line_number(size_t pos) const {
         return reader->line_number(pos);
     }
 
-    inline SourcePosition position() const {
+    SourcePosition position() const {
         return SourcePosition(reader);
     }
 
-    inline fpl_reader_p_c const_reader() const {
+    fpl_reader_p_c const_reader() const {
         return reader;
     }
 
-    inline int lr_stack_size() const {
+    int param_stack_size() const {
+        return param_stack.size();
+    }
+
+    int lr_stack_size() const {
         return lr_stack.size();
     }
 
-    inline int lr_top() const {
+    int lr_top_index() const {
         return lr_stack.size() - 1;
     }
 
-    // "pops" and discards down to the new top specified
-    inline int lr_pop_to(int new_top) {
-        lr_stack.resize(new_top + 1);
-        return lr_top();
+    void lr_pop() {
+        if(lr_stack.size() > 0) {
+            auto popped = lr_stack.back();
+            cur_state = popped.state;
+// XXX OHHHH make sure that this doesn't kill extra items off the param stack
+// if we are popping (say) an ejected or optional step (in which case there
+// can be multiple lr entries with the same parem_ind.  Might be working
+// now simply because we're not hitting that case.
+// like, don't pop if the new top has the same position as the popped.
+// but make a test first.
+            if(popped.param_ind >= 0) {
+                param_stack.resize(popped.param_ind);
+            }
+            lr_stack.pop_back();
+        }
+
+        if(lr_stack.size() == 0) {
+            // else there's nothing left to pop on the lr_stack,
+            // and the param stack had better be clear, too, or
+            // something is wrong:
+            if(param_stack.size() > 0) {
+                jerror::warning(stringformat(
+                    "popping from empty lr_stack, but there are {} params\n",
+                    param_stack.size()
+                ));
+            }
+        }
     }
 
-    inline StackEntry lr_stack_entry(int pos) const {
+    // "pops" and discards down to the new maximum index
+    // specified
+    void lr_pop_to(int new_max) {
+        while(lr_top_index() > new_max) {
+            lr_pop();
+        }
+    }
+
+    StackEntry lr_stack_entry(int pos) const {
         if((pos >= 0) && (pos < lr_stack_size())) {
             return lr_stack[pos];
         } else {
@@ -411,20 +431,152 @@ public:
         }
     }
 
+    StackEntry lr_top() const {
+        return lr_stack_entry(lr_top_index());
+    }
+
+    // lr_position_before_XXX(pos, multiple):  returns the first
+    // position before pos in the lr stack which does not match
+    // the element ID in question.  Recurses on subexpressions.
+    @for(int el_id = 0; el_id < prds.elements.size(); ++el_id) {-@
+        @declare element: prds.elements.at(el_id)@
+        @declare elname: prds.element_id_name(el_id)@
+        @declare subrule_num:  prds.subrulenum_for_el(element)@
+        int lr_position_before_@elname@(int pos, bool multiple) const {
+
+            @if(subrule_num < 0) {@
+                // normal case - not a subexpression
+                // XXX whhhy does the NULL element match el ID 6?
+                // (checking pos >= 0 because of that.  in theory,
+                //  shouldn't have to check)
+                while(pos >= 0 && lr_stack_entry(pos).element_id == @el_id@) {
+                    --pos;
+                    if(!multiple)
+                        break;
+                }
+            @} else {@
+                @declare subrule: prds.rules[subrule_num]@
+                //   @subrule.to_str()@
+                int subp = pos;
+                int lastp;
+                bool matched_whole = true;
+                while(subp >= 0) {
+                    @for(int sti = subrule.num_steps() - 1; sti >= 0; --sti) {@
+                        @declare substep: subrule.nth_step(sti)@
+                        @declare sename: prds.element_id_name(substep.gexpr)@
+                        @declare mult: substep.qty.multiple@
+                        @declare req: !substep.qty.optional@
+                        lastp = subp;
+                        subp = lr_position_before_@sename@(subp, @mult@);
+                        if(@req@ && lastp == subp) matched_whole = false;
+                    @}@
+                    if(matched_whole)
+                        pos = subp;
+                    else
+                        break;
+// XXX what if not multiple?
+// add test
+                }
+            @}@
+
+            return pos;
+        }
+    @}@
+
+    // lr_count_of_X(pos, multiple):  returns the number of
+    // stack entries matching X going forward through the lr stack,
+    // starting at the position passed.   If argument "multiple"
+    // is false, only counts up to one entry.
+    @for(int el_id = 0; el_id < prds.elements.size(); ++el_id) {-@
+        @declare element: prds.elements.at(el_id)@
+        @declare elname: prds.element_id_name(el_id)@
+        @declare subrule_num:  prds.subrulenum_for_el(element)@
+        int lr_count_of_@elname@(int pos, bool multiple) const {
+            int size = 0;
+            @if(subrule_num < 0) {@
+                // normal case - not a subexpression
+                while(lr_stack_entry(pos + size).element_id == @el_id@) {
+                    ++size;
+                    if(!multiple)
+                        break;
+                }
+            @} else {@
+                @declare subrule: prds.rules[subrule_num]@
+                //   @subrule.to_str()@
+                int subp = pos;
+                bool matched_whole = true;
+                while(subp < lr_stack_size()) {
+                    int ssize = 0; // size of substep
+                    int msize = 0; // size of subexpression match
+                    @for(int sti = 0; sti < subrule.num_steps(); ++sti) {@
+                        @declare substep: subrule.nth_step(sti)@
+                        @declare sename: prds.element_id_name(substep.gexpr)@
+
+                        ssize = lr_count_of_@sename@(
+                            subp, @substep.qty.multiple@
+                        );
+
+                        if(@!substep.qty.optional@ && ssize == 0)
+                            matched_whole = false;
+
+                        subp  += ssize;
+                        msize += ssize;
+                    @}@
+
+                    if(matched_whole) {
+                        size += msize;
+                    } else {
+                        break;
+                    }
+
+                    if(!multiple) {
+                        break;
+                    }
+                }
+            @}@
+
+            return size;
+        }
+    @}@
+
     class StackSlice {
-        int base_index;
-        int size;
+        int base_index; // in lr_stack
+        int size;       // also in lr_stack
 
         // owner here is annoying because we should be able to
-        // infer it. it should always be the "this" (assuming
-        // StackSlices are private).  jest feature?
+        // infer it... jest feature?
         const @class_name@ &owner;
 
     public:
+        // returns the number of lr_stack entries in this slice:
         int count() const { return size; }
 
-        // (syntactic sugar for optionals)
-        bool exists() const { return count() !=  0; }
+        // returns the number of parameter stack entries for this
+        // slice:
+        int arg_count() const {
+            StackEntry sel = owner.lr_stack_entry(base_index);
+
+            // this slice "contains" all arguments starting
+            // at the position in the argument stack starting
+            // at the argument from the base element and going
+            // to just before the one for the base element of
+            // the slice above us, or the top of the argument
+            // stack if we're the topmost slice
+            int cap_ind = base_index + size;
+            if(cap_ind < owner.lr_stack_size()) {
+                StackEntry eel = owner.lr_stack_entry(cap_ind);
+                return eel.param_ind - sel.param_ind;
+            } else {
+                // goes to the end of the arg stack:
+                return owner.param_stack_size() - sel.param_ind;
+            }
+        }
+
+        // returns the corresponding base in the param stack
+        // or -1 if there is no such thing.
+        int param_base() const {
+            return owner.lr_stack_entry(base_index).param_ind;
+        }
 
         // construct a slice with a particular base and count.
         // if the count is -1 or unspecified, construct a slice
@@ -435,42 +587,21 @@ public:
             owner(o)
         {
             if(size == -1) {
-                size = o.lr_stack_size() - base;
+                size = owner.param_stack.size() - param_base();
             }
-        }
-
-        // construct a slice by pseudo-popping a set of elements of
-        // the same type from the stack.  We use this for things like
-        // constructing arguments for rules with repetition or optional
-        // parameters.
-        // "pseudo-popping" means reading from and updating the "pos"
-        // integer passsed, instead of actually popping from the stack
-        // (we only remove from the stack after the reduction rule
-        // is executed).
-        StackSlice(@class_name@ &o, int element_id, bool multiple, int &pos) :
-            size(0),
-            owner(o)
-        {
-            // starting at pos and going backward down the stack,
-            // scan elements matching the id passed:
-            while(StackEntry se = owner.lr_stack_entry(pos)) {
-                if(se.grammar_element_id() != element_id) {
-                    break;
-                }
-                pos--;
-                size++;
-
-                if(!multiple) break;
-            }
-            base_index = pos + 1;
         }
 
         // Negative indexes are offset from a hypothetical argument
         // just past the end of the slice (i.e. -1 means end-of-slice).
         // Accessing to entries outside the slice yields a "false"
         // stack entry.
-        inline StackEntry operator [](int ind) const {
+// XXX actually now there's only one StackEntry, though multiple params.
+// try axing this.
+        StackEntry operator [](int ind) const {
             if(ind < 0) ind += size; // allow negative indexes
+//std::cerr << stringformat("OPERATOR [] being called with non 0 index ({})\n", ind);
+// XXX it's actually called
+
 
             int off = ind + base_index;
             if((off < owner.lr_stack_size()) && (off >= 0)) {
@@ -480,39 +611,32 @@ public:
             }
         }
 
-        inline Product product(int ind = 0) const {
-            if(ind < 0) ind += size; // negative indexes are relative to end
+        // Returns the nth "product" (from the argument stack)
+        // corresponding to this slice.
+        // If the index passed is out of bounds, returns a 
+        // default product.
+        // Note that there may be 0 products for any slice,
+        // so the 0th is not guaranteed to be anything real.
+        Product product(int ind = 0, src_location caller = CALLER()) const {
+            const int num_args = arg_count();
+            if(ind < 0) ind += num_args; // negative = relative to end + 1 
 
-            if((ind >= 0) && (ind < size)) {
-                unsigned int sind = base_index + ind;
-                if(sind > owner.lr_stack.size())
-                    jerror::error(stringformat( 
-                        "stack slice access out of stack range. {} + {} = {} > {}\n",
-                        base_index, ind, sind, owner.lr_stack.size()
-                    ));
-                return owner.lr_stack[sind].product;
+            if((ind >= 0) && (ind < num_args)) {
+                unsigned int sind = param_base() + ind;
+                return owner.param_stack_entry(sind, caller);
             } else {
                 return Product();
             }
         }
 
-        inline std::string term_str(int ind = 0) const {
-            return product(ind).term_str();
-        }
-
-        using ForeachFunc = std::function<void(const Product &)>;
-        void foreach(ForeachFunc func) const {
-            for(int ind = 0; ind < size; ++ind) {
-                func(product(ind));
-            }
-        }
-
         inline std::string to_str() const {
-            std::string out;
+            std::string out = stringformat(
+                "slice at {} ({} params at {}):\n",
+                base_index, arg_count(), param_base()
+            );
             for(int ind = 0; ind < size; ++ind) {
-                out += stringformat(
-                    "{} (abs {}): {::n}\n",
-                    ind, base_index + ind, product(ind)
+                out += stringformat("    {} (param_stack[{}]): {::n}\n",
+                    ind, param_base() + ind, product(ind)
                 );
             }
             return out;
@@ -535,20 +659,58 @@ public:
         return "unknown type in prod_type_name";
     }
 
+// This really represents the argument for a given step,
+// which should be one lr stack entry plus a slice of the
+// param stack (possibly 0 sized).
     template<typename ReduceType>
-    struct StackSliceSpecialization : public StackSlice {
-        StackSliceSpecialization(@class_name@ &o, int element_id, bool multiple, int &pos) :
-            StackSlice(o, element_id, multiple, pos) { }
+    class ReductionParameter {
+        // all access to param and lr stacks go through this:
+        StackSlice lr_slice;
 
-        // this allows you to pass the stack slice itself from within
+    public:
+        ReductionParameter(@class_name@ &o, int lr_base, int lr_count) :
+            lr_slice(o, lr_base, lr_count) { }
+
+        // returns the number of param_stack entries in this:
+        int count() const { return lr_slice.arg_count(); }
+
+        // (syntactic sugar for optionals)
+        bool exists() const { return count() !=  0; }
+
+        SourcePosition position() const {
+            return lr_slice[0].position();
+        }
+
+        SourcePosition end_position() const {
+            return lr_slice[-1].position();
+        }
+
+        // this allows you to refer to the stack slice itself from within
         // reduce functions using the at sign (eg thing@@self())
-        StackSliceSpecialization<ReduceType> self() { return *this; }
+        ReductionParameter<ReduceType> self() { return *this; }
 
         // in reduce code, this is accessed via [] or (for the 0th element)
         // just the name of the variable itself.
-        const ReduceType val(int ind = 0) const {
-            ReduceType got = std::get<ReduceType>(product(ind).var());
-            return got;
+        const ReduceType val(int ind = 0, src_location ca = CALLER()) const {
+            const int num_args = count();
+
+            if(ind < 0) ind += num_args; // negative = relative to end + 1 
+
+            if((ind < 0) || (ind >= num_args)) {
+                jerror::warning(stringformat(
+                    "Index {} out of range ({} items) at {}",
+                    ind, num_args, ca
+                ));
+
+                // try to return a default item of the ReduceType.
+                // this may or may not be possible, depending on the
+                // type, but it's better than crashing.
+                return ReduceType();
+            }
+
+            return std::get<ReduceType>(
+                lr_slice.product(ind, ca).var()
+            );
         }
 
         static std::string type_name() {
@@ -563,62 +725,91 @@ public:
             return out;
         }
 
+        // XXX we pass the Product here so that callers can get at
+        // line numbers etc, but ... oh that's outdated.
+        // See if we can jsut pass ReduceType
+        using ForeachFunc = std::function<void(const Product &)>;
+        void foreach(ForeachFunc func) const {
+            for(int ind = 0; ind < count(); ++ind) {
+                func(lr_slice.product(ind));
+            }
+        }
+
         std::string join(const std::string &jv) const {
             std::string out;
             for(int ind = 0; ind < count(); ind++) {
-                out += to_string(val(ind));
                 if(ind < count() - 1)
-                    out += jv;
+                    out += stringformat("{}{}", val(ind), jv);
+                else // last element
+                    out += stringformat("{}", val(ind));
             }
             return out;
         }
+
+        inline std::string to_str() const {
+            // XXX do something smarter here
+            return lr_slice.to_str();
+        }
     };
 
-    void set_product(const Product &pr) {
+    void set_product(int element_id, const Product &pr) {
         if(last_product) {
             // if this happens, it's almost certainly a bug in fpl2cc
             // since it means we're setting a new product without having
             // shifted whatever nonterm product was next up..
             internal_error(stringformat(
                 "splatting last_product ({}) with {}\n",
-                last_product.to_str(), pr.to_str()
+                last_product, pr
             ));
         }
-        last_product = pr;
+        last_product_id = element_id;
+        last_product    = pr;
     }
 
+    void set_state(State st) {
+        cur_state = st;
+    }
+
+    void clear_product() {
+        last_product_id = 0;
+        last_product    = Product();
+    }
+
+    Product param_stack_entry(int pos, src_location caller = CALLER()) const {
+        // this is very similar to lr_stack_entry.  generalize?
+        if((pos >= 0) && (pos < param_stack.size())) {
+            return param_stack[pos];
+        } else {
+            jerror::warning(stringformat(
+                "param stack access out of range ({}/{}) at {}",
+                pos, param_stack.size(), caller
+            ));
+            return Product();
+        }
+    }
 
     State current_state() const {
-        int st = lr_stack.size() - 1;
-        if(st >= 0) {
-            return lr_stack[st].state;
-        } else {
-            return &@class_name@::state_0;
-        }
+        return cur_state;
     }
 
     // this is more or less debugging
     std::string to_str() const {
         std::string out;
 
-        std::string next_up;
-        if(last_product) {
-            next_up = last_product.to_str();
-        } else {
-            next_up = stringformat(
-                "«{}» ({}:{::n})",
-                reader->debug_peek(32),
-                reader->filename(), reader->current_position()
-            );
-        }
-        out += stringformat("next up: {::n}\n", next_up);
+        out += stringformat("next up: {}\n", next_up_str());
         out += stringformat(
             "{} bytes of separator since last terminal\n", bytes_eaten
         );
-        out += stringformat("stack ({} items)\n", lr_stack.size());
+        out += stringformat("lr stack ({} items):\n", lr_stack.size());
         for(int sind = lr_stack.size() - 1; sind >= 0; --sind) {
             out += stringformat(
-                "    [{}] {}\n", sind, lr_stack_entry(sind).to_str()
+                "    [{}] {}\n", sind, lr_stack_entry(sind)
+            );
+        }
+        out += stringformat("param stack ({} items):\n", param_stack.size());
+        for(int sind = param_stack.size() - 1; sind >= 0; --sind) {
+            out += stringformat(
+                "    [{}] {::n}\n", sind, param_stack_entry(sind)
             );
         }
         return out;
@@ -628,9 +819,6 @@ public:
         return last_product;
     }
 
-    static bool is_goal(const Product &pr) {
-        return is_goal(pr.grammar_element_id());
-    }
 
     void terminate() {
         stop_parsing = true;
@@ -643,31 +831,37 @@ public:
     // but unused terminals, thus setting the read pointer to
     // the start of any unrecognized input.
     void rewind_to_nonterm() {
-        StackEntry last_popped;
+        if(last_product)
+            return; // already after last nonterminal
+
         size_t rewind_to = reader->current_position();
         while(lr_stack.size() > 0) {
-            last_popped = lr_pop();
-            Product &top_prod = last_popped.product;
-            if(top_prod.is_terminal()) {
-                rewind_to = top_prod.position().position();
-            } else {
-                last_product = top_prod;
+            auto last = lr_stack.back();
+            if(last.is_nonterminal()) {
+                last_product_id = last.element_id;
+                last_product    = last.product(*this);
                 break;
             }
+            rewind_to = last.position();
+            lr_pop();
         }
+        reader->go_to(rewind_to);
 
-        if(last_popped) {
-            reader->go_to(rewind_to);
-        }
     }
 
     // returns a string with either the next bit of text
-    // (in French quotes) or the name of the next production
-    std::string debug_next_up() {
-        if(last_product) {
-            return nonterm_str(last_product.grammar_element_id());
+    // (in French quotes) or the next production
+    std::string next_up_str() const {
+        if(last_product_id) {
+            return stringformat(
+                "{} = {::n}", element_str(last_product_id), last_product
+            );
         } else {
-            return stringformat("«{}»", reader->debug_peek().c_str());
+            return stringformat(
+                "«{}» ({}:{::n})",
+                reader->debug_peek(32),
+                reader->filename(), reader->current_position()
+            );
         }
     }
 
@@ -684,7 +878,7 @@ public:
         //  - we haven't been told to stop (due to errors or whatever)
         //  - and there's more input -or- we're not at the goal
         return !stop_parsing
-            && ((!eof() || lr_stack.size() > 0) || !is_goal(last_product));
+            && ((!eof() || lr_stack.size() > 0) || !result_is_goal());
     }
 
     // resets the state of the parser, discarding anything on
@@ -696,7 +890,8 @@ public:
             std::cerr << "resetting @class_name@!!!\n";
         @}@
         lr_stack.clear();
-        //set_state(&@class_name@::state_0);
+        set_state(&@class_name@::state_0);
+        last_product_id  = 0;
         last_product     = Product();
         bytes_eaten      = 0;
         stop_parsing     = false;
@@ -735,9 +930,9 @@ public:
         reset();
         parse_partial();
         rewind_to_nonterm();
-        Product got = result();
-        if(is_goal(got)) {
-            last_product = Product();
+        if(result_is_goal()) {
+            Product got = result();
+            clear_product();
             return got;
         }
         return Product();
@@ -749,6 +944,7 @@ public:
     // Returns whatever it got, regardless of errors,
     // which might mean returning a default of whatever
     // the reduce type is.
+    //  (a lot of the internal logic here is questionable, at this point)
     @prds.reduce_type@ parse() {
         // we're parsing from initial state...
         reset();
@@ -779,7 +975,9 @@ public:
             // got some generally unrecognized input:
             std::string message;
             if(got) {
-                errm = stringformat("unexpected {}", got.to_str());
+                errm = stringformat(
+                    "unexpected {} ({})", element_str(last_product_id), got
+                );
             } else  {
                 errm = "unrecognised input";
             }
@@ -789,10 +987,10 @@ public:
             // it means we recognized more than one component,
             // but nothing complete.
             errm = "incomplete input";
-        } else if(!is_goal(got)) {
+        } else if(!result_is_goal()) {
             errm = stringformat(
                 "parsed a {} = {}, but that's not a goal (@prds.goal@)",
-                nonterm_str(got.grammar_element_id()), got
+                element_str(last_product_id), got
             );
         }
 
@@ -802,7 +1000,7 @@ public:
                 "here's what we have so far:\n{}"
                 "{}and state was:\n{}\n",
                 errm, StackSlice(*this, 0),
-                got?stringformat("next up would have been {}\n", got):"",
+                next_up_str(),
                 state_string(current_state())
             ));
         }
@@ -811,8 +1009,6 @@ public:
 
         return got.val();
     }
-
-
 
 private:
 
@@ -848,8 +1044,7 @@ private:
             @#fpl_x_parser_shift_term(prds, element, opts)@
         @}@
     @}@
-
-
+    @#fpl_x_parser_shift_none(prds, grammar_element(), opts)@
 
 public:
 
@@ -860,19 +1055,6 @@ public:
         @-}-@
     } ElementID;
 
-    // deprecated.  use element_str instead (which handles terminals
-    // as well)
-    static std::string nonterm_str(int id) {
-        switch(id) {
-            @for(int el_id = 0; el_id < prds.elements.size(); ++el_id) {-@
-                @declare el: prds.elements[el_id]@
-                @if(el.type == grammar_element::NONTERM_PRODUCTION) {-@
-                    case @el_id@: return "@el.nonterm_id_str()@";
-                @}-@
-            @-}-@
-        }
-        return std::to_string(id) + " is not a nonterm.";
-    }
 
     // returns a string describing the element matching the ID
     // passed. this is for debugging.
@@ -886,10 +1068,10 @@ public:
         return stringformat("¡unknown element id {}!", id);
     }
 
-    static bool is_terminal(int id) {
+    static bool is_nonterminal(int id) {
         switch(id) {
             @for(int el_id = 0; el_id < prds.elements.size(); ++el_id) {-@
-                @if(prds.elements[el_id].is_terminal()) {-@ 
+                @if(prds.elements[el_id].is_nonterminal()) {-@ 
                     case @el_id@: return true;
                 @} else {-@
                     case @el_id@: return false;
@@ -923,14 +1105,18 @@ public:
         return "<invalid state>";
     }
 
-    static bool is_goal(int id) {
-        switch(id) {
+    static bool is_goal(int el_id) {
+        switch(el_id) {
             @for(auto gstr : prds.goal) {-@
                 case ElementID::_@gstr@: return true;
             @}@
             default: return false;
         }
         return false;
+    }
+
+    bool result_is_goal() const {
+        return is_goal(last_product_id);
     }
 
     static size_t separator_length(const utf8_byte *inp) {
@@ -953,14 +1139,15 @@ public:
 
     // reduction rules:
     @for(auto rule : prds.rules) {@
-        @#fpl_x_parser_reduce_action(prds, rule)@
+        @if(!rule.is_subexpression()) {@
+            @#fpl_x_parser_reduce_action(prds, rule)@
+        @}@
     @}@
 
     // parser states:
     @for(int stn = 0; stn < prds.num_states(); stn++) {@
         @#fpl_x_parser_state(prds, prds.states.at(stn), prds.opts)@
     @}@
-
 
 };
 

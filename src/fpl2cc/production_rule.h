@@ -69,6 +69,8 @@ public:
                 // the abtracted implementation match thing:
                 return gexpr.expr;
             }
+            // else caller will need to fill in something contextually
+            // appropriate:
             return "";
         }
 
@@ -76,10 +78,6 @@ public:
             return gexpr.type;
         }
 
-        // XXX deprecated:
-        inline bool is_terminal() const {
-            return gexpr.is_terminal();
-        }
 
         inline bool is_nonterminal() const {
             return gexpr.is_nonterminal();
@@ -90,13 +88,12 @@ public:
         }
 
         inline std::string production_name() const {
-            if(gexpr.type == grammar_element::NONTERM_PRODUCTION) {
+            if(is_nonterminal()) {
                 return gexpr.expr;
             } else {
                 return "[NOT A PRODUCTION]";
             }
         }
-
 
         inline std::string to_str() const {
             std::string out(gexpr.to_str());
@@ -128,23 +125,56 @@ private:
     reducer               abs_impl;      // abstracted implementation, if any
     std::string           file;
     int                   line;
-    int                   rulenum;
+    grammar_element::Type prod_type; // production, subrule, or none if false rule
+    int                   rulenum;        // assigned when added to productions
+    int                   parent_rulenum; // or -1 if no parent (not subrule)
+    int                   parent_cpos;    // step relative to end of parent
 
 public:
 
-    production_rule(const std::string fn, int ln) :
+    production_rule(
+        const std::string fn, int ln,
+        grammar_element::Type tp = grammar_element::NONTERM_PRODUCTION
+    ) :
         file(fn),
         line(ln),
-        rulenum(-1)
-    {
+        prod_type(tp),
+        rulenum(-1),
+        parent_rulenum(-1),
+        parent_cpos(0) {
     }
 
+    production_rule() :
+        line(0),
+        prod_type(grammar_element::NONE),
+        rulenum(-1),
+        parent_rulenum(-1),
+        parent_cpos(0) {
+    }
+
+    operator bool() const {
+        return prod_type != grammar_element::Type::NONE;
+    }
+    
     void set_rule_number(int num) {
         rulenum = num;
     }
 
     int rule_number() const {
         return rulenum;
+    }
+
+    void set_parent(int rulenum, int ctd) {
+        parent_rulenum = rulenum;
+        parent_cpos = ctd;
+    }
+
+    int parent_rule_number() const {
+        return parent_rulenum;
+    }
+
+    int parent_countdown_pos() const {
+        return parent_cpos;
     }
 
     std::string rule_fn() const {
@@ -259,8 +289,13 @@ public:
     }
 
     bool needs_reducer() const {
-        if(reduce_code())
+        if(reduce_code()) {
             return false; // don't need - we have one
+        }
+
+        if(parent_rulenum >= 0) {
+            return false; // don't need - parent does reduce
+        }
 
         for(int stepi : psteps) {
             step st = rsteps[stepi];
@@ -300,12 +335,41 @@ public:
         return prod;
     }
 
+    // Returns the name of the product for purposes of state generation.
+    // Subexpressions get a unique "dummy" product.  Normal rules will
+    // have the name of the thing the rule produces.
     const std::string &product() const {
         return prod;
     }
 
+    // Returns a grammar element representing the result of matching
+    // this rule.  For normal rules, this will simply be the grammar
+    // element for the rule's product.  For subexpressions, this will
+    // be an element representing whatever the subexpression evaluates
+    // to (for purposes of determining what's on the stack).  If the
+    // subexpression has no evaluation result (eg if all steps are
+    // ejected), or the evaluation type otherwise cannot be determined,
+    // returns a grammar_element with type NONE.
     grammar_element product_element() const {
-        return grammar_element(product(), grammar_element::NONTERM_PRODUCTION);
+        if(is_subexpression()) {
+            // At present, subexpressions evaluate to the type of the
+            // single non-ejected element in the subexpression.
+            // More than one is currently not supported.
+            if(num_reduce_params() != 1) {
+                return grammar_element(product(), grammar_element::Type::NONE);
+            } else {
+                // XXX if the step is, itself, a subexpression I think we need
+                // to recurse.  but to find the rule for the step, we need the
+                // productions{}.  Maybe this is why we need to move this there.
+                return reduce_param(0).gexpr;
+            }
+        }
+
+        return grammar_element(product(), prod_type);
+    }
+
+    bool is_subexpression() const {
+        return prod_type == grammar_element::Type::NONTERM_SUBEXPRESSION;
     }
 
     int line_number() const {
@@ -355,10 +419,6 @@ public:
         abs_impl = red;
     }
 
-    const char *product_c_str() const {
-        return product().c_str();
-    }
-
     std::string to_str() const {
         std::string out;
         for(auto step : rsteps) {
@@ -366,7 +426,12 @@ public:
             out += " ";
         }
 
-        out += "-> " + product();
+        out += "-> ";
+        if(parent_rulenum >= 0) {
+            out += stringformat("rule {}:{}", parent_rulenum, parent_cpos);
+        } else {
+            out += product();
+        }
 
         return out;
     }

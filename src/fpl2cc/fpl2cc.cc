@@ -277,7 +277,7 @@ int main(int argc, const char** argv) {
 
     if(num_warnings > 0) {
         std::cerr << stringformat(
-            "{}: {} warnings\n", opts.src_fpl, num_warnings
+            "{}: {} warnings\n", opts.src_filename(), num_warnings
         );
     }
 

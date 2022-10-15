@@ -6,8 +6,6 @@
 
 @/*
  generates the call to the reduce function for the given rule.
- Note: the StackSlices passed for normal arguments get (effectively)
- downcast to the (hopefully) appropriate specialization.
 */@
 
     @/* figure out the stack slices for each argument.
@@ -17,16 +15,49 @@
         not going to pass to the reduce function.  wasteful, but easy.
         at some point ideally we won't even push them...
     */@
-    int frame_start = lr_top();
-    int lr_arg_base = frame_start;  // (gets updated as we create args)
+    int frame_start = lr_top_index();
+    @if(opts.debug) {-@
+        std::cerr << stringformat(
+            "reducing by @c_str_escape(rule.to_str())@ ({} steps, {} params)\n",
+            @rule.num_steps()@, @rule.num_reduce_params()@
+        );
+    @}@
     @for(int stind = rule.num_steps() - 1; stind >= 0; --stind) {-@
-        @declare expr: rule.nth_step(stind)@
-        @declare elid: prds.element_index.at(expr.gexpr)@
-        @if(!expr) {-@
+        @declare step: rule.nth_step(stind)@
+        @if(!step) {-@
+            // XXX real error boom here.  might have to modify jemp.
+            // or actually just call jerror and fix jemp's handing of that later.
             #error Bug: no expression for step @stind@ @rule.to_str()@ @rule.location()@
         @-} else {-@
-            StackSliceSpecialization<@prds.type_for(expr.gexpr)@>
-                arg_@stind@(*this, @elid@, @expr.qty.multiple@, lr_arg_base);
+            @declare el_id: prds.element_index.at(step.gexpr)@
+            @declare elname: prds.element_id_name(el_id)@
+
+            frame_start = lr_position_before_@elname@(
+                frame_start, @step.qty.multiple@
+            );
+        @}@
+    @}@
+    frame_start++;  // (we went until just before the real frame start)
+
+    // Now that we know where the frame starts, we can go forward through
+    // the stack to find the appropriate slices for our arguments.  We do
+    // need to do this back-and-forth thing to get the arguments correct
+    // for rules like: 
+    //    foo:first foo*:rest -> bar ;
+    int arg_start = frame_start;
+    int slice_size;
+    @for(int stind = 0; stind < rule.num_steps(); ++stind) {-@
+        @declare step: rule.nth_step(stind)@
+        @if(!step) {-@
+            // XXX real error here
+            #error Bug: no expression for step @stind@ @rule.to_str()@ @rule.location()@
+        @-} else {-@
+            @declare el_id: prds.element_index.at(step.gexpr)@
+            @declare elname: prds.element_id_name(el_id)@
+            slice_size = lr_count_of_@elname@(arg_start, @step.qty.multiple@);
+            ReductionParameter<@prds.type_for(step.gexpr)@>
+                arg_@stind@(*this, arg_start, slice_size);
+            arg_start += slice_size;
         @}-@
     @}-@
 
@@ -41,20 +72,26 @@
         @prds.post_reduce.format()@
     } @}@
 
-    set_product(Product(result,
-        @- rule.product_element().nonterm_id_str() -@, arg_0[0].position()
-    ));
+    @declare result_el_id: prds.element_id_name(rule.product_element()) @
+    Product prod(result);
+    @if(opts.debug) {-@
+        std::cerr << stringformat(
+            "reduced to  @result_el_id@ = {}\n", prod
+        );
+    @}@
+    set_product(@result_el_id@, prod);
 
     @/*
-        this is what actually pops the stack. note we pop after
-        the reduce (mainly to minimize moves, but also so the
-        stack is more intact for error/bug analysis)
+        This is what actually pops the stack. Note we pop after
+        the reduce - reduce functions refer to items in the param
+        stack itself, and not copies. This also keeps the stack
+        intact for dealing with errors/debug.
     */@
-    lr_pop_to(lr_arg_base);
+    lr_pop_to(frame_start - 1);
 
     @if(opts.debug) {-@
         std::cerr << stringformat("popped from {} to {}\n",
-           frame_start, lr_top()
+           frame_start, lr_top_index()
         );
     @-}-@
 

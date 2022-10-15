@@ -11,22 +11,8 @@
 //   shift_TERM_CUSTOM__terminal_X()
 //   (etc - anything which is not a nonterminal)
 // .. where X is the element ID number.
-bool shift_@el.type_str()@_@el_id@(State new_st) {
+bool shift_@el.type_str()@_@el_id@(bool eject) {
 
-    // never match if there's a product up next.
-    // the incomplete answer as to why is that it's always
-    // wrong to start working on a new product when there's
-    // already one next up in the input (last_product) because
-    // we can have at most one to-be-shifted product,  so it's
-    // no use starting on a new one.
-    if(last_product)
-        return false;
-
-    @if(opts.debug) {@
-        std::cerr << stringformat(
-            "maybe shift @el_str@ to {}? ", state_to_str(new_st)
-        );
-    @}@
 
     const SourcePosition pos = position();
     Terminal result;
@@ -57,24 +43,21 @@ bool shift_@el.type_str()@_@el_id@(State new_st) {
 
     if(result) {
         @if(opts.debug) {@
-            std::cerr << "yes\n";
+            std::cerr << "shifting @el_str@\n";
         @}@
-        lr_push(new_st, Product(result, @el_id@, pos));
-        // so since assertions count as terminals, clearing
-        // bytes_eaten is, strictly speaking, correct even
-        // in the case of assertions, but might or might not
-        // be what we actually want.  possibly redefining
-        // lack-of-separator to be something like "read position
-        // is at the end of the last match after calling
-        // eat_separator()" would be more robust than trying
-        // to keep a counter like this...
+        lr_push(@el_id@, eject, pos, Product(result));
+        // assertions count as terminals.  therefore, clearing
+        // bytes_eaten is (strictly speaking) correct, here.
+        // but actually I think it's wrong in cases where
+        // there may be more than one consecutive lack-of-separator.
+        // also, we really have no idea if a TERM_CUSTOM moved
+        // the input pointer or what.
+        // possibly a better implementation would be to track
+        // the position of the end of the last non-0-length
+        // separator.
         bytes_eaten = 0;
         return true;
     }
-
-    @if(opts.debug) {@
-        std::cerr << "no\n";
-    @}@
 
     return false;
 }

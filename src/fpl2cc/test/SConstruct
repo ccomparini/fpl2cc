@@ -10,12 +10,24 @@ env.Program('reader', [ 'reader.cc' ])
 env.Command('reader.out', 'reader', '$SOURCE > $TARGET')
 env.CompareOut('reader.success', [ 'reader.expect', 'reader.out' ])
 
+# fpl itself has error tests:
+env.Append(BUILDERS = {
+    'CaptureFplCompile': Builder(
+        action = run_and_capture_action(['bin/fpl2cc', '--debug-single-step']),
+        suffix = '.result',
+        src_suffix = '.fpl'
+    )
+})
+
+env.CaptureFplCompile('eject_keep_conflict')
+env.CompareOut('eject_keep_conflict.success', [ 'eject_keep_conflict.expect', 'eject_keep_conflict.result' ])
+
 #
-# fpl tests:
+# fpl language tests:
 #
 # dependencies:
-#   [src language] : [src language].cc
-#   [src language].cc : [src language].fpl
+#   [src language]: [src language].cc
+#   [src language].cc: [src language].fpl
 #   [src language].test/[test name].result: [src language].test/[test name].[src language] [src language]
 #   [src language].test/[test name].success: [src language].test/[test name].expect [src language].test/[test name].result
 #
@@ -37,10 +49,10 @@ env.CompareOut('reader.success', [ 'reader.expect', 'reader.out' ])
 # we're going to use:
 fpls = Glob('*.fpl')
 
-def build_default(lprog) :
+def build_default(lprog):
     return env.Program(lprog, [ lprog + '.cc' ])
 
-def build_json_exe(lprog) :
+def build_json_exe(lprog):
     return env.Program(lprog, [ lprog + '.cc' ], LIBS = 'jest')
 
 # functions for generating the executable for a given language.
@@ -49,15 +61,15 @@ def build_json_exe(lprog) :
 # equivalent) here.  if not, build_default() will be called,
 # which should work for most cases.
 build_lang_exe = {
-    "json" : build_json_exe,
+    "json": build_json_exe,
 }
 
 # this sets up:
-#   [lang] : [lang].cc
-#   [lang].cc : [lang].fpl #bin/fpl2cc
+#   [lang]: [lang].cc
+#   [lang].cc: [lang].fpl #bin/fpl2cc
 # for each language we're testing, and makes the builder for:
-#   [x].result : [x].[lang] [lang]
-for fpl in fpls :
+#   [x].result: [x].[lang] [lang]
+for fpl in fpls:
     langprog, foo = os.path.splitext(fpl.get_abspath())
     language = os.path.basename(langprog)
 
@@ -65,22 +77,24 @@ for fpl in fpls :
     # that language to exist, so we want this dependency:
     env.Append(
         SCANNERS = Scanner(
-            function = lambda node, env, path : [ langprog ],
+            function = lambda node, env, path: [ langprog ],
             skeys = [ language ]
         )
     )
 
     # .. and now create a builder for running the language program:
-    env.Append(BUILDERS =
-        { 'FPLTestLang_' + language : Builder(
+    env.Append(BUILDERS = {
+        'FPLTestLang_' + language: Builder(
             action = run_and_capture_action(langprog),
             suffix = '.result',
-            src_suffix = language) } )
+            src_suffix = language
+        )
+    })
 
     # .. and, the language program is built from <lang>.fpl
-    if 'FPL_TEST_DEBUG' in os.environ :
+    if 'FPL_TEST_DEBUG' in os.environ:
         env.Fpl2cc(language + '.cc', [ langprog + '.fpl' ], FPLOPTS="--debug-single-step")
-    else :
+    else:
         env.Fpl2cc(language + '.cc', [ langprog + '.fpl' ])
 
     # and it depends on the fpl compiler (which is ultimately
@@ -95,13 +109,13 @@ test_dirs = Glob('*.test')
 # sets up:
 #   [lang].test/[t].success: [lang].test/[t].expect [lang].test/[t].result
 # and the invocation of the generated language program:
-#   [x].result : [lang] [x].[lang]
+#   [x].result: [lang] [x].[lang]
 # for each "expect" file.
-for test_dir in test_dirs :
+for test_dir in test_dirs:
     language, foo = os.path.splitext(test_dir.name)
 
     expecteds = Glob(test_dir.name + '/*.expect')
-    for expected in expecteds :
+    for expected in expecteds:
         test_name, foo = os.path.splitext(expected.get_path())
         src_file = test_name + '.' + language
         success_file = test_name + '.success'

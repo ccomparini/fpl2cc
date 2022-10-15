@@ -1,0 +1,6 @@
+returncode = 0
+stderr = ""
+stdout = "found a string: «things» at src/fpl2cc/test/goal.test/a.goal:4
+found a string: «oh hai» at src/fpl2cc/test/goal.test/a.goal:4
+found a string: «but this is» at src/fpl2cc/test/goal.test/a.goal:8
+"

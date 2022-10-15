@@ -21,7 +21,7 @@
 @return_type@ @rule.rule_fn()@(
     @-for(int pind = 0; pind < num_params; pind++) {-@
         @declare step: rule.reduce_param(pind) @
-        @- pind?", ":"" -@ StackSliceSpecialization<@prds.type_for(step.gexpr)@> @step.variable_name()-@
+        @- pind?", ":"" -@ ReductionParameter<@prds.type_for(step.gexpr)@> @step.variable_name()-@
     @-}-@
 ) {
     @#fpl_x_parser_reduce_action_meta(rule)@
@@ -46,11 +46,11 @@
                     #error "no default for multiple '@vname@' in rule @rule.to_str()@"
                 @-} else {-@
                     @-if(parmi > 0){@,@}-@ @/* argument separator */@
-                    @-if(param.is_terminal()) {-@
+                    @-if(param.is_nonterminal()) {-@
+                        @-vname@.val()
+                    @-} else {-@
                         @/* by default, pass terminals a strings: */@
                         @-vname@.val().to_str()
-                    @-} else {-@
-                        @-vname@.val()
                     @-}-@
                 @-}-@
             @-}-@

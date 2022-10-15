@@ -13,12 +13,12 @@ void @sfn@() {
         trying to match terminals (of course), and we use the
         number of bytes eaten for lack-of-separator assertions.
     */@
-    size_t b_eaten = eat_separator();
+    eat_separator();
 
     @if(opts.debug) {@
         std::cerr << stringformat(
             "======= @sfn@ =======\n"
-            "{}\n{}\n--\n",
+            "{::c}\n{}\n--\n",
             state_string(&@prds.fq_member_name(sfn)@), *this
         );
         debug_pause();
@@ -27,34 +27,39 @@ void @sfn@() {
     @for(auto trans : state.transitions(prds)) {-@
         @declare right_of_dot: trans.right_of_dot@
         @declare type: right_of_dot.type_str()@
-        @declare str: c_str_escape(right_of_dot.expr)@
         @declare el_id: prds.element_id_name(right_of_dot)@
-        @declare next_state: prds.state_fn(trans.next_state_number, true)@
-        @- "" @if(shift_@type@_@el_id@(&@next_state@)) {
-            @if(opts.debug) {@
-                std::cerr << stringformat(
-                    "   matched @el_id@ ({}) at «{}»\n"
-                    "   next state:  &@next_state@\n",
-                    "@str@", reader->debug_peek()
-                );
+        @/* call here is to shift_nonterm_xxx, shift_term_xxx, etc,
+            which will call lr_shift or such as approriate.
+            see src/fpl2cc/fpl_x_parser_shift_* for details. */@
+        if(shift_@type@_@el_id@(@trans.eject@)) {
+            @if(trans.what == productions::lr_transition::STATE) {@
+                @declare next_state: prds.state_fn(trans.which, true)@
+                set_state(&@next_state@);
+                @if(opts.debug) {@
+                    std::cerr << "   next state:  @trans.which@\n";
+                @}@
+            @} else if(trans.what == productions::lr_transition::REDUCTION) {@
+                @declare rule: prds.rules[trans.which]@
+                @if(opts.debug) {-@
+                    std::cerr << "    @sfn@ is going to reduce by rule "
+                                 "@c_str_escape(rule.to_str())@\n";
+                @-}-@
+                @#fpl_x_parser_reduce_call(prds, rule, opts)@
+            @} else {@
+                #error unknown transition type for @trans@
             @}@
-        } else @ "" -@
+        } else
     @-}-@
     {
-        @declare reduce_item: state.reduction_item() @
-        @if(reduce_item) {-@
-            @if(opts.debug) {-@
-                std::cerr << "    @sfn@ is going to reduce to a "
-                             "@c_str_escape(reduce_item.to_str(&prds))@\n";
-            @-}-@
-            @#fpl_x_parser_reduce_call(prds, prds.rules[reduce_item.rule], opts)@
-        @} else {-@
-            @if(opts.debug) {-@
-                std::cerr <<  "    terminating in @sfn@\n";
-            @}@
-            terminate();
-        @}-@
+        // else we hit something we don't specifically handle here.
+        // It could be an error, or a successful partial or full parse.
+        // Callers will decide, but for now we're done parsing:
+        @if(opts.debug) {-@
+            std::cerr <<  "    terminating in @sfn@\n";
+        @}@
+        terminate();
     }
+ 
     @if(opts.debug) {-@
         std::cerr << "======= @sfn@ end =======\n";
     @}@

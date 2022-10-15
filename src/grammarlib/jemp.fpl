@@ -59,6 +59,8 @@ text+:chunks -> fragment ;
 # instead of in the generated location(s).
 '@realign:'^ /\s*/^ text:realign '@'^ /\n?/^ -> fragment ;
 
+# can't eject this leading_ws - it causes an eject/keep
+# conflict with other leading_ws
 leading_ws?^ '@-' -> subst_start ;
 '@'               -> subst_start ;
 

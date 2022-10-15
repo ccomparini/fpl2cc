@@ -201,8 +201,9 @@ struct fpl_options {
         statedump = infer_filename(statedump);
     }
 
+    // returns the relative-path source filename
     std::string src_filename() const {
-        return src_fpl;
+        return fs::relative(src_fpl, fs::path("."));
     }
 
     int version_major() const { return version_maj; }

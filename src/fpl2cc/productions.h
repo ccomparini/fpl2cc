@@ -34,7 +34,7 @@ class productions {
     std::set<std::string> exported_products; // exported to that of which this is a sub
 
     std::string reduce_type; // default reduce type
-    std::map<std::string, std::string> type_for_product; // (reduce type for particular product)
+    std::map<std::string, std::string> type_for_product; // (c++ reduce type for particular product)
     std::set<std::string> all_types; // for deduplication
 
     std::list<std::string> imports; // filenames
@@ -54,7 +54,7 @@ class productions {
     int anon_product_count; // used to generate unique ids for anonymous rules
 
     std::vector<grammar_element>    elements;
-    std::map<grammar_element, int>  element_index;
+    std::map<grammar_element, int>  element_index; // element -> element ID
 
     std::list<reducer> reducers;
 
@@ -145,7 +145,7 @@ class productions {
     ) const {
         auto eli = element_index.find(el);
         if(eli == element_index.end()) {
-            // return the "null" element:
+            // return the name for the "null" element:
             return element_id_name(0, caller);
         }
         return element_id_name(eli->second);
@@ -223,16 +223,20 @@ class productions {
                 // if we have a suitable products pointer, we can
                 // also show what this item is used to produce and
                 // where it is in the rule:
-                const production_rule &rl = prds->rules[rule];
-                out = stringformat("{} {}:\t", rl.product(), out);
+                if(rule >= 0 && rule < prds->rules.size()) {
+                    const production_rule &rl = prds->rules[rule];
+                    out = stringformat("{} {}:\t", rl.product(), out);
 
-                for(int stepi = rl.num_steps(); stepi >= 0; --stepi) {
-                    if(stepi == countdown) out += " •";
-                    else                   out += " ";
+                    for(int stepi = rl.num_steps(); stepi >= 0; --stepi) {
+                        if(stepi == countdown) out += " •";
+                        else                   out += " ";
 
-                    production_rule::step step = rl.nth_from_end(stepi);
-                    if(step)
-                        out += step.to_str();
+                        production_rule::step step = rl.nth_from_end(stepi);
+                        if(step)
+                            out += step.to_str();
+                    }
+                } else {
+                    out = stringformat("(invalid rule {})", rule);
                 }
 
                 if(state) {
@@ -245,6 +249,11 @@ class productions {
                         out += stringformat("\t=> (reduce)");
                     }
                 }
+
+                if(rule >= 0 && rule < prds->rules.size()) {
+                    const production_rule &rl = prds->rules[rule];
+                    out += "\t(" + rl.location() + ")";
+                }
             }
 
             return out;
@@ -252,19 +261,45 @@ class productions {
     };
 
     struct lr_transition {
+        using type = enum { STATE, REDUCTION };
         grammar_element right_of_dot;
-        int32_t         next_state_number;
-        lr_transition(const grammar_element &ge, int32_t ns)
-            : right_of_dot(ge), next_state_number(ns) {
+        type            what;
+        int             which; // state num, or num of rule to reduce by
+        bool            eject;
+
+        lr_transition() : which(-1), eject(false) { }
+
+        lr_transition(const grammar_element &ge, bool e, type t, int n)
+            : right_of_dot(ge), what(t), which(n), eject(e) {
+        }
+
+        operator bool() const {
+            return which >= 0;
+        }
+
+        std::string to_str() const {
+            return stringformat("{}: ({} {})",
+                right_of_dot,
+                what == REDUCTION?"reduce by rule":"state",
+                which
+            );
         }
     };
 
-    // an lr_set is a set of lr items.
-    // each state is represented by an lr_set.
+    // An lr_set is a set of lr items.
+    // Each state is represented by an lr_set (for now - 
+    // this feels like it needs a refactor such that states
+    // are implemented as lr_sets but have other features..)
     class lr_set {
         mutable std::string _id_cache;
         std::set<lr_item> items;
+
+        // everything here and below is state only:
         std::map<grammar_element, int32_t> next_state_for_el;
+
+        // in the current state, if the element matched is in
+        // this set, it doesn't get pushed to the param stack:
+        std::set<grammar_element>          ejected_el;
     public:
 
         lr_set() { }
@@ -304,20 +339,60 @@ class productions {
             return next_state(st.gexpr);
         }
 
-        // returns an iterable set of transitions out of the state
-        // passed.  use this for code generation.
-        using lr_transitions = std::vector<lr_transition>;
+        //
+        // Returns an iterable set of transitions out of the state
+        // passed.
+        //
+        // Each transition is a mapping of a (possibly false/"none")
+        // grammar element to what to do if that element is next up.
+        // "What to do" is either to push the matching element and
+        // move to a new state, or reduce according to a particular
+        // rule, followed by popping stack elements and moving to
+        // the new state on the stack.
+        //
+        // Nonterminal transitions come first, followed by terminals,
+        // possibly followed by a transition for element "NONE" (which
+        // perhaps should be renamed "ANY"?), which should be executed
+        // if none of the prior states match.
+        //
+        // Use this for code generation.
+        using lr_transitions = std::list<lr_transition>;
         lr_transitions transitions(const productions &prds) const {
-            lr_transitions out;
-            out.reserve(next_state_for_el.size());
+            lr_transitions nonterm_trans;
+            lr_transitions term_trans;
+            lr_transition  none_trans;
 
             for(lr_item item : iterable_items()) {
-                 if(item.countdown > 0) {
-                     auto step = item.step(prds);
-                     out.push_back(lr_transition(
-                         step.gexpr, next_state(step)
-                     ));
-                 }
+                production_rule::step step = item.step(prds);
+                lr_transition trans;
+                int32_t next_stn = next_state(step);
+                bool ejected = ejected_el.count(step.gexpr) > 0;
+                if(next_stn < 0) {
+                    trans = lr_transition(
+                        step.gexpr, ejected,
+                        lr_transition::REDUCTION, item.rule
+                    );
+                } else {
+                    trans = lr_transition(
+                        step.gexpr, ejected,
+                        lr_transition::STATE, next_stn
+                    );
+                }
+
+                if(step.gexpr.type == grammar_element::Type::NONE) {
+                    none_trans = trans;
+                } else if(step.gexpr.is_nonterminal()) {
+                    nonterm_trans.push_back(trans);
+                } else {
+                    term_trans.push_back(trans);
+                }
+            }
+
+            lr_transitions out;
+            out.splice(out.end(), nonterm_trans);
+            out.splice(out.end(), term_trans);
+            if(none_trans) {
+                out.push_back(none_trans);
             }
             return out;
         }
@@ -335,7 +410,6 @@ class productions {
         void add_expanded(const lr_item &it, const productions &prds) {
             if(!it) return;
 
-
             const production_rule &rule = prds.rules[it.rule];
 
             for(int ctd = it.countdown; ctd >= 0; ctd--)  {
@@ -344,8 +418,7 @@ class productions {
 
                 // if it's a nonterm, we need to add each thing which
                 // can start that nonterm so that the generated state
-                // can correctly recognize things which will make that
-                // nonterm:
+                // can correctly recognize the start of the match:
                 if(expr.is_nonterminal()) {
                     const std::string &pname = expr.production_name();
                     auto strl  = prds.rules_for_product.lower_bound(pname);
@@ -374,26 +447,6 @@ class productions {
             }
         }
 
-        // returns an lr_item representing the reduction for
-        // this set/state, or a false-valued lr_item if there's
-        // no such reduction.
-        lr_item reduction_item() const {
-            for(auto it : items) {
-                // It's possible that there's more than one item
-                // with countdown == 0.  We're not worrying about
-                // that here, though - the implied conflict should
-                // have been reported when generating states.
-                // We do return the first such item, though, to
-                // make it so that the conflict is resolved by
-                // rule order.
-                if(it.countdown == 0) {
-                    return it;
-                }
-            }
-            // (no such item)
-            return lr_item();
-        }
-
         std::string to_str(
             const productions *prds = nullptr,
             const std::string &line_prefix = "    ",
@@ -415,24 +468,28 @@ class productions {
             return stringformat("{::c}", out);
         }
 
-        // returns a multimap of (grammar_element -> lr_item).
-        // for use in generating states.
-        // items for the ends of rules will be indexed under
+        // Returns a multimap of (grammar_element -> lr_item)
+        // for the items in this lr_set.
+        // Items for the ends of rules will be indexed under
         // grammar element type == NONE.
+        // Used in generating states.
         std::multimap<grammar_element, lr_item> items_per_element(
             const productions &prds
         ) const {
-            // inline function?  this is like.. index_items or something
             std::multimap<grammar_element, lr_item> items_for_el;
             lr_item default_item = lr_item();
             for(auto item : items) {
                 if(item.countdown == 0) {
                     if(default_item) {
+                        // reduce/reduce conflict (or conflict at the end
+                        // of 2 rules, anyway - they don't necessarily
+                        // want to reduce)
                         prds.conflict(default_item, item, this);
                     } else {
                         default_item = item;
                     }
                     items_for_el.insert(
+                        // index it as grammar_element of type NONE:
                         std::make_pair(grammar_element(), item)
                     );
                 } else {
@@ -448,6 +505,29 @@ class productions {
                 }
             }
             return items_for_el;
+        }
+
+        void report_eject_conflicts( 
+            const productions &prds,
+            const grammar_element &element,
+            const std::list <lr_item> &ejected,
+            const std::list <lr_item> &nonejected
+        ) const {
+            std::string msg = stringformat(
+                "eject/keep conflict on {}:\n", element
+            );
+            for(auto item : ejected) {
+                msg += stringformat("        {}\n", item.to_str(&prds));
+            }
+            msg += "      vs\n";
+            for(auto item : nonejected) {
+                msg += stringformat("        {}\n", item.to_str(&prds));
+            }
+
+            // this is not necessarily fatal, and in any case we want to
+            // finish generating states (among other reasons, to give the
+            // fpl author more info to debug the conflict). so, just warn:
+            warn(stringformat("{::c}\n", msg));
         }
 
         // recursively generates any following states, adding them
@@ -468,18 +548,27 @@ class productions {
                 return;
             }
 
+            auto trit = items_for_el.begin(); // transition iterator
             auto done = items_for_el.end();
-            auto trit = items_for_el.begin();
             while(trit != done) {
+                lr_set next_state;
+
+                // these pertain to cur_el (below) and are use for
+                // checking and reporting eject conflicts.  
+                std::list<lr_item> items_with_eject;
+                std::list<lr_item> items_without_eject;
+
                 // make an lr_set for all the items matching the
                 // input element:
-                lr_set next_state;
                 const grammar_element &cur_el = trit->first;
                 for( ; trit != done && trit->first == cur_el; ++trit) {
-                    if(cur_el.type != grammar_element::Type::NONE) {
-                        const lr_item item = trit->second;
-                        auto          step = item.step(prds);
+                    const lr_item item = trit->second;
+                    auto          step = item.step(prds);
 
+                    if(step.eject) items_with_eject.push_back(item);
+                    else        items_without_eject.push_back(item);
+
+                    if(cur_el.type != grammar_element::Type::NONE) {
                         // if the item is multiple-match ('*' or '+'
                         // after it), it can follow itself:
                         if(step.is_multiple()) {
@@ -487,6 +576,55 @@ class productions {
                         }
 
                         next_state.add_expanded(item.next_in_rule(), prds);
+                    } else {
+                        // we're at the end of a rule or subexpression.
+                        // if it's a subexpression, we don't reduce the
+                        // subexpression.  Instead, we move on to the
+                        // next step in the parent.  The parent will
+                        // glean this rule's steps at reduce time.
+                        auto rule = prds.rules.at(item.rule);
+                        int prulenum = rule.parent_rule_number();
+                        if(prulenum >= 0) {
+                            lr_item us_in_parent = lr_item(
+                                prulenum, rule.parent_countdown_pos()
+                            );
+                            auto pstep = us_in_parent.step(prds);
+                            if(pstep.is_multiple()) {
+                                next_state.add_expanded(us_in_parent, prds);
+                            }
+                            lr_item next_in_parent = us_in_parent.next_in_rule();
+                            if(next_in_parent) {
+                                next_state.add_expanded(
+                                    us_in_parent.next_in_rule(), prds
+                                );
+                            } else {
+                                // We are the final step in the parent
+                                // rule.  Therefore, the next step is
+                                // the 0 countdown of the parent as well,
+                                // so add item (parent rule num, 0)
+                                next_state.add_item(lr_item(prulenum, 0));
+                            }
+                        }
+                    }
+                }
+ 
+                if(items_with_eject.size() > 0) {
+                    if(items_without_eject.size() > 0) {
+                        // some items/rules expect this to be ejected, and
+                        // some don't.
+                        report_eject_conflicts(
+                            prds, cur_el,
+                            items_with_eject, items_without_eject
+                        );
+                    } else {
+                        // Only add it to the ejected set if there are
+                        // no items expecting that it's not ejected.
+                        // This is because if an element is marked ejected
+                        // for a given rule but wasn't actually ejected,
+                        // the reduce code can still work consistently,
+                        // but reduce code which expects an argument might
+                        // actually need that argument.
+                        ejected_el.insert(cur_el);
                     }
                 }
 
@@ -582,8 +720,8 @@ public:
         return in_type;
     }
 
-    // returns the name of the type expected as the result
-    // of reducing to the product type indicated:
+    // returns the name of the target-language type expected as
+    // the result of reducing to the product indicated:
     std::string type_for(const std::string &product) const {
         auto tf = type_for_product.find(product);
         if(tf != type_for_product.end()) {
@@ -604,14 +742,11 @@ public:
     // and this returns the type to use for a particular grammar
     // element, which covers terminals as well:
     std::string type_for(const grammar_element &ge) const {
-        if(ge.is_terminal()) {
-            return "Terminal";
+        if(ge.is_nonterminal()) {
+            return type_for(ge.expr);
         }
-        // there's no type for assertions, presently.  bool
-        // would make sense, but it's already covered by the
-        // fact of a match so ... hmm optional assertions?
-        // anyway at this point assume it's a production:
-        return type_for(ge.expr);
+        // assertions are terminals as well:
+        return "Terminal";
     }
 
 // XXX maybe fix the code and then this comment:
@@ -762,8 +897,8 @@ public:
         } else if(dir == "default_action") {
             default_action = code_for_directive(dir);
         } else if(dir == "default_main") {
-            // XXX deprecated. kill this in favor of
-            // having a default main in grammarlib and importing.
+            // TODO kill this in favor of having a default
+            // main in grammarlib and importing.
             default_main = true;
         } else if(dir == "goal") {
             std::string newgoal = arg_for_directive();
@@ -812,6 +947,63 @@ public:
         }
     }
 
+    // If the element passed is a subexpressionm returns the
+    // index of the rule for matching the element.
+    // Returns -1 if there's no such rule, or the element isn't
+    // a subexpression.
+    int subrulenum_for_el(const grammar_element &el) const {
+        int found = -1;
+
+        if(el.type == grammar_element::NONTERM_SUBEXPRESSION) {
+            auto rit = rules_for_product.lower_bound(el.expr);
+            auto end = rules_for_product.upper_bound(el.expr);
+
+            for( ; rit != end; ++rit) {
+                if(found >= 0) {
+                    warn(stringformat(
+                        "more than one rule produces {} - bug?", el
+                    ));
+                    break;
+                }
+                found = rit->second;
+            }
+        }
+
+        return found;
+    }
+
+    // If the grammar element passed refers to a subexpression, returns the
+    // rule for that subexpression.  Otherwise, returns a false rule.
+    // The returned rule's lifespan should not be expected to exceeed
+    // the lifespan of *this.
+    const production_rule &subrule_for_el(const grammar_element &el) const {
+        int srn = subrulenum_for_el(el);
+        if(srn >= 0) {
+            return rules.at(srn);
+        }
+        static production_rule false_rule;
+        return false_rule;
+    }
+
+/*
+XXX not used after all.  we go straight to the production_rule.
+BUT maybe we want this for other aliasing.
+    // returns the element ID to expect when reducing.
+    // this may be different due to subexpressions or
+    // (future) element aliasing.
+    int reduce_element_id(const grammar_element &el) const {
+std::cerr << stringformat("getting reduce element ID for {}\n", el);
+        auto &subrule = subrule_for_el(el);
+        if(subrule) {
+
+std::cerr << stringformat("   .. which is produced by a subrule so we'll really want {}\n", subrule.product_element());
+// XXX OK so figure out:  what's product element, and is it different from reduce element?
+            return element_index.at(subrule.product_element());
+        }
+        return element_index.at(el);
+    }
+ */
+
     void add_rule(production_rule &rule) {
         int rule_num = rules.size();
         rule.set_rule_number(rule_num);
@@ -828,7 +1020,39 @@ public:
         rules.push_back(rule);
 
         for(int stp = 0; stp < rule.num_steps(); stp++) {
-            record_element(rule.nth_step(stp).gexpr);
+            grammar_element ge = rule.nth_step(stp).gexpr;
+            record_element(ge);
+            if(ge.type == grammar_element::Type::NONTERM_SUBEXPRESSION) {
+                int srnum = subrulenum_for_el(ge);
+                if(srnum < 0) {
+                    warn(stringformat("no subrule for {} - bug?", ge));
+                } else {
+                    rules[srnum].set_parent(rule_num, rule.num_steps() - stp);
+                }
+/*
+                int num_subs = rules_for_product.count(ge.expr);
+                if(num_subs != 1) {
+                    // There should be exactly one subrule for this
+                    // subexpression.  If not, I'm guessing either the
+                    // subrule wasn't added yet, or there's some kind
+                    // of naming bug.  i.e. we shouldn't be able to get
+                    // here:
+                    warn(stringformat(
+                        "{} subrules for step {} in {}? expected 1",
+                        num_subs, stp, rule
+                    ));
+                } else {
+// hmm.. consider, if we did it after all rules were parsed, we
+// could always do this transformation (if single rule for product
+// and no reduce on that rule) (and compatible/same reduce type).
+// has to happen before generate_states().
+// might have to alias types.  do have to implement stack
+// pops such that they understand how to pop child rules.
+                    int srnum = rules_for_product.find(ge.expr)->second;
+                    rules[srnum].set_parent(rule_num, rule.num_steps() - stp);
+                }
+ */
+            }
         }
         record_element(rule.product_element());
 
@@ -844,10 +1068,12 @@ public:
         //    "("^ foo ")"^ -> bar ; # fold: match all; foo will be passed
         //    "true" -> true ;
         //    "false" -> false ;
-        //    true -> boolean ;  # foldable, except that...
+        //    true -> boolean ;  # not foldable, because....
         //    false -> boolean ; #  ... since this is also boolean and we
         //                       # don't do "or" we'd have to duplicate
-        //                       # rules or somehting to fold
+        //                       # rules or somehting to fold.  but I think
+        //                       # "true" and "false" could be type aliased to
+        //                       # boolean
         //    boolean '|' boolean => bexpr ; # ...
         // .. so anyway I guess we're just finding fold candidates here.
         // OH ONE INTERESTING THING:  if a parameter is ejected,
@@ -1014,7 +1240,10 @@ public:
         } else {
             // subexpressions are implemented as sub rules,
             // so we need to make a rule:
-            production_rule subrule(src.filename(), src.line_number());
+            production_rule subrule(
+                src.filename(), src.line_number(),
+                grammar_element::NONTERM_SUBEXPRESSION
+            );
             subname = make_sub_prod_name();
             subrule.product(subname);
             parse_expressions(src, subrule);
@@ -1025,8 +1254,7 @@ public:
                 ));
             }
 
-            // OK plan:
-            //   - subexpression matches as a rule
+            // goal:
             //   - subexpression contents are seen by the containing
             //     rule as flattened into 1 (or more if we can do skips)
             //     arguments to the reduce function.
@@ -1036,7 +1264,15 @@ public:
             //   '{'^ (key '=>' el (', ' $)*)? '}'^ hmmm commas here? interestin.
             //   maybe it's not worth supporting more than one anyway.
             //   though it would be nice to be able to do the above...
-            // For the moment, we'll just support one
+            // For the moment, we'll just support one element_id within a subexpression.
+            //
+            // plan:
+            //   - temporary rule made for the subexpression.  use this
+            //     rule as usual in generating states, except that instead
+            //     of reducing, it just goes to the state for the next
+            //     step in the parent rule.  (hmm.. rules know about parents?)
+            //   - on reduce, the containing rule needs to know how to
+            //     pop params appropriately.
             // 
             //add_type_for(
 
@@ -1087,8 +1323,8 @@ public:
                 case '(':
                     expr_str = parse_subexpression(src);
                     if(expr_str.length()) {
-                        type = grammar_element::Type::NONTERM_PRODUCTION;
-                    } // else 
+                        type = grammar_element::Type::NONTERM_SUBEXPRESSION;
+                    } // else ... ? error? XXX
                     break;
                 case ')':
                     // end of a subrule, or else a stray ')'
@@ -1434,7 +1670,7 @@ public:
                 // also potentially relevant:
                 for(int stepi = 0; stepi < rule.num_steps(); ++stepi) {
                      production_rule::step step = rule.nth_step(stepi);
-                     if(step && !step.is_terminal()) {
+                     if(step && step.is_nonterminal()) {
                          if(!out.count(step.production_name())) {
                              all_wanted.push_back(step.production_name());
                          }
@@ -1800,10 +2036,10 @@ public:
 
                 if(step.varname.size())
                     out += step.varname;
-                else if(step.is_terminal())
-                    out += stringformat("term_{}", term_name++);
-                else // XXX this can collide
+                else if(step.is_nonterminal())
                     out += stringformat(step.production_name());
+                else
+                    out += stringformat("term_{}", term_name++);
                 params++;
             }
         }
@@ -1888,6 +2124,9 @@ public:
         const productions &prds, const grammar_element &el, const fpl_options &
     );
     friend std::string fpl_x_parser_shift_nonterm(
+        const productions &prds, const grammar_element &el, const fpl_options &
+    );
+    friend std::string fpl_x_parser_shift_none(
         const productions &prds, const grammar_element &el, const fpl_options &
     );
 

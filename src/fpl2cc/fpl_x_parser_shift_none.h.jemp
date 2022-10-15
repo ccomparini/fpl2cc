@@ -1,0 +1,10 @@
+@parameter: const productions &prds @
+@parameter: const grammar_element &el @
+@parameter: const fpl_options &opts @
+@declare el_id: prds.element_id_name(el)@
+
+// shift_NONE_xxx()
+bool shift_@el.type_str()@_@el_id@(bool eject) {
+    // this always matches. it's used to match at ends of rules.
+    return true;
+}

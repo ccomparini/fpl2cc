@@ -36,11 +36,11 @@ def run_and_capture_action(program):
 
         # remove the target first so that if the progam fails, we
         # don't have whatever the last run generated lying around
-        target_fn = target[0].abspath
+        target_fn = target[0].get_path()
         if os.path.isfile(target_fn):
             os.remove(target_fn)
 
-        command = program + [f.abspath for f in source]
+        command = program + [f.get_path() for f in source]
         cap = subprocess.run(command, capture_output=True, timeout=10)
 
         with open(target_fn, mode='w', encoding='utf-8') as outf:

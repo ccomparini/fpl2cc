@@ -56,7 +56,6 @@ env = Environment(
     tools = toolset(),
 )
 
-
 def read_dependencies(senv):
     for dirpath, dirnames, filenames in os.walk('.'):
         for filename in filenames:
@@ -94,11 +93,13 @@ def sources_are_same(target, source, env):
 # 2 test output files - one with whatever was generated and one with
 # what we expected it to generate) and creates the target file (.success)
 # and returns success if they match, or reports failure otherwise.
-env.Append(BUILDERS =
-    { 'CompareOut' : Builder(
+env.Append(BUILDERS = {
+    'CompareOut' : Builder(
         action=sources_are_same,
         suffix = '.success',
-        src_suffix = '.out') } )
+        src_suffix = '.out'
+    )
+})
 
 def depend_on_fpl2cc(target, source, env) :
     # make fpl2cc a dependency of each source (.fpl) file passed
@@ -112,34 +113,42 @@ def depend_on_fpl2cc(target, source, env) :
         Depends(src, '#bin/fpl2cc') # deliberate: .fpl file depends on fpl2cc
     return target, source
 
-
-
 # fpl -> cc builder:
 fpl_args = '--src-path=' + ':'.join(fpl_include_dirs) + ' $FPLOPTS $SOURCES --out $TARGET --depfile .deps --statedump .states'
-env.Append(BUILDERS =
-    { 'Fpl2cc' : Builder(action = debugger + 'bin/fpl2cc ' + fpl_args,
-                 emitter = depend_on_fpl2cc,
-	         suffix = '.cc',
-	         src_suffix = '.fpl') } )
+env.Append(BUILDERS = {
+    'Fpl2cc' : Builder(
+        action = debugger + 'bin/fpl2cc ' + fpl_args,
+        emitter = depend_on_fpl2cc,
+	suffix = '.cc',
+	src_suffix = '.fpl'
+    )
+})
 
 # fpl -> h builder:
-env.Append(BUILDERS =
-    { 'Fpl2h' : Builder(action = debugger + 'bin/fpl2cc ' + fpl_args,
-                 emitter = depend_on_fpl2cc,
-	         suffix = '_parser.h',
-	         src_suffix = '.fpl') } )
+env.Append(BUILDERS = {
+    'Fpl2h' : Builder(
+        action = debugger + 'bin/fpl2cc ' + fpl_args,
+        emitter = depend_on_fpl2cc,
+	suffix = '_parser.h',
+	src_suffix = '.fpl'
+    )
+})
 
 # fpl -> jest builder:
-env.Append(BUILDERS =
-    { 'Fpl2jest' : Builder(action = debugger + 'bin/fpl ' + fpl_args,
-	         suffix = '.jest',
-	         src_suffix = '.fpl') } )
+env.Append(BUILDERS = {
+    'Fpl2jest' : Builder(
+        action = debugger + 'bin/fpl ' + fpl_args,
+	suffix = '.jest',
+	src_suffix = '.fpl'
+    )
+})
 
 # another fake "Scanner" to make it so that headers generated
 # from .jemp sources depend on jemplpl.
 # there must be a simpler way to do this...
 def depend_on_jemplpl(node, env, path) :
     return [ '#bin/jemplpl' ]
+
 env.Append(
     SCANNERS = Scanner(
         function = depend_on_jemplpl,
@@ -148,10 +157,13 @@ env.Append(
 )
 
 # jemp -> h builder
-env.Append(BUILDERS =
-    { 'Jemp2h' : Builder(action = 'bin/jemplpl $SOURCE > $TARGET',
-	         suffix = '.h',
-	         src_suffix = '.h.jemp') } )
+env.Append(BUILDERS = {
+    'Jemp2h' : Builder(
+        action = 'bin/jemplpl $SOURCE > $TARGET',
+	suffix = '.h',
+	src_suffix = '.h.jemp'
+    )
+})
 
 src_subdirs = [
     # these are specified roughly in compile/dependency order:
@@ -161,6 +173,7 @@ src_subdirs = [
     'fpl2cc/test/',
     'compiler/',
 ]
+
 for sdir in src_subdirs: 
     SConscript('src/' + sdir + 'SConstruct', exports='env', variant_dir='build/'+sdir, duplicate=False)
 

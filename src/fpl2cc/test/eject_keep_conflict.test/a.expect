@@ -1,0 +1,5 @@
+returncode = 0
+stderr = ""
+stdout = "We have bats. Oh yes, we have bats.
+bar:b
+foo:a + bar:b"
