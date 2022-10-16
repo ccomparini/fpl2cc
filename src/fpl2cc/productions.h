@@ -828,7 +828,6 @@ public:
         all_types.insert(rt);
         reduce_type = rt;
     }
-    void set_default_action(const std::string &rt) { default_action = rt; }
     void set_post_parse(const code_block &cb)      { post_parse = cb; }
     void set_post_reduce(const code_block &cb)     { post_reduce = cb; }
     void set_default_main(bool def)                { default_main = def; }
@@ -895,7 +894,14 @@ public:
                 add_comment_style(style, inp->filename(), line_num);
             }
         } else if(dir == "default_action") {
-            default_action = code_for_directive(dir);
+            code_block new_code = code_for_directive(dir);
+            if(default_action) {
+                warn(stringformat(
+                    "default_action at {} overwrites existing at {}\n",
+                    new_code.location(), default_action.location()
+                ));
+            }
+            default_action = new_code;
         } else if(dir == "default_main") {
             // TODO kill this in favor of having a default
             // main in grammarlib and importing.
@@ -1008,14 +1014,6 @@ std::cerr << stringformat("   .. which is produced by a subrule so we'll really 
         int rule_num = rules.size();
         rule.set_rule_number(rule_num);
 
-        // we set the default action for the rule here so
-        // that (1) we don't have to resolve it later
-        // and (2) authors can set a default action, define
-        // several rules for which it's a good default, then
-        // set another, etc..
-        if(!rule.code()) {
-            rule.code(default_action);
-        }
 
         rules.push_back(rule);
 
@@ -1029,29 +1027,6 @@ std::cerr << stringformat("   .. which is produced by a subrule so we'll really 
                 } else {
                     rules[srnum].set_parent(rule_num, rule.num_steps() - stp);
                 }
-/*
-                int num_subs = rules_for_product.count(ge.expr);
-                if(num_subs != 1) {
-                    // There should be exactly one subrule for this
-                    // subexpression.  If not, I'm guessing either the
-                    // subrule wasn't added yet, or there's some kind
-                    // of naming bug.  i.e. we shouldn't be able to get
-                    // here:
-                    warn(stringformat(
-                        "{} subrules for step {} in {}? expected 1",
-                        num_subs, stp, rule
-                    ));
-                } else {
-// hmm.. consider, if we did it after all rules were parsed, we
-// could always do this transformation (if single rule for product
-// and no reduce on that rule) (and compatible/same reduce type).
-// has to happen before generate_states().
-// might have to alias types.  do have to implement stack
-// pops such that they understand how to pop child rules.
-                    int srnum = rules_for_product.find(ge.expr)->second;
-                    rules[srnum].set_parent(rule_num, rule.num_steps() - stp);
-                }
- */
             }
         }
         record_element(rule.product_element());
@@ -1084,8 +1059,6 @@ std::cerr << stringformat("   .. which is produced by a subrule so we'll really 
         // is passed;  it's solely for matching.
         // i.e. if the step the rule is being folded into gets ejected, I think
         // you can always fold..?
-        // XXX figure out if folding is useful.  at one point you thought it
-        // was.  maybe more explicit aliasing of terminals is enough.
     }
 
     void add_preamble(const code_block &code) {
@@ -1261,7 +1234,7 @@ std::cerr << stringformat("   .. which is produced by a subrule so we'll really 
             // eg:
             //   '('^ (el (',', el)*)? ')'^ -> arg_list ;
             //
-            //   '{'^ (key '=>' el (', ' $)*)? '}'^ hmmm commas here? interestin.
+            //   '{'^ (key '=>' el (', ' $)*)? '}'^ hmmm commas here?
             //   maybe it's not worth supporting more than one anyway.
             //   though it would be nice to be able to do the above...
             // For the moment, we'll just support one element_id within a subexpression.
@@ -1274,7 +1247,6 @@ std::cerr << stringformat("   .. which is produced by a subrule so we'll really 
             //   - on reduce, the containing rule needs to know how to
             //     pop params appropriately.
             // 
-            //add_type_for(
 
             add_rule(subrule);
         }
@@ -2102,7 +2074,7 @@ public:
         apply_reducers();
         generate_states(goal);
         dump_states(opts);
-        check_actions();
+        resolve_actions();
         check_rules();
     }
 
@@ -2227,11 +2199,15 @@ public:
         }
     }
 
-    void check_actions() const {
+    void resolve_actions() {
         std::list<std::string> missing_actions;
 
         for(int rnum = 0; rnum < rules.size(); rnum++) {
-            const production_rule &rule = rules[rnum];
+            production_rule &rule = rules[rnum];
+            if(!rule.code() && default_action) {
+                rule.code(default_action);
+            }
+
             if(rule.needs_reducer()) {
                 missing_actions.push_back(stringformat(
                     "{}\t{}\n", rule.location(), hypothetical_reducer(rule)
@@ -2239,7 +2215,7 @@ public:
             }
         }
 
-        // .. but if any rules are missing actions, it's an error because
+        // if any rules are missing actions, it's an error because
         // it means we won't know what to do if the rule matches:
         if(missing_actions.size() > 0) {
             std::string msg = stringformat(
