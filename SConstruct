@@ -7,12 +7,15 @@ debugger = ''
 
 fpl_include_dirs = [ 'src/grammarlib' ]
 
-# figure out some sensible way to set this.
-# 10 is great on my ~2015 macbook pro, but utterly destroys my
-# dinky amazon lightsail instance.
-#SetOption('num_jobs', 4)
-SetOption('num_jobs', 10)
+cpu_count = os.cpu_count();
+if(cpu_count is None):
+    cpu_count = 1  # we are currently running on something, after all..
+SetOption('num_jobs', cpu_count + 1);
 
+
+# on ubuntu, I had to:
+#   sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/gcc-10 100
+# to get a working c++20 compiler
 ccflags = "-std=c++20 -Wno-parentheses"
 if debugger : ccflags += " -g"
 else        : ccflags += " -O2"
