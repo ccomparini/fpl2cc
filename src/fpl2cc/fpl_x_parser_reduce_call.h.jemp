@@ -15,13 +15,7 @@
         not going to pass to the reduce function.  wasteful, but easy.
         at some point ideally we won't even push them...
     */@
-    int frame_start = lr_top_index();
-    @if(opts.debug) {-@
-        std::cerr << stringformat(
-            "reducing by @c_str_escape(rule.to_str())@ ({} steps, {} params)\n",
-            @rule.num_steps()@, @rule.num_reduce_params()@
-        );
-    @}@
+    lr_frame_start = lr_top_index();
     @for(int stind = rule.num_steps() - 1; stind >= 0; --stind) {-@
         @declare step: rule.nth_step(stind)@
         @if(!step) {-@
@@ -32,19 +26,29 @@
             @declare el_id: prds.element_index.at(step.gexpr)@
             @declare elname: prds.element_id_name(el_id)@
 
-            frame_start = lr_position_before_@elname@(
-                frame_start, @step.qty.multiple@
+            lr_frame_start = lr_position_before_@elname@(
+                lr_frame_start, @step.qty.multiple@
             );
         @}@
     @}@
-    frame_start++;  // (we went until just before the real frame start)
+    lr_frame_start++;  // (we went until just before the real frame start)
+
+    @if(opts.debug) {-@
+        std::cerr << stringformat(
+            "reducing by @c_str_escape(rule.to_str())@ ({} steps, {} params)\n",
+            @rule.num_steps()@, @rule.num_reduce_params()@
+        );
+        std::cerr << stringformat(
+            "all_matched_steps: {}\n", all_matched_steps()
+        );
+    @}@
 
     // Now that we know where the frame starts, we can go forward through
     // the stack to find the appropriate slices for our arguments.  We do
     // need to do this back-and-forth thing to get the arguments correct
     // for rules like: 
     //    foo:first foo*:rest -> bar ;
-    int arg_start = frame_start;
+    int arg_start = lr_frame_start;
     int slice_size;
     @for(int stind = 0; stind < rule.num_steps(); ++stind) {-@
         @declare step: rule.nth_step(stind)@
@@ -87,11 +91,11 @@
         stack itself, and not copies. This also keeps the stack
         intact for dealing with errors/debug.
     */@
-    lr_pop_to(frame_start - 1);
+    lr_pop_to(lr_frame_start - 1);
 
     @if(opts.debug) {-@
         std::cerr << stringformat("popped from {} to {}\n",
-           frame_start, lr_top_index()
+           lr_frame_start, lr_top_index()
         );
     @-}-@
 

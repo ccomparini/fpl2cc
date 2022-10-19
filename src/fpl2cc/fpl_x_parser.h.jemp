@@ -280,6 +280,7 @@ private:
     int                     last_product_id; // (element id)
     Product                 last_product;
     std::vector<StackEntry> lr_stack;
+    int                     lr_frame_start;  // during current reduce call
     std::vector<Product>    param_stack;
     size_t                  bytes_eaten; // since last terminal
     bool                    stop_parsing;
@@ -305,6 +306,7 @@ public:
         reader(rdr),
         cur_state(&@class_name@::state_0),
         last_product_id(0),
+        lr_frame_start(0),
         bytes_eaten(0),
         stop_parsing(false),
         max_errors(1),
@@ -539,6 +541,11 @@ public:
         }
     @}@
 
+    // A StackSlice here is a set of 0 or more consecutive lr_stack
+    // entries. It's used to represent the match(es) which went into
+    // 1 particular step (see ReductionParameter, below), or the set
+    // of all steps which led to a current rule match (see
+    // all_matched_steps(), below), or any other slice of the lr_stack.
     class StackSlice {
         int base_index; // in lr_stack
         int size;       // also in lr_stack
@@ -552,8 +559,8 @@ public:
         int count() const { return size; }
 
         // returns the number of parameter stack entries for this
-        // slice:
-        int arg_count() const {
+        // entire slice.
+        int param_count() const {
             StackEntry sel = owner.lr_stack_entry(base_index);
 
             // this slice "contains" all arguments starting
@@ -587,7 +594,7 @@ public:
             owner(o)
         {
             if(size == -1) {
-                size = owner.param_stack.size() - param_base();
+                size = owner.lr_stack.size() - base;
             }
         }
 
@@ -595,13 +602,8 @@ public:
         // just past the end of the slice (i.e. -1 means end-of-slice).
         // Accessing to entries outside the slice yields a "false"
         // stack entry.
-// XXX actually now there's only one StackEntry, though multiple params.
-// try axing this.
         StackEntry operator [](int ind) const {
             if(ind < 0) ind += size; // allow negative indexes
-//std::cerr << stringformat("OPERATOR [] being called with non 0 index ({})\n", ind);
-// XXX it's actually called
-
 
             int off = ind + base_index;
             if((off < owner.lr_stack_size()) && (off >= 0)) {
@@ -618,7 +620,7 @@ public:
         // Note that there may be 0 products for any slice,
         // so the 0th is not guaranteed to be anything real.
         Product product(int ind = 0, src_location caller = CALLER()) const {
-            const int num_args = arg_count();
+            const int num_args = param_count();
             if(ind < 0) ind += num_args; // negative = relative to end + 1 
 
             if((ind >= 0) && (ind < num_args)) {
@@ -631,17 +633,22 @@ public:
 
         inline std::string to_str() const {
             std::string out = stringformat(
-                "slice at {} ({} params at {}):\n",
-                base_index, arg_count(), param_base()
+                "slice at {} size {} ({} params at {}):\n",
+                base_index, count(), param_count(), param_base()
             );
             for(int ind = 0; ind < size; ++ind) {
-                out += stringformat("    {} (param_stack[{}]): {::n}\n",
-                    ind, param_base() + ind, product(ind)
-                );
+                out += stringformat("    {}\n", owner.lr_stack[ind]);
             }
             return out;
         }
     };
+
+    // Call this within a reduce function to get a stack slice containing
+    // all the steps (StackEntries) for the matched rule.
+    // Don't call from outside a reduce function.
+    StackSlice all_matched_steps() {
+        return StackSlice(*this, lr_frame_start);
+    }
 
     // call this like:  prod_type_name(typeid(...));
     static std::string prod_type_name(const std::type_info &tinf) {
@@ -659,9 +666,8 @@ public:
         return "unknown type in prod_type_name";
     }
 
-// This really represents the argument for a given step,
-// which should be one lr stack entry plus a slice of the
-// param stack (possibly 0 sized).
+    // This represents the argument for a given step, which should be one
+    // lr stack entry plus a (possibly 0-sized) slice of the param stack
     template<typename ReduceType>
     class ReductionParameter {
         // all access to param and lr stacks go through this:
@@ -672,7 +678,7 @@ public:
             lr_slice(o, lr_base, lr_count) { }
 
         // returns the number of param_stack entries in this:
-        int count() const { return lr_slice.arg_count(); }
+        int count() const { return lr_slice.param_count(); }
 
         // (syntactic sugar for optionals)
         bool exists() const { return count() !=  0; }

@@ -10,7 +10,6 @@ env.Program('reader', [ 'reader.cc' ])
 env.Command('reader.out', 'reader', '$SOURCE > $TARGET')
 env.CompareOut('reader.success', [ 'reader.expect', 'reader.out' ])
 
-# fpl itself has error tests:
 env.Append(BUILDERS = {
     'CaptureFplCompile': Builder(
         action = run_and_capture_action(['bin/fpl2cc', '--debug-single-step']),
