@@ -632,10 +632,7 @@ public:
         }
 
         inline std::string to_str() const {
-            std::string out = stringformat(
-                "slice at {} size {} ({} params at {}):\n",
-                base_index, count(), param_count(), param_base()
-            );
+            std::string out;
             for(int ind = 0; ind < size; ++ind) {
                 out += stringformat("    {}\n", owner.lr_stack[ind]);
             }
@@ -1004,7 +1001,7 @@ public:
             error(stringformat(
                 "{}\n"
                 "here's what we have so far:\n{}"
-                "{}and state was:\n{}\n",
+                "{} and state was:\n{}\n",
                 errm, StackSlice(*this, 0),
                 next_up_str(),
                 state_string(current_state())
