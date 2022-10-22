@@ -822,6 +822,9 @@ public:
         return last_product;
     }
 
+    int result_product_id() const {
+        return last_product_id;
+    }
 
     void terminate() {
         stop_parsing = true;
@@ -834,7 +837,7 @@ public:
     // but unused terminals, thus setting the read pointer to
     // the start of any unrecognized input.
     void rewind_to_nonterm() {
-        if(last_product)
+        if(result())
             return; // already after last nonterminal
 
         size_t rewind_to = reader->current_position();
@@ -855,9 +858,10 @@ public:
     // returns a string with either the next bit of text
     // (in French quotes) or the next production
     std::string next_up_str() const {
-        if(last_product_id) {
+        if(result_product_id()) {
             return stringformat(
-                "{} = {::n}", element_str(last_product_id), last_product
+                "{} = {::n}",
+                element_str(result_product_id()), result()
             );
         } else {
             return stringformat(
@@ -958,6 +962,7 @@ public:
 
         parse_partial();
         Product got = result();
+        int got_id = result_product_id();
 
         // consume any additional "separators" (eg whitespace,
         // comments) before checking if we're at end of input:
@@ -970,16 +975,16 @@ public:
         //   - result is a goal
         std::string errm;
         if(!eof()) {
+            std::string message;
             // If we're not at end of input, we stopped when we
             // didn't recognize something.  If there's currently 
             // a "result", that's what was unexpected (i.e. it
             // recognized something, but that something didn't
             // fit the bigger picture).  Otherwise, it means we
             // got some generally unrecognized input:
-            std::string message;
-            if(got) {
+            if(got_id) {
                 errm = stringformat(
-                    "unexpected {} ({})", element_str(last_product_id), got
+                    "unexpected {} ({})", element_str(got_id), got
                 );
             } else  {
                 errm = "unrecognised input";
@@ -993,7 +998,7 @@ public:
         } else if(!result_is_goal()) {
             errm = stringformat(
                 "parsed a {} = {}, but that's not a goal (@prds.goal@)",
-                element_str(last_product_id), got
+                element_str(got_id), got
             );
         }
 
@@ -1119,7 +1124,7 @@ public:
     }
 
     bool result_is_goal() const {
-        return is_goal(last_product_id);
+        return is_goal(result_product_id());
     }
 
     static size_t separator_length(const utf8_byte *inp) {
