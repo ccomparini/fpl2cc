@@ -20,7 +20,7 @@ typedef const std::string &src_location;
 
     // CALLER() returns a file/line string
     #define CALLER() \
-        (std::string(__builtin_FILE()) + " line " + std::to_string(__builtin_LINE()))
+        (std::string(__builtin_FILE()) + ":" + std::to_string(__builtin_LINE()))
 #else
     #define CALLER_FILE() ("(file unavailable)")
     #define CALLER_LINE() (0)
