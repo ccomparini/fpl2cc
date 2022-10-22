@@ -194,17 +194,23 @@ public:
         State          state;
         int            element_id;
         SourcePosition pos;        // start of match in source code
-        int            param_ind;  // offset in param_stack or -1 if ejected
+        int            param_ind;  // offset in param_stack
+        bool           eject;
 
-        StackEntry(State st, int el_id, SourcePosition p, int pind) :
+        StackEntry(State st, int el_id, SourcePosition p, int pind, bool ej) :
             state(st),
             element_id(el_id),
             pos(p),
-            param_ind(pind) {
+            param_ind(pind),
+            eject(ej) {
         }
 
         // creates a "false" stack entry:
-        StackEntry() : state(NULL), element_id(-1), param_ind(-1) {
+        StackEntry() :
+            state(NULL),
+            element_id(-1),
+            param_ind(-1),
+            eject(true) {
         }
 
         StackEntry(const StackEntry &) = default;
@@ -215,6 +221,10 @@ public:
 
         int grammar_element_id() const {
             return element_id;
+        }
+
+        bool ejected() const {
+            return eject;
         }
 
         SourcePosition position() const {
@@ -233,8 +243,8 @@ public:
             return @class_name@::is_nonterminal(element_id);
         }
 
-        // returns the first Product corresponding to this
-        // StackEntry, if there is one.  Otherwise returns
+        // Returns the first Product corresponding to this
+        // StackEntry, if there is one.  Otherwise, returns
         // a false Product.
         Product product(const @class_name@ &owner) const {
             if(param_ind >= 0 && param_ind < owner.param_stack.size()) {
@@ -253,16 +263,16 @@ public:
         }
     };
 
-    // Pushes an element to the lr or parameter stacks as appropriate.
+    // Pushes an element to the lr and/or parameter stacks as appropriate.
     // "ejected" elements (those marked with a '^' in fpl source) are
-    // not pushed to the param stack.
-// XXX ALSO maybe don't push to lr if doing so would be redundant.
-// but how to tell?
+    // not pushed to the param stack.  Redundant lr_stack entries may or
+    // may not actually be pushed.  (in the current implementation, they
+    // are pushed, but that might not pertain in the future)
     void lr_push(
         int element_id, bool eject, const SourcePosition &pos, Product pr
     ) {
         lr_stack.push_back(StackEntry(
-            cur_state, element_id, pos, param_stack.size()
+            cur_state, element_id, pos, param_stack.size(), eject
         ));
 
         if(!eject) {
@@ -559,7 +569,8 @@ public:
         int param_count() const {
             StackEntry sel = owner.lr_stack_entry(base_index);
 
-            if(sel.param_ind < 0) return 0;
+            // ejected -> 0 params
+            if(sel.ejected()) return 0;
 
             // this slice "contains" all arguments starting
             // at the position in the argument stack starting
