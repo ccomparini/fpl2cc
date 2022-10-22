@@ -194,7 +194,7 @@ public:
         State          state;
         int            element_id;
         SourcePosition pos;        // start of match in source code
-        int            param_ind;  // offset in param_stack
+        int            param_ind;  // offset in param_stack or -1 if ejected
 
         StackEntry(State st, int el_id, SourcePosition p, int pind) :
             state(st),
@@ -204,13 +204,13 @@ public:
         }
 
         // creates a "false" stack entry:
-        StackEntry() : state(NULL), element_id(-1), param_ind(0) {
+        StackEntry() : state(NULL), element_id(-1), param_ind(-1) {
         }
 
         StackEntry(const StackEntry &) = default;
 
         operator bool() const {
-            return state != NULL;
+            return element_id > 0; // note null element id makes this false.. hmm
         }
 
         int grammar_element_id() const {
@@ -233,13 +233,9 @@ public:
             return @class_name@::is_nonterminal(element_id);
         }
 
-/*
-XXX
-kill:  this no longer makes sense;  products are in the argument stack.
-but, this is used in rewind, which is interesting and indicates bugs
-because what if there are multiple products?
-probably need to make the argument stack 3 point.
- */
+        // returns the first Product corresponding to this
+        // StackEntry, if there is one.  Otherwise returns
+        // a false Product.
         Product product(const @class_name@ &owner) const {
             if(param_ind >= 0 && param_ind < owner.param_stack.size()) {
                 return owner.param_stack[param_ind];
@@ -563,6 +559,8 @@ public:
         int param_count() const {
             StackEntry sel = owner.lr_stack_entry(base_index);
 
+            if(sel.param_ind < 0) return 0;
+
             // this slice "contains" all arguments starting
             // at the position in the argument stack starting
             // at the argument from the base element and going
@@ -620,11 +618,12 @@ public:
         // Note that there may be 0 products for any slice,
         // so the 0th is not guaranteed to be anything real.
         Product product(int ind = 0, src_location caller = CALLER()) const {
+            const int pbase = param_base();
             const int num_args = param_count();
             if(ind < 0) ind += num_args; // negative = relative to end + 1 
 
             if((ind >= 0) && (ind < num_args)) {
-                unsigned int sind = param_base() + ind;
+                unsigned int sind = pbase + ind;
                 return owner.param_stack_entry(sind, caller);
             } else {
                 return Product();
