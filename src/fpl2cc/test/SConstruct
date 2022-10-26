@@ -82,9 +82,12 @@ for fpl in fpls:
     )
 
     # .. and now create a builder for running the language program:
+    interactive=False
+    if 'FPL_TEST_DEBUG' in os.environ:
+        interactive=True
     env.Append(BUILDERS = {
         'FPLTestLang_' + language: Builder(
-            action = run_and_capture_action(langprog),
+            action = run_and_capture_action(langprog, interactive=interactive),
             suffix = '.result',
             src_suffix = language
         )
