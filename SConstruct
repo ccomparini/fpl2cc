@@ -1,3 +1,4 @@
+import atexit
 import os
 import sys
 import sysconfig
@@ -179,4 +180,18 @@ src_subdirs = [
 
 for sdir in src_subdirs: 
     SConscript('src/' + sdir + 'SConstruct', exports='env', variant_dir='build/'+sdir, duplicate=False)
+
+# Stolen from:
+#  https://scons.org/doc/production/HTML/scons-user.html#idp105548894836432
+# .. uhh and then I did a source dive to figure out how to make
+# it print something useful...
+def print_build_failures():
+    from SCons.Script import GetBuildFailures
+    fails = GetBuildFailures()
+    if len(fails):
+        print(f"\n\n{len(fails)} FAILURES:");
+        for bf in fails:
+            print(f"    {bf.node}\t{env.subst(bf.action, executor=bf.executor)}")
+
+atexit.register(print_build_failures)
 
