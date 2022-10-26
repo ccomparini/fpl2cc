@@ -23,8 +23,8 @@ import unittest
 
   Overview of key features:
    - trailing commas are allowed
-   - multiline strings are allowed (in fact, required)
-   - mixed type arrays are fine
+   - multiline strings are allowed (in fact, required if there's a newline)
+   - mixed type arrays work
    - everything is flattened:
      - each element of each dict gets its own line with the
        full path to the element.  eg:
@@ -37,7 +37,7 @@ import unittest
        (note the sorting and that each assignment gets its own line)
      - each array item gets its own line, including the array subscript
        (in square brackets)
-     - None/NULL/missing values are valid (and represented by nothing).
+     - None/missing values are valid (and represented by nothing).
        example:
            { 'foo': None }
        becomes:
@@ -45,16 +45,19 @@ import unittest
 
    The idea behind all this is to make it as simple as possible to
    write and compare data dumps.  For example, if you have 1000 elements
-   and only the 534th ones differ, you can tell where the difference
-   is without counting elements.  Same with nested structures - if
+   and only the 534th ones differ, a simple command line diff will show
+   exactly which element differ.  Same with nested structures - if
    there are deeply nested structures, even very deep differences
-   are easy to find and examine.
+   are easy to find and examine using standard unix command line tools.
 
    Disadvantages:
        - output is bulkier than json, toml, and pretty much anything else
-       - I made this up so there's no off-the-shelf parser.
+       - I made this up so there's no off-the-shelf parser*.
          however, I expect it would be easy to parse - everything
          is <nested key> = [value].
+
+   *per the goal, just about every command line unix tool is a "parser"
+   for most of the key purposes.
 
 """
 
@@ -73,6 +76,12 @@ def _format_value(val):
         val = val.replace('\\', r'\\');
         val = val.replace('"',  r'\"');
         return f'"{val}"'
+    elif isinstance(val, bytes):
+        # doing a utf-8 encoding w/ backslashed hex codes for binary,
+        # since it's the most transparent thing I can think of which
+        # fits the whole goal of being able to process the resulting
+        # files with standard unix command line tools (diff, grep etc).
+        return _format_value(val.decode(errors='backslashreplace'))
     else:
         # we actually want to support as much as possible, so if we hit
         # this it's a sign we need to support more (maybe by defaulting
@@ -105,16 +114,18 @@ def dumps(value, name = ""):
 class Testesml(unittest.TestCase):
 
     def test_all(self):
-        expected = ('foo = "bar\n\\"bat\\"\n"\n'
-                    'lat = 23.4394\n'
-                    'wup.flew = false\n'
-                    'wup.peep.deep[0] = 2\n'
-                    'wup.peep.deep[1] = 3\n'
-                    'wup.shoe = true\n'
-                    'zoo[0].kind = "cow"\n'
-                    'zoo[0].says = "moo"\n'
-                    'zoo[1].kind = "fox"\n'
-                    'zoo[1].says = \n'
+        expected = (
+            'foo = "bar\n\\"bat\\"\n"\n'
+            'lat = 23.4394\n'
+            'not_utf-8 = "\\\\xff🙂\0\\"\r\n#"\n'
+            'wup.flew = false\n'
+            'wup.peep.deep[0] = 2\n'
+            'wup.peep.deep[1] = 3\n'
+            'wup.shoe = true\n'
+            'zoo[0].kind = "cow"\n'
+            'zoo[0].says = "moo"\n'
+            'zoo[1].kind = "fox"\n'
+            'zoo[1].says = \n'
         )
         #print(expected)
         #print("==== above is the expected poop ====")
@@ -130,6 +141,14 @@ class Testesml(unittest.TestCase):
                     'deep': [ 2, 3 ]
                 }
             },
+            'not_utf-8': bytes([
+                0xff,                   # garbage
+                0xf0, 0x9f, 0x99, 0x82, # utf-8 smiley
+                0x00,                   # c end-of-string
+                0x22,                   # ascii double quote
+                0x0d, 0x0a,             # microsoft nl - expect to see \r \n
+                0x23                    # '#'
+            ]),
             'lat': 23.4394,
         })
         #print(got)
