@@ -13,7 +13,6 @@
 // .. where X is the element ID number.
 bool shift_@el.type_str()@_@el_id@(bool eject) {
 
-
     const SourcePosition pos = position();
     Terminal result;
     @if(el.type == grammar_element::TERM_EXACT) {@
@@ -56,6 +55,14 @@ bool shift_@el.type_str()@_@el_id@(bool eject) {
         // the position of the end of the last non-0-length
         // separator.
         bytes_eaten = 0;
+
+        if(!lr_read(@el_id@)) {
+            internal_error(stringformat(
+                "expected item with id @el_id@ but this was next up: {}\n",
+                lr_next()
+            ));
+        }
+
         return true;
     }
 

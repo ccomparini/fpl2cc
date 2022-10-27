@@ -327,6 +327,10 @@ class productions {
             return items.size();
         }
 
+        const std::set<grammar_element> &ejected_elements() const {
+            return ejected_el;
+        }
+
         int32_t next_state(const grammar_element &ge) const {
             auto nsi = next_state_for_el.find(ge);
             if(nsi != next_state_for_el.end()) {

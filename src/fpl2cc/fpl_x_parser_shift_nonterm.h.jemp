@@ -6,13 +6,11 @@
 // shift_NONTERM_xxx()
 bool shift_@el.type_str()@_@el_id@(bool eject) {
 
-    if(result_product_id() == @el_id@) {
+    if(lr_read(@el_id@)) {
         @if(opts.debug) {@
             std::cerr << "shifting nonterm @el_id@";
         @}@
 
-        lr_push(@el_id@, eject, lr_top().position(), result());
-        clear_product();
         return true;
     }
 

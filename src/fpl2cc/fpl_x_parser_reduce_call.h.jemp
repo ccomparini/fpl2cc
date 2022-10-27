@@ -15,7 +15,6 @@
         not going to pass to the reduce function.  wasteful, but easy.
         at some point ideally we won't even push them...
     */@
-    lr_frame_start = lr_top_index();
     @for(int stind = rule.num_steps() - 1; stind >= 0; --stind) {-@
         @declare step: rule.nth_step(stind)@
         @if(!step) {-@
@@ -26,12 +25,12 @@
             @declare el_id: prds.element_index.at(step.gexpr)@
             @declare elname: prds.element_id_name(el_id)@
 
-            lr_frame_start = lr_position_before_@elname@(
-                lr_frame_start, @step.qty.multiple@
+            lr_read_pos = lr_position_before_@elname@(
+                lr_read_pos, @step.qty.multiple@
             );
         @}@
     @}@
-    lr_frame_start++;  // (we went until just before the real frame start)
+    lr_read_pos++;  // (we went until just before the real frame start)
 
     @if(opts.debug) {-@
         std::cerr << stringformat(
@@ -48,7 +47,7 @@
     // need to do this back-and-forth thing to get the arguments correct
     // for rules like: 
     //    foo:first foo*:rest -> bar ;
-    int arg_start = lr_frame_start;
+    int arg_start = lr_read_pos;
     int slice_size;
     @for(int stind = 0; stind < rule.num_steps(); ++stind) {-@
         @declare step: rule.nth_step(stind)@
@@ -83,7 +82,9 @@
             "reduced to  @result_el_id@ = {}\n", prod
         );
     @}@
-    set_product(@result_el_id@, prod);
+
+    @/* (must come before the pop or the position gets lost) */@
+    auto src_pos = arg_0.position();
 
     @/*
         This is what actually pops the stack. Note we pop after
@@ -91,11 +92,16 @@
         stack itself, and not copies. This also keeps the stack
         intact for dealing with errors/debug.
     */@
-    lr_pop_to(lr_frame_start - 1);
+    lr_pop_to(lr_read_pos - 1);
+
+    @/* ya know, if it weren't for potential side effects, it's
+        possible we could get away with not even calling the
+        reduce function in the eject case...
+    */@
+    bool eject = state_ejects(cur_state, @result_el_id@);
+    lr_push(@result_el_id@, eject, src_pos, prod);
 
     @if(opts.debug) {-@
-        std::cerr << stringformat("popped from {} to {}\n",
-           lr_frame_start, lr_top_index()
-        );
+        std::cerr << stringformat("popped to {}\n", lr_top_index());
     @-}-@
 

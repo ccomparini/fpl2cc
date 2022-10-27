@@ -283,10 +283,8 @@ public:
 private:
     fpl_reader_p            reader;      // (must be non-null)
     State                   cur_state;
-    int                     last_product_id; // (element id)
-    Product                 last_product;
     std::vector<StackEntry> lr_stack;
-    int                     lr_frame_start;  // during current reduce call
+    int                     lr_read_pos;
     std::vector<Product>    param_stack;
     size_t                  bytes_eaten; // since last terminal
     bool                    stop_parsing;
@@ -311,8 +309,7 @@ public:
     @class_name@(fpl_reader_p rdr) :
         reader(rdr),
         cur_state(&@class_name@::state_0),
-        last_product_id(0),
-        lr_frame_start(0),
+        lr_read_pos(0),
         bytes_eaten(0),
         stop_parsing(false),
         max_errors(1),
@@ -432,6 +429,9 @@ public:
     }
 
     StackEntry lr_stack_entry(int pos) const {
+        // (as usual, negative positions are relative to the top of stack)
+        if(pos < 0) pos += lr_stack_size();
+
         if((pos >= 0) && (pos < lr_stack_size())) {
             return lr_stack[pos];
         } else {
@@ -439,18 +439,41 @@ public:
         }
     }
 
+    StackEntry lr_next() const {
+        return lr_stack_entry(lr_read_pos);
+    }
+
     StackEntry lr_top() const {
         return lr_stack_entry(lr_top_index());
     }
 
-    // lr_position_before_XXX(pos, multiple):  returns the first
-    // position before pos in the lr stack which does not match
-    // the element ID in question.  Recurses on subexpressions.
+    // Increments the lr read pointer and returns true if the element ID
+    // passed matches the next item to read from the lr stack.  Otherwise,
+    // returns false.
+    bool lr_read(int element_id) {
+        if(element_id == lr_next().element_id) {
+            lr_read_pos++;
+            return true;
+        }
+        return false;
+    }
+
+    // lr_position_before_xxx(pos, multiple):  Each returns the
+    // first position before pos in the lr stack which does not
+    // match the element ID in question. If pos is past the top
+    // of the stack, starts at the top of the stack.
+    // Recurses on subexpressions.
+    //
+    // These are used to put together the arguments for reduce
+    // actions.
     @for(int el_id = 0; el_id < prds.elements.size(); ++el_id) {-@
         @declare element: prds.elements.at(el_id)@
         @declare elname: prds.element_id_name(el_id)@
         @declare subrule_num:  prds.subrulenum_for_el(element)@
         int lr_position_before_@elname@(int pos, bool multiple) const {
+
+            if(pos > lr_top_index())
+                pos = lr_top_index();
 
             @if(subrule_num < 0) {@
                 // normal case - not a subexpression
@@ -641,7 +664,7 @@ public:
             }
         }
 
-        inline std::string to_str() const {
+        std::string to_str() const {
             std::string out;
             for(int ind = 0; ind < size; ++ind) {
                 out += stringformat("    {}\n", owner.lr_stack[ind]);
@@ -654,7 +677,7 @@ public:
     // all the steps (StackEntries) for the matched rule.
     // Don't call from outside a reduce function.
     StackSlice all_matched_steps() {
-        return StackSlice(*this, lr_frame_start);
+        return StackSlice(*this, lr_read_pos);
     }
 
     // call this like:  prod_type_name(typeid(...));
@@ -765,28 +788,11 @@ public:
         }
     };
 
-    void set_product(int element_id, const Product &pr) {
-        if(last_product) {
-            // if this happens, it's almost certainly a bug in fpl2cc
-            // since it means we're setting a new product without having
-            // shifted whatever nonterm product was next up..
-            internal_error(stringformat(
-                "splatting last_product ({}) with {}\n",
-                last_product, pr
-            ));
-        }
-        last_product_id = element_id;
-        last_product    = pr;
-    }
 
     void set_state(State st) {
         cur_state = st;
     }
 
-    void clear_product() {
-        last_product_id = 0;
-        last_product    = Product();
-    }
 
     Product param_stack_entry(int pos, src_location caller = CALLER()) const {
         // this is very similar to lr_stack_entry.  generalize?
@@ -809,14 +815,17 @@ public:
     std::string to_str() const {
         std::string out;
 
-        out += stringformat("next up: {}\n", next_up_str());
+        out += stringformat(
+            "next up (lr pos {}): {}\n", lr_read_pos, next_up_str()
+        );
         out += stringformat(
             "{} bytes of separator since last terminal\n", bytes_eaten
         );
         out += stringformat("lr stack ({} items):\n", lr_stack.size());
         for(int sind = lr_stack.size() - 1; sind >= 0; --sind) {
             out += stringformat(
-                "    [{}] {}\n", sind, lr_stack_entry(sind)
+                " {} [{}] {}\n",
+                sind == lr_read_pos?"->":"  ", sind, lr_stack_entry(sind)
             );
         }
         out += stringformat("param stack ({} items):\n", param_stack.size());
@@ -828,20 +837,25 @@ public:
         return out;
     }
 
-    const Product &result() const {
-        return last_product;
+    Product result() const {
+        // (... possibly we should only consider it a result if there's
+        // exactly one item on the stack.  could simplify callers)
+        return lr_stack_entry(-1).product(*this);
     }
 
     int result_product_id() const {
-        return last_product_id;
+        return lr_stack_entry(-1).element_id;
     }
+
 
     void terminate() {
         stop_parsing = true;
     }
 
-    // rewind to the point just after the last nonterminal.
-    // this is used after termination to unwind such that the
+    // Removes terminals from the top of the lr stack and sets
+    // the source read position to the start of the removed
+    // terminals.
+    // This is used after termination to unwind such that the
     // read position is just after the last successfully parsed
     // thing instead of potentially being after some recognized
     // but unused terminals, thus setting the read pointer to
@@ -854,24 +868,21 @@ public:
         while(lr_stack.size() > 0) {
             auto last = lr_stack.back();
             if(last.is_nonterminal()) {
-                last_product_id = last.element_id;
-                last_product    = last.product(*this);
                 break;
             }
             rewind_to = last.position();
             lr_pop();
         }
         reader->go_to(rewind_to);
-
     }
 
-    // returns a string with either the next bit of text
+    // Returns a string with either the next bit of text
     // (in French quotes) or the next production
     std::string next_up_str() const {
-        if(result_product_id()) {
+        if(StackEntry next = lr_next()) {
             return stringformat(
                 "{} = {::n}",
-                element_str(result_product_id()), result()
+                element_str(next.element_id), next.product(*this)
             );
         } else {
             return stringformat(
@@ -895,7 +906,7 @@ public:
         //  - we haven't been told to stop (due to errors or whatever)
         //  - and there's more input -or- we're not at the goal
         return !stop_parsing
-            && ((!eof() || lr_stack.size() > 0) || !result_is_goal());
+            && ((!eof() || lr_stack.size() > 1) || !result_is_goal());
     }
 
     // resets the state of the parser, discarding anything on
@@ -907,22 +918,21 @@ public:
             std::cerr << "resetting @class_name@!!!\n";
         @}@
         lr_stack.clear();
+        param_stack.clear();
         set_state(&@class_name@::state_0);
-        last_product_id  = 0;
-        last_product     = Product();
         bytes_eaten      = 0;
         stop_parsing     = false;
         num_errors       = 0;
     }
 
     // In an fpl parser, we do not want to require that the whole
-    // input has been consumed.  this allows piecewise parsing.
-    // for example, a top down parser can invoke an fpl parser
+    // input has been consumed.  This allows piecewise parsing.
+    // For example, a top down parser can invoke an fpl parser
     // to handle some class of expressions, receive the result,
-    // and then continue parsing whatever it was parsing, or
-    // you're parsing a stream of input, and you want to parse
-    // it as it comes in instead of all at once after getting
-    // the entire thing.
+    // and then continue parsing whatever it was parsing.  Or,
+    // let's say you're parsing a stream of input, and you want
+    // to parse it as it comes in instead of all at once after
+    // getting the entire thing.
     //
     // So, this parses as much as it can, then leaves the parser
     // as intact as possible so that the caller can examine it
@@ -948,9 +958,7 @@ public:
         parse_partial();
         rewind_to_nonterm();
         if(result_is_goal()) {
-            Product got = result();
-            clear_product();
-            return got;
+            return result();
         }
         return Product();
     }
@@ -961,7 +969,6 @@ public:
     // Returns whatever it got, regardless of errors,
     // which might mean returning a default of whatever
     // the reduce type is.
-    //  (a lot of the internal logic here is questionable, at this point)
     @prds.reduce_type@ parse() {
         // we're parsing from initial state...
         reset();
@@ -1000,10 +1007,10 @@ public:
                 errm = "unrecognised input";
             }
             error(message);
-        } else if(lr_stack_size() > 0) {
-            // there's stuff on the stack after we rewound,
-            // it means we recognized more than one component,
-            // but nothing complete.
+        } else if(lr_stack_size() > 1) {
+            // If there's extra stuff on the stack after we rewound,
+            // it means we recognized more than one component, but
+            // nothing complete.
             errm = "incomplete input";
         } else if(!result_is_goal()) {
             errm = stringformat(
@@ -1073,7 +1080,6 @@ public:
         @-}-@
     } ElementID;
 
-
     // returns a string describing the element matching the ID
     // passed. this is for debugging.
     static std::string element_str(int id) {
@@ -1112,15 +1118,37 @@ public:
     }
 
     static const char *state_string(State st) {
-        @for(int st = 0; st < prds.num_states(); st++) {-@
-            if(&@prds.state_fn(st, true)@ == st) {
-                return "@prds.state_fn(st, false)@:\n"
-                       @prds.states.at(st).to_str(
+        @for(int sti = 0; sti < prds.num_states(); sti++) {-@
+            if(&@prds.state_fn(sti, true)@ == st) {
+                return "@prds.state_fn(sti, false)@:\n"
+                       @prds.states.at(sti).to_str(
                            &prds, "\"    ", "\\n\"\n", true
                        )@;
             }
         @}@
         return "<invalid state>";
+    }
+
+    // Returns true if elements matching the element id passed
+    // are ejected in the context of the given state, or false
+    // otherwise.
+    static bool state_ejects(State st, int element_id) {
+        @-for(int sti = 0; sti < prds.num_states(); sti++) {-@
+            @declare state: prds.states.at(sti)@
+            if(&@prds.state_fn(state, true)@ == st) {
+                @for(auto eje : state.ejected_elements()) {@
+                    if(ElementID::@prds.element_id_name(eje)@ == element_id) {
+                        return true;
+                    } else
+                @}@
+                {
+                    return false;
+                }
+            } else
+        @-}-@
+        {
+            return false;
+        }
     }
 
     static bool is_goal(int el_id) {
