@@ -89,7 +89,11 @@ def run_and_capture_action(program, interactive=False):
     # runs the proc passed normally (blocking), and returns
     # a tuple with whatever was written to (stdout, stderr).
     def run_normally(proc, timeout=5):
-        proc.wait(timeout)
+        try:
+            proc.wait(timeout)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            raise
         return proc.stdout.read(), proc.stderr.read()
 
     # program should really be program + arguments, but support
