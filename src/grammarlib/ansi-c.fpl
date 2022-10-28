@@ -4,6 +4,10 @@
 #   http://www.quut.com/c/ANSI-C-grammar-l-2011.html
 #   http://www.quut.com/c/ANSI-C-grammar-y.html
 #
+#
+# A better source of this would be:
+#   https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1256.pdf
+# (Annex A page 403)
 
 @comment_style c
 
