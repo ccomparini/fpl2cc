@@ -6,6 +6,8 @@ uses "libc";
 
 message:string = "hi world\n";
 
+foo := message.length;
+
 /*
 #libc.write(fd = libc.stdout, buf = message, count = message.length);
  */
