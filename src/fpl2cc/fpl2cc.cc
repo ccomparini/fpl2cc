@@ -100,12 +100,7 @@ void warn(const std::string &msg, src_location caller = CALLER()) {
  TODO/fix
 
 Thu Apr 14 08:54:41 PDT 2022
-  - separate stack for arguments.  this will allow ejected params
-    to not be stored in the first place and simplify argument passing.
-    Also lets us go back to recursive ascent (potentially)
   - add timings so we can compare algorithms/implementations
-  - make it so you can do regex separators/comments.
-    this will allow separators to be specified in "pure" fpl
   - Refactor:
     - separate parsing out of Productions
     - make an fpl based fpl parser, then add:
@@ -121,27 +116,10 @@ Thu Apr 14 08:54:41 PDT 2022
   Abstract the target language/application:
   - error handling and messaging is _terrible_ right now (with
     the default, anyway)
-  - bug:  if everything in your fpl grammar is optional, it generates
-    some kind of infinite loop, I guess looking for nothing.
-    eg:
-      foo* -> done ;
-      'a' -> foo ;
-    .. actually similar issue on regexes which match 0-length, if match
-    count is > 1 - it'll keep looping on a 0 length match, because
-    0 length doesn't advance the read pointer, which means it'll match
-    again (and again and again...)
-  - get jest in here :D
-  - lots of stuff is misnamed:
-    - "num_args" should be count or size or something sensible
-    - @comment_style and @separator - maybe just have @elider and
-      allow multiple?  default also doesn't have to be space.
-      lots of modern stuff puts space in the grammar.
-  - if a generated fpl encounters an unexpected anything, it stops
-    parsing (by design).  this could be used for incremental parsing
-    in cases where you are parsing a buffer as it's being filled
-    (such as parsing network input or even just from the command line).
-    the current buffering framework doesn't allow that, though.
-  - precedence.  maybe an @prec (... )? or ^other_rule?
+  - @comment_style and @separator - maybe just have @elider and
+    allow multiple?  default also doesn't have to be space.
+    lots of modern stuff puts space in the grammar.
+  - precedence: square brackets?
   o document the fpl (see docs dir)
     - docs suck and are out of date.  probably want to inline them
 
@@ -151,7 +129,7 @@ Thu Apr 14 08:54:41 PDT 2022
 
 Production rules are ordered;  first one matches.
 
-Production rules can be looked up the name of the thing they
+Production rules can be looked up by the name of the thing they
 produce.
 
 Each production rule is an array of things to match (items),
@@ -204,9 +182,6 @@ void write_depfile(const productions &prds, const fpl_options &opts) {
         fclose(depf);
     }
 }
-
-// self generated parser class:
-//#include "fpl_parser.h"
 
 // returns an exit()-appropriate status (i.e. 0 on success)
 ExitVal fpl2cc(const fpl_options &opts) {
