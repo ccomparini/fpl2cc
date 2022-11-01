@@ -29,13 +29,16 @@ syn match	fplAtDirective	"@scanner.*"
 syn match	fplAtDirective	"@separator.*"
 syn match	fplAtDirective	"@type_for.*"
 
+syn match	fplQuantifier	"[*+?]"
+
 " operators (such as they are):
 syn match	fplOperator	"->"
 syn match	fplOperator	"\s;"
-syn match	fplOperator	"[*+?]"
 syn match	fplOperator	"+{"
 syn match	fplOperator	"}+"
 syn match	fplOperator	":"
+syn match	fplOperator	"("
+syn match	fplOperator	")"
 
 " imports
 syn match	fplImport	"`.*`"
@@ -58,14 +61,15 @@ syntax include @CPP syntax/cpp.vim
 syntax region cppSnip matchgroup=fplSnip start="+{" end="}+" contains=@CPP
 " :hi link Snip SpecialComment
 
-hi def link fplComment	Comment
-hi def link fplTodo	Todo
 hi def link fplAtDirective	PreProc
-hi def link fplOperator	Operator
-hi def link fplImport	PreProc
+hi def link fplComment	Comment
 hi def link fplExpression	Constant
+hi def link fplImport	PreProc
+hi def link fplOperator	Operator
 hi def link fplProductionName	Identifier
-hi def link fplSuffix	Special
+hi def link fplQuantifier	Repeat
 hi def link fplSnip	Operator
+hi def link fplSuffix	Special
+hi def link fplTodo	Todo
 
 
