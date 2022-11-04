@@ -297,6 +297,7 @@ public:
             return false; // don't need - parent does reduce
         }
 
+/*
         for(int stepi : psteps) {
             step st = rsteps[stepi];
 
@@ -326,6 +327,7 @@ public:
                 return true;
             }
         }
+ */
 
         return false;
     }

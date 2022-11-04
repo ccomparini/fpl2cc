@@ -195,6 +195,18 @@ ExitVal fpl2cc(const fpl_options &opts) {
         inp = make_shared<fpl_reader>(opts.src_fpl, fail_reader_adapter);
     }
 
+    std::string output_fn;
+    std::ofstream output_file;
+    if(!opts.check_only) {
+        output_fn = opts.out_filename();
+        // If we're writing to a file, remove any existing
+        // copy of that file so that if we get some kind
+        // of error, no one will mistake an old copy for
+        // the output.
+        if(output_fn.length())
+            fs::remove(output_fn);
+    }
+
     // parse the input file into a set of productions:
     productions prds(opts, inp); // XXX don't pass inp here
     if(opts.new_parser) {
@@ -218,14 +230,23 @@ ExitVal fpl2cc(const fpl_options &opts) {
 
     std::string output;
     if(opts.generate_code)
-        output = prds.generate_code();
+        output = prds.generate_code(opts);
 
-    if(opts.out) {
-        // uhh... this is easy, if hokey:
-        if(output.length())
-            fprintf(opts.out, "%s\n", output.c_str());
-    } else {
-        std::cout << output;
+    if(output.length() && !opts.check_only) {
+        if(!output_fn.length()) {
+            std::cout << output;
+        } else {
+            if(FILE *out = fopen(output_fn.c_str(), "w")) {
+                // uhh... this is easy, if hokey:
+                fprintf(out, "%s\n", output.c_str());
+                fclose(out);
+            } else {
+                fail(stringformat(
+                    "--out: can't open '{}' for write: {}",
+                    output_fn, strerror(errno)
+                ));
+            }
+        }
     }
 
     return ExitVal::OK;

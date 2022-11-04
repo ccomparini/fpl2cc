@@ -832,10 +832,10 @@ public:
         all_types.insert(rt);
         reduce_type = rt;
     }
-    void set_post_parse(const code_block &cb)      { post_parse = cb; }
-    void set_post_reduce(const code_block &cb)     { post_reduce = cb; }
-    void set_default_main(bool def)                { default_main = def; }
-    void add_internal(const code_block &cb)        { parser_members.push_back(cb); }
+    void set_post_parse(const code_block &cb)  { post_parse = cb; }
+    void set_post_reduce(const code_block &cb) { post_reduce = cb; }
+    void set_default_main(bool def)            { default_main = def; }
+    void add_internal(const code_block &cb)    { parser_members.push_back(cb); }
 
     void add_type_for(const std::string &prod, const std::string &type) {
         type_for_product[prod] = type;
@@ -1889,7 +1889,9 @@ public:
         states[start_state].generate_states(*this);
     }
 
-    std::string why_cant_use_reducer(const reducer &red, const production_rule &rule) {
+    std::string why_cant_use_reducer(
+        const reducer &red, const production_rule &rule
+    ) {
         if(red.name() != rule.product()) {
             return stringformat(
                 "different products ({} vs {})",
@@ -2106,7 +2108,17 @@ public:
         const productions &prds, const grammar_element &el, const fpl_options &
     );
 
-    std::string generate_code(src_location caller = CALLER()) {
+    std::string generate_code(
+        const fpl_options &opts, src_location caller = CALLER()
+    ) {
+        if(opts.check_only) {
+            // This will (I think correctly) splat any @produces
+            // type set, but (perhaps not correctly?) not splat
+            // specific types set for specific productions.
+            // It should cover the "check abstract fpl grammar"
+            // case correctly, so I'm going with it for the moment.
+            set_reduce_type("check_only");
+        }
         resolve(caller);
         return reformat_code(fpl_x_parser(*this, opts), opts.output_fn);
     }

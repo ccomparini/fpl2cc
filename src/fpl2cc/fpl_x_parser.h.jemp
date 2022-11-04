@@ -97,6 +97,21 @@ public:
 
     class Product {
         struct false_product { };
+
+        // this is the "product" we make everything produce for
+        // the --check-only option.  It can be constructed from
+        // anything, so that it can drop into any arbitrary rule.
+        struct check_only {
+            operator bool() const { return true; }
+            std::string to_str() const {
+                return "«dummy»";
+            }
+
+            // (construct from any set of arguments)
+            template <typename... Args>
+            check_only(Args&&... args) { }
+        };
+
         using Var = std::variant<
             false_product,
             @-for(auto type : prds.all_types) {-@

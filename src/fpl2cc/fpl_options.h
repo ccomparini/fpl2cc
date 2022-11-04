@@ -15,9 +15,9 @@ struct fpl_options {
 
     std::string src_fpl;
     Searchpath src_path;
-    FILE *out;
     std::string output_fn;
 
+    bool check_only;
     bool debug;
     std::list<std::string> entry_points;
     bool generate_code;
@@ -81,7 +81,7 @@ struct fpl_options {
         version_maj(vmaj),
         version_min(vmin),
         src_path("."),
-        out(nullptr),
+        check_only(false),
         debug(false),
         generate_code(true),
         generate_main(false),
@@ -116,7 +116,9 @@ struct fpl_options {
                         opt = opt.substr(0, pos);
                     }
 
-                    if(opt == "debug") {
+                    if(opt == "check-only") {
+                        check_only = true;
+                    } else if(opt == "debug") {
                         debug = true;
                     } else if(opt == "debug-single-step") {
                         debug = true;
@@ -170,29 +172,6 @@ struct fpl_options {
             #undef SCAN_VALUE
         }
 
-        // if no output filename was specified, base it on the input name,
-        // or write to stdout:
-        if(!output_fn.length()) {
-            if(src_fpl.length() == 0) {
-                output_fn = "«stdout»";
-                out       = stdout;
-            } else {
-                std::filesystem::path pt(src_fpl);
-                pt.replace_extension("cc");
-                output_fn = pt.filename();
-            }
-        }
-
-        if(!out) {
-            out = fopen(output_fn.c_str(), "w");
-            if(!out) {
-                error(
-                    "--out: can't open '" + output_fn + "' for write: " +
-                    strerror(errno)
-                );
-            }
-        }
-
         // special case for depfiles:  if the name begins with a ".",
         // consider the depfile name to be the extension and use the
         // fpl base name.  this makes it easier to jam into scons,
@@ -204,6 +183,22 @@ struct fpl_options {
     // returns the relative-path source filename
     std::string src_filename() const {
         return fs::relative(src_fpl, fs::path("."));
+    }
+
+    std::string out_filename() const {
+        if(output_fn.length()) {
+            return output_fn;
+        } else {
+            // no output filename was specified.
+            // base it on the input name.
+            if(src_fpl.length()) {
+                std::filesystem::path pt(src_fpl);
+                pt.replace_extension("cc");
+                return pt.filename();
+            }
+        }
+
+        return "";
     }
 
     int version_major() const { return version_maj; }
