@@ -34,7 +34,8 @@
 
     @if(opts.debug) {-@
         std::cerr << stringformat(
-            "reducing by @c_str_escape(rule.to_str())@ ({} steps, {} params)\n",
+            "reducing by {}  ({} steps, {} params)\n",
+            "@c_str_escape(rule.to_str())@", // (rule might have {} in it)
             @rule.num_steps()@, @rule.num_reduce_params()@
         );
         std::cerr << stringformat(
