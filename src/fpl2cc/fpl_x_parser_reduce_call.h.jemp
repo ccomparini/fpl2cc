@@ -62,6 +62,12 @@
             ReductionParameter<@prds.type_for(step.gexpr)@>
                 arg_@stind@(*this, arg_start, slice_size);
             arg_start += slice_size;
+            @if(opts.debug) {@
+                std::cerr << stringformat(
+                    "arg @stind@ is {} @prds.type_for(step.gexpr)@\n",
+                    arg_@stind@.count()
+                );
+            @}@
         @}-@
     @}-@
 
