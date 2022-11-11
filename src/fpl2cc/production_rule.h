@@ -125,9 +125,9 @@ private:
     reducer               abs_impl;      // abstracted implementation, if any
     std::string           file;
     int                   line;
-    grammar_element::Type prod_type; // production, subrule, or none if false rule
+    grammar_element::Type prod_type;      // production, subrule, or none
     int                   rulenum;        // assigned when added to productions
-    int                   parent_rulenum; // or -1 if no parent (not subrule)
+    int                   parent_rulenum; // (or -1 if not subrule)
     int                   parent_cpos;    // step relative to end of parent
 
 public:
