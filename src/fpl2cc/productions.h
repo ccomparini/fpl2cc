@@ -536,7 +536,7 @@ class productions {
 
         // recursively generates any following states, adding them
         // to the productions passed.
-        void generate_states(
+        void generate_following_states(
             productions &prds,
             src_location caller = CALLER()
         ) {
@@ -643,7 +643,8 @@ class productions {
                         int32_t new_state_num = prds.add_state(next_state);
 
                         next_state_for_el[cur_el] = new_state_num;
-                        prds.states[new_state_num].generate_states(prds);
+                        prds.states[new_state_num]
+                            .generate_following_states(prds);
                     }
                 }
             } // all elements handled
@@ -1886,7 +1887,7 @@ public:
             ));
         }
 
-        states[start_state].generate_states(*this);
+        states[start_state].generate_following_states(*this);
     }
 
     std::string why_cant_use_reducer(
