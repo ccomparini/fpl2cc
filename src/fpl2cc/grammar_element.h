@@ -123,6 +123,10 @@ struct grammar_element {
     }
 };
 
+std::string to_string(grammar_element::Type t) {
+    return grammar_element::Type_to_str(t);
 }
+
+} // namespace fpl
 
 #endif // GRAMMAR_ELEMENT_H
