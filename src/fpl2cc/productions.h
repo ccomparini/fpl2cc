@@ -481,17 +481,8 @@ class productions {
             const productions &prds
         ) const {
             std::multimap<grammar_element, lr_item> items_for_el;
-            lr_item default_item = lr_item();
             for(auto item : items) {
                 if(item.countdown == 0) {
-                    if(default_item) {
-                        // reduce/reduce conflict (or conflict at the end
-                        // of 2 rules, anyway - they don't necessarily
-                        // want to reduce)
-                        prds.conflict(default_item, item, this);
-                    } else {
-                        default_item = item;
-                    }
                     items_for_el.insert(
                         // index it as grammar_element of type NONE:
                         std::make_pair(grammar_element(), item)
@@ -534,6 +525,20 @@ class productions {
             warn(stringformat("{::c}\n", msg));
         }
 
+        void report_reduce_conflicts(
+            productions &prds, const std::list<lr_item> &items
+        ) {
+            std::string cons;
+            for(auto item: items) {
+                cons += stringformat("        {}\n", item.to_str(&prds));
+            }
+
+            warn(stringformat(
+                "reduce/reduce conflict in state {} ({} items):\n{}",
+                prds.state_index.at(this->id()), items.size(), cons
+            ));
+        }
+
         // recursively generates any following states, adding them
         // to the productions passed.
         void generate_following_states(
@@ -561,6 +566,9 @@ class productions {
                 // checking and reporting eject conflicts.  
                 std::list<lr_item> items_with_eject;
                 std::list<lr_item> items_without_eject;
+
+                // for checking reduce/reduce conflicts:
+                std::list<lr_item> reduce_items;
 
                 // make an lr_set for all the items matching the
                 // input element:
@@ -608,8 +616,14 @@ class productions {
                                 // so add item (parent rule num, 0)
                                 next_state.add_item(lr_item(prulenum, 0));
                             }
+                        } else {
+                            reduce_items.push_back(item);
                         }
                     }
+                }
+
+                if(reduce_items.size() > 1) {
+                    report_reduce_conflicts(prds, reduce_items);
                 }
  
                 if(items_with_eject.size() > 0) {
@@ -1786,25 +1800,6 @@ std::cerr << stringformat("   .. which is produced by a subrule so we'll really 
         return out;
     }
 
-    void conflict(lr_item item1, lr_item item2, const lr_set *state) const {
-        std::string indent = "    ";
-        const production_rule &rule1 = rules[item1.rule];
-        const production_rule &rule2 = rules[item2.rule];
-
-        std::string in_state;
-        if(state) {
-            in_state = stringformat(
-                " in state {}", state_index.at(state->id())
-            );
-        }
-
-        warn(stringformat(
-            "conflict{}:\n{}    {} at {}\n{} vs {} at {}\n",
-            in_state,
-            indent, rule1, rule1.location(),
-            indent, rule2, rule2.location()
-        ));
-    }
 
 public:
 
