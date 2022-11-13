@@ -1414,16 +1414,14 @@ std::cerr << stringformat("   .. which is produced by a subrule so we'll really 
          return code_block(code_str, src.filename(), src.line_number(start));
     }
 
-    // argument declaration for a reduction code block:
+    // optional argument declaration for a reduction code block:
     //
-    //   '(' (argument ','?)* ')' -> argdecl ;
+    //   ('(' (argument ','?)* ')')? -> argdecl ;
     //
     std::set<std::string> parse_argdecl() {
         std::set<std::string> args;
 
-        if(!inp->read_byte_equalling('(')) {
-            error("expected start of argument declaration '('");
-        } else {
+        if(inp->read_byte_equalling('(')) {
             while(!inp->read_byte_equalling(')')) {
                 std::string name = read_production_name(*inp);
                 if(!name.length()) {
