@@ -212,12 +212,31 @@ class productions {
             return prds.rules[rule].nth_from_end(countdown);
         }
 
+        // Returns the (rule num:countdown) string used in to_str().
+        // If this is a subrule, and the productions pointer passed
+        // is not null, it also recursively prepends any parent
+        // (rule num:countdown) strings, to show context.
+        std::string rule_pos_str(const productions *prds) const {
+            // we can always show (rule number):(how many steps are left):
+            std::string out = stringformat("({}:{})", rule, countdown);
+            if(prds) {
+                // .. in this case, we can get the context too (if any)
+                int prule = prds->rules[rule].parent_rule_number();
+                if(prule >= 0) {
+                    int ppos  = prds->rules[rule].parent_countdown_pos();
+                    lr_item pitem(prule, ppos);
+                    out = pitem.rule_pos_str(prds) + out;
+                }
+            }
+            return out;
+        }
+
         std::string to_str(
             const productions *prds = nullptr,
             const lr_set *state = nullptr
         ) const {
             // we can always show (rule number):(how many steps are left):
-            std::string out = stringformat("({}:{})", rule, countdown);
+            std::string out = rule_pos_str(prds);
 
             if(prds) {
                 // if we have a suitable products pointer, we can
@@ -225,7 +244,8 @@ class productions {
                 // where it is in the rule:
                 if(rule >= 0 && rule < prds->rules.size()) {
                     const production_rule &rl = prds->rules[rule];
-                    out = stringformat("{} {}:\t", rl.product(), out);
+                    auto &context = prds->parentmost_rule(rl);
+                    out = stringformat("{} {}:\t", context.product(), out);
 
                     for(int stepi = rl.num_steps(); stepi >= 0; --stepi) {
                         if(stepi == countdown) out += " •";
@@ -685,12 +705,12 @@ class productions {
         }
         
         for(auto rit = strl; rit != endrl; ++rit) {
-            const production_rule &subrule = rules[rit->second];
+            const production_rule &ruleref = rules[rit->second];
             set.add_expanded(
                 // (items here are always referring to the start
                 // of the rule, and since items count down to the
                 // end of the rule, start position is num_steps().
-                lr_item(rit->second, subrule.num_steps()),
+                lr_item(rit->second, ruleref.num_steps()),
                 *this
             );
         }
@@ -972,10 +992,9 @@ public:
         }
     }
 
-    // If the element passed is a subexpressionm returns the
+    // If the element passed is a subexpression, returns the
     // index of the rule for matching the element.
-    // Returns -1 if there's no such rule, or the element isn't
-    // a subexpression.
+    // Returns -1 if the element isn't a subexpression.
     int subrulenum_for_el(const grammar_element &el) const {
         int found = -1;
 
@@ -997,6 +1016,20 @@ public:
         return found;
     }
 
+    // Traverses the set of parent rules until it comes to a
+    // rule with no parents, and returns a ref to that rule.
+    // Used for determining the context of subrules.
+    const production_rule &parentmost_rule(
+        const production_rule &rule
+    ) const {
+        int topmost = rule.rule_number();
+        while(int prulenum = rules[topmost].parent_rule_number() >= 0) {
+            topmost = prulenum;
+        }
+
+        return rules[topmost];
+    }
+
     // If the grammar element passed refers to a subexpression, returns the
     // rule for that subexpression.  Otherwise, returns a false rule.
     // The returned rule's lifespan should not be expected to exceeed
@@ -1010,29 +1043,9 @@ public:
         return false_rule;
     }
 
-/*
-XXX not used after all.  we go straight to the production_rule.
-BUT maybe we want this for other aliasing.
-    // returns the element ID to expect when reducing.
-    // this may be different due to subexpressions or
-    // (future) element aliasing.
-    int reduce_element_id(const grammar_element &el) const {
-std::cerr << stringformat("getting reduce element ID for {}\n", el);
-        auto &subrule = subrule_for_el(el);
-        if(subrule) {
-
-std::cerr << stringformat("   .. which is produced by a subrule so we'll really want {}\n", subrule.product_element());
-// XXX OK so figure out:  what's product element, and is it different from reduce element?
-            return element_index.at(subrule.product_element());
-        }
-        return element_index.at(el);
-    }
- */
-
     void add_rule(production_rule &rule) {
         int rule_num = rules.size();
         rule.set_rule_number(rule_num);
-
 
         rules.push_back(rule);
 
@@ -1051,33 +1064,6 @@ std::cerr << stringformat("   .. which is produced by a subrule so we'll really 
         record_element(rule.product_element());
 
         rules_for_product.insert(std::make_pair(rule.product(), rule_num));
-
-        // if this rule has exactly one (.. hmm or <= 1?)
-        // step, it's a candidate for folding..
-        //  OK foldable thought/typing experiments (all assume there's
-        //  no abstracted reducer):
-        //    a -> b ;  # fold: a can be substituted for b always
-        //    "a" -> b ;  # fold: "a" can be substituted in for b (assuming
-        //                # the "a" can be converted on passing)
-        //    "("^ foo ")"^ -> bar ; # fold: match all; foo will be passed
-        //    "true" -> true ;
-        //    "false" -> false ;
-        //    true -> boolean ;  # not foldable, because....
-        //    false -> boolean ; #  ... since this is also boolean and we
-        //                       # don't do "or" we'd have to duplicate
-        //                       # rules or somehting to fold.  but I think
-        //                       # "true" and "false" could be type aliased to
-        //                       # boolean
-        //    boolean '|' boolean => bexpr ; # ...
-        // .. so anyway I guess we're just finding fold candidates here.
-        // OH ONE INTERESTING THING:  if a parameter is ejected,
-        // it can be folded into a rule where the same param is ejected:
-        //      foo^ => bar ;
-        //      "x" "y" "z" => foo ;
-        // The above can be converted to "x"^ "y"^ "z"^ => bar ; because nothing
-        // is passed;  it's solely for matching.
-        // i.e. if the step the rule is being folded into gets ejected, I think
-        // you can always fold..?
     }
 
     void add_preamble(const code_block &code) {
@@ -1219,7 +1205,7 @@ std::cerr << stringformat("   .. which is produced by a subrule so we'll really 
     }
 
     std::string make_sub_prod_name() {
-        return stringformat("_subexpression_{]", anon_product_count++);
+        return stringformat("_subex_{}", anon_product_count++);
     }
 
     // returns the name of the production representing the subexpression,
@@ -1245,27 +1231,6 @@ std::cerr << stringformat("   .. which is produced by a subrule so we'll really 
                     subrule.location()
                 ));
             }
-
-            // goal:
-            //   - subexpression contents are seen by the containing
-            //     rule as flattened into 1 (or more if we can do skips)
-            //     arguments to the reduce function.
-            // eg:
-            //   '('^ (el (',', el)*)? ')'^ -> arg_list ;
-            //
-            //   '{'^ (key '=>' el (', ' $)*)? '}'^ hmmm commas here?
-            //   maybe it's not worth supporting more than one anyway.
-            //   though it would be nice to be able to do the above...
-            // For the moment, we'll just support one element_id within a subexpression.
-            //
-            // plan:
-            //   - temporary rule made for the subexpression.  use this
-            //     rule as usual in generating states, except that instead
-            //     of reducing, it just goes to the state for the next
-            //     step in the parent rule.  (hmm.. rules know about parents?)
-            //   - on reduce, the containing rule needs to know how to
-            //     pop params appropriately.
-            // 
 
             add_rule(subrule);
         }
@@ -2081,7 +2046,7 @@ public:
     // jemp-based output:
     //  this friends thing is horrible.  can we make them members?
     //  problem then is that the generated code format is then
-    //  even more tightly bound to this class....
+    //  even more tightly bound to this class.
     friend std::string fpl_x_parser_state(
         const productions &,
         const productions::lr_set &,
