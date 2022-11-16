@@ -410,12 +410,6 @@ public:
         if(lr_stack.size() > 0) {
             auto popped = lr_stack.back();
             cur_state = popped.state;
-// XXX OHHHH make sure that this doesn't kill extra items off the param stack
-// if we are popping (say) an ejected or optional step (in which case there
-// can be multiple lr entries with the same parem_ind.  Might be working
-// now simply because we're not hitting that case.
-// like, don't pop if the new top has the same position as the popped.
-// but make a test first.
             if(popped.param_ind >= 0) {
                 param_stack.resize(popped.param_ind);
             }
@@ -503,6 +497,7 @@ public:
             @} else {@
                 @declare subrule: prds.rules[subrule_num]@
                 //   @subrule.to_str()@
+//std::cerr << stringformat("rewinding to before subrule @elname@\n");
                 int subp = pos;
                 int lastp;
                 bool matched_whole = true;
@@ -511,17 +506,18 @@ public:
                         @declare substep: subrule.nth_step(sti)@
                         @declare sename: prds.element_id_name(substep.gexpr)@
                         @declare mult: substep.qty.multiple@
-                        @declare req: !substep.qty.optional@
+                        @declare required: !substep.qty.optional@
                         lastp = subp;
-                        subp = lr_position_before_@sename@(subp, @mult@);
-                        if(@req@ && lastp == subp) matched_whole = false;
+                        subp = lr_position_before_@sename@(subp, @-mult-@);
+//std::cerr << stringformat(" .... looked for start of @sename@ ({}). got {} with last {}\n", @mult@?"multiple":"single", subp, lastp);
+                        if(lastp == subp) { // (didn't match)
+                            if(@required@) matched_whole = false;
+                        } else {
+                            pos = subp;
+                        }
                     @}@
-                    if(matched_whole)
-                        pos = subp;
-                    else
+                    if(!multiple || !matched_whole)
                         break;
-// XXX what if not multiple?
-// add test
                 }
             @}@
 
@@ -557,10 +553,9 @@ public:
                     @for(int sti = 0; sti < subrule.num_steps(); ++sti) {@
                         @declare substep: subrule.nth_step(sti)@
                         @declare sename: prds.element_id_name(substep.gexpr)@
+                        @declare mult: substep.qty.multiple@
 
-                        ssize = lr_count_of_@sename@(
-                            subp, @substep.qty.multiple@
-                        );
+                        ssize = lr_count_of_@sename@(subp, @mult@);
 
                         if(@!substep.qty.optional@ && ssize == 0)
                             matched_whole = false;

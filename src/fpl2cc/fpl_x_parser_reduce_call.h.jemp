@@ -12,14 +12,12 @@
         we have to do this outside the call because parameter evaluation
         order is not defined in c++ and we're (pseudo-)popping the stack.
         at the moment, we create a stack slice even for things we're
-        not going to pass to the reduce function.  wasteful, but easy.
-        at some point ideally we won't even push them...
+        not going to pass to the reduce function.
     */@
     @for(int stind = rule.num_steps() - 1; stind >= 0; --stind) {-@
         @declare step: rule.nth_step(stind)@
         @if(!step) {-@
-            // XXX real error boom here.  might have to modify jemp.
-            // or actually just call jerror and fix jemp's handing of that later.
+            // If there's no such step, it's a bug in fpl
             #error Bug: no expression for step @stind@ @rule.to_str()@ @rule.location()@
         @-} else {-@
             @declare el_id: prds.element_index.at(step.gexpr)@
