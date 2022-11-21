@@ -36,10 +36,10 @@ public:
         return initialized;
     }
 
-    // Returns a parseable searchpath string showing the
-    // full expanded searchpath, with all directories
-    // converted to absolute paths (i.e. showing unambiguously
-    // what would be searched by find()).
+    // Returns a parsable searchpath string showing the full
+    // expanded searchpath, with all directories converted
+    // to absolute paths (i.e. showing unambiguously what
+    // would be searched by find()).
     std::string to_str() const {
         std::string out;
         for(auto el : directories) {
