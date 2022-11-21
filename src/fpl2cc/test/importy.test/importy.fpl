@@ -1,0 +1,73 @@
+
+@produces std::string
+@goal json.json
+@post_parse +{ std::cout << result << "\n"; }+
+
+# let's say we're supporting json but with variables
+# allowed for values, and we're stealing the definition
+# of identifiers for variables from c:
+`ansi-c`.identifier -> value +{
+    return "c-value:" + identifier;
+}+
+
+# ... and for some reason we're going to allow c-style
+# unary operators.  hmm.. I don't love the way unary
+# operators are specified in ansi-c.fpl, because it makes
+# us have to if/else here.  also most of them don't make
+# sense.  ohwell.  this is just to show/test if we can.
+`ansi-c`.unary_operator:op number -> number +{
+    if(op == "+") {
+        return number;
+    } else if(op == "-") {
+        return stringformat("{}", -std::stod(number));
+    } else if(op == "~") {
+        return stringformat("{}", ~std::stol(number));
+    } else if(op == "!") {
+        if(std::stol(number))
+            return "true";
+        return "false";
+    } else {
+        // things like address-of and dereference don't
+        // make sense in json, so:
+        error(stringformat("operator {} not supported on numbers\n", op));
+    }
+
+    return op + number;
+}+
+
+`ansi-c`.unary_operator:op boolean -> boolean +{
+    if(op == "!") {
+        if(boolean == "true")
+            return "false";
+        return "true";
+    }
+
+    error(stringformat("operator {} not supported on boolean\n", op));
+
+    // Let's arbitrarily say unsupported operators or any
+    // surprise results in "false".  The error (above) is
+    // probably going to be fatal anyway.  (it is in test)
+    return "false";
+}+
+
++object(members) +{
+    std::string out = "object {\n ";
+    out += members@join(",\n");
+    out += "}\n";
+    return out;
+}+
+
++array(elements) +{
+    std::string out = "array { ";
+    out += elements@join(", ");
+    out += "}\n";
+    return out;
+}+
+
+
++member(key value) +{
+    return key + " = " + value;
+}+
+
+@default_main
+

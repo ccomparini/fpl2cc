@@ -6,7 +6,6 @@ import sysconfig
 debugger = ''
 #debugger = 'TERM=xterm-256color /usr/bin/lldb --one-line "b debug_hook" -- '
 
-fpl_include_dirs = [ 'src/grammarlib' ]
 
 cpu_count = os.cpu_count();
 if(cpu_count is None):
@@ -54,7 +53,6 @@ env = Environment(
         '#src',
         '#src/util',
     ],
-    FPLPATH = fpl_include_dirs,
     LIBPATH=[ '#lib' ],
     LIBS='jest_util',
     tools = toolset(),
@@ -105,23 +103,9 @@ env.Append(BUILDERS = {
     )
 })
 
-def depend_on_fpl2cc(target, source, env) :
-    # make fpl2cc a dependency of each source (.fpl) file passed
-    # (not a source dependency!).  This is because fpl2cc must be
-    # built -before- the source (.fpl) file is processed.  If we
-    # simply add fpl2cc to the source dependency list, scons thinks
-    # it can process the fpl in parallel with building fpl2cc,
-    # which leads to races and (usually) the fpl file being
-    # processed using the prior version of fpl2cc.
-    for src in source :
-        Depends(src, '#bin/fpl2cc') # deliberate: .fpl file depends on fpl2cc
-    return target, source
-
-# fpl -> cc builder:
-fpl_args = '--src-path=' + ':'.join(fpl_include_dirs) + ' $FPLOPTS $SOURCES --out $TARGET --depfile .deps --statedump .states'
 env.Append(BUILDERS = {
     'Fpl2cc' : Builder(
-        action = debugger + 'bin/fpl2cc ' + fpl_args,
+        action = fpl_compile_action(),
         emitter = depend_on_fpl2cc,
 	suffix = '.cc',
 	src_suffix = '.fpl'
@@ -131,7 +115,7 @@ env.Append(BUILDERS = {
 # fpl -> h builder:
 env.Append(BUILDERS = {
     'Fpl2h' : Builder(
-        action = debugger + 'bin/fpl2cc ' + fpl_args,
+        action = fpl_compile_action(),
         emitter = depend_on_fpl2cc,
 	suffix = '_parser.h',
 	src_suffix = '.fpl'

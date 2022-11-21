@@ -4,7 +4,7 @@ import unittest
 # New NEW plan is to blow off both json and toml, because
 # neither of them is suitable for what I want.
 #
-# Why?
+# Why this?
 #   - stderr, stdout, return codes, and anything else can all go
 #     in one output file per test; hence less clutter.
 #   - Unlike json (which I tried first), toml will let me do multiline
@@ -105,7 +105,7 @@ def dumps(value, name = ""):
             out.append(dumps(value[index], name=f"{name}[{index}]"))
     else:
         if not name:
-            raise ValueError("Every value in esml must have a name")
+            raise ValueError("Can't dump " + type(value).__name__ + " - every value in esml must have a name")
         return f"{name} = {_format_value(value)}\n"
 
     return ''.join(out)

@@ -1,0 +1,385 @@
+
+# https://www.ecma-international.org/publications-and-standards/standards/ecma-404/
+#  or, better:
+# https://www.crockford.com/mckeeman.html
+
++{
+    #include <list>
+    #include <unistd.h>
+    #include <vector>
+    #include "fpl2cc/fpl_reader.h"
+    #include "util/to_hex.h"
+    inline bool is_json_space(utf8_byte in) {
+        return(
+                (in == 0x20)
+             || (in == 0x0a)
+             || (in == 0x0d)
+             || (in == 0x09)
+        );
+    }
+
+    static bool is_big_endian()
+    {
+        union {
+            uint32_t num;
+            char     byte[4];
+        } bint;
+        bint.num = 0x04030201;
+    
+        return bint.byte[0] == 0x04; 
+    }
+}+
+
+@separator +{
+    /*
+      from crockford, whitespace is:
+        ""
+        '0020' ws
+        '000A' ws
+        '000D' ws
+        '0009' ws
+      .. so it's a more limited set than default fpl handles.
+      btw our input is utf8 and all of those chars are in the ascii
+      range, so going 8 bits at a time works:
+    */
+    size_t len = 0;
+    while(is_json_space(*inp)) {
+        inp++;
+        len++;
+    }
+
+    return len;
+}+
+
+@produces bkv_item_list
+
++{
+    /*
+
+XXX figure out endianness.  maybe put endianness in a header and
+make whatever reads this deal.  alternately, pick and endianness
+and let anything not that endianness deal with it.
+ALTERNATELY define bkv_int as little endian (or blob) and have
+a separate big endian type.  Or just blow endianness off since this
+isn't going to be a serious format.
+
+          Header is one 32 bit little endian int.
+          Top 3 bits are type, remaining 29 bits are size.
+          Types are:
+           - integer/blob: arbitrary data/integer.
+                  null is a length 0 integer.
+           - object:  N pairs of (key, value) item pairs
+           - array: arbitrary number of items
+           - string: utf-8 string 0-terminated XXX actually it's
+             not terminated
+           - floating point: floating point number of some kind.
+             errf how to encode portably.  maybe string it.
+             (but that's huge then)
+           - boolean true. 0 bytes data
+           - boolean false. 0 bytes data
+     */
+
+    enum bkv_type {
+        bkv_int   = 0x0 << 29, // also null
+        bkv_str   = 0x1 << 29,
+        bkv_arr   = 0x2 << 29,
+        bkv_obj   = 0x3 << 29,
+        bkv_flt   = 0x4 << 29,
+        // reserved  0x5 << 29,
+        bkv_true  = 0x6 << 29,
+        bkv_false = 0x7 << 29,
+    };
+
+    typedef char bkv_data_byte;
+    typedef std::vector<bkv_data_byte> bkv_data_buf;
+    typedef std::list<struct bkv_item> bkv_item_list;
+
+    // (no longer needed, now that different rules can
+    // return different types)
+    inline bkv_item_list list_one(const bkv_item &it) {
+        return bkv_item_list(1, it);
+    }
+
+    template <class T>
+    bkv_data_buf datafy(T in) {
+        bkv_data_byte *bytes = reinterpret_cast<bkv_data_byte *>(&in);
+        bkv_data_buf out;
+        for(int ind = 0; ind < sizeof(in); ind++) {
+            out.push_back(bytes[ind]);
+        }
+        return out;
+    }
+
+    inline bkv_data_buf from_str(const std::string &in) {
+        bkv_data_buf out;
+        //const bkv_data_byte *bytes = reinterpret_cast<const bkv_data_byte *>(in.data());
+        //out.insert(out.end(), bytes, in.length() + 1);
+        for(auto ch : in) {
+            out.push_back(ch);
+        }
+        return out;
+    } 
+
+    struct bkv_item {
+        bkv_type type;
+        bkv_data_buf data;
+
+        size_t out_size() const {
+            uint32_t out = data.size();
+            if(out & (0x7<<29)) {
+                out &= (0x7<<29);
+                fprintf(stderr, "warning: data will be truncated to %u bytes\n", out);
+            }
+            return out;
+        }
+
+        bkv_data_buf encode() const {
+            // XXX keep encoded and decode on the fly?
+            // would be more efficient. Also then we could
+            // toss an error or whatever as soon as we added
+            // too much data or whatever
+            bkv_data_buf out;
+            size_t osize = out_size();
+            uint32_t header = osize;
+            header |= type;
+
+            // actually change this such that the low bits are the type;
+            // then, possibly the size can just be in 8 byte units...
+            // except these files are already ending up big enough.
+            // and then we have to deal with padding
+            bkv_data_buf head_out(datafy(header));
+            out.insert(out.end(), head_out.begin(), head_out.end());
+            out.insert(out.end(), data.begin(), data.begin() + osize);
+            return out;
+        }
+
+        // decodes the item at the offset passed, and moves the offset
+        // to just past the end of that item
+        static bkv_item decode(const bkv_data_buf &in, size_t &offset) {
+            uint32_t header = *(uint32_t *)(in.data() + offset);
+            auto data_start = in.begin() + offset + sizeof(uint32_t);
+            bkv_type type = bkv_type(header & 0xe0000000);
+            size_t data_size = header & (0xffffffff >> 3);
+
+            offset += sizeof(header) + data_size;
+
+            if(data_size <= 0)
+                return bkv_item(type);
+
+            bkv_data_buf data(data_start, data_start + data_size);
+            return bkv_item(type, data);
+        }
+
+        // empty item of a particular type:
+        bkv_item(bkv_type t) : type(t) { }
+
+        // particular type with particular data:
+        bkv_item(bkv_type t, const bkv_data_buf &d) : type(t), data(d) { }
+
+        // null:
+        bkv_item() : type(bkv_int) { }
+
+        // integers:
+        bkv_item(char d)      : type(bkv_int), data(datafy(d)) { }
+        bkv_item(int d)       : type(bkv_int), data(datafy(d)) { }
+        bkv_item(long d)      : type(bkv_int), data(datafy(d)) { }
+        bkv_item(long long d) : type(bkv_int), data(datafy(d)) { }
+
+        // blob:
+        bkv_item(const std::vector<bkv_data_byte> in)
+            : type(bkv_int), data(in) { }
+
+        // string:
+        bkv_item(const std::string &in)
+            : type(bkv_str), data(from_str(in)) {
+        }
+
+        // array or object (i.e. k/v pairs):
+        bkv_item(const bkv_item_list &in, bool is_obj = false) {
+            type = bkv_arr;
+
+            // .. this is a lot of copies :P XXX
+            // preallocating the data would probably help considerably
+            for(auto item : in) {
+                bkv_data_buf itb = item.encode();
+                data.insert(data.end(), itb.begin(), itb.end());
+            }
+
+            if(is_obj) {
+                type = bkv_obj;
+                if(in.size() % 2) {
+                    fprintf(stderr,
+                        "Warning: odd number of elements (%li) in object\n",
+                        in.size()
+                    );
+
+                    // append a null item so that we get an even number:
+                    bkv_data_buf null = bkv_item().encode();
+                    data.insert(data.end(), null.begin(), null.end());
+                }
+            }
+        }
+
+        // floating point. encoding here is interesting.
+        // we're going to encode it as a string for portability,
+        // despite the non-compactness of that.
+        // there's a double conversion here (the parser converts
+        // from the string input to a double and then we convert
+        // to string), but that should serve to normalize the
+        // representation (and also allows for stuff like NaN
+        // or Inf to be encoded, as well as preserving sign on
+        // zeroes and other weird floating point stuff).
+        // https://en.wikipedia.org/wiki/IEEE_754#Interchange_formats
+        // ^^ consider this if we use this in any serious way
+        bkv_item(double num)
+            : type(bkv_flt), data(from_str(std::to_string(num))) { }
+
+        static const bkv_item true_val;
+        static const bkv_item false_val;
+
+        static bkv_item_list true_l()  { return list_one(true_val);  }
+        static bkv_item_list false_l() { return list_one(false_val); }
+
+        std::string _arr_obj_to_string() const {
+            std::string out;
+            std::string sep_a;
+            std::string sep_b;
+            if(type == bkv_obj) {
+                sep_a = " : ";
+                sep_b = ",\n";
+                out = "{ ";
+            } else if(type == bkv_arr) {
+                sep_a = ", ";
+                sep_b = ",\n";
+                out = "[ ";
+            } else {
+                out = "<not a string> ";
+            }
+            for(size_t off = 0; off < data.size(); ) {
+                bkv_item sub(decode(data, off));
+                out += sub.to_string();
+                out += sep_a;
+            }
+
+            if(type == bkv_obj) {
+                out += "}";
+            } else if(type == bkv_arr) {
+                out += "]";
+            } else {
+                out += ">";
+            }
+
+            return out;
+        }
+
+        std::string to_string() const {
+            switch(type) {
+                case bkv_int:   return bs_to_hex(data);
+                case bkv_str:   return "\"" + std::string(data.data(), data.size()) + "\"";
+                case bkv_arr:   return _arr_obj_to_string();
+                case bkv_obj:   return _arr_obj_to_string();
+                case bkv_flt:   return std::string(data.data(), data.size());
+                case bkv_true:  return "<true>";
+                case bkv_false: return "<false>";
+            }
+
+            return "Unknown type " + std::to_string(type);
+        }
+    };
+    const bkv_item bkv_item::true_val  = bkv_item(bkv_true);
+    const bkv_item bkv_item::false_val = bkv_item(bkv_false);
+
+    std::string to_string(const bkv_item &in) {
+        return in.to_string();
+    }
+
+    std::string to_string(const bkv_item_list &in) {
+        std::string out;
+        for(auto item : in) {
+            out += item.to_string();
+        }
+        return out;
+    }
+
+}+
+
+@main +{
+/*
+    uint32_t foo = 0x01020304;
+    printf(
+        "this machine %s big-endian, so 0x%x starts with 0x%x\n",
+        is_big_endian()?"is":"is not", foo,
+        reinterpret_cast<const char *>(&foo)[0]
+    );
+ */
+
+    if(argc < 2) {
+        fpl_reader::default_fail("Please provide a source file name.\n");
+    }
+    fpl_reader_p inp = std::make_shared<fpl_reader>(argv[1]);
+    json_parser parser(inp);
+    auto result = parser.parse();
+    return parser.error_count()?-1:0;
+}+
+
+@post_parse +{
+    // fprintf(stderr, "======\n%s\n======\n", to_string(result).c_str());
+    size_t total_written = 0;
+    for(auto item : result) {
+        bkv_data_buf out(item.encode());
+        total_written += write(1, out.data(), out.size());
+    }
+    fprintf(stderr, "%lu total bytes\n", total_written);
+}+
+
+@grammar json
+
++boolean(true_val)  +{ return bkv_item::true_l();   }+
++boolean(false_val) +{ return bkv_item::false_l();  }+
++value(null_val)    +{ return list_one(bkv_item()); }+
+
++object(members) +{
+    bkv_item_list out;
+    // for(auto item : members) { // Boobytrap! iterates only the first
+    members@foreach([&out](const Product &item)->void {
+        out.push_back(item.val());
+    });
+    return list_one(bkv_item(out, true));
+}+
+
++member(key, value) +{
+    // we represent a k/v pair as a 2 item list
+
+    bkv_item_list out(key);
+    // this is a bit goofy.  elements are passed around as lists,
+    // so the value is actually the starting element of the list.
+    // this is awkward.
+    out.push_back(*(value.begin()));
+
+    return out;
+}+
+
++array(elements) +{
+    return list_one(bkv_item(elements));
+}+
+
++string(src) +{
+    // https://www.crockford.com/mckeeman.html
+    //  "Any single Unicode code point except the 32 control
+    //   codes may be placed within the single quotes."
+    // so to make this strict we'd have to check for that.
+    // Also there are particular escape sequences with meaning,
+    // which we should translate here (or elsewhere)
+    return list_one(bkv_item(src.capgroup(0)));
+}+
+
+# ACTUALLY we _do_ need to distinguish floats and ints, at least
+# the way I have things set up at the moment. hmm
++number(float_val) +{
+    return list_one(bkv_item(std::stod(float_val)));
+}+
+
++number(integer) +{
+    return list_one(bkv_item(std::stol(integer)));
+}+
+

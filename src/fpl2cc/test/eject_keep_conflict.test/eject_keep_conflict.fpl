@@ -1,0 +1,47 @@
+@produces std::string
+
+bat+ -> bats +{
+    std::string out = "We have bats. Oh yes, we have bats.\n";
+    out += bat@join("\n");
+    std::cout << out;
+    return out;
+}+
+
+'a'^ -> foo +{
+    StackSlice steps = all_matched_steps();
+    return stringformat(
+        "foo: {} steps, {} params", steps.count(), steps.param_count()
+    );
+}+
+
+'b'  -> bar +{
+    return "bar:b";
+}+
+
+foo^ bar '.'^ -> bat +{ // note foo is ejected here
+    std::string out;
+    StackSlice steps = all_matched_steps();
+    out += stringformat(
+        "{} steps, {} params: ", steps.count(), steps.param_count()
+    );
+    for(int sti = 0; sti < steps.count(); sti++) {
+        // at the moment, in an eject/keep conflict, we actually
+        // keep the arguments, so we should actually get a prd
+        // here for the foo, even though it's ejected.
+        Product prd = steps.product(sti);
+        if(prd) out += ' ' + prd.var_str();
+    }
+    return out;
+}+
+
+foo  bar ';'^ -> bat +{ // and not ejected here
+    if(foo@count()) {
+        // if we dtrt and didn't eject the foo, we'll hit this one.
+        // we check count 
+        return foo + " + " + bar;
+    }
+
+    return "fail - got no foo\n";
+}+
+
+@default_main

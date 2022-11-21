@@ -1,0 +1,106 @@
+
+@produces std::string
+
+@separator +{
+    if(size_t len = space_length(inp)) {
+        return len;
+    }
+
+    // c++ style comments:
+    if(inp[0] == '/' && inp[1] == '*') {
+        size_t len = 2;
+        while(inp[len]) {
+            if(inp[len] == '*' && inp[len + 1] == '/')
+                return len + 2;
+            len++;
+        }
+        // error - no end of comment (XXX)?
+        return 0;
+    }
+
+    if(inp[0] == '/' && inp[1] == '/') {
+        size_t len = 2;
+        while(inp[len] && inp[len] != '\n') {
+            len++;
+        }
+        return len;
+    }
+
+    return 0;
+}+
+
+@scanner default +{
+    // default always matches, and matches exactly nothing.
+    // so return one such nothing:
+    return std::array{""};
+}+
+
+# in order to test subexpression repetition, let's say
+# statements can be followed by an optional comma
+#(statement ','?^ block)*:statements -> done +{ # should fail compile; does not XXX
+(statement ','?^)*:statements -> done +{
+    return statements@join("\n");
+}+
+
+block -> statement ;
+
+"{"^ statement* "}"^ -> block +{
+    if(statement@count() == 0)
+        return "empty block";
+
+    std::string out("block with ");
+    for(int sti = 0; sti < statement@count(); sti++) {
+        out += statement[sti];
+        if(sti + 1 < statement@count())
+            out += ", ";
+    }
+
+    return out;
+}+
+
+'%':pct -> statement +{
+    return "one percent";
+}+
+
+# heh... bug:  foo becomes foo.var() within the string.
+#/f[aeiou]o/:foo -> statement +{
+/f[aeiou]o/ -> statement +{
+    return "close enough to foo";
+}+
+
+'!'^ xxx_or_def aaa_or_def '!'^ -> statement +{
+    return xxx_or_def + aaa_or_def;
+}+
+
+'aaa'    -> aaa_or_def ;
+&default -> aaa_or_def +{ return "bbb"; }+
+
+'xxx'    -> xxx_or_def ;
+&default -> xxx_or_def +{ return "yyy"; }+
+
+# realistically you wouldn't do /[a-zA-Z_]/+ (you'd do
+# /[a-zA-Z_]+/), but we're testing repetition:
+/[a-zA-Z_]/+:letters ";"^ -> statement +{
+    return letters@concatenate();
+}+
+
+# this will have an eject conflict with the above:
+#/[a-zA-Z_]/+^ ">"^ -> statement +{
+#    return "yo nothing";
+#}+
+
+'#'+:pounds ";"^ -> statement +{
+    return pounds@join("x");
+}+
+
++{
+#include<iostream>
+}+
+
+@default_main
+@post_parse +{
+    std::cout << stringformat("======\n{}\n======\n", result);
+    exit(0);
+}+
+
+
