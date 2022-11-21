@@ -32,11 +32,7 @@ enum ExitVal {
 };
 
 void fail(const std::string &msg, src_location caller = CALLER()) {
-    if(msg[msg.length() - 1] != '\n') {
-        fprintf(stderr, "%s\n", msg.c_str());
-    } else {
-        fprintf(stderr, "%s", msg.c_str());
-    }
+    std::cerr << ensure_nl(msg);
 
     exit(ExitVal::FAIL);
 }
@@ -44,12 +40,7 @@ void fail(const std::string &msg, src_location caller = CALLER()) {
 static int num_warnings = 0;
 void warn(const std::string &msg, src_location caller = CALLER()) {
     // (indent warnings so that errors stand out)
-    if(msg[msg.length() - 1] != '\n') {
-        fprintf(stderr, "    warning: %s\n", msg.c_str());
-    } else {
-        fprintf(stderr, "    warning: %s", msg.c_str());
-    }
-
+    std::cerr << ensure_nl(stringformat("    warning: {}", msg));
     num_warnings++;
 }
 
