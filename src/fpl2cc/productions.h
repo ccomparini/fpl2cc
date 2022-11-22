@@ -895,15 +895,15 @@ public:
     }
 
     std::string arg_for_directive() {
-        // reads an argument to the end of the line.
-        // end of line is any ascii vertical space (for now).
-        // leading and trailing spaces/tabs are stripped
+        // Reads an argument to the end of the line.
+        // End of line is any ascii vertical space (for now).
+        // Leading and trailing spaces/tabs are stripped.
         return inp->read_re("[ \\t]*([^@\\x0a-\\x0d]+)[ \\t]*\n")[1];
     }
 
     void add_goal(const std::string raw_goal) {
         // the goal is either simply a production name,
-        // or grammar_name.production_name.  so see which:
+        // or grammar_name.production_name.  so, see which:
         size_t grammar_end = raw_goal.find('.');
         if(grammar_end != std::string::npos) {
             // if the dot is at the start or end, we're missing
@@ -1138,7 +1138,10 @@ public:
     // Attempts to open an fpl source file and associate it with a
     // reader for import.  Searches the directory this source file
     // is in, as well as any other directories in the --src-path.
-    fpl_reader_p open_for_import(const std::string &fpl_name) {
+    fpl_reader_p open_for_import(
+        const std::string &fpl_name,
+        src_location caller = CALLER()
+    ) {
 
         Searchpath searchp = opts.src_path;
 
@@ -1156,7 +1159,13 @@ public:
             error(src, "\n\t" + msg);
         };
 
-        return make_shared<fpl_reader>(filename, sub_errcb);
+        auto subreader = make_shared<fpl_reader>(filename, sub_errcb);
+        if(!subreader) {
+            internal_error(stringformat(
+                "make_shared<fpl_reader> failed for '{}'\n", filename
+            ));
+        }
+        return subreader;
     }
 
     // Loads (and parses) the subgrammar specifier, or fetches
@@ -1176,9 +1185,14 @@ public:
             subgrammar_p sub = make_unique<productions>(
                 opts, open_for_import(grammar_name)
             );
-            sub->parse_fpl();
+            // To avoid issues when/if the fpl tries to load itself
+            // as a subgrammar, we're going to move the sub to the
+            // sub_productions index before parsing (thus avoiding
+            // infinite loops).  But save the "out" ptr so we can
+            // parse off of it:
             out = sub.get();
             sub_productions[grammar_name] = std::move(sub);
+            out->parse_fpl();
         }
 
         return out;
