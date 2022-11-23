@@ -127,8 +127,6 @@ def run_and_capture_action(program, interactive=False):
         command = [env.subst(p, target=target, source=source) for p in program]
 
         strcommand = ' '.join(command) # for error messages, etc.
-        #print(f"\ncommand will be:\n   {strcommand}\n", file=sys.stderr)
-        #print(f"\ncommand will be:\n   {strcommand}\n")
         proc = subprocess.Popen(command,
             stdin=sys.stdin, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         )

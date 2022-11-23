@@ -3,6 +3,8 @@
 @goal json.json
 @post_parse +{ std::cout << result << "\n"; }+
 
+`importy_s1` -> foo ;
+
 # let's say we're supporting json but with variables
 # allowed for values, and we're stealing the definition
 # of identifiers for variables from c:

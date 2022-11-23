@@ -80,7 +80,7 @@ struct fpl_options {
     fpl_options(int argc, const char* const* argv, int vmaj, int vmin) :
         version_maj(vmaj),
         version_min(vmin),
-        src_path("."),
+        src_path(),
         check_only(false),
         debug(false),
         generate_code(true),

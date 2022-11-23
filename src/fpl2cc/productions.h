@@ -30,6 +30,7 @@ class productions {
 
     // for imports and such:
     using subgrammar_p = std::unique_ptr<productions>;
+    const productions *parent; // prods of which we are a sub, or nullptr
     std::map<std::string, subgrammar_p> sub_productions; // grammar name -> productions
     std::set<std::string> exported_products; // exported to that of which this is a sub
 
@@ -87,7 +88,7 @@ class productions {
     }
 
     // report an error at the given SourcePosition
-    static void error(const SourcePosition where, const std::string &msg) {
+    static void error(const SourcePosition &where, const std::string &msg) {
         error(where.reader(), where.position(), msg);
     }
 
@@ -724,8 +725,11 @@ public:
 
 // XXX this is currently stupid in that you pass the fpl_reader
 // but then you have to make a separate call to parse it.  fix that.
-    productions(const fpl_options &op, fpl_reader_p src) :
-        inp(src), opts(op), default_main(false), anon_product_count(0)
+    productions(
+        const fpl_options &op, fpl_reader_p src, productions *p = nullptr
+    ) :
+        inp(src), opts(op), parent(p),
+        default_main(false), anon_product_count(0)
     {
         // element 0 is a null element and can be used to
         // indicate missing/uninitialized elements or such.
@@ -735,6 +739,11 @@ public:
             grammar_element("_fpl_null", grammar_element::NONTERM_PRODUCTION)
         );
 
+    }
+
+    std::string input_filename() const {
+        if(inp) return inp->filename();
+        return "";
     }
 
     // if there's only one way to make a given product, the
@@ -905,7 +914,7 @@ public:
         return inp->read_re("[ \\t]*([^@\\x0a-\\x0d]+)[ \\t]*\n")[1];
     }
 
-    void add_goal(const std::string raw_goal) {
+    void add_goal(const std::string raw_goal, const SourcePosition &whence) {
         // the goal is either simply a production name,
         // or grammar_name.production_name.  so, see which:
         size_t grammar_end = raw_goal.find('.');
@@ -918,7 +927,7 @@ public:
 
             std::string grammar_name = raw_goal.substr(0, grammar_end);
             std::string production   = raw_goal.substr(grammar_end + 1);
-            import_grammar(subgrammar(grammar_name), production);
+            import_grammar(subgrammar(grammar_name, whence), production);
             goal.push_back(production);
         } else {
             // it's a simple goal name:
@@ -950,15 +959,17 @@ public:
             // main in grammarlib and importing.
             default_main = true;
         } else if(dir == "goal") {
+            SourcePosition whence(inp);
             std::string newgoal = arg_for_directive();
             if(!newgoal.length()) {
                 error("can't parse the @goal");
             } else {
-                add_goal(newgoal);
+                add_goal(newgoal, whence);
             }
         } else if(dir == "grammar") {
             // import the grammar from another fpl:
-            import_grammar(subgrammar(arg_for_directive()));
+            SourcePosition whence(inp);
+            import_grammar(subgrammar(arg_for_directive(), whence));
         } else if(dir == "internal") {
             // a code block which goes in the "private" part
             // of the parser class itself.  This is either
@@ -1139,26 +1150,47 @@ public:
         return imports;
     }
 
+    // Searches ancestors to see if any import the file with the given
+    // name.  Used for finding dependency loops.
+    // Filename checks are simplistic (no checks for symlinks or other
+    // file aliasing) but this is good enough for now.
+    const productions *ancestor_which_imports(const std::string filename) {
+        for(const productions *prds = this; prds; prds = prds->parent) {
+            if(prds->input_filename() == filename) {
+                return prds;
+            }
+        }
+        return nullptr;
+    }
+
     // Attempts to open an fpl source file and associate it with a
     // reader for import.  Searches the directory this source file
     // is in, as well as any other directories in the --src-path.
     fpl_reader_p open_for_import(
         const std::string &fpl_name,
-        src_location caller = CALLER()
+        const SourcePosition whence
     ) {
 
         Searchpath searchp = opts.src_path;
 
-        // search relative to the importing fpl first:
-        searchp.prepend(inp->input_dir());
-        std::string filename = opts.src_path.find(fpl_name + ".fpl");
+        // search relative to the source fpl as well.
+        searchp.append(inp->input_dir());
+        std::string filename = searchp.find(fpl_name + ".fpl");
+
+        // Check to see if importing the given filename would cause an
+        // "import loop".  For example, if a given fpl imports itself,
+        // it's nearly certain that's not what the user intended. Also,
+        // at the moment we can't handle it if a.fpl imports b.fpl and
+        // b.fpl imports a (and I question if it's ever a good idea to
+        // do that), so we're calling that an error as well.
+        if(auto other = ancestor_which_imports(filename))
+            error(whence, stringformat("Import loop loading {}", filename));
 
         // this is for generating dependencies and such (--dump-dependencies)
         imports.push_back(filename);
 
         // report errors in the sub-fpl in the context of
         // the importing file:
-        SourcePosition whence(inp);
         auto sub_errcb = [whence](const std::string &msg)->void {
             error(whence, "\n\t" + msg);
         };
@@ -1179,7 +1211,9 @@ public:
     // want to import multiple pieces of a given subgrammar, we
     // don't have to read and parse the source for that multiple
     // times.
-    productions *subgrammar(const std::string &grammar_name) {
+    productions *subgrammar(
+        const std::string &grammar_name, const SourcePosition &where
+    ) {
         productions *out = nullptr;
 
         auto exsp = sub_productions.find(grammar_name);
@@ -1187,7 +1221,7 @@ public:
             out = exsp->second.get();
         } else {
             subgrammar_p sub = make_unique<productions>(
-                opts, open_for_import(grammar_name)
+                opts, open_for_import(grammar_name, where), this
             );
             // To avoid issues when/if the fpl tries to load itself
             // as a subgrammar, we're going to move the sub to the
@@ -1206,6 +1240,7 @@ public:
     // imports relevant rules into this and returns the name of
     // the top level production created
     std::string parse_import(production_rule &rule) {
+        SourcePosition whence(inp);
         std::string grammar_name(inp->parse_string());
         if(!grammar_name.length()) {
             error(inp, "no grammar name specified");
@@ -1219,7 +1254,7 @@ public:
             prod_name = read_production_name(inp);
         }
 
-        return import_grammar(subgrammar(grammar_name), prod_name);
+        return import_grammar(subgrammar(grammar_name, whence), prod_name);
     }
 
     std::string make_sub_prod_name() {

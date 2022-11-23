@@ -60,6 +60,12 @@ public:
         directories.push_front(element);
     }
 
+    // Searches the path for the file of the name passed.
+    // Returns the name of the first file found, or the
+    // name passed if no matching file was found.
+    // This allows callers to simply wrap the filename
+    // they're passing to an existing function call and
+    // not have to add any particular new error handling.
     std::string find(const std::string &fn) const {
         for(auto dir = directories.begin(); dir != directories.end(); ++dir) {
             fs::path fp = fs::path(*dir);
