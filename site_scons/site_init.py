@@ -1,6 +1,7 @@
 import esml
 import os
 import pprint
+import signal
 import subprocess # requires python 3.x
 import threading
 
@@ -126,7 +127,9 @@ def run_and_capture_action(program, interactive=False):
         # substitute $TARGET etc into the command strings:
         command = [env.subst(p, target=target, source=source) for p in program]
 
-        #print(f"\ncommand will be:\n   {command}\n", file=sys.stderr)
+        strcommand = ' '.join(command) # for error messages, etc.
+        #print(f"\ncommand will be:\n   {strcommand}\n", file=sys.stderr)
+        #print(f"\ncommand will be:\n   {strcommand}\n")
         proc = subprocess.Popen(command,
             stdin=sys.stdin, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         )
@@ -135,6 +138,12 @@ def run_and_capture_action(program, interactive=False):
             pout, perr = run_interactively(proc)
         else:
             pout, perr = run_normally(proc)
+
+        if(proc.returncode < 0):
+             # process died of some singal (interrupt, segfault, whatever):
+             signame = signal.Signals(-proc.returncode).name
+             msg = f"\n{signame} failure on command \"{strcommand}\"\n"
+             print(msg, file=sys.stderr)
 
         with open(capfile, mode='wb') as outf:
             outf.write(bytes(esml.dumps( {
