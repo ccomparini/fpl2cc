@@ -25,7 +25,7 @@ std::string fpl_x_parser(const productions &, const fpl_options &);
 
 class productions {
 
-    fpl_reader_p  inp;
+    fpl_reader_p      inp;
     const fpl_options opts;
 
     // for imports and such:
@@ -100,6 +100,10 @@ class productions {
     // report an error at the current position in the current input
     void error(const std::string &msg) const {
         error(*inp, inp->current_position(), msg);
+    }
+
+    void error(const fpl_reader_p &rdr, const std::string &msg) {
+        error(*rdr, msg);
     }
 
     // report an error at a possibly-not-input-file location:
@@ -808,7 +812,7 @@ public:
         code_block code;
         if(allowed_src | INLINE) {
             // try "regular" +{ }+ code blocks:
-            code = read_code(*inp);
+            code = read_code();
         }
 
 // XXX oh yeah hey uhh... this used?  try it!
@@ -878,7 +882,7 @@ public:
     }
 
     void parse_scanner() {
-        std::string name = read_identifier(*inp);
+        std::string name = read_identifier(inp);
         if(name == "") {
             error("expected name of scanner");
         }
@@ -979,7 +983,7 @@ public:
             );
         } else if(dir == "type_for") {
             inp->eat_separator();
-            std::string prod = read_production_name(*inp);
+            std::string prod = read_production_name(inp);
             inp->eat_separator();
             std::string type = inp->read_re(".*")[0];
             if(prod.length() && type.length()) {
@@ -1070,22 +1074,22 @@ public:
         preamble.push_back(code);
     }
 
-    static void read_quantifier(fpl_reader &src, production_rule::step &expr) {
-        switch(src.peek()) {
+    static void read_quantifier(fpl_reader_p &src, production_rule::step &expr) {
+        switch(src->peek()) {
             case '*':
                 expr.qty.optional = true;
                 expr.qty.multiple = true;
-                src.skip_bytes(1);
+                src->skip_bytes(1);
                 break;
             case '+':
                 expr.qty.optional = false;
                 expr.qty.multiple = true;
-                src.skip_bytes(1);
+                src->skip_bytes(1);
                 break;
             case '?':
                 expr.qty.optional = true;
                 expr.qty.multiple = false;
-                src.skip_bytes(1);
+                src->skip_bytes(1);
                 break;
             default:
                 expr.qty.optional = false;
@@ -1094,13 +1098,13 @@ public:
         }
     }
 
-    static void read_suffix(fpl_reader &src, production_rule::step &expr) {
-        if(src.read_byte_equalling('^')) {
+    static void read_suffix(fpl_reader_p &src, production_rule::step &expr) {
+        if(src->read_byte_equalling('^')) {
             expr.eject = true;
-        } else if(src.read_byte_equalling(':')) {
+        } else if(src->read_byte_equalling(':')) {
             // the name to give the argument corresponding
             // this this step follows:
-            expr.varname = src.read_re("[A-Za-z][A-Za-z0-9_]*")[0];
+            expr.varname = src->read_re("[A-Za-z][A-Za-z0-9_]*")[0];
         }
     }
 
@@ -1114,19 +1118,19 @@ public:
 
     // identifiers must start with a letter, and thereafter may
     // contain letters, digits, or underscores.
-    static inline std::string read_identifier(fpl_reader &src) {
-        std::cmatch nm = src.read_re("[a-zA-Z][a-zA-Z_0-9]*");
+    static inline std::string read_identifier(fpl_reader_p &src) {
+        std::cmatch nm = src->read_re("[a-zA-Z][a-zA-Z_0-9]*");
         if(!nm.length())
             return "";
         return nm[0];
     }
 
-    static inline std::string read_production_name(fpl_reader &src) {
+    static inline std::string read_production_name(fpl_reader_p &src) {
         return read_identifier(src);
     }
 
-    static inline std::string read_directive(fpl_reader &src) {
-        return src.read_re("([A-Za-z][A-Za-z0-9_]+)\\s*")[1];
+    static inline std::string read_directive(fpl_reader_p &src) {
+        return src->read_re("([A-Za-z][A-Za-z0-9_]+)\\s*")[1];
     }
 
     inline std::list<std::string> imported_files() const {
@@ -1154,9 +1158,9 @@ public:
 
         // report errors in the sub-fpl in the context of
         // the importing file:
-        fpl_reader &src = *inp;
-        auto sub_errcb = [&src](const std::string &msg)->void {
-            error(src, "\n\t" + msg);
+        SourcePosition whence(inp);
+        auto sub_errcb = [whence](const std::string &msg)->void {
+            error(whence, "\n\t" + msg);
         };
 
         auto subreader = make_shared<fpl_reader>(filename, sub_errcb);
@@ -1201,18 +1205,18 @@ public:
     // syntax: '`' grammar_name '`' ~ /(.production_to_import)/?
     // imports relevant rules into this and returns the name of
     // the top level production created
-    std::string parse_import(fpl_reader &src, production_rule &rule) {
-        std::string grammar_name(src.parse_string());
+    std::string parse_import(production_rule &rule) {
+        std::string grammar_name(inp->parse_string());
         if(!grammar_name.length()) {
-            error(src, "no grammar name specified");
+            error(inp, "no grammar name specified");
             return "<failed import>";
         }
 
         // `grammarname`.production means import only the
         // specified production:
         std::string prod_name;
-        if(src.read_byte_equalling('.')) {
-            prod_name = read_production_name(src);
+        if(inp->read_byte_equalling('.')) {
+            prod_name = read_production_name(inp);
         }
 
         return import_grammar(subgrammar(grammar_name), prod_name);
@@ -1225,22 +1229,22 @@ public:
     // returns the name of the production representing the subexpression,
     // or an empty string on failure.
     // (may also toss errors on failure)
-    std::string parse_subexpression(fpl_reader &src) {
+    std::string parse_subexpression() {
         std::string subname;
-        if(!src.read_byte_equalling('(')) {
+        if(!inp->read_byte_equalling('(')) {
             error("expected subexpression");
         } else {
             // subexpressions are implemented as sub rules,
             // so we need to make a rule:
             production_rule subrule(
-                src.filename(), src.line_number(),
+                inp->filename(), inp->line_number(),
                 grammar_element::NONTERM_SUBEXPRESSION
             );
             subname = make_sub_prod_name();
             subrule.product(subname);
-            parse_expressions(src, subrule);
-            if(!src.read_byte_equalling(')')) {
-                error(src, stringformat(
+            parse_expressions(subrule);
+            if(!inp->read_byte_equalling(')')) {
+                error(inp, stringformat(
                     "expected ')' for subexpression starting at {}\n",
                     subrule.location()
                 ));
@@ -1252,46 +1256,46 @@ public:
         return subname;
     }
 
-    int parse_expressions(fpl_reader &src, production_rule &rule) {
+    int parse_expressions(production_rule &rule) {
         int num_read = 0;
         bool done = false;
         do {
-            src.eat_separator();
+            inp->eat_separator();
 
             std::string expr_str;
             grammar_element::Type type = grammar_element::Type::NONE;
 
-            const utf8_byte inch = src.peek();
+            const utf8_byte inch = inp->peek();
             switch(inch) {
                 case '\0':
                     done = true;
                     break; // EOF
                 case '#':
                     // line comment - just skip
-                    src.read_line();
+                    inp->read_line();
                     break;
                 case '"':
                 case '\'':
-                    expr_str = src.parse_string();
+                    expr_str = inp->parse_string();
                     type     = grammar_element::Type::TERM_EXACT;
                     break;
                 case '/':
-                    expr_str = src.parse_string();
+                    expr_str = inp->parse_string();
                     type     = grammar_element::Type::TERM_REGEX;
                     break;
                 case '&':
-                    src.read_byte(); // (read the '&')
-                    expr_str = read_identifier(src);
+                    inp->read_byte(); // (read the '&')
+                    expr_str = read_identifier(inp);
                     type     = grammar_element::Type::TERM_CUSTOM;
                     break;
                 case '~':
                     // lack-of-separator assertion:
-                    src.read_byte();
+                    inp->read_byte();
                     expr_str = "~";
                     type     = grammar_element::Type::LACK_OF_SEPARATOR;
                     break;
                 case '(':
-                    expr_str = parse_subexpression(src);
+                    expr_str = parse_subexpression();
                     if(expr_str.length()) {
                         type = grammar_element::Type::NONTERM_SUBEXPRESSION;
                     } // else ... ? error? XXX
@@ -1306,25 +1310,25 @@ public:
                     break;
                 case '`':
                     // parse/import the sub-fpl, and use whatever it produces:
-                    expr_str = parse_import(src, rule);
+                    expr_str = parse_import(rule);
                     type     = grammar_element::Type::NONTERM_PRODUCTION;
                     break;
                 case /*{*/ '}':
                     // this can happen, especially if there's a '}+'
                     // embedded in a code block.
-                    if(src.read_byte_equalling('+'))
-                        error(src,
+                    if(inp->read_byte_equalling('+'))
+                        error(inp,
                             "stray '}+'.  "
                             "perhaps there's }+ embedded in a code block"
                         );
                     else
-                        error(src, "unmatched '}'");
+                        error(inp, "unmatched '}'");
                     break;
                 default:
                     // should be the name of a production.
-                    expr_str = read_production_name(src);
+                    expr_str = read_production_name(inp);
                     if(!expr_str.length()) {
-                        error(src, stringformat(
+                        error(inp, stringformat(
                             "expected production name for rule '{}'\n"
                             " starting at {}",
                             rule.to_str(), rule.location()
@@ -1337,34 +1341,34 @@ public:
             if(type != grammar_element::Type::NONE) {
                 if(expr_str.length() >= 1) {
                     production_rule::step expr(expr_str, type);
-                    read_quantifier(src, expr);
-                    read_suffix(src, expr);
+                    read_quantifier(inp, expr);
+                    read_suffix(inp, expr);
                     if(type == grammar_element::Type::LACK_OF_SEPARATOR)
                         expr.eject = true;
                     rule.add_step(expr);
                     num_read++;
                 } else {
-                    error(src, stringformat(
+                    error(inp, stringformat(
                         "expected type {} = {} but got .. nothing?\n",
                         grammar_element::Type_to_str(type), type
                     ));
                 }
             }
-        } while(!(done || src.eof()));
+        } while(!(done || inp->eof()));
 
         return num_read;
     }
 
-    static code_block read_code(fpl_reader &src) {
+    code_block read_code() {
          // code is within "+{" "}+" brackets.
          // we don't know anything about the grammar of the code
          // within the brackets (presently), so you will derail
          // it if you put +{ or }+ in a comment or string or whatever.
          // sorry.  try not to do that.
-         src.eat_separator();
+         inp->eat_separator();
 
-         size_t start = src.current_position();
-         if(!src.read_exact_match("+{")) {
+         size_t start = inp->current_position();
+         if(!inp->read_exact_match("+{")) {
              // no code - return a false value
              return code_block();
          }
@@ -1372,10 +1376,10 @@ public:
          std::string code_str;
          bool found_terminator = false;
          char byte_in;
-         while(byte_in = src.read_byte()) {
+         while(byte_in = inp->read_byte()) {
              if(byte_in == '}') {
-                 if(src.peek() == '+') {
-                     src.read_byte();
+                 if(inp->peek() == '+') {
+                     inp->read_byte();
                      found_terminator = true;
                      break;
                  }
@@ -1384,13 +1388,13 @@ public:
          }
 
          if(!found_terminator) {
-             error(src, stringformat(
+             error(inp, stringformat(
                  "Expected code block terminator ('}}+') but got byte 0x{}",
                  to_hex(byte_in)
              ));
          }
 
-         return code_block(code_str, src.filename(), src.line_number(start));
+         return code_block(code_str, inp->filename(), inp->line_number(start));
     }
 
     // optional argument declaration for a reduction code block:
@@ -1402,7 +1406,7 @@ public:
 
         if(inp->read_byte_equalling('(')) {
             while(!inp->read_byte_equalling(')')) {
-                std::string name = read_production_name(*inp);
+                std::string name = read_production_name(inp);
                 if(!name.length()) {
                     error("invalid production name");
                     break;
@@ -1514,14 +1518,14 @@ public:
             return;
         }
 
-        std::string name = read_production_name(*inp);
+        std::string name = read_production_name(inp);
         if(name.length() == 0) {
             error("expected production name after '+'");
             return;
         }
 
         auto args = parse_argdecl();
-        auto code = read_code(*inp);
+        auto code = read_code();
         mangle_stack_slice_args(code.code, args); // XXX peeking inside code_block
 
         if(!code) {
@@ -1543,7 +1547,7 @@ public:
                 if(inp->peek(1) == '{') {
                     // inlined/general code - goes at the top of the
                     // generated code.  Use to define types or whatever.
-                    code_block code(read_code(*inp));
+                    code_block code(read_code());
                     if(code) {
                         add_preamble(code);
                     }
@@ -1552,7 +1556,7 @@ public:
                     parse_reducer();
                 }
             } else if(inp->read_byte_equalling('@')) {
-                std::string directive = read_directive(*inp);
+                std::string directive = read_directive(inp);
                 parse_directive(directive);
             } else if(inp->read_byte_equalling('}')) {
                 // likely what happened is someone put a }+ inside
@@ -1561,7 +1565,7 @@ public:
                 error("unmatched '}'\n");
             } else {
                 production_rule rule(inp->filename(), inp->line_number());
-                if(parse_expressions(*inp, rule)) {
+                if(parse_expressions(rule)) {
                     // .. we've read the expressions/steps leading to
                     // read what the expressions above produce:
                     inp->eat_separator();
@@ -1570,7 +1574,7 @@ public:
                     }
                     inp->eat_separator();
 
-                    std::string pname = read_production_name(*inp);
+                    std::string pname = read_production_name(inp);
                     if(!pname.length()) {
                         error("invalid production name\n");
                     } else {
@@ -1589,7 +1593,7 @@ public:
                     // if it's ';' we read it and move on;  otherwise
                     // it's a code block for the rule.
                     if(!inp->read_byte_equalling(';')) {
-                        auto code = read_code(*inp);
+                        auto code = read_code();
                         if(!code) {
                             error(stringformat(
                                 "expected ';' or code block for rule {}",
