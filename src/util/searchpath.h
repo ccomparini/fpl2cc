@@ -76,11 +76,8 @@ public:
     }
 
     // Searches the path for the file of the name passed.
-    // Returns the name of the first file found, or the
-    // name passed if no matching file was found.
-    // This allows callers to simply wrap the filename
-    // they're passing to an existing function call and
-    // not have to add any particular new error handling.
+    // Returns the name of the first file found, or an empty
+    // string if no match was found.
     std::string find(const std::string &fn) const {
         for(auto dir = directories.begin(); dir != directories.end(); ++dir) {
             fs::path fp = fs::path(*dir);
@@ -89,6 +86,17 @@ public:
                 return fp;
             }
         }
+        return "";
+    }
+
+
+    // Searches the path for the file of the name passed.
+    // Returns the name of the first file found, or the
+    // name passed if no matching file was found.
+    std::string search(const std::string &fn) const {
+        std::string found = find(fn);
+        if(found.length())
+            return found;
 
         // can't find it in the set of directories - return
         // the filename passed.  This makes it so that if
@@ -119,8 +127,37 @@ public:
         return found;
     }
 
+    // Like search(), above, but searches for variants of the base filename
+    // passed with the set of extensions passed in as some sort of iterable
+    // container of std::strings (or something very compatible).
+    // Extension matches are checked in iteration order.
+    // Extensions may be specified with or without the initial '.'.
+    // The name passed is treated as a base name - for example, if the
+    // name passed is "foo.bar" and the extensions are [ "bat", ".woo" ],
+    // this will look for "foo.bar.bat" and "foo.bar.woo".
+    // Returns an empty string if nothing was found.
+    template<typename It>
+    std::string search_alternates(
+        const std::string &basename, It &extensions
+    ) const {
+        for(auto ext: extensions) {
+            std::string found;
+
+            if(ext[0] == '.') 
+                found = find(basename + ext);
+            else
+                found = find(basename + '.' + ext);
+
+            if(fs::exists(found))
+                return found;
+        }
+
+        return "";
+    }
+
     auto begin() const { return directories.begin(); }
     auto end()   const { return directories.end();   }
+
 };
 
 #endif // SEARCHPATH_H
