@@ -74,7 +74,7 @@ def run_and_capture_action(program, interactive=False):
                     else:
                         pout += inp
 
-            await asyncio.gather(read_stdout(), tee_stderr())
+            await asyncio.gather(read_stdout(), tee_stderr(), proc.wait())
             returncode = proc.returncode
 
         asyncio.run(runit())
