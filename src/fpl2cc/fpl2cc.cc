@@ -255,10 +255,10 @@ int main(int argc, const char** argv) {
         }
         opts.usage();
         status = ExitVal::BAD_ARGS;
+    } else if(opts.help) {
+        opts.usage();
+        status = ExitVal::OK;
     } else {
-        if(opts.help)
-            opts.usage();
-
         status = fpl2cc(opts);
     }
 
