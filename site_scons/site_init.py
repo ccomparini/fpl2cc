@@ -2,6 +2,7 @@ import asyncio
 import esml
 import os
 import pprint
+import signal
 import subprocess
 
 def run_and_capture_action(program, interactive=False):
