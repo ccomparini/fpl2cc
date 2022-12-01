@@ -15,7 +15,72 @@
 namespace fpl {
 
 class production_rule {
+    public: struct step; private:
+
+    std::string prod;
+    std::vector<step>     rsteps;
+    std::vector<int>      psteps;        // index of step for parameter number
+    std::set<std::string> step_vars;     // for finding conflicts
+    code_block            code_for_rule; // reduce code, if known yet
+    reducer               abs_impl;      // abstracted implementation, if any
+    std::string           file;
+    int                   line;
+    grammar_element::Type prod_type;      // production, subrule, or none
+    int                   rulenum;        // assigned when added to productions
+    int                   parent_rulenum; // (or -1 if not subrule)
+    int                   parent_cpos;    // step relative to end of parent
+
 public:
+
+    production_rule(
+        const std::string fn, int ln,
+        grammar_element::Type tp = grammar_element::NONTERM_PRODUCTION
+    ) :
+        file(fn),
+        line(ln),
+        prod_type(tp),
+        rulenum(-1),
+        parent_rulenum(-1),
+        parent_cpos(0) {
+    }
+
+    production_rule() :
+        line(0),
+        prod_type(grammar_element::NONE),
+        rulenum(-1),
+        parent_rulenum(-1),
+        parent_cpos(0) {
+    }
+
+    operator bool() const {
+        return prod_type != grammar_element::Type::NONE;
+    }
+    
+    void set_rule_number(int num) {
+        rulenum = num;
+    }
+
+    int rule_number() const {
+        return rulenum;
+    }
+
+    void set_parent(int rulenum, int ctd) {
+        parent_rulenum = rulenum;
+        parent_cpos = ctd;
+    }
+
+    int parent_rule_number() const {
+        return parent_rulenum;
+    }
+
+    int parent_countdown_pos() const {
+        return parent_cpos;
+    }
+
+    std::string rule_fn() const {
+        return stringformat("rule_{}", rulenum);
+    }
+
     struct step {
         grammar_element gexpr;
         std::string varname; // if set, name of this expression in reduce code
@@ -115,71 +180,6 @@ public:
             return out;
         }
     };
-
-private:
-    std::string prod;
-    std::vector<step>     rsteps;
-    std::vector<int>      psteps;        // index of step for parameter number
-    std::set<std::string> step_vars;     // for finding conflicts
-    code_block            code_for_rule; // reduce code, if known yet
-    reducer               abs_impl;      // abstracted implementation, if any
-    std::string           file;
-    int                   line;
-    grammar_element::Type prod_type;      // production, subrule, or none
-    int                   rulenum;        // assigned when added to productions
-    int                   parent_rulenum; // (or -1 if not subrule)
-    int                   parent_cpos;    // step relative to end of parent
-
-public:
-
-    production_rule(
-        const std::string fn, int ln,
-        grammar_element::Type tp = grammar_element::NONTERM_PRODUCTION
-    ) :
-        file(fn),
-        line(ln),
-        prod_type(tp),
-        rulenum(-1),
-        parent_rulenum(-1),
-        parent_cpos(0) {
-    }
-
-    production_rule() :
-        line(0),
-        prod_type(grammar_element::NONE),
-        rulenum(-1),
-        parent_rulenum(-1),
-        parent_cpos(0) {
-    }
-
-    operator bool() const {
-        return prod_type != grammar_element::Type::NONE;
-    }
-    
-    void set_rule_number(int num) {
-        rulenum = num;
-    }
-
-    int rule_number() const {
-        return rulenum;
-    }
-
-    void set_parent(int rulenum, int ctd) {
-        parent_rulenum = rulenum;
-        parent_cpos = ctd;
-    }
-
-    int parent_rule_number() const {
-        return parent_rulenum;
-    }
-
-    int parent_countdown_pos() const {
-        return parent_cpos;
-    }
-
-    std::string rule_fn() const {
-        return stringformat("rule_{}", rulenum);
-    }
 
     void add_step(step st) {
         int stepi = rsteps.size();
