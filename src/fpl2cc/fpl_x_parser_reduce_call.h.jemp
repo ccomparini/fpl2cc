@@ -20,7 +20,7 @@
             // If there's no such step, it's a bug in fpl
             #error Bug: no expression for step @stind@ @rule.to_str()@ @rule.location()@
         @-} else {-@
-            @declare el_id: prds.element_index.at(step.gexpr)@
+            @declare el_id: prds.element_id(step.gexpr)@
             @declare elname: prds.element_id_name(el_id)@
 
             lr_read_pos = lr_position_before_@elname@(

@@ -133,9 +133,9 @@ class productions {
         int el_ind, src_location caller = CALLER()
     ) const {
         if(el_ind < 0 || el_ind >= elements.size()) {
-            jerror::error(stringformat(
-                "bad element id ({}) at {}\n", el_ind, caller
-            ));
+            internal_error(
+                stringformat("bad element id ({})\n", el_ind), caller
+            );
         }
 
         const grammar_element el = elements[el_ind];
@@ -154,6 +154,18 @@ class productions {
             return element_id_name(0, caller);
         }
         return element_id_name(eli->second);
+    }
+
+    int element_id(
+        grammar_element el, src_location caller = CALLER()
+    ) const {
+        auto eli = element_index.find(el);
+        if(eli == element_index.end()) {
+            internal_error(
+                stringformat("element {} is unindexed", el), caller
+            );
+        }
+        return eli->second;
     }
 
     struct lr_item {
@@ -454,7 +466,7 @@ class productions {
                     auto endrl = prds.rules_for_product.upper_bound(pname);
                     if(strl == endrl) {
                         error(rule.location(), stringformat(
-                            "Nothing produces '{}'\n", pname
+                            "Bug: nothing produces '{}' ({})\n", pname, expr
                         ));
                     }
                     for(auto rit = strl; rit != endrl; ++rit) {
