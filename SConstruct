@@ -106,7 +106,7 @@ env.Append(BUILDERS = {
 env.Append(BUILDERS = {
     'Fpl2cc' : Builder(
         action = fpl_compile_action(),
-        emitter = depend_on_fpl2cc,
+        emitter = depend_on_fpl2cc(),
 	suffix = '.cc',
 	src_suffix = '.fpl'
     )
@@ -116,7 +116,7 @@ env.Append(BUILDERS = {
 env.Append(BUILDERS = {
     'Fpl2h' : Builder(
         action = fpl_compile_action(),
-        emitter = depend_on_fpl2cc,
+        emitter = depend_on_fpl2cc(),
 	suffix = '_parser.h',
 	src_suffix = '.fpl'
     )

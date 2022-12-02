@@ -15,9 +15,9 @@ env.Append(BUILDERS = {
         action = run_and_capture_action(
             fpl_compile_action(), interactive=True
         ),
-        emitter = depend_on_fpl2cc,
-	suffix = '.cc',
-	src_suffix = '.fpl'
+        emitter = depend_on_fpl2cc(),
+	src_suffix = '.fpl',
+	suffix = '.cc'
     )
 })
 
@@ -90,6 +90,8 @@ def make_language_rules(env, directory):
     if 'FPL_TEST_DEBUG' in os.environ:
         interactive=True
         fpl_options="--debug-single-step"
+        print(f"Adding fpl single step option for langprog {langprog}", file=sys.stderr)
+
     env.Append(BUILDERS = {
         'FPLTestLang_' + language: Builder(
             action = run_and_capture_action(
@@ -103,15 +105,13 @@ def make_language_rules(env, directory):
 
     # .. and, the language program is built from <lang>.fpl
     langsource = langbase + '.fpl'
-    capfile = langbase + '.fpl_result'
+    langcc     = langbase + '.cc'
+    capfile    = langbase + '.fpl_result'
+    #print(f"fpl options on {langsource}: {fpl_options}", file=sys.stderr)
     env.CaptureFplCompile(
-        [ langbase + '.cc', capfile ],  [ langsource ],
+        [ langcc, capfile ],  [ langsource ],
         FPLOPTS=fpl_options, CAPFILE=capfile
     )
-
-    # and it depends on the fpl compiler (which is ultimately
-    # what we're testing):
-    env.Depends(langbase + '.cc', [ '#bin/fpl2cc' ])
 
     compiler = build_lang_exe.get(langbase, build_default)(langprog)
 
