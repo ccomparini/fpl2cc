@@ -5,7 +5,7 @@ import pprint
 import signal
 import subprocess
 
-def run_and_capture_action(program, interactive=False):
+def run_and_capture_action(program, varlist=[]):
     """
         Returns a scons Builder action which runs the source program
         specified, capturing stderr, stdout, and the exit value, and
@@ -98,9 +98,10 @@ def run_and_capture_action(program, interactive=False):
     # This is the scons Builder action we return:
     def run_and_cap(target, source, env):
 
-        nonlocal program, interactive
+        nonlocal program
 
-        capfile = env.get('CAPFILE', None)
+        interactive = env.get('INTERACTIVE', None)
+        capfile     = env.get('CAPFILE', None)
 
         # If we haven't been told the name of the file in which
         # to dump the capture, use the first target.  This is a
@@ -120,7 +121,7 @@ def run_and_capture_action(program, interactive=False):
 
         strcommand = ' '.join(command) # for error messages, etc.
 
-        #print(f"Going to run:\n    {strcommand}\n", file=sys.stderr);
+        print(f"Going to run:\n    {strcommand}\n", file=sys.stderr);
 
         if interactive:
             returncode, pout, perr = run_interactively(command)
@@ -143,7 +144,14 @@ def run_and_capture_action(program, interactive=False):
 
         return 0 # success if we got here without tossing an exception
 
-    return run_and_cap;
+    # It appears we need to wrap this in an action so that when options
+    # like "interactive" change, scons can know to rerun stuff.
+    # https://scons.org/doc/production/HTML/scons-man.html
+    #  ^ the key thing is the "build signature".
+    # https://scons.org/doc/production/HTML/scons-man.html#action_objects
+    # Possibly we didn't need or want to use all these closures.
+    # errf ohwell
+    return Action(run_and_cap, varlist=varlist + ['CAPFILE', 'INTERACTIVE'])
 
 # Returns a scons Emitter which causes targets to depend
 # on the thing passed.  Used (for example) to make files
@@ -162,9 +170,9 @@ def depend_on(primary):
 def depend_on_fpl2cc() :
     return depend_on('#bin/fpl2cc')
 
-# Common fpl compile command line action.  Usable by scons Builders.
-fpl_args = '--src-path=src/grammarlib' + ' $FPLOPTS $SOURCES --out $TARGET --depfile .deps --statedump .states'
-def fpl_compile_action():
-    return 'bin/fpl2cc ' + fpl_args
+# Common fpl compile command line.
+# Can be used to construct actions.
+def fpl_compile_command():
+    return 'bin/fpl2cc --src-path=src/grammarlib $FPLOPTS $SOURCES --out $TARGET --depfile .deps --statedump .states'
 
 
