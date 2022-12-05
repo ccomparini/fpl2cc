@@ -532,7 +532,8 @@ public:
                         lastp = subp;
                         subp = lr_position_before_@sename@(subp, @-mult-@);
 //std::cerr << stringformat(" .... looked for start of @sename@ ({}). got {} with last {}\n", @mult@?"multiple":"single", subp, lastp);
-                        if(lastp == subp) { // (didn't match)
+                        if(lastp == subp) {
+                            // (didn't match)
                             if(@required@) matched_whole = false;
                         } else {
                             pos = subp;
