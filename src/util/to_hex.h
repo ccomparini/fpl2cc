@@ -4,6 +4,8 @@
 #include<array>
 #include<string>
 
+#include<stdio.h>
+
 // returns a string containing a big-endian hex dump
 // of the thing passed
 template<class T>
@@ -21,6 +23,29 @@ std::string to_hex(const T &inst) {
     }
     return out;
 }
+
+// Because of various endianess issues, to get reasonable results
+// for various normal ints, we need this.
+// For example, 0x
+template<class T>
+std::string _int_to_hex(T val) {
+    int shift = sizeof(val) * 8;
+    std::string out;
+    out.reserve(2 * sizeof(val)); // 2 chars per byte
+    while((shift -= 8) >= 0) {
+        out += to_hex(char((val >> shift) & 0xff));
+    }
+
+    return out;
+}
+std::string to_hex(signed int num) { return _int_to_hex(num); }
+std::string to_hex(signed long int num) { return _int_to_hex(num); }
+std::string to_hex(signed long long int num) { return _int_to_hex(num); }
+std::string to_hex(signed short int num) { return _int_to_hex(num); }
+std::string to_hex(unsigned int num) { return _int_to_hex(num); }
+std::string to_hex(unsigned long int num) { return _int_to_hex(num); }
+std::string to_hex(unsigned long long int num) { return _int_to_hex(num); }
+std::string to_hex(unsigned short int num) { return _int_to_hex(num); }
 
 template<class TT>
 std::string bs_to_hex(const TT &in, const std::string &separator = " ") {

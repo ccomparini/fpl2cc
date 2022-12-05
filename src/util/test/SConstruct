@@ -1,9 +1,12 @@
+import os
+
 Import('env')
 env = env.Clone()
 
 env.Jemp2h('jemptest.jemp')
 
-for tprog in ('jemptest', 'stringformattest') :
+for scons_tprog in Glob('*.cc'):
+    tprog, ext = os.path.splitext(scons_tprog.name)
     env.Program(tprog, [ tprog + '.cc' ])
 
     # Run the test:
