@@ -142,7 +142,7 @@ def run_and_capture_action(program, varlist=[]):
                 }
             ), encoding='utf-8', errors='ignore'))
 
-        return 0 # success if we got here without tossing an exception
+        return returncode
 
     # It appears we need to wrap this in an action so that when options
     # like "interactive" change, scons can know to rerun stuff.
