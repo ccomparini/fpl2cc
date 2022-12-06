@@ -25,6 +25,7 @@
 #include <regex>
 #include <stdlib.h>
 #include <string>
+#include <type_traits>
 #include <typeindex>
 #include <typeinfo>
 #include <variant>
@@ -42,6 +43,26 @@
 @}@
 
 class @class_name@ {
+
+    // If some poor hapless fpl author should happen to try
+    // to use a non-copy-constructable type in some way that
+    // it lands in the variant (below), they will be rewarded
+    // by their c++ compiler with about 23k lines of "note:"
+    // gibberish about every possible constructor in the
+    // standard libraries.  To avoid this, and to give a non-0
+    // chance at a useful error message, we do this lame hack:
+    static void check_copy() {
+        @-for(auto tp : prds.all_types) {@
+            {
+                // (having a separate "copyable" bool makes the
+                // static_assert not expand templates into the
+                // message)
+                const bool copyable = std::is_copy_constructible<@tp@>::value;
+                static_assert(copyable, "@tp@ is not copy constructable");
+            }
+        @}@
+    }
+
 public:
     void state(); // this just facilitates the "using State"
     using State = decltype(&@class_name@::state);
@@ -113,6 +134,7 @@ public:
         };
 
         using Var = std::variant<
+            // consider adding std::monostate here
             false_product,
             @-for(auto type : prds.all_types) {-@
                 @type@,
