@@ -7,15 +7,7 @@
 number                    -> expression ;
 '('^ expression ')'^      -> expression ;
 
-# you can multiply with or without the "*".
-#  HEY this ain't right.  for one thing, it matches just
-#     23 *
-# ...    ^^ trailing * wat?
-# secondly, the implied expression -> multiplication_expression
-# is fishy...
-#(expression '*'?^)+:terms  -> multiplication_expression;
-# ... the extra layer of subexpression here really only serves
-# to name the parameter properly.  anyway, shipit.
+# you can multiply with or without the "*":
 (expression ('*'?^ expression)*):terms -> multiplication_expression;
 
 multiplication_expression -> expression ;
