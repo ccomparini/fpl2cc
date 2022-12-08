@@ -96,9 +96,12 @@ public:
         step() : gexpr("", grammar_element::Type::NONE), eject(true) {
         }
 
-        step(const std::string &str, grammar_element::Type tp)
-            : gexpr(str,tp), eject(false)
-        { }
+        step(
+            const std::string &expr_str,
+            grammar_element::Type tp,
+            const std::string vn = ""
+        ) : gexpr(expr_str,tp), eject(false), varname(vn) {
+        }
 
         operator bool() const {
             return gexpr.type != grammar_element::Type::NONE;
