@@ -88,6 +88,9 @@ def run_and_capture_action(program, varlist=[]):
             stdin=sys.stdin, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         )
         pout, perr = proc.communicate(timeout=timeout)
+        if(len(perr)):
+            print(perr.decode("utf-8"), file=sys.stderr)
+        
         return proc.returncode, pout, perr
 
     # program should really be program + arguments, but support
@@ -95,10 +98,19 @@ def run_and_capture_action(program, varlist=[]):
     if isinstance(program, str):
         program = program.split()
 
+    # returns the command to run + arguments, as a list, with
+    # $TARGET etc expanded.
+    def command_and_args(target, source, env):
+        nonlocal program
+
+        # substitute $TARGET etc into the command strings:
+        return [env.subst(p, target=target, source=source) for p in program]
+
+    def strfunction(target, source, env, executor=None):
+        return ' '.join(command_and_args(target, source, env))
+
     # This is the scons Builder action we return:
     def run_and_cap(target, source, env):
-
-        nonlocal program
 
         interactive = env.get('INTERACTIVE', None)
         capfile     = env.get('CAPFILE', None)
@@ -117,9 +129,10 @@ def run_and_capture_action(program, varlist=[]):
             os.remove(capfile)
 
         # substitute $TARGET etc into the command strings:
-        command = [env.subst(p, target=target, source=source) for p in program]
+        command = command_and_args(target, source, env)
 
-        strcommand = ' '.join(command) # for error messages, etc.
+        # XXX see if we need this.
+        strcommand = strfunction(target, source, env)
 
         #print(f"Going to run:\n    {strcommand}\n", file=sys.stderr);
 
@@ -151,7 +164,11 @@ def run_and_capture_action(program, varlist=[]):
     # https://scons.org/doc/production/HTML/scons-man.html#action_objects
     # Possibly we didn't need or want to use all these closures.
     # errf ohwell
-    return Action(run_and_cap, varlist=varlist + ['CAPFILE', 'INTERACTIVE'])
+    return Action(
+        run_and_cap,
+        strfunction=strfunction,
+        varlist=varlist + ['CAPFILE', 'INTERACTIVE']
+    )
 
 # Returns a scons Emitter which causes targets to depend
 # on the thing passed.  Used (for example) to make files
