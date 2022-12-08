@@ -57,6 +57,11 @@ struct grammar_element {
         return left.compare(right) == 0;
     }
 
+    operator bool() const {
+        // Type "NONE" counts as false.
+        // Any invalid type (>= _TYPE_CAP) is also false.
+        return (type > NONE && type < _TYPE_CAP);
+    }
 
     inline bool is_nonterminal() const {
         return (type >= NONTERM_PRODUCTION);
