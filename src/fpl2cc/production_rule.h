@@ -345,28 +345,9 @@ public:
     }
 
     // Returns a grammar element representing the result of matching
-    // this rule.  For normal rules, this will simply be the grammar
-    // element for the rule's product.  For subexpressions, this will
-    // be an element representing whatever the subexpression evaluates
-    // to (for purposes of determining what's on the stack).  If the
-    // subexpression has no evaluation result (eg if all steps are
-    // ejected), or the evaluation type otherwise cannot be determined,
-    // returns a grammar_element with type NONE.
+    // this rule.  Normally, this will simply be the grammar
+    // element for the rule's product.
     grammar_element product_element() const {
-        if(is_subexpression()) {
-            // At present, subexpressions evaluate to the type of the
-            // single non-ejected element in the subexpression.
-            // More than one is currently not supported.
-            if(num_reduce_params() != 1) {
-                return grammar_element(product(), grammar_element::Type::NONE);
-            } else {
-                // XXX if the step is, itself, a subexpression I think we need
-                // to recurse.  but to find the rule for the step, we need the
-                // productions{}.  Maybe this is why we need to move this there.
-                return reduce_param(0).gexpr;
-            }
-        }
-
         return grammar_element(product(), prod_type);
     }
 
