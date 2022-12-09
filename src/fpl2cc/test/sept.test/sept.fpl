@@ -21,8 +21,8 @@ thing~ thing:suffix     -> thing +{ return thing + "+" + suffix; }+
 # of why anyone would want it, so therefore I'm punting
 # for now and not worrying about it.
 # ~ '1' -> thing ;
-'1' ~ -> thing ; # (this doesn't break the parser)
-/[a-z]/ -> thing ;
+'1' ~   -> thing; # (this doesn't break the parser)
+/[a-z]/ -> thing;
 
 # TODO:
 #  - test leading lack-of-space

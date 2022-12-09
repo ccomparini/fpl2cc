@@ -33,7 +33,7 @@ syn match	fplQuantifier	"[*+?]"
 
 " operators (such as they are):
 syn match	fplOperator	"->"
-syn match	fplOperator	"\s;"
+syn match	fplOperator	";"
 syn match	fplOperator	"+{"
 syn match	fplOperator	"}+"
 syn match	fplOperator	":"
