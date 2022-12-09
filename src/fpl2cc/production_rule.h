@@ -291,50 +291,6 @@ public:
         return rsteps;
     }
 
-    bool needs_reducer() const {
-        if(reduce_code()) {
-            return false; // don't need - we have one
-        }
-
-        if(parent_rulenum >= 0) {
-            return false; // don't need - parent does reduce
-        }
-
-/*
-        for(int stepi : psteps) {
-            step st = rsteps[stepi];
-
-            // If the step is either multiple or optional,
-            // someone needs to write a reducer to tell
-            // us how to handle it (for now, anyway).
-            // We _are_ (presently) allowing multiple arguments
-            // to be passed through by default.  The idea here
-            // is that (c++ case) if there's an appropriate
-            // multi-argument constructor for the thing we're
-            // producing, it'll "just work" in the default case.
-            // I'm of 2 minds on this whole thing though.
-            // Ideally, we'd err on the side of requiring less
-            // and letting the c++ (or whatever target/next layer)
-            // compiler complain if we end up with something which
-            // won't work.  The problem is that with both gnu and
-            // clang, the c++ error messages are absolutely attrocious
-            // if there isn't a matching constructor.
-            // The present compromise is to expect that constructors
-            // can be available for non-fpl specific things (i.e.
-            // normal, "single" arguments) but not aggregates/optional,
-            // because aggregates/optionals use fpl-specific classes
-            // (though maybe they shouldn't).
-            // This is probably a dumb compromise.  The right answer
-            // is to not use c++.  Revisit.
-            if(!st.is_single()) {
-                return true;
-            }
-        }
- */
-
-        return false;
-    }
-
     const std::string &product(const std::string &pr) {
         prod = pr;
         return prod;

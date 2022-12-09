@@ -2113,7 +2113,6 @@ public:
     }
 
     void check_rules() const {
-        std::list<std::string> missing_actions;
         bool used[rules.size()];
 
         for(int rind = 0; rind < rules.size(); rind++) {
@@ -2126,15 +2125,6 @@ public:
             for(lr_item item : state.iterable_items()) {
                 if(!used[item.rule]) {
                     used[item.rule] = true;
-
-                    // turns out we do use this rule.  it'll need reduce
-                    // code from one place or another:
-                    const production_rule &rule = rules[item.rule];
-                    if(!rule.reduce_code()) {
-                        missing_actions.push_back(stringformat(
-                            "{}\t{}\n", rule.location(), hypothetical_reducer(rule)
-                        ));
-                    }
                 }
             }
         }
@@ -2154,33 +2144,24 @@ public:
     }
 
     void resolve_actions() {
-        std::list<std::string> missing_actions;
-
+        // A given rule will be reduced according to the first of the
+        // following possibilities:
+        //   1) abstracted implementations (+product). this is top
+        //      priority so that you can use the grammar defined by
+        //      non-"pure" fpl and just override anything you need to
+        //      without having to change the grammar fpl.
+        //      (handled in the production rule/reducer)
+        //   2) code from the +{ ... }+ block in the rule definition
+        //      (handled in the production rule)
+        //   3) the @default_action (handled here)
+        //   4) to construct an object of the type for the
+        //      production from the result of the steps for the rule
+        //      (handled in the .jemp for the reduce action)
         for(int rnum = 0; rnum < rules.size(); rnum++) {
             production_rule &rule = rules[rnum];
             if(!rule.code() && default_action) {
                 rule.code(default_action);
             }
-
-            if(rule.needs_reducer()) {
-                missing_actions.push_back(stringformat(
-                    "{}\t{}\n", rule.location(), hypothetical_reducer(rule)
-                ));
-            }
-        }
-
-        // if any rules are missing actions, it's an error because
-        // it means we won't know what to do if the rule matches:
-        if(missing_actions.size() > 0) {
-            std::string msg = stringformat(
-                "missing reduce action for {} rules:\n"
-                "    original rule location\tdesired reducer\n",
-                missing_actions.size()
-            );
-            for(std::string rmsg : missing_actions) {
-                msg += "    " + rmsg;
-            }
-            error(msg);
         }
     }
 };
