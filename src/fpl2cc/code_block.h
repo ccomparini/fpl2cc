@@ -97,6 +97,98 @@ struct code_block {
         return "\n{\n" + format() + "\n}\n";
     }
 
+private:
+    static inline bool maybe_name_start(const std::string &str, size_t pos) {
+        // start of string definitely could be the start of a name
+        if(pos == 0) return true;
+        
+        char ch_before = str[pos - 1];
+        if(is_production_name_char(ch_before)) {
+             // apparently we're within the name of another variable - 
+             // eg at "bar" within  "foobar":
+            return false;
+        } else {
+            // the character before the one we're looking at isn't
+            // part of a normal variable name, but it might be something
+            // indicating a member of something else (eg foo.bar or foo->bar)
+            if(ch_before == '.') return false; // foo.bar
+
+            if(ch_before == '>') {
+                // check for ->bar vs possible 2>bar
+                return pos < 2 || str[pos - 2] != '-';
+            }
+        }
+        return true;
+    }
+
+    static inline bool is_production_name_char(const char ch) {
+        return (ch == '_')              ||
+               (ch >= 'A' && ch <= 'Z') ||
+               (ch >= 'a' && ch <= 'z') ||
+               (ch >= '0' && ch <= '9');
+    }
+public:
+
+    //
+    // For each argument name in the set passed, mangle the code
+    // text as follows:
+    //  <argname>\[([0-9+])\] -> <argname>.val($1)
+    //  <argname>[^@] -> <argname>.val()
+    //  <argname>@ -> argname.
+    // 
+    // This means that the stack slice looks like an array of whatever
+    // type is expected for that variable, but it's a magic array
+    // where the name itself resolves to the first element (so that
+    // simple things like wcalc can just deal in the arg names),
+    // but, if you want metadata about the argument you can access it
+    // via the "@" pseudo operator.
+    //
+    // Perhaps obviously, this only dtrt for code blocks for rule
+    // actions. It's a bit of an ugly hack.  The right thing would
+    // be not to have to write rule actions in c++, but that's a
+    // whole other can of worms so I'm doing this for now.
+    //
+    void mangle_stack_slice_args(const std::set<std::string> args) {
+        for(auto arg : args) {
+            const size_t argl = arg.length();
+            size_t pos = 0;
+            while((pos = code.find(arg, pos)) != std::string::npos) {
+                // we found something matching the name of the arg, but
+                // make sure it matches the _start_ of the arg:
+                size_t endp = pos + argl;
+                if(maybe_name_start(code, pos)) {
+                    // now check what comes right after:
+                    if(code[endp] == '@') {
+                        // author wants metadata: just change the '@' to '.',
+                        // and we'll expect it to result in a call to
+                        // whatever the method in the stack slice is:
+                        code[endp] = '.';
+                    } else if(code[endp] == '[') {
+                        size_t end_brace = endp + 1;
+                        while(code[end_brace] && code[end_brace] != ']')
+                            end_brace++;
+                        if(code[end_brace] != ']') {
+                            jerror::error(stringformat(
+                                "no end brace found on {}\n", arg
+                            ));
+                        }
+                        size_t subl = end_brace - endp - 1;
+                        std::string subs = stringformat(
+                            ".val({})", code.substr(endp + 1, subl)
+                        );
+                        code.replace(endp, end_brace - endp + 1, subs);
+                        endp += subs.length();
+                    } else if(!is_production_name_char(code[endp])) {
+                        // plain production name - default to 0th element:
+                        std::string subs = ".val()";
+                        code.insert(endp, subs);
+                        endp += subs.length();
+                    } // else it's not something to expand
+                }
+                pos = endp;
+            }
+        }
+    }
 };
 
 }
