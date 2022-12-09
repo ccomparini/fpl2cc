@@ -23,43 +23,43 @@
 #       | '1'              { $$ = 1; }
 #       ;
 #
-# except the above was too simple for me to care
-# so I added unary minus, proper numbers, etc.
+# .. except the above was too simple for me to care
+# so I added unary minus, proper numbers, comments,
+# etc.  This has become a sort of general fpl test
+# bed based on the classic desk calculator case.
 #
 
-#@produces int
 @produces double
 @default_main
-#@comment_style sh
 @comment_style c
 
 @post_parse +{
     std::cout << stringformat("result: {}\n", result);
 }+
 
-#
-# Also Aho, Sethi, Ulman pg 247.
-#
+[
+    . '+'^ > -> add +{ return arg_0 + arg_2; }+
+    . '-'^ > -> sub +{ return arg_0 - arg_2; }+
+] -> aexpr +{
+    std::cerr << stringformat("YAY addition expression = {}\n", aexpr);
+    return aexpr;
+}+,
+[
+    . '*'^ >  -> mul +{ return arg_0 * arg_2; }+
+    . '/'^ >  -> div +{ return arg_0 / arg_2; }+
+    . '%'^ >  -> mod +{ return long(arg_0) % long(arg_2); }+
+] -> mexpr,
+[
+    '-'^ .:term  -> neg +{ return -term; }+
+    '('^ << ')'^ -> par ;
 
-aexpr '+'^ mexpr -> aexpr +{ return aexpr + mexpr; }+
-aexpr '-'^ mexpr -> aexpr +{ return aexpr - mexpr; }+
-mexpr            -> aexpr ;
+    /[0-9]*\.[0-9]+/:decimal_digits -> real +{
+        return std::stod(decimal_digits);
+    }+
 
-mexpr '*'^ term  -> mexpr +{ return mexpr * term; }+
-mexpr '/'^ term  -> mexpr +{ return mexpr / term; }+
-mexpr '%'^ term  -> mexpr +{ return long(mexpr) % long(term); }+
-term             -> mexpr ;
-
-'-'^ term        -> term +{ return -term; }+
-
-'('^ aexpr ')'^  -> term ;
-
-/[0-9]*\.[0-9]+/:decimal_digits -> term +{
-    return std::stod(decimal_digits);
-}+
-
-/[0-9]+/:digits -> term +{
-    return std::stod(digits);
-}+
+    /[0-9]+/:digits -> integer +{
+        return std::stod(digits);
+    }+
+] -> term;
 
 # you cant end a file with a comment

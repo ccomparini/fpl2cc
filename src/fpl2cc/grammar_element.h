@@ -1,6 +1,9 @@
 #ifndef GRAMMAR_ELEMENT_H
 #define GRAMMAR_ELEMENT_H
 
+#include "util/jerror.h"
+#include "util/src_location.h"
+
 namespace fpl {
 
 struct grammar_element {
@@ -11,8 +14,9 @@ struct grammar_element {
         TERM_REGEX,  // regular expression match
         TERM_CUSTOM, // custom code for matching terminal
         LACK_OF_SEPARATOR, // pseudoterminal indicating no separator
-        NONTERM_PRODUCTION,    // the result of reducing a rule
-        NONTERM_SUBEXPRESSION, // parenthesized expression
+        NONTERM_PRODUCTION,       // the result of reducing a rule
+        NONTERM_SUBEXPRESSION,    // parenthesized expression
+        NONTERM_PREC_PLACEHOLDER, // precedence placeholder
         _TYPE_CAP
     } Type;
     Type type;
@@ -26,6 +30,7 @@ struct grammar_element {
             "LACK_OF_SEPARATOR", // convert to TERM_CUSTOM?
             "NONTERM_PRODUCTION",
             "NONTERM_SUBEXPRESSION",
+            "NONTERM_PREC_PLACEHOLDER"
         };
         if(t >= NONE && t < _TYPE_CAP) {
             return strs[t];
@@ -67,6 +72,10 @@ struct grammar_element {
         return (type >= NONTERM_PRODUCTION);
     }
 
+    inline bool is_placeholder() const {
+        return (type >= NONTERM_PREC_PLACEHOLDER);
+    }
+
     std::string nonterm_id_str() const {
         if(is_nonterminal()) {
             // always prefix with underscore as a hack to avoid
@@ -83,6 +92,19 @@ struct grammar_element {
 
     inline std::string type_str() const {
         return Type_to_str(type);
+    }
+
+    void resolve_to(
+        const std::string prod_name, src_location caller = CALLER()
+    ) {
+        if(!is_placeholder()) {
+            jerror::warning(stringformat(
+                "resolving non-placeholder expression ({}) at {}",
+                *this, caller
+            ));
+        }
+        expr = prod_name;
+        type = NONTERM_PRODUCTION;
     }
 
     inline std::string to_str() const {
@@ -112,6 +134,10 @@ struct grammar_element {
             case NONTERM_SUBEXPRESSION:
                 lb = "(";
                 rb = ")";
+                break;
+            case NONTERM_PREC_PLACEHOLDER:
+                lb = "";
+                rb = "";
                 break;
             default:
                 lb = "??????";

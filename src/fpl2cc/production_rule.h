@@ -7,6 +7,7 @@
 
 #include "util/c_str_escape.h"
 #include "util/jerror.h"
+#include "util/src_location.h"
 #include "util/stringformat.h"
 
 #include <string>
@@ -146,7 +147,6 @@ public:
             return gexpr.type;
         }
 
-
         inline bool is_nonterminal() const {
             return gexpr.is_nonterminal();
         }
@@ -214,6 +214,20 @@ public:
         }
 
         rsteps.push_back(st);
+    }
+
+    void resolve_step(
+        int stepi, const std::string prod, src_location caller = CALLER()
+    ) {
+        if(stepi < 0 || stepi >= rsteps.size()) {
+            jerror::warning(stringformat(
+                "step {} is out of range at {}",
+                stepi, caller
+            ));
+        } else {
+            grammar_element &ge = rsteps[stepi].gexpr;
+            ge.resolve_to(prod, caller);
+        }
     }
 
     inline int num_steps() const { return rsteps.size(); }
@@ -342,6 +356,7 @@ public:
     // in the fpl (eg inline or from an abstracted reducer),
     // or a false code block if no such thing was specified.
     code_block reduce_code() const {
+        code_block out;
 
         // abstracted reducers take priority over inline code.
         // this is so that fpl authors can import grammar
@@ -349,12 +364,13 @@ public:
         // as necessary for their particular applications.
         reducer red = abstracted_reducer();
         if(red)
-            return red.code();
+            out = red.code();
         else if(code_for_rule)
-            return code_for_rule;
+            out = code_for_rule;
+        // else return a false code block
 
-        // no specific reduce code for this rule:
-        return code_block();
+        out.mangle_stack_slice_args(reduce_params());
+        return out;
     }
 
     void set_reducer(const reducer &red) {

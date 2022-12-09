@@ -39,6 +39,9 @@ syn match	fplOperator	"}+"
 syn match	fplOperator	":"
 syn match	fplOperator	"("
 syn match	fplOperator	")"
+syn match	fplOperator	","
+syn match	fplOperator	"\["
+syn match	fplOperator	"\]"
 
 " imports
 syn match	fplImport	"`.*`"

@@ -1,4 +1,9 @@
 returncode = 0
-stderr = ""
+stderr = "YAY addition expression = 1.500000
+YAY addition expression = 7.500000
+YAY addition expression = 2.000000
+YAY addition expression = -4.000000
+YAY addition expression = 3.500000
+"
 stdout = "result: 3.500000
 "

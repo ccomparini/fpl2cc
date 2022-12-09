@@ -50,6 +50,10 @@ class productions {
     std::list<std::string> goal; // goal is any of these
     std::map<std::string, code_block> scanners;
 
+    // for precedence lists:
+    std::vector<std::string>   precedence_group_names;
+    std::map<std::string, int> product_precedence;
+
     std::vector<production_rule>    rules;
     std::multimap<std::string, int> rules_for_product; // product -> rule ind
     int anon_product_count; // used to generate unique ids for anonymous rules
@@ -121,7 +125,24 @@ class productions {
     }
 
     // records the fact that the given grammar element exists
-    void record_element(const grammar_element &nge) {
+    void record_element(
+        const grammar_element &nge,
+        src_location caller = CALLER()
+    ) {
+
+        if(!nge) {
+            //internal_error(stringformat(
+            jerror::warning(stringformat(
+                "attempt to record invalid element '{}'", nge
+            ), caller);
+        }
+
+        // (recording placeholder elements is not useful,
+        // and is in fact harmful because you get weird
+        // duplicates)
+        if(nge.is_placeholder())
+            return;
+
         if(element_index.find(nge) == element_index.end()) {
             element_index[nge] = elements.size();
             elements.push_back(nge);
@@ -902,6 +923,10 @@ public:
         all_types.insert(type);
     }
 
+    void set_precedence(const std::string &product, int precedence) {
+        product_precedence[product] = precedence;
+    }
+
     void parse_scanner() {
         std::string name = read_identifier(inp);
         if(name == "") {
@@ -1070,7 +1095,9 @@ public:
         return false_rule;
     }
 
-    void add_rule(production_rule &rule) {
+    // adds and indexes a copy of the rule passed.
+    // returns a rule number.
+    int add_rule(production_rule &rule, src_location caller = CALLER()) {
         int rule_num = rules.size();
         rule.set_rule_number(rule_num);
 
@@ -1078,19 +1105,25 @@ public:
 
         for(int stp = 0; stp < rule.num_steps(); stp++) {
             grammar_element ge = rule.nth_step(stp).gexpr;
+
             record_element(ge);
+
             if(ge.type == grammar_element::Type::NONTERM_SUBEXPRESSION) {
                 int srnum = subrulenum_for_el(ge);
                 if(srnum < 0) {
-                    warn(stringformat("no subrule for {} - bug?", ge));
+                    warn(stringformat(
+                        "no subrule for {} at {} - bug?", ge, caller
+                    ));
                 } else {
                     rules[srnum].set_parent(rule_num, rule.num_steps() - stp);
                 }
             }
         }
-        record_element(rule.product_element());
+        record_element(rule.product_element(), caller);
 
         rules_for_product.insert(std::make_pair(rule.product(), rule_num));
+
+        return rule_num;
     }
 
     void add_preamble(const code_block &code) {
@@ -1363,6 +1396,18 @@ public:
                     else
                         error(inp, "unmatched '}'");
                     break;
+                case '<':
+                case '.':
+                case '>':
+                    // special precedence-related production names:
+                    //  '>>' = the highest precedence product
+                    //  '>'  = the product with precedence one higher than us
+                    //  '.'  = the product for our precedence group
+                    //  '<'  = the product with precedence just lower than us
+                    //  '<<' = the lowest precedence product
+                    expr_str = inp->read_re("(:?<<?)|\\.|(:?>>?)")[0];
+                    type = grammar_element::Type::NONTERM_PREC_PLACEHOLDER;
+                    break;
                 default:
                     // should be the name of a production.
                     expr_str = read_production_name(inp);
@@ -1488,7 +1533,6 @@ public:
 
         auto args = parse_argdecl();
         auto code = read_code();
-        code.mangle_stack_slice_args(args);
 
         if(!code) {
              error(stringformat(
@@ -1498,6 +1542,166 @@ public:
         }
 
         reducers.push_back(reducer(name, args, code));
+    }
+
+    // parses the '->' [production name] in a rule definition
+    std::string read_rule_production() {
+        inp->eat_separator();
+        if(!inp->read_exact_match("->")) {
+            error("expected '->' before production name");
+        }
+
+        inp->eat_separator();
+
+        std::string pname = read_production_name(inp);
+        if(!pname.length()) {
+            error("invalid production name\n");
+        }
+        return pname;
+    }
+
+    void parse_rule_implementation(production_rule &rule) {
+        std::string pname = read_rule_production();
+        if(!pname.length()) {
+            error("invalid production name\n");
+        } else {
+            rule.product(pname);
+
+        }
+
+        inp->eat_separator();
+
+        // next we might have a code block:
+        auto code = read_code();
+        if(code) {
+            rule.code(code);
+        }
+
+        inp->read_byte_equalling(';');
+    }
+
+    // Parses the next rule (if any) and adds it to this.
+    // Returns the new rule number, or -1 if no rule was parsed.
+    int parse_rule() {
+        production_rule rule(inp->filename(), inp->line_number());
+        if(parse_expressions(rule)) {
+            parse_rule_implementation(rule);
+            return add_rule(rule);
+        }
+        return -1;
+    }
+
+    void parse_precedence_group_prods(
+        std::list<std::string> &prods_this_group
+    ) {
+        // we expect 0 or more rules or names. (0 probably
+        // doesn't really make sense, but we'll accept it)
+        bool done = false;
+        while(!done) {
+            inp->eat_separator();
+
+            if(inp->read_byte_equalling(']')) {
+                break;
+            }
+
+            std::string this_product;
+            int rn;
+            if((rn = parse_rule()) >= 0) {
+                this_product = rules[rn].product();
+            } else {
+                this_product = read_production_name(inp);
+                if(!this_product.length()) {
+                    error("expected rule definition or product name");
+                    break;
+                }
+
+                inp->eat_separator();
+                if(!inp->read_byte_equalling(',')) {
+                    done = true;
+                }
+            }
+            prods_this_group.push_back(this_product);
+        }
+    }
+
+    void parse_precedence_group() {
+        // Precedence groups are:
+        //     '[' rule_or_name+ ']' -> group_name rule_code ;
+        //
+        // If it's a rule, rule_or_name is parsed as a regular rule.
+        // Names are just product names, comma terminated (with the
+        // final comma optional).
+        //
+        // What they do is:
+        //   - add group_name to the (global) precedence list; add the
+        //     index to the relative_precedence_index
+        //   - for each rule/product name inside the list,
+        //     - set the relative precedence index for the product
+        //       to the index of the group name
+        //     - create another rule for product -> group_name
+        //   - add a rule:
+        //         > -> group_name ;
+        // (note: the assumption in the above rule is that higher precedence
+        // comes later in the file, and has a greater index)
+        //
+        // The relative precedence index is used to resolve the
+        // special production tokens '<', '.', and '>' to the group name
+        // at index relative precedence - 1, relative precedence, and
+        // relative precedence + 1 respectively.
+        //
+        if(inp->read_byte_equalling('[')) {
+            std::list<std::string> prods_this_group;
+            parse_precedence_group_prods(prods_this_group);
+
+            // "group rule" serves 2 purposes.
+            // The first is precedence linking - the rule itself
+            // is an alias of the next higher precedence product
+            // to the thing the group rule produces.
+            // Second is that it's product is the group name product,
+            // which other things may use via the < . > product aliases
+            // (or as any other product name).
+            production_rule group_rule(inp->filename(), inp->line_number());
+            parse_rule_implementation(group_rule); // (parses the name etc)
+
+            group_rule.add_step(production_rule::step(
+                ">", grammar_element::Type::NONTERM_PREC_PLACEHOLDER,
+                group_rule.product()
+            ));
+            std::string group_name = group_rule.product();
+
+            inp->eat_separator();
+
+
+            // If a comma comes next, we're linking this precedence group
+            // to the group after the comma.
+            // With some effort, we could actually make the comma be a sort
+            // of precedence-setting operator and have it not matter if
+            // the things on the left or right of it are groups or individual
+            // rules (or production names), but for now I'm going to just
+            // parse it here.
+            if(inp->read_byte_equalling(',')) {
+                add_rule(group_rule);
+            }
+
+            int precedence = precedence_group_names.size();
+            set_precedence(group_name, precedence);
+            precedence_group_names.push_back(group_name);
+
+            for(auto prod: prods_this_group) {
+                set_precedence(prod, precedence);
+
+                // and this rule effectively adds the product to the group
+                // by creating a rule:   prod -> group_product
+                production_rule rule(inp->filename(), inp->line_number());
+                rule.add_step(production_rule::step(
+                    prod, grammar_element::Type::NONTERM_PRODUCTION,
+                    group_rule.product()
+                ));
+                rule.code(group_rule.code());
+                rule.product(group_name);
+                add_rule(rule);
+            }
+        }
     }
 
     void parse_fpl() {
@@ -1520,54 +1724,17 @@ public:
             } else if(inp->read_byte_equalling('@')) {
                 std::string directive = read_directive(inp);
                 parse_directive(directive);
-            } else if(inp->read_byte_equalling('}')) {
+            } else if(inp->peek() == '[') {
+                parse_precedence_group();
+            } else if(inp->read_byte_equalling(']')) {
+                error("unmatched ']'\n");
+            } else if(/* { */ inp->read_byte_equalling('}')) {
                 // likely what happened is someone put a }+ inside
                 // a code block.  anyway a floating end brace is
                 // wrong..
                 error("unmatched '}'\n");
             } else {
-                production_rule rule(inp->filename(), inp->line_number());
-                if(parse_expressions(rule)) {
-                    // .. we've read the expressions/steps leading to
-                    // read what the expressions above produce:
-                    inp->eat_separator();
-                    if(!inp->read_exact_match("->")) {
-                        error("expected '->' after parsing rule expressions");
-                    }
-                    inp->eat_separator();
-
-                    std::string pname = read_production_name(inp);
-                    if(!pname.length()) {
-                        error("invalid production name\n");
-                    } else {
-                        rule.product(pname);
-
-                        // if there's no explicit goal, default
-                        // to the product for the first explicit
-                        // rule parsed:
-                        if(goal.empty())
-                            goal = { pname };
-                    }
-
-                    inp->eat_separator();
-
-                    // next we expect either ';' or a code block.
-                    // if it's ';' we read it and move on;  otherwise
-                    // it's a code block for the rule.
-                    if(!inp->read_byte_equalling(';')) {
-                        auto code = read_code();
-                        if(!code) {
-                            error(stringformat(
-                                "expected ';' or code block for rule {}",
-                                rule.to_str()
-                            ));
-                        }
-                        code.mangle_stack_slice_args(rule.reduce_params());
-                        rule.code(code);
-                    }
-
-                    add_rule(rule);
-                }
+                parse_rule();
             }
         } while(!inp->eof());
     }
@@ -1963,6 +2130,64 @@ public:
         return out;
     }
 
+    void resolve_precedence() {
+        for(int rulei = 0; rulei < rules.size(); rulei++) {
+            production_rule &rule = rules[rulei];
+            std::string prod = rule.product();
+            auto prp = product_precedence.find(prod);
+            for(int stepi = 0; stepi < rule.num_steps(); stepi++) {
+                grammar_element ge = rule.nth_step(stepi).gexpr;
+                if(ge.is_placeholder()) {
+                    int pg_ind = -1;
+                    std::string errmsg;
+                    if(prp == product_precedence.end()) {
+                        errmsg = stringformat(
+                            "{} is not in any precedence list", prod
+                        );
+                    } else if(ge.expr == "<<") {
+                        pg_ind = 0;
+                    } else if(ge.expr == "<") {
+                        pg_ind = prp->second - 1;
+                        if(pg_ind < 0) {
+                            errmsg = stringformat(
+                                "nothing has precedence less than {}", prod
+                            );
+                        }
+                    } else if(ge.expr == ".") {
+                        pg_ind = prp->second;
+                    } else if(ge.expr == ">") {
+                        pg_ind = prp->second + 1;
+                        if(pg_ind >= precedence_group_names.size()) {
+                            errmsg = stringformat(
+                                "nothing has precedence greater than {}", prod
+                            );
+                        }
+                    } else if(ge.expr == ">>") {
+                        pg_ind = precedence_group_names.size() - 1;
+                    }
+
+                    if(pg_ind < 0 || pg_ind >= precedence_group_names.size()) {
+                        if(!errmsg.size()) {
+                            errmsg = stringformat(
+                                "no precedence defined for {}", ge.expr
+                            );
+                        } // else there's already a message for the situation
+                    }
+
+                    if(errmsg.size()) {
+                        error(rule.location(), stringformat(
+                            "can't resolve '{}' relative to '{}': {}",
+                            ge.expr, prod, errmsg
+                        ));
+                    } else {
+                        rule.resolve_step(stepi, precedence_group_names[pg_ind]);
+                        record_element(rule.nth_step(stepi).gexpr);
+                    }
+                } // else it's not something we need to resolve
+            }
+        }
+    }
+
     void check_missing_types() {
         std::set<std::string> missing_types;
         int num_rules = 0;
@@ -1995,6 +2220,27 @@ public:
         }
     }
 
+    const std::string default_goal() const {
+        // default goal is either:
+        // 1) whatever the first precedence group produces
+        //    (i.e. the lowest precedence expression in the
+        //    grammar))
+        if(precedence_group_names.size())
+            return precedence_group_names[0];
+
+        // 2) whatever the first top-level rule produces.
+        //    "top level" means not a subrule.  Ideally, this
+        //    is the first rule specified by the fpl author.
+        for(auto rule : rules) {
+            if(!rule.is_subexpression()) {
+                return rule.product();
+            }
+        }
+
+        // 3) a production named "goal"
+        return "goal";
+    }
+
     // determines goal(s), generates states, matches up reducers, 
     // reports errors, etc.
     // call this before generating code.
@@ -2003,6 +2249,8 @@ public:
             error("No rules found\n");
         }
 
+        resolve_precedence();
+
         check_missing_types();
 
         if(opts.entry_points.size()) {
@@ -2010,9 +2258,7 @@ public:
         }
 
         if(goal.empty()) {
-            // no particular goal products specified, so we default
-            // to whatever the first rule produces:
-            goal.push_back(rules[0].product());
+            goal.push_back(default_goal());
         }
 
         apply_reducers();
