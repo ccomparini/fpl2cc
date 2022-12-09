@@ -1204,7 +1204,9 @@ public:
         @}-@
 
         @for(auto sepc : prds.separator_code) {-@
-            @sepc.format_scoped()@
+            {
+                @sepc.format()@
+            }
         @}-@
 
         @/* catchall: if nothing returned a length yet, no separator */@

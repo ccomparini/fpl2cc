@@ -89,13 +89,6 @@ struct code_block {
         return out;
     }
 
-    // As format() but wrapped in { } so that if the code is
-    // declares a local variable or such, that variable will
-    // be scoped.
-    // This will probably only work with code fragments.
-    std::string format_scoped() const {
-        return "\n{\n" + format() + "\n}\n";
-    }
 
 private:
     static inline bool maybe_name_start(const std::string &str, size_t pos) {
