@@ -105,6 +105,10 @@ public:
             return "";
         }
 
+        int num_capgroups() const {
+            return matches.size() - 1;
+        }
+
         operator bool() const {
             return matches.size() > 0;
         }

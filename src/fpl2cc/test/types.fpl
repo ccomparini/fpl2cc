@@ -1,0 +1,147 @@
+
+@grammar json
+@default_main
+
++{
+#include<memory>
+#include<string>
+#include<vector>
+#include<variant>
+
+struct json_object;
+struct json_array;
+struct json_null {
+    std::string to_str() const { return "null"; }
+};
+
+using json_object_p = std::shared_ptr<json_object>;
+using json_array_p  = std::shared_ptr<json_array>;
+using json_string_p = std::shared_ptr<std::string>;
+
+struct json_value{
+    std::variant<
+        json_object_p,
+        json_array_p,
+        json_string_p,
+        double,
+        json_null,
+        bool
+    > val;
+
+    json_value() : val(json_null()) { }
+
+    json_value(json_object_p x) : val(x) { }
+    json_value(json_array_p  x) : val(x) { }
+    json_value(json_string_p x) : val(x) { }
+    json_value(double        x) : val(x) { }
+    json_value(json_null     x) : val(x) { }
+    json_value(bool          x) : val(x) { }
+};
+
+struct json_object {
+    struct member {
+        json_string_p key;
+        json_value    val;
+        std::string to_str() const {
+            return stringformat("{}: '{}'", *key, val);
+        }
+        member() { }
+        member(const json_string_p &k, const json_value &v) :
+            key(k), val(v) {
+        }
+    };
+    using memlist = std::vector<member>;
+    memlist mems;
+    std::string to_str() const {
+        return stringformat("[{} k/v pairs]", mems.size());
+    }
+
+    json_object() { }
+    json_object(const std::vector<member> &m) : mems(m) { }
+};
+
+using ellist = std::vector<json_value>;
+struct json_array {
+    ellist vals;
+    std::string to_str() const {
+        return stringformat("[{} elements]", vals.size());
+    }
+    json_array() {}
+    json_array(const std::vector<json_value> &a) : vals(a) { }
+};
+
+}+
+
+@produces json_value
+
+@type_for value   json_value
+
+@type_for member  json_object::member
+@type_for object  json_object_p
+
+@type_for array   json_array_p
+
+@type_for string  json_string_p
+@type_for number  float
+@type_for null    json_null
+@type_for boolean bool
+
+@type_for members json_object::memlist
+@type_for elements ellist
+
++value(null_val) +{ return json_null(); }+
+
++boolean(true_val)  +{ return true;  }+
++boolean(false_val) +{ return false; }+
+
++string(src) +{ return make_shared<std::string>(src.capgroup(0)); }+
+
++number(float_val) +{ return std::stod(float_val); }+
+# wtb also some way to say "match anything and just name the param this"
+# (at least for cases where there are multiple ways with a single param...)
++number(integer)   +{ return std::stod(integer); }+
+
++object(members) +{
+    if(members@count())
+        return std::make_shared<json_object>(members[0]);
+
+    // empty object:
+    return std::make_shared<json_object>();
+}+
+
++array(elements) +{
+    if(elements@count())
+        return std::make_shared<json_array>(elements[0]);
+
+    return std::make_shared<json_array>();
+}+
+
++member(key value) +{
+    return json_object::member(key, value);
+}+
+
++members(member) +{
+    return json_object::memlist(1, member);
+}+
+
++members(member members) +{
+    // this is a shocking number of extra copies and general inefficiency
+    json_object::memlist out(members.size() + 1);
+    out.push_back(member);
+    out.insert(out.end(), members.begin(), members.end());
+    return out;
+}+
+
++elements(element) +{
+    return ellist(1, element);
+}+
+
++elements(element elements) +{
+    // yay lots of copies.  fix when we have parens
+    ellist out(elements.size() + 1);
+    out.push_back(element);
+    out.insert(out.end(), elements.begin(), elements.end());
+    return out;
+}+
+
+
