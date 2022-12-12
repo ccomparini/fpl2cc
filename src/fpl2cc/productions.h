@@ -1605,24 +1605,40 @@ public:
             if(inp->read_byte_equalling(']')) {
                 break;
             }
-
-            std::string this_product;
-            int rn;
-            if((rn = parse_rule()) >= 0) {
-                this_product = rules[rn].product();
+            
+            size_t rew_pos = inp->current_position();
+            std::string this_product = read_production_name(inp);
+            inp->eat_separator();
+            if(inp->read_byte_equalling(',')) {
+                // this_product is the name of the product; proceed
+            } else if(inp->peek() == ']') {
+                // this_product is the last product name in the list;
+                // proceed
             } else {
-                this_product = read_production_name(inp);
-                if(!this_product.length()) {
-                    error("expected rule definition or product name");
-                    break;
-                }
-
-                inp->eat_separator();
-                if(!inp->read_byte_equalling(',')) {
-                    done = true;
+                // this_product is not a simple product name.  The
+                // other valid possibility is it's a rule producing
+                // the product to add to the group, so we need to
+                // rewind and parse the rule:
+                inp->go_to(rew_pos);
+                int rn = parse_rule();
+                if(rn >= 0) {
+                    this_product = rules[rn].product();
+                } else {
+                    // failed parsing the rule as well. it probably
+                    // already tossed an error, but clear the result
+                    // anyway:
+                    this_product = "";
                 }
             }
-            prods_this_group.push_back(this_product);
+
+            if(this_product.length()) {
+                prods_this_group.push_back(this_product);
+            } else {
+                error(SourcePosition(inp, rew_pos),
+                    "expected rule definition or product name"
+                );
+                done = true;
+            }
         }
     }
 
