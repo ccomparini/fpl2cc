@@ -1082,18 +1082,6 @@ public:
         return rules[topmost];
     }
 
-    // If the grammar element passed refers to a subexpression, returns the
-    // rule for that subexpression.  Otherwise, returns a false rule.
-    // The returned rule's lifespan should not be expected to exceeed
-    // the lifespan of *this.
-    const production_rule &subrule_for_el(const grammar_element &el) const {
-        int srn = subrulenum_for_el(el);
-        if(srn >= 0) {
-            return rules.at(srn);
-        }
-        static production_rule false_rule;
-        return false_rule;
-    }
 
     // adds and indexes a copy of the rule passed.
     // returns a rule number.
