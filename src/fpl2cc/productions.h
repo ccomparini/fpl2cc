@@ -1169,10 +1169,18 @@ public:
         return src->read_re("([A-Za-z][A-Za-z0-9_]+)\\s*")[1];
     }
 
-    inline std::list<std::string> imported_files() const {
-        // hopefully the compiler inlines this and doesn't copy all
-        // these strings...
-        return imports;
+    // Returns the set of names of all imported files.
+    inline std::set<std::string> imported_files() const {
+        // Hopefully the compiler does something smart and doesn't
+        // copy all these strings over and over.. :/
+        std::set<std::string> out;
+        out.insert(imports.begin(), imports.end());
+        // for(auto it = sub_productions.begin(); it != sub_productions.end(); it++) {
+        for(auto const &sub : sub_productions) {
+            auto subimps = sub.second->imported_files();
+            out.insert(subimps.begin(), subimps.end());
+        }
+        return out;
     }
 
     // Searches ancestors to see if any import the file with the given
