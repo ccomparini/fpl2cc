@@ -1756,6 +1756,10 @@ public:
                 parse_rule();
             }
         } while(!inp->eof());
+
+        // we do this here (right after parsing) so that it
+        // works right for imports
+        resolve_precedence_expressions();
     }
 
     // returns a set of strings representing the set of products
@@ -2149,10 +2153,13 @@ public:
         return out;
     }
 
-    void resolve_precedence() {
+    void resolve_precedence_expressions() {
         for(int rulei = 0; rulei < rules.size(); rulei++) {
             production_rule &rule = rules[rulei];
-            std::string prod = rule.product();
+            // the product to which these expressions are relative
+            // is the product of the parentmost rule so that you
+            // can use relative expressions in subexpressions:
+            std::string prod = parentmost_rule(rule).product();
             auto prp = product_precedence.find(prod);
             for(int stepi = 0; stepi < rule.num_steps(); stepi++) {
                 grammar_element ge = rule.nth_step(stepi).gexpr;
@@ -2268,7 +2275,6 @@ public:
             error("No rules found\n");
         }
 
-        resolve_precedence();
 
         check_missing_types();
 

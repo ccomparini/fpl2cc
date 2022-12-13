@@ -4,29 +4,20 @@
 
 (expression ';'^)*:statement -> statements ;
 
-number                    -> expression ;
-'('^ expression ')'^      -> expression ;
-
-`subex_mult`.multiplication_expression -> expression ;
+# Primary expressions are in their own fpl not because it's
+# good structure (it's not), but to test if subexpressions
+# in subfpl dtrt.  (At one point, there was a bug involving
+# name collisions among imported subexpressions)
+`expression` -> expression ;
 
 # functions:
-'sum' argument_list:args  -> sum ;
+'sum' argument_list:args -> sum ;
 sum -> expression ;
 
 # this is an argument list in the c style (though it's inherently
 # variadic), where commas are required before any but the first
 # element:
 '('^ (expression (','^ expression)*)?:args ')'^ -> argument_list ;
-
-natural_log_base -> number ;
-pi               -> number ;
-
-'e'  -> natural_log_base ;
-'pi' -> pi ;
-'π'  -> pi ;
-
-/[0-9]*\.[0-9]+/:digits   -> number ;
-/[0-9]+/:digits           -> number ;
 
 ####### implementations:
 +{
@@ -38,12 +29,25 @@ pi               -> number ;
 +natural_log_base +{ return M_E; }+
 +pi               +{ return M_PI; }+
 
-+multiplication_expression(terms) +{
+
++add(lhs, rhs) +{
+    return lhs + rhs;
+}+
+
++sub(lhs, rhs) +{
+    return lhs - rhs;
+}+
+
++mult(terms) +{
     double result = terms[0];
     for(int ind = 1; ind < terms@count(); ind++) {
         result *= terms[ind];
     }
     return result;
+}+
+
++div(numerator, denominator) +{
+    return numerator/denominator;
 }+
 
 @type_for argument_list std::vector<double>
