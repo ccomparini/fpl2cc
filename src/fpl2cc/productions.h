@@ -1075,7 +1075,8 @@ public:
         const production_rule &rule
     ) const {
         int topmost = rule.rule_number();
-        while(int prulenum = rules[topmost].parent_rule_number() >= 0) {
+        int prulenum;
+        while((prulenum = rules[topmost].parent_rule_number()) >= 0) {
             topmost = prulenum;
         }
 
