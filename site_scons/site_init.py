@@ -41,6 +41,7 @@ def run_and_capture_action(program, varlist=[]):
     # Returns a tuple of bytes objects containing whatever the subproc
     # wrote to stdout and stderr (respectively)
     def run_interactively(command):
+        print(f"running {command} interactively\n", file=sys.stderr);
         pout = b""
         perr = b""
         returncode = -255
@@ -87,10 +88,14 @@ def run_and_capture_action(program, varlist=[]):
         proc = subprocess.Popen(command,
             stdin=sys.stdin, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         )
-        pout, perr = proc.communicate(timeout=timeout)
-        if(len(perr)):
-            print(perr.decode("utf-8"), file=sys.stderr)
-        
+        try:
+            pout, perr = proc.communicate(timeout=timeout)
+            if(len(perr)):
+                print(perr.decode("utf-8"), file=sys.stderr)
+        except:
+            proc.kill()
+            raise
+
         return proc.returncode, pout, perr
 
     # program should really be program + arguments, but support
