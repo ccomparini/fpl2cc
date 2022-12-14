@@ -142,7 +142,7 @@ public:  // XXX this is a terible hack - make a reasonable way
 }+
 
 +directive(produces) +{
-    productions->set_reduce_type(produces);
+    productions->set_output_type(produces);
     return "@produces";
 }+
 

@@ -208,17 +208,17 @@ public:
         }
 
         // phase out if possible, because this only supports the
-        // top reduce_type and that's wacky.
-        @prds.reduce_type@ val(const std::string &caller = CALLER()) const {
-            if(!std::holds_alternative<@prds.reduce_type@>(red)) {
+        // top output_type() and that's wacky.
+        @prds.output_type()@ val(const std::string &caller = CALLER()) const {
+            if(!std::holds_alternative<@prds.output_type()@>(red)) {
                 jerror::error(stringformat(
-                    "FAILULAR: product holds type {} and not @prds.reduce_type@ at {}\n",
+                    "FAILULAR: product holds type {} and not @prds.output_type()@ at {}\n",
                     type_name(), caller
                 ));
-                @prds.reduce_type@ dummy;
+                @prds.output_type()@ dummy;
                 return dummy;
             }
-            return std::get<@prds.reduce_type@>(red);
+            return std::get<@prds.output_type()@>(red);
         }
 
         std::string capgroup(int capi) const {
@@ -932,7 +932,7 @@ public:
 
     // not passing by reference here - instead, crossing fingers
     // and hoping it really just gets inlined.
-    inline void post_parse(@prds.reduce_type@ result) {
+    inline void post_parse(@prds.output_type()@ result) {
         @if(prds.post_parse) {@
             @prds.post_parse.format()@
         @}@
@@ -1006,7 +1006,7 @@ public:
     // Returns whatever it got, regardless of errors,
     // which might mean returning a default of whatever
     // the reduce type is.
-    @prds.reduce_type@ parse() {
+    @prds.output_type()@ parse() {
         // we're parsing from initial state...
         reset();
 

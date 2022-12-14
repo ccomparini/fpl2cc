@@ -34,7 +34,7 @@ class productions {
     std::map<std::string, subgrammar_p> sub_productions; // grammar name -> productions
     std::set<std::string> exported_products; // exported to that of which this is a sub
 
-    std::string reduce_type; // default reduce type
+    std::string final_type; // this is what the parser returns. set by @produces or inferred
     std::map<std::string, std::string> type_for_product; // (c++ reduce type for particular product)
     std::set<std::string> all_types; // for deduplication
 
@@ -821,7 +821,7 @@ public:
 
         // last resort, use the @produces type. (possibly this part
         // could be implemented using the inheritance, above)
-        return reduce_type;
+        return final_type;
     }
 
     // and this returns the type to use for a particular grammar
@@ -909,10 +909,14 @@ public:
         ));
     }
 
-    void set_reduce_type(const std::string &rt) {
+    void set_output_type(const std::string &rt) {
         all_types.insert(rt);
-        reduce_type = rt;
+        final_type = rt;
     }
+    std::string output_type() const {
+        return final_type;
+    }
+
     void set_post_parse(const code_block &cb)  { post_parse = cb; }
     void set_post_reduce(const code_block &cb) { post_reduce = cb; }
     void set_default_main(bool def)            { default_main = def; }
@@ -1022,7 +1026,7 @@ public:
         } else if(dir == "post_reduce") {
             post_reduce = code_for_directive(dir);
         } else if(dir == "produces") {
-            set_reduce_type(arg_for_directive());
+            set_output_type(arg_for_directive());
         } else if(dir == "scanner") {
             parse_scanner();
         } else if(dir == "separator") {
@@ -2275,7 +2279,6 @@ public:
             error("No rules found\n");
         }
 
-
         check_missing_types();
 
         if(opts.entry_points.size()) {
@@ -2285,6 +2288,10 @@ public:
         if(goal.empty()) {
             goal.push_back(default_goal());
         }
+
+        // resolve goal/produces types here:
+        //   - if no produces:
+        //     - if all goals produce the same thing, set that as the @produces type
 
         apply_reducers();
         generate_states(goal);
@@ -2326,7 +2333,7 @@ public:
             // specific types set for specific productions.
             // It should cover the "check abstract fpl grammar"
             // case correctly, so I'm going with it for the moment.
-            set_reduce_type("check_only");
+            set_output_type("check_only");
         }
         resolve(caller);
         return reformat_code(fpl_x_parser(*this, opts), opts.output_fn);
