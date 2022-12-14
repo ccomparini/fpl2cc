@@ -1781,8 +1781,8 @@ public:
             
             if(strl == endrl) {
                 error(stringformat(
-                    "No rule for '{}' in {}\n",
-                    wanted, inp->filename()
+                    "No rule for '{}' in {}, needed to generate {}\n",
+                    wanted, inp->filename(), prod
                 ));
             }
 
