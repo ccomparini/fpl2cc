@@ -13,7 +13,7 @@
     @opts.to_str()@
 
   calculated goal(s):
-    @prds.goal@
+    @prds.goals@
  */
 
 @for(auto fn : opts.impl_sources) {@
@@ -1051,7 +1051,7 @@ public:
             errm = "incomplete input";
         } else if(!result_is_goal()) {
             errm = stringformat(
-                "parsed a {} = {}, but that's not a goal (@prds.goal@)",
+                "parsed a {} = {}, but that's not a goal (@prds.goals@)",
                 element_str(got_id), got
             );
         }
@@ -1190,7 +1190,7 @@ public:
 
     static bool is_goal(int el_id) {
         switch(el_id) {
-            @for(auto gstr : prds.goal) {-@
+            @for(auto gstr : prds.goals) {-@
                 case ElementID::_@gstr@: return true;
             @}@
             default: return false;

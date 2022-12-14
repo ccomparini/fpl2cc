@@ -1,0 +1,15 @@
+
+#
+#  test if fpl-generated types are even vaguely sane
+#
+
+
+@default_main
+@goal done
+@type_for done std::string
+'shaddap' -> done;
+
+#@goal done2
+#@type_for done2 int
+#'woot' -> done2 +{ return 23; }+
+

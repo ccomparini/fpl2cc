@@ -47,7 +47,7 @@ class productions {
     code_block main_guts;
     std::list<code_block> preamble;
     std::list<code_block> parser_members;
-    std::list<std::string> goal; // goal is any of these
+    std::list<std::string> goals; // goal is any of these
     std::map<std::string, code_block> scanners;
 
     // for precedence lists:
@@ -969,10 +969,10 @@ public:
             std::string grammar_name = raw_goal.substr(0, grammar_end);
             std::string production   = raw_goal.substr(grammar_end + 1);
             import_grammar(subgrammar(grammar_name, whence), production);
-            goal.push_back(production);
+            goals.push_back(production);
         } else {
             // it's a simple goal name:
-            goal.push_back(raw_goal);
+            goals.push_back(raw_goal);
         }
     }
 
@@ -2271,6 +2271,31 @@ public:
         return "goal";
     }
 
+    void infer_output_type() {
+        if(output_type().length() == 0) {
+            // We don't know our output type, so infer it from goals.
+            // In theory we could return a union or some functional
+            // equivalent, but for the moment we require that all
+            // goals have the same type.
+            std::map<std::string, std::string> goal_for_type;
+            for(auto goal: goals) {
+                goal_for_type[type_for(goal)] = goal;
+            }
+            if(goal_for_type.size() == 1) {
+                set_output_type(goal_for_type.begin()->first);
+            } else {
+                // more than one type:  report a comflict
+                std::string conflicts;
+                for(auto gft : goal_for_type) {
+                    conflicts += stringformat(
+                        "    goal '{}' produces {}\n", gft.second, gft.first
+                    );
+                }
+                error(stringformat("can't infer output type.\n{}", conflicts));
+            }
+        } // else we already know our output type
+    }
+
     // determines goal(s), generates states, matches up reducers, 
     // reports errors, etc.
     // call this before generating code.
@@ -2281,20 +2306,20 @@ public:
 
         check_missing_types();
 
+        // Goals can be overridden by options.  This lets
+        // users test subsets of their grammars (or extract
+        // subsets for other purposes).
         if(opts.entry_points.size()) {
-            goal = opts.entry_points;
+            goals = opts.entry_points;
         }
 
-        if(goal.empty()) {
-            goal.push_back(default_goal());
+        if(goals.empty()) {
+            goals.push_back(default_goal());
         }
 
-        // resolve goal/produces types here:
-        //   - if no produces:
-        //     - if all goals produce the same thing, set that as the @produces type
-
+        infer_output_type();
         apply_reducers();
-        generate_states(goal);
+        generate_states(goals);
         dump_states(opts);
         resolve_actions();
         check_rules();
