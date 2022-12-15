@@ -2210,7 +2210,9 @@ public:
                             ge.expr, prod, errmsg
                         ));
                     } else {
-                        rule.resolve_step(stepi, precedence_group_names[pg_ind]);
+                        rule.resolve_placeholder(
+                            stepi, precedence_group_names[pg_ind]
+                        );
                         record_element(rule.nth_step(stepi).gexpr);
                     }
                 } // else it's not something we need to resolve

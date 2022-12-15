@@ -94,7 +94,7 @@ struct grammar_element {
         return Type_to_str(type);
     }
 
-    void resolve_to(
+    void resolve_placeholder(
         const std::string prod_name, src_location caller = CALLER()
     ) {
         if(!is_placeholder()) {

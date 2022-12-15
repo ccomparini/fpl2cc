@@ -216,7 +216,7 @@ public:
         rsteps.push_back(st);
     }
 
-    void resolve_step(
+    void resolve_placeholder(
         int stepi, const std::string prod, src_location caller = CALLER()
     ) {
         if(stepi < 0 || stepi >= rsteps.size()) {
@@ -226,7 +226,7 @@ public:
             ));
         } else {
             grammar_element &ge = rsteps[stepi].gexpr;
-            ge.resolve_to(prod, caller);
+            ge.resolve_placeholder(prod, caller);
         }
     }
 
