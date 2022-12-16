@@ -30,6 +30,8 @@
 #
 
 @produces double
+@type_for integer int
+@type_for real double
 @default_main
 @comment_style c
 
