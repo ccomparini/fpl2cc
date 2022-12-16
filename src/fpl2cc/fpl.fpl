@@ -20,28 +20,17 @@ struct quantifier {
     quantifier(int mn, int mx) : min(mn), max(mx) { }
 };
 
-/*
-// XXX maybe implement this and all the predeclarations via
-// some kind of fpl feature.
-typedef std::variant<
-    std::string,
-    Productions *, // the final thing
-    ProductionRule,
->;
- */
+// probably want some kind of smart pointer if we're actually going
+// to use this:
+using productions_ptr = Productions *;
 }+
 
-@produces Productions *
+@produces productions_ptr
 
 
 @internal +{
 public:  // XXX this is a terible hack - make a reasonable way
-    Productions *productions;  // XXX this too.. @params?  something? naming is hard
-                               // @model_class? @implementation? @apply_to?
-                               // if @apply_to one could abstract further
-                               // by having grammar to call methods in
-                               // the @apply_to instance, which could be
-                               // language independent
+    productions_ptr productions;
 }+
 
 @type_for grammar_element GrammarElement
@@ -151,7 +140,7 @@ public:  // XXX this is a terible hack - make a reasonable way
     return "@separator";
 }+
 
-@type_for items Productions*
+@type_for items productions_ptr
 +items(items) +{
     // everything will already have been addded to the productions
     // passed, so just return (a pointer to) it:
