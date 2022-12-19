@@ -8,7 +8,7 @@
 @separator none
 # XXX idea:  @+ starts an indented expansion where
 # everything to the left of the @+ on the same line
-# gets substituted in for newlins in the expansion.
+# gets substituted in for newlines in the expansion.
 # that way you can keep indent or do line comments 
 # or whatever.  or maybe '@>'?
 # 
@@ -44,7 +44,7 @@ text+:chunks -> fragment ;
 # or expressions. For example, to set "fruitbat" to 10 more
 # than the current value of x, you might do:
 #   @declare fruitbat: x + 10@
-'@declare'^ /\s*/^ identifier:name_decl ':'^ /(?:[^@]|(?:@@))*/:value '@'^ /\n?/^ -> fragment ;
+leading_ws? '@declare'^ /\s*/^ identifier:name_decl ':'^ /(?:[^@]|(?:@@))*/:value '@'^ /\n?/^ -> fragment ;
 
 # Tells the jemp processor to use the given text as the format
 # string in a call to stringformat() whenever it appears that
