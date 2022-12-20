@@ -1,6 +1,7 @@
 #ifndef STRINGFORMAT_H
 #define STRINGFORMAT_H
 
+#include "is_iterable.h"
 #include "to_hex.h"
 
 #include <cstdlib>
@@ -81,22 +82,6 @@ struct _std_to_string_exists_for<T,
     : std::true_type
 {};
 
-template <typename T, typename = int>
-struct _is_iterable
-    : std::false_type
-{};
-
-// uhh let's say it's iterable if it has a "begin" method
-// (or, sloppily, anything called "begin")
-// or actually apparently... gah I hate c++.
-// just try to make something work at all.  std::begin.
-// whatevs.  shipit.
-template <typename T>
-//struct _is_iterable <T, decltype(&T::begin, 0)> // apparently begin doesn't count as a member?
-struct _is_iterable <T, decltype(std::begin(std::declval<T&>()), 0)>
-    : std::true_type
-{};
-
 template<typename T>
 std::string _stringformat(T &in, const std::string &opts = "") {
     if constexpr (std::is_convertible_v<T, std::string> or
@@ -113,7 +98,7 @@ std::string _stringformat(T &in, const std::string &opts = "") {
         // ... or std::to_string.  can't figure out how to make it
         // find this with just one xxx_exists_for.  moving on:
         return std::to_string(in);
-    } else if constexpr (_is_iterable<T>::value) {
+    } else if constexpr (is_iterable(T)) {
         // or if it's iterable, recursively compose something
         // from its elements:
         std::string out;
