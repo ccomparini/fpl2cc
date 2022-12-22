@@ -8,6 +8,7 @@
 
 #include "util/c_str_escape.h"
 #include "util/jerror.h"
+#include "util/join.h"
 #include "util/reformat_code.h"
 #include "util/src_location.h"
 #include "util/stringformat.h"
@@ -1766,11 +1767,22 @@ public:
         resolve_precedence_expressions();
     }
 
+    // Returns an arbitrary (but better than nothing) file:line
+    // source location for the product passed.
+    std::string prod_location(const std::string &prod) const {
+        auto first_rule_i = rules_for_product.lower_bound(prod);
+        if(first_rule_i != rules_for_product.end()) {
+            return rules[first_rule_i->second].location();
+        }
+        return stringformat("(no location available for {})", prod);
+    }
+
     // returns a set of strings representing the set of products
     // needed to create the product passed (including the product
     // passed)
     std::set<std::string> dependent_products(const std::string &prod) const {
         std::list<std::string> all_wanted = { prod };
+        std::set<std::string> missing;
         std::set<std::string> out;
 
         // NOTE I'm assuming here that we can append to a list
@@ -1784,10 +1796,7 @@ public:
             auto endrl = rules_for_product.upper_bound(wanted);
             
             if(strl == endrl) {
-                error(stringformat(
-                    "No rule for '{}' in {}, needed to generate {}\n",
-                    wanted, inp->filename(), prod
-                ));
+                missing.insert(wanted);
             }
 
             for(auto rit = strl; rit != endrl; ++rit) {
@@ -1804,6 +1813,13 @@ public:
                      }
                 }
             }
+        }
+
+        if(missing.size()) {
+            error(prod_location(prod), stringformat(
+                "Missing the following products for '{}':\n    {}\n",
+                prod, join(missing, ",\n    ")
+            ));
         }
 
         return out;
