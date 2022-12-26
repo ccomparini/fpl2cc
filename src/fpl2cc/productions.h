@@ -1777,6 +1777,14 @@ public:
         return stringformat("(no location available for {})", prod);
     }
 
+    // Returns true if nothing creates the product passed.
+    // Used for error checking.
+    bool nothing_creates(const std::string &prod) const {
+        auto strl  = rules_for_product.lower_bound(prod);
+        auto endrl = rules_for_product.upper_bound(prod);
+        return strl == endrl;
+    }
+
     // returns a set of strings representing the set of products
     // needed to create the product passed (including the product
     // passed)
@@ -1794,21 +1802,24 @@ public:
 
             auto strl  = rules_for_product.lower_bound(wanted);
             auto endrl = rules_for_product.upper_bound(wanted);
-            
-            if(strl == endrl) {
-                missing.insert(wanted);
-            }
 
             for(auto rit = strl; rit != endrl; ++rit) {
                 production_rule rule = rules[rit->second];
 
-                // any rules needed to generate the rule we just pushed are
-                // also potentially relevant:
+                // any rules needed to generate the thing we just pushed
+                // are also potentially relevant:
                 for(int stepi = 0; stepi < rule.num_steps(); ++stepi) {
                      production_rule::step step = rule.nth_step(stepi);
                      if(step && step.is_nonterminal()) {
                          if(!out.count(step.production_name())) {
-                             all_wanted.push_back(step.production_name());
+                             const std::string next = step.production_name();
+                             all_wanted.push_back(next);
+                             if(nothing_creates(next)) {
+                                 missing.insert(stringformat(
+                                     "{} (needed by {}, {})",
+                                     next, rule.product(), rule.location()
+                                 ));
+                             }
                          }
                      }
                 }
@@ -1817,8 +1828,8 @@ public:
 
         if(missing.size()) {
             error(prod_location(prod), stringformat(
-                "Missing the following products for '{}':\n    {}\n",
-                prod, join(missing, ",\n    ")
+                "missing the following elements, needed for '{}':\n    {}\n",
+                prod, join(missing, "\n    ")
             ));
         }
 
