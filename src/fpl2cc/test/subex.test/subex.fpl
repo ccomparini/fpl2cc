@@ -1,6 +1,7 @@
 
 @produces double
 @goal statements
+@comment_style c
 
 (expression ';'^)*:statement -> statements ;
 
