@@ -1036,7 +1036,7 @@ public:
             // recognized something, but that something didn't
             // fit the bigger picture).  Otherwise, it means we
             // got some generally unrecognized input:
-            if(got_id) {
+            if(got_id >= 0) {
                 errm = stringformat(
                     "unexpected {} ({})", element_str(got_id), got
                 );
