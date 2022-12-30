@@ -22,6 +22,15 @@ def run_and_capture_action(program, varlist=[]):
 
         env.CompileFoo("xyz.bar", [ "xyz.foo" ], CAPFILE="xyz.out")
 
+        The following environment variables apply:
+            CAPFILE=<filename>  - Tells where to put the capture
+            IGNORE_EXIT=<val>   - If set, ignore the exit value for purposes
+                                  of determining if the action worked.
+                                  The specific exit value is still captured
+                                  and written to the capfile.
+            INTERACTIVE=<val>   - If true, run interactively, passing stderr
+                                  through and reading input from stdin
+
         The generated esml target files contain objects with the following
         fields:
             'returncode': <exit value of the program>
@@ -136,9 +145,8 @@ def run_and_capture_action(program, varlist=[]):
         # substitute $TARGET etc into the command strings:
         command = command_and_args(target, source, env)
 
-        # XXX see if we need this.
+        # (for reporting)
         strcommand = strfunction(target, source, env)
-
         #print(f"Going to run:\n    {strcommand}\n", file=sys.stderr);
 
         if interactive:
@@ -147,10 +155,10 @@ def run_and_capture_action(program, varlist=[]):
             returncode, pout, perr = run_normally(command)
 
         if(returncode < 0):
-             # process died of some signal (interrupt, segfault, whatever):
-             signame = signal.Signals(-returncode).name
-             msg = f"\n{signame} ({returncode}) failure on command \"{strcommand}\"\n"
-             print(msg, file=sys.stderr)
+            # process died of some signal (interrupt, segfault, whatever):
+            signame = signal.Signals(-returncode).name
+            msg = f"\n{signame} ({returncode}) failure on command \"{strcommand}\"\n"
+            print(msg, file=sys.stderr)
 
         with open(capfile, mode='wb') as outf:
             outf.write(bytes(esml.dumps( {
@@ -159,6 +167,13 @@ def run_and_capture_action(program, varlist=[]):
                     'stdout':     pout
                 }
             ), encoding='utf-8', errors='ignore'))
+
+        if(env.get('IGNORE_EXIT', False)):
+            # ignore "real" exit codes (which came from the program),
+            # but do consider it failed if the program was killed by
+            # a signal (by falling through)
+            if(returncode >= 0):
+                return 0;
 
         return returncode
 
