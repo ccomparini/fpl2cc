@@ -73,7 +73,7 @@ sum -> expression ;
     statement@foreach([](const Product &el)->void {
        std::cout << stringformat("{}\n", el.val());
     });
-    return 23;
+    return statement@count();
 }+
 
 @default_main
