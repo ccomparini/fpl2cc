@@ -148,7 +148,9 @@ for test_dir in test_dirs:
         # call the test lang compile rule for the soure:
         test_lang_builder = getattr(env, 'FPLTestLang_' + language)
         test_lang_builder(
-            result_file, [ src_file ], INTERACTIVE=interactive
+            result_file, [ src_file ],
+            INTERACTIVE=interactive,
+            QUIET=True  # avoid spam when testing errors
         )
         env.CompareOut(success_file, [ expected, result_file ])
 

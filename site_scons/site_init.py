@@ -23,13 +23,17 @@ def run_and_capture_action(program, varlist=[]):
         env.CompileFoo("xyz.bar", [ "xyz.foo" ], CAPFILE="xyz.out")
 
         The following environment variables apply:
-            CAPFILE=<filename>  - Tells where to put the capture
+            CAPFILE=<filename>  - Tells where to put the capture.  Default is
+                                  the (scons) target.
             IGNORE_EXIT=<val>   - If set, ignore the exit value for purposes
                                   of determining if the action worked.
                                   The specific exit value is still captured
                                   and written to the capfile.
             INTERACTIVE=<val>   - If true, run interactively, passing stderr
                                   through and reading input from stdin
+            QUIET               - If true and we're not in INTERACTIVE mode,
+                                  write stderr it to the capture file without
+                                  echoing it to scons's stderr.
 
         The generated esml target files contain objects with the following
         fields:
@@ -93,13 +97,13 @@ def run_and_capture_action(program, varlist=[]):
 
     # runs the proc passed normally (blocking), and returns
     # a tuple with whatever was written to (stdout, stderr).
-    def run_normally(command, timeout=5):
+    def run_normally(command, timeout=5, quiet=False):
         proc = subprocess.Popen(command,
             stdin=sys.stdin, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         )
         try:
             pout, perr = proc.communicate(timeout=timeout)
-            if(len(perr)):
+            if(not quiet and len(perr)):
                 print(perr.decode("utf-8"), file=sys.stderr)
         except:
             proc.kill()
@@ -152,7 +156,8 @@ def run_and_capture_action(program, varlist=[]):
         if interactive:
             returncode, pout, perr = run_interactively(command)
         else:
-            returncode, pout, perr = run_normally(command)
+            quiet = env.get('QUIET', False)
+            returncode, pout, perr = run_normally(command, quiet=quiet)
 
         if(returncode < 0):
             # process died of some signal (interrupt, segfault, whatever):
