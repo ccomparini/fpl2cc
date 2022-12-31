@@ -51,20 +51,6 @@ env.CompareOut('reader.success', [ 'reader.expect', 'reader.out' ])
 #     https://scons.org/doc/production/HTML/scons-user.html#app-variables
 #
 
-def build_default(lprog):
-    return env.Program(lprog, [ lprog + '.cc' ])
-
-def build_json_exe(lprog):
-    return env.Program(lprog, [ lprog + '.cc' ], LIBS = 'jest')
-
-# If a given language executable needs particular libraries
-# or whatever, put the name of your custom env.Program (or
-# equivalent) here.  If not, build_default() will be called,
-# which should work for most cases.
-build_lang_exe = {
-    "json": build_json_exe,
-}
-
 # given a directory name like foo/bar/bat.test,
 # infers the language name "bat".
 def language_from_directory(directory):
@@ -113,7 +99,7 @@ def make_language_rules(env, directory):
         FPLOPTS=fpl_options, CAPFILE=capfile
     )
 
-    compiler = build_lang_exe.get(langbase, build_default)(langprog)
+    compiler = env.Program(langprog, [ langprog + '.cc' ])
 
 
 test_dirs = Glob('*.test')
