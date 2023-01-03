@@ -35,8 +35,10 @@ public:
 
     production_rule(
         const std::string fn, int ln,
-        grammar_element::Type tp = grammar_element::NONTERM_PRODUCTION
+        grammar_element::Type tp = grammar_element::NONTERM_PRODUCTION,
+        std::string product = "" // (current parsing reads the prod later)
     ) :
+        prod(product),
         file(fn),
         line(ln),
         prod_type(tp),
