@@ -1124,7 +1124,12 @@ public:
         }
         record_element(rule.product_element(), caller);
 
-        rules_for_product.insert(std::make_pair(rule.product(), rule_num));
+        std::string prd = rule.product();
+        if(prd == "") {
+            warn(stringformat("no product for rule {} - bug?", rule));
+        } else {
+            rules_for_product.insert(std::make_pair(prd, rule_num));
+        }
 
         return rule_num;
     }
