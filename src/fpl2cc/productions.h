@@ -1073,19 +1073,28 @@ public:
         return found;
     }
 
+    const production_rule &rule(int rnum, src_location cl = CALLER()) const {
+        if(rnum < rules.size()) {
+            return rules[rnum];
+        }
+        warn(stringformat("invalid rule number {} at {}\n", rnum, cl));
+        static production_rule dummy;
+        return dummy;
+    }
+
     // Traverses the set of parent rules until it comes to a
     // rule with no parents, and returns a ref to that rule.
     // Used for determining the context of subrules.
     const production_rule &parentmost_rule(
-        const production_rule &rule
+        const production_rule &child
     ) const {
-        int topmost = rule.rule_number();
+        int topmost = child.rule_number();
         int prulenum;
         while((prulenum = rules[topmost].parent_rule_number()) >= 0) {
             topmost = prulenum;
         }
 
-        return rules[topmost];
+        return rule(topmost);
     }
 
 
