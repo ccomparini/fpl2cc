@@ -877,11 +877,11 @@ public:
     Product result() const {
         // (... possibly we should only consider it a result if there's
         // exactly one item on the stack.  could simplify callers)
-        return lr_stack_entry(-1).product(*this);
+        return lr_top().product(*this);
     }
 
     int result_product_id() const {
-        return lr_stack_entry(-1).element_id;
+        return lr_top().element_id;
     }
 
 
