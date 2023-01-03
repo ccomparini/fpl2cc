@@ -2334,16 +2334,7 @@ public:
         } // else we already know our output type
     }
 
-    // determines goal(s), generates states, matches up reducers, 
-    // reports errors, etc.
-    // call this before generating code.
-    void resolve(src_location caller = CALLER()) {
-        if(rules.size() <= 0) {
-            error("No rules found\n");
-        }
-
-        check_missing_types();
-
+    void resolve_goals() {
         // Goals can be overridden by options.  This lets
         // users test subsets of their grammars (or extract
         // subsets for other purposes).
@@ -2354,6 +2345,19 @@ public:
         if(goals.empty()) {
             goals.push_back(default_goal());
         }
+    }
+
+    // determines goal(s), generates states, matches up reducers, 
+    // reports errors, etc.
+    // call this before generating code.
+    void resolve(src_location caller = CALLER()) {
+        if(rules.size() <= 0) {
+            error("No rules found\n");
+        }
+
+        check_missing_types();
+        resolve_goals();
+
 
         infer_output_type();
         apply_reducers();
