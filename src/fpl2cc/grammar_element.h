@@ -17,6 +17,7 @@ struct grammar_element {
         NONTERM_PRODUCTION,       // the result of reducing a rule
         NONTERM_SUBEXPRESSION,    // parenthesized expression
         NONTERM_PREC_PLACEHOLDER, // precedence placeholder
+        END_OF_PARSE, // indicates we're done parsing (good or bad)
         _TYPE_CAP
     } Type;
     Type type;
@@ -30,7 +31,8 @@ struct grammar_element {
             "LACK_OF_SEPARATOR", // convert to TERM_CUSTOM?
             "NONTERM_PRODUCTION",
             "NONTERM_SUBEXPRESSION",
-            "NONTERM_PREC_PLACEHOLDER"
+            "NONTERM_PREC_PLACEHOLDER",
+            "END_OF_PARSE"
         };
         if(t >= NONE && t < _TYPE_CAP) {
             return strs[t];
@@ -74,6 +76,10 @@ struct grammar_element {
 
     inline bool is_placeholder() const {
         return (type >= NONTERM_PREC_PLACEHOLDER);
+    }
+
+    inline bool is_end_of_parse() const {
+        return (type == END_OF_PARSE);
     }
 
     std::string nonterm_id_str() const {
@@ -136,6 +142,7 @@ struct grammar_element {
                 rb = ")";
                 break;
             case NONTERM_PREC_PLACEHOLDER:
+            case END_OF_PARSE:
                 lb = "";
                 rb = "";
                 break;
