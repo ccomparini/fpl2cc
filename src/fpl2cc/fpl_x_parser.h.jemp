@@ -955,6 +955,7 @@ public:
             std::cerr << "resetting @class_name@!!!\n";
         @}@
         lr_stack.clear();
+        lr_read_pos      = 0;
         param_stack.clear();
         set_state(&@class_name@::state_0);
         bytes_eaten      = 0;
