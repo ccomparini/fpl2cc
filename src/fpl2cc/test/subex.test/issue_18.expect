@@ -1,0 +1,13 @@
+returncode = 255
+stderr = "Error src/fpl2cc/test/subex.test/issue_18.subex:7:1 near «fruitbat(99)»: 
+Error src/fpl2cc/test/subex.test/issue_18.subex:7:1 near «fruitbat(99)»: unexpected statements (double «1.000000»)
+here's what we have so far:
+    state_0 statements param[0] (src/fpl2cc/test/subex.test/issue_18.subex:6)
+«fruitbat(99);\\n\\0<EOF>» (src/fpl2cc/test/subex.test/issue_18.subex:199) and state was:
+state_42:
+    _fpl_goal (30:0):	 statements •	=> (done)	(src/fpl2cc/productions.h:2387)
+
+too many errors.  aborting
+"
+stdout = "85.397342
+"

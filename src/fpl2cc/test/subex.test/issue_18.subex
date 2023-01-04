@@ -1,0 +1,7 @@
+//
+// Test fix for  https://github.com/ccomparini/jest2/issues/18
+// We expect this to throw a parse error.  What we do not expect
+// is for it to enter an infinite loop while parsing.
+//
+(π e) 10;
+fruitbat(99);

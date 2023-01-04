@@ -45,6 +45,16 @@ void @sfn@() {
                                  "@c_str_escape(rule.to_str())@\n";
                 @-}-@
                 @#fpl_x_parser_reduce_call(prds, rule, opts)@
+            @} else if(trans.what == productions::lr_transition::COMPLETION) {@
+                @if(opts.debug) {-@
+                    std::cerr << stringformat(
+                        "    @sfn@ says we're done parsing. result is a {}:\n"
+                        "-------------\n{}\n-------------\n",
+                        element_str(result_product_id()), result()
+                    );
+                @-}-@
+                // matched a goal:
+                terminate();
             @} else {@
                 #error unknown transition type for @trans@
             @}@

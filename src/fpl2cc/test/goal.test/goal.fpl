@@ -1,8 +1,8 @@
 #
 # Test partial parse in a file with other stuff.
 #
-# It's not a realistic case, but the parts we "parse" a single and
-# double quoted strings.  Everything else is outside the grammar.
+# It's not a realistic case, but the parts we "parse" are single
+# and double quoted strings.  Everything else is outside the grammar.
 # The test harness calls parse_goal() and then examines the result.
 # If it parsed a goal (in this case, a quoted string), it writes
 # that string to standard out.  Otherwise, it pretend-parses by
@@ -56,7 +56,7 @@ single_quote^ /[^'\n]+/:src single_quote^ -> quoted_string +{
         if(parsed) {
             std::cout << stringformat("found a string: {}\n", parsed.val());
         } else {
-            // one possible use case here is we're using the goal parse
+            // one possible use case here is we're using the goal parser
             // to parse something out of a larger parsing context.  so
             // for the non-goal parser, we just pretend to parse using
             // a regex (which eats non-space):

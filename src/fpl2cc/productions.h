@@ -278,19 +278,21 @@ class productions {
             std::string out = rule_pos_str(prds);
 
             if(prds) {
+                const production_rule &prl = prds->rule(rule);
+
                 // if we have a suitable products pointer, we can
                 // also show what this item is used to produce and
                 // where it is in the rule:
                 if(rule >= 0 && rule < prds->rules.size()) {
-                    const production_rule &rl = prds->rules[rule];
-                    auto &context = prds->parentmost_rule(rl);
+                    const production_rule &prl = prds->rules[rule];
+                    auto &context = prds->parentmost_rule(prl);
                     out = stringformat("{} {}:\t", context.product(), out);
 
-                    for(int stepi = rl.num_steps(); stepi >= 0; --stepi) {
+                    for(int stepi = prl.num_steps(); stepi >= 0; --stepi) {
                         if(stepi == countdown) out += " •";
                         else                   out += " ";
 
-                        production_rule::step step = rl.nth_from_end(stepi);
+                        production_rule::step step = prl.nth_from_end(stepi);
                         if(step)
                             out += step.to_str();
                     }
@@ -304,14 +306,15 @@ class productions {
                     int32_t next_stn = state->next_state(step(*prds));
                     if(next_stn >= 0) {
                         out += stringformat("\t=> state {}", next_stn);
-                    } else {
+                    } else if(!prl.product_element().is_end_of_parse()) {
                         out += stringformat("\t=> (reduce)");
+                    } else {
+                        out += stringformat("\t=> (done)");
                     }
                 }
 
                 if(rule >= 0 && rule < prds->rules.size()) {
-                    const production_rule &rl = prds->rules[rule];
-                    out += "\t(" + rl.location() + ")";
+                    out += "\t(" + prl.location() + ")";
                 }
             }
 
@@ -320,7 +323,7 @@ class productions {
     };
 
     struct lr_transition {
-        using type = enum { STATE, REDUCTION };
+        using type = enum { STATE, REDUCTION, COMPLETION };
         grammar_element right_of_dot;
         type            what;
         int             which; // state num, or num of rule to reduce by
@@ -336,11 +339,18 @@ class productions {
             return which >= 0;
         }
 
+        static std::string type_to_str(type t) {
+            switch(t) {
+                case STATE:      return "STATE";
+                case REDUCTION:  return "REDUCTION";
+                case COMPLETION: return "COMPLETION";
+            }
+            return "(unknown transition type)";
+        }
+
         std::string to_str() const {
             return stringformat("{}: ({} {})",
-                right_of_dot,
-                what == REDUCTION?"reduce by rule":"state",
-                which
+                right_of_dot, type_to_str(what), which
             );
         }
     };
@@ -431,10 +441,23 @@ class productions {
                 int32_t next_stn = next_state(step);
                 bool ejected = ejected_el.count(step.gexpr) > 0;
                 if(next_stn < 0) {
-                    trans = lr_transition(
-                        step.gexpr, ejected,
-                        lr_transition::REDUCTION, item.rule
-                    );
+                    // This may be over articulated.   Possibly the
+                    // reduce call (or action!) could handle the
+                    // distinction between reducing to a normal
+                    // product and being done.  Right now, I think
+                    // it can't just be an action, because of how we
+                    // clean the stack after the action.  But, if we
+                    // ever allow rules to do the stack manipulation,
+                    // the termination action could simply call
+                    // terminate() and leave the stack intact (or in
+                    // whatever state is appropriate)
+                    lr_transition::type tp = lr_transition::REDUCTION;
+                    grammar_element pe = prds.rule(item.rule).product_element();
+                    if(pe.is_end_of_parse()) {
+                        // matching this rule indicates end of parse:
+                        tp = lr_transition::COMPLETION;
+                    }
+                    trans = lr_transition(step.gexpr, ejected, tp, item.rule);
                 } else {
                     trans = lr_transition(
                         step.gexpr, ejected,
@@ -2350,6 +2373,27 @@ public:
         if(goals.empty()) {
             goals.push_back(default_goal());
         }
+
+        add_goal_rules();
+    }
+
+    // goal rules are wrappers used in detecting termination:
+    void add_goal_rules() {
+        if(rules_for_product.count("_fpl_goal") == 0) {
+            // for each goal the author/user wants,
+            // make a "completion" rule:
+            for(auto goal: goals) {
+                production_rule goal_rule(
+                    __FILE__, __LINE__,
+                    grammar_element::END_OF_PARSE, "_fpl_goal"
+                );
+                // the rule is always a single step (product -> _fpl_goal)
+                goal_rule.add_step(production_rule::step(
+                    goal, grammar_element::Type::NONTERM_PRODUCTION
+                ));
+                add_rule(goal_rule);
+            }
+        }
     }
 
     // determines goal(s), generates states, matches up reducers, 
@@ -2363,10 +2407,10 @@ public:
         check_missing_types();
         resolve_goals();
 
-
         infer_output_type();
         apply_reducers();
-        generate_states(goals);
+        //generate_states(goals);
+        generate_states({"_fpl_goal"});
         dump_states(opts);
         resolve_actions();
         check_rules();

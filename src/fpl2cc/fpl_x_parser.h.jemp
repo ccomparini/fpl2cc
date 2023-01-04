@@ -940,7 +940,8 @@ public:
 
     bool more_to_parse() const {
         // there's more to parse if:
-        //  - we haven't been told to stop (due to errors or whatever)
+        //  - we haven't been told to stop (due to matching _fpl_goal,
+        //    or errors, or whatever)
         //  - and there's more input -or- we're not at the goal
         return !stop_parsing
             && ((!eof() || lr_stack.size() > 1) || !result_is_goal());

@@ -25,6 +25,7 @@ bool shift_@el.type_str()@_@el_id@(bool eject) {
             is allowed, the parser ends up looping infinitely
             reading 0 bytes and saying "ok yeah that matched".
             Note: 0-byte match is considered not empty.
+            (issue 18?) (check)
         */@
         if(!match.empty()) {
             result = Terminal(match.begin(), match.end());
@@ -58,8 +59,10 @@ bool shift_@el.type_str()@_@el_id@(bool eject) {
 
         if(!lr_read(@el_id@)) {
             internal_error(stringformat(
-                "expected item with id @el_id@ but this was next up: {}\n",
-                lr_next()
+                "expected item with id @el_id@ but this was next up (at lr {}): {}\n"
+                "stack:\n{}\n",
+                lr_read_pos, lr_next(),
+                lr_stack
             ));
         }
 
