@@ -136,7 +136,8 @@ for test_dir in test_dirs:
         test_lang_builder(
             result_file, [ src_file ],
             INTERACTIVE=interactive,
-            QUIET=True  # avoid spam when testing errors
+            IGNORE_EXIT=True, # so we can test failure cases
+            QUIET=True  # avoid spam when testing failures
         )
         env.CompareOut(success_file, [ expected, result_file ])
 
