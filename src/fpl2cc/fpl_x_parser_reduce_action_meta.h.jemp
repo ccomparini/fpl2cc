@@ -16,6 +16,9 @@
         static int num_steps() {
             return @rule.num_steps()@;
         }
+        static int num_params() {
+            return @rule.num_reduce_params()@;
+        }
         static int line_number() {
             return @rule.line_number()@;
         }
@@ -28,16 +31,17 @@
         static const char *to_str() {
             return "@c_str_escape(rule.to_str())@";
         }
-        static const char *argname(unsigned int argi) {
-            static const char *an[] = {
-                @for(int sti = 0; sti < rule.num_steps(); ++sti) {-@
-                    "@rule.nth_step(sti).variable_name()@"
+        static const char *param_name(unsigned int ind) {
+            static const char *pname[] = {
+                @for(int rpi = 0; rpi < rule.num_reduce_params(); ++rpi) {-@
+                    "@rule.reduce_param(rpi).variable_name()@"
                 @}-@
             };
-            if(argi < @rule.num_steps()@) {
-                return an[argi];
+            if(ind < @rule.num_reduce_params()@) {
+                return pname[ind];
             } else {
-                return "arg index out of bounds";
+                return "param_name index out of bounds at "
+                       "@c_str_escape(rule.location())@";
             }
         }
     } this_rule;
