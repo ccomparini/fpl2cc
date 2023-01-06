@@ -28,7 +28,7 @@ void @sfn@() {
         @declare right_of_dot: trans.right_of_dot@
         @declare type: right_of_dot.type_str()@
         @declare el_id: prds.element_id_name(right_of_dot)@
-        @/* call here is to shift_nonterm_xxx, shift_term_xxx, etc,
+        @/* call here is to shift_NONTERM__xxx, shift_TERM__xxx, etc,
             which will call lr_shift or such as approriate.
             see src/fpl2cc/fpl_x_parser_shift_* for details. */@
         if(shift_@type@_@el_id@(@trans.eject@)) {

@@ -601,9 +601,7 @@ class productions {
                 msg += stringformat("        {}\n", item.to_str(&prds));
             }
 
-            // this is not necessarily fatal, and in any case we want to
-            // finish generating states (among other reasons, to give the
-            // fpl author more info to debug the conflict). so, just warn:
+            // this is not at all fatal. the item will be kept if necessary.
             warn(stringformat("{::c}\n", msg));
         }
 
@@ -615,6 +613,9 @@ class productions {
                 cons += stringformat("        {}\n", item.to_str(&prds));
             }
 
+            // these aren't fatal either, but typically the author
+            // will want to know because it means that one rule or
+            // the other won't ever reduce:
             warn(stringformat(
                 "reduce/reduce conflict in state {} ({} items):\n{}",
                 prds.state_index.at(this->id()), items.size(), cons
