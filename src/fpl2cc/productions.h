@@ -1315,7 +1315,7 @@ public:
     // syntax: '`' grammar_name '`' ~ /(.production_to_import)/?
     // imports relevant rules into this and returns the name of
     // the top level production created
-    std::string parse_import(production_rule &rule) {
+    std::string parse_import() {
         SourcePosition whence(inp);
         std::string grammar_name(inp->parse_string());
         if(!grammar_name.length()) {
@@ -1427,7 +1427,7 @@ public:
                     break;
                 case '`':
                     // parse/import the sub-fpl, and use whatever it produces:
-                    expr_str = parse_import(rule);
+                    expr_str = parse_import();
                     type     = grammar_element::Type::NONTERM_PRODUCTION;
                     break;
                 case /*{*/ '}':
@@ -1650,7 +1650,12 @@ public:
             }
             
             size_t rew_pos = inp->current_position();
-            std::string this_product = read_production_name(inp);
+            std::string this_product;
+            if(inp->peek() == '`') {
+                this_product = parse_import();
+            } else {
+                this_product = read_production_name(inp);
+            }
             inp->eat_separator();
             if(inp->read_byte_equalling(',')) {
                 // this_product is the name of the product; proceed
