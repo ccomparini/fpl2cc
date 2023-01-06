@@ -5,7 +5,7 @@ here's what we have so far:
     state_0 statements param[0] (src/fpl2cc/test/subex.test/issue_18.subex:6)
 «fruitbat(99);\\n\\0<EOF>» (src/fpl2cc/test/subex.test/issue_18.subex:199) and state was:
 state_42:
-    _fpl_goal (30:0):	 statements •	=> (done)	(src/fpl2cc/productions.h:2392)
+    _fpl_goal (30:0):	 statements •	=> (done)	(src/fpl2cc/productions.h:2395)
 
 too many errors.  aborting
 "

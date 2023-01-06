@@ -1647,6 +1647,9 @@ public:
 
             if(inp->read_byte_equalling(']')) {
                 break;
+            } else if(inp->read_byte_equalling('#')) {
+                inp->read_line(); // comment
+                continue;
             }
             
             size_t rew_pos = inp->current_position();
