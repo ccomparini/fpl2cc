@@ -713,6 +713,10 @@ public:
     // Call this within a reduce function to get a stack slice containing
     // all the steps (StackEntries) for the matched rule.
     // Don't call from outside a reduce function.
+    //  hey..... uhh... is this misnamed?  I think it doesn't include
+    //  -actually- ejected steps.  errf.  but it's not all params either
+    //  because if there's an eject/keep conflict we'll keep the param
+    //  here, whether or not this action considers it a parameter.
     StackSlice all_matched_steps() {
         return StackSlice(*this, lr_read_pos);
     }
@@ -1039,7 +1043,7 @@ public:
             // got some generally unrecognized input:
             if(got_id >= 0) {
                 errm = stringformat(
-                    "unexpected {} ({})", element_str(got_id), got
+                    "unexpected element: {} ({})", element_str(got_id), got
                 );
             } else  {
                 errm = "unrecognised input";

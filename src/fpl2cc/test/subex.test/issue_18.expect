@@ -1,7 +1,7 @@
 returncode = 255
 stderr = "Error src/fpl2cc/test/subex.test/issue_18.subex:7:1 near «fruitbat(99)»: 
 too many errors.  aborting
-Error src/fpl2cc/test/subex.test/issue_18.subex:7:1 near «fruitbat(99)»: unexpected statements (double «1.000000»)
+Error src/fpl2cc/test/subex.test/issue_18.subex:7:1 near «fruitbat(99)»: unexpected element: statements (double «1.000000»)
 here's what we have so far:
     state_0 statements param[0] (src/fpl2cc/test/subex.test/issue_18.subex:6)
 «fruitbat(99);\\n\\0<EOF>» (src/fpl2cc/test/subex.test/issue_18.subex:199) and state was:
