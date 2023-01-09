@@ -888,7 +888,6 @@ public:
         return lr_top().element_id;
     }
 
-
     void terminate() {
         stop_parsing = true;
     }
@@ -1005,6 +1004,55 @@ public:
         return Product();
     }
 
+    void report_parse_error(const std::string &errm) {
+        error(stringformat(
+            "{}\n"
+            "here's what we have so far:\n{}"
+            "{} and state was:\n{}\n",
+            errm, StackSlice(*this, 0),
+            next_up_str(),
+            state_string(current_state())
+        ));
+    }
+
+    // returns a string telling why parse() failed, or
+    // an empty string if it appears to have worked
+    std::string why_bad_parse() const {
+        Product got = result();
+        int got_id  = result_product_id();
+        // In this case, we're assuming we have the entire input.
+        // So, we expect:
+        //   - we're at eof (end of input)
+        //   - nothing left on the stack
+        //   - result is a goal
+        if(!eof()) {
+            // If we're not at end of input, we stopped when we
+            // didn't recognize something.  If there's currently 
+            // a "result", that's what was unexpected (i.e. it
+            // recognized something, but that something didn't
+            // fit the bigger picture).  Otherwise, it means we
+            // got some generally unrecognized input:
+            if(got_id >= 0) {
+                return stringformat(
+                    "unexpected element: {} ({})", element_str(got_id), got
+                );
+            } else  {
+                return "unrecognised input";
+            }
+        } else if(lr_stack_size() > 1) {
+            // If there's extra stuff on the stack after we rewound,
+            // it means we recognized more than one component, but
+            // nothing complete.
+            return "incomplete input";
+        } else if(!result_is_goal()) {
+            return stringformat(
+                "parsed a {} = {}, but that's not a goal (@prds.goals@)",
+                element_str(got_id), got
+            );
+        }
+        return "";
+    }
+
     // Parses the contents of the current reader.
     // Input contents are assumed to be complete.
     // Calls error() if any parse errors were detected.
@@ -1014,64 +1062,19 @@ public:
     @prds.output_type()@ parse() {
         // we're parsing from initial state...
         reset();
-
-        // errors should be handed up to the caller somehow,
-        // but for now I'm going to let callers use parse_partial
-        // and figure out errors if that's what they want.
-
         parse_partial();
-        Product got = result();
-        int got_id = result_product_id();
 
         // consume any additional "separators" (eg whitespace,
-        // comments) before checking if we're at end of input:
+        // comments) before checking the parse, since it's
+        // going to check eof()
         eat_separator();
 
-        // In this case, we're assuming we have the entire input.
-        // So, we expect:
-        //   - we're at eof (end of input)
-        //   - nothing left on the stack
-        //   - result is a goal
-        std::string errm;
-        if(!eof()) {
-            std::string message;
-            // If we're not at end of input, we stopped when we
-            // didn't recognize something.  If there's currently 
-            // a "result", that's what was unexpected (i.e. it
-            // recognized something, but that something didn't
-            // fit the bigger picture).  Otherwise, it means we
-            // got some generally unrecognized input:
-            if(got_id >= 0) {
-                errm = stringformat(
-                    "unexpected element: {} ({})", element_str(got_id), got
-                );
-            } else  {
-                errm = "unrecognised input";
-            }
-            error(message);
-        } else if(lr_stack_size() > 1) {
-            // If there's extra stuff on the stack after we rewound,
-            // it means we recognized more than one component, but
-            // nothing complete.
-            errm = "incomplete input";
-        } else if(!result_is_goal()) {
-            errm = stringformat(
-                "parsed a {} = {}, but that's not a goal (@prds.goals@)",
-                element_str(got_id), got
-            );
-        }
-
+        std::string errm = why_bad_parse();
         if(errm.length()) {
-            error(stringformat(
-                "{}\n"
-                "here's what we have so far:\n{}"
-                "{} and state was:\n{}\n",
-                errm, StackSlice(*this, 0),
-                next_up_str(),
-                state_string(current_state())
-            ));
+            report_parse_error(errm);
         }
 
+        Product got = result();
         post_parse(got.val());
 
         return got.val();
