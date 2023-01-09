@@ -382,7 +382,7 @@ public:
     void error(size_t pos, const std::string &msg) {
         std::string full_msg = reader->format_error_message(pos, msg);
         fputs(full_msg.c_str(), stderr);
-        if(++num_errors > max_errors) {
+        if(++num_errors >= max_errors) {
             fputs("too many errors.  aborting\n", stderr);
             terminate();
         }
