@@ -369,6 +369,7 @@ class productions {
         // in the current state, if the element matched is in
         // this set, it doesn't get pushed to the param stack:
         std::set<grammar_element>          ejected_el;
+
     public:
 
         lr_set() { }
@@ -398,6 +399,18 @@ class productions {
 
         const std::set<grammar_element> &ejected_elements() const {
             return ejected_el;
+        }
+
+        std::list<grammar_element> terminals() const {
+            std::list<grammar_element> items;
+            auto start = next_state_for_el.begin();
+            auto end   = next_state_for_el.end();
+            for(auto ge_nst = start; ge_nst != end; ++ge_nst) {
+                if(!ge_nst->first.is_nonterminal()) {
+                    items.push_back(ge_nst->first);
+                }
+            }
+            return items;
         }
 
         int32_t next_state(const grammar_element &ge) const {

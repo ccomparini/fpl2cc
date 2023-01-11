@@ -827,11 +827,9 @@ public:
         }
     };
 
-
     void set_state(State st) {
         cur_state = st;
     }
-
 
     Product param_stack_entry(int pos, src_location caller = CALLER()) const {
         // this is very similar to lr_stack_entry.  generalize?
@@ -1002,15 +1000,25 @@ public:
         return Product();
     }
 
+    // Returns a string containing a list of possible terminals
+    // when in the state passed.  Used for error messages.
+    static std::string expected_terminals(State st) {
+        @-for(int sti = 0; sti < prds.num_states(); sti++) {-@
+            @declare state: prds.states.at(sti)@
+            if(&@prds.state_fn(state, true)@ == st) {
+                return @-for(auto term: state.terminals()) {-@
+                    "@c_str_escape(term.to_str())@, "
+                @-}-@ "";
+            }
+        @}@
+        return "";
+    }
+
     void report_parse_error(const std::string &errm) {
-        error(stringformat(
-            "{}\n"
-            "here's what we have so far:\n{}"
-            "{} and state was:\n{}\n",
-            errm, StackSlice(*this, 0),
-            next_up_str(),
-            state_string(current_state())
-        ));
+        // at this point, it looks clearest to just pass the
+        // error through.  I'm keeping this function as a
+        // place to hook counters or whatever, however.
+        error(errm);
     }
 
     // returns a string telling why parse() failed, or
@@ -1018,10 +1026,11 @@ public:
     std::string why_bad_parse() const {
         Product got = result();
         int got_id  = result_product_id();
+
         // In this case, we're assuming we have the entire input.
         // So, we expect:
         //   - we're at eof (end of input)
-        //   - nothing left on the stack
+        //   - only the result left on the stack
         //   - result is a goal
         if(!eof()) {
             // If we're not at end of input, we stopped when we
@@ -1030,12 +1039,16 @@ public:
             // recognized something, but that something didn't
             // fit the bigger picture).  Otherwise, it means we
             // got some generally unrecognized input:
-            if(got_id >= 0) {
+            if(got_id >= 0 && is_nonterminal(got_id)) {
                 return stringformat(
-                    "unexpected element: {} ({})", element_str(got_id), got
+                    "unexpected element: {} ({}).",
+                    element_str(got_id), got
                 );
             } else  {
-                return "unrecognised input";
+                return stringformat(
+                    "unrecognised input.  expected one of: {}",
+                    expected_terminals(current_state())
+                );
             }
         } else if(lr_stack_size() > 1) {
             // If there's extra stuff on the stack after we rewound,
@@ -1145,13 +1158,13 @@ public:
                 @}-@
             @-}-@
         }
-
         jerror::error(stringformat(
             "internal error {}: invalid terminal id: {}\n", caller, id
         ));
         return false;
     }
 
+    // returns the name of the state function for the state pointer passed
     static std::string state_to_str(State st) {
         if(!st) return "NULL";
         // c++ won't let you compare pointers in a switch statement.. sigh
@@ -1163,6 +1176,7 @@ public:
         return "<not a state>";
     }
 
+    // return a stack-trace style dump of the state passed.
     static const char *state_string(State st) {
         @for(int sti = 0; sti < prds.num_states(); sti++) {-@
             if(&@prds.state_fn(sti, true)@ == st) {

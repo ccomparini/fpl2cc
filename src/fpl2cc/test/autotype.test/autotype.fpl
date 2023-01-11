@@ -4,6 +4,7 @@
 #
 
 
+@comment_style c
 @default_main
 @goal done
 @type_for done std::string

@@ -1,0 +1,7 @@
+returncode = 64
+stderr = "Error src/fpl2cc/test/autotype.test/error.autotype:3:1 near «not_a_token\\n»: unrecognised input.  expected one of: 'shaddap', 
+too many errors.  aborting
+FAILULAR: product holds type <no type> and not std::string at src/fpl2cc/fpl_x_parser.h.jemp:1089
+Aborting at src/fpl2cc/fpl_x_parser.h.jemp:214
+"
+stdout = ""
