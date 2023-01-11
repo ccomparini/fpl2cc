@@ -989,9 +989,8 @@ public:
     // position from the start of parse.
     // Any additional input after the goal is left and may be
     // parsed with additional passes of this or another parser.
-    // If whatever we parsed was a goal, we return that and
-    // reset the result to a false product.   Otherwise,
-    // we return a false product.
+    // If it parsed a goal product, that product will be returned.
+    // Otherwise, returns a false product.
     const Product parse_goal() {
         reset();
         parse_partial();
@@ -1131,7 +1130,7 @@ public:
         return stringformat("¡unknown element id {}!", id);
     }
 
-    static bool is_nonterminal(int id) {
+    static bool is_nonterminal(int id, const std::string &caller = CALLER()) {
         switch(id) {
             @for(int el_id = 0; el_id < prds.elements.size(); ++el_id) {-@
                 @if(prds.elements[el_id].is_nonterminal()) {-@ 
@@ -1141,7 +1140,10 @@ public:
                 @}-@
             @-}-@
         }
-        fprintf(stderr, "invalid terminal id: %i\n", id);
+
+        jerror::error(stringformat(
+            "internal error {}: invalid terminal id: {}\n", caller, id
+        ));
         return false;
     }
 
