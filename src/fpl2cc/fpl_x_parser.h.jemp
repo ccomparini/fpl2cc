@@ -211,10 +211,6 @@ public:
         // top output_type() and that's wacky.
         @prds.output_type()@ val(const std::string &caller = CALLER()) const {
             if(!std::holds_alternative<@prds.output_type()@>(red)) {
-                jerror::error(stringformat(
-                    "FAILULAR: product holds type {} and not @prds.output_type()@ at {}\n",
-                    type_name(), caller
-                ));
                 @prds.output_type()@ dummy;
                 return dummy;
             }
@@ -1083,12 +1079,11 @@ public:
         std::string errm = why_bad_parse();
         if(errm.length()) {
             report_parse_error(errm);
+        } else {
+            post_parse(result().val());
         }
 
-        Product got = result();
-        post_parse(got.val());
-
-        return got.val();
+        return result().val();
     }
 
 private:
