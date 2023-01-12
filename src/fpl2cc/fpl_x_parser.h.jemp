@@ -486,6 +486,10 @@ public:
         return lr_stack_entry(lr_read_pos);
     }
 
+    StackEntry lr_prev() const {
+        return lr_stack_entry(lr_read_pos - 1);
+    }
+
     StackEntry lr_top() const {
         return lr_stack_entry(lr_top_index());
     }
@@ -675,7 +679,7 @@ public:
         // construct a slice with a particular base and count.
         // if the count is -1 or unspecified, construct a slice
         // with the given base to the top of the stack
-        StackSlice(@class_name@ &o, int base, int count = -1) :
+        StackSlice(const @class_name@ &o, int base, int count = -1) :
             base_index(base),
             size(count),
             owner(o)
@@ -1080,14 +1084,26 @@ public:
             // recognized something, but that something didn't
             // fit the bigger picture).  Otherwise, it means we
             // got some generally unrecognized input:
+            std::string prev_str;
+            if(StackEntry prev = lr_prev()) {
+                prev_str = stringformat(
+                    " after {} at {}",
+                    element_str(prev.grammar_element_id()),
+                    prev.position()
+                );
+            }
             if(got_id >= 0 && is_nonterminal(got_id)) {
                 return stringformat(
-                    "unexpected element: {} ({}).",
-                    element_str(got_id), got
+                    "unexpected element{}: {} ({}).\nso far we have:\n{}",
+                    prev_str,
+                    element_str(got_id), got,
+                    StackSlice(*this, 0)
+                    //next_up_str()
                 );
             } else  {
                 return stringformat(
-                    "unrecognised input.  expected one of: {}",
+                    "unrecognised input{}.  expected one of: {}",
+                    prev_str,
                     expected_terminals(current_state())
                 );
             }
