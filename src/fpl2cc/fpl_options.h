@@ -28,6 +28,9 @@ struct fpl_options {
     std::string statedump;
     bool dump_dependencies;
 
+    int lr_stack_reserve;
+    int param_stack_reserve;
+
     bool new_parser;
 
     std::list<std::string> errors;
@@ -74,6 +77,23 @@ struct fpl_options {
         return "";
     }
 
+    static bool arg_to_int(int &val, const std::string &arg) {
+        if(!arg.length())
+            return false;
+
+        bool worked = false;
+        try {
+            val = std::stod(arg);
+            worked = true;
+        } catch(std::invalid_argument const& ex) {
+            // (just return false);
+        } catch(std::out_of_range const& ex) {
+            // (just return false);
+        } // anything else indicates a bug
+
+        return worked;
+    }
+
     // janky, but good enough:
     // (move to some kind of json spec to describe options in
     // general)
@@ -88,6 +108,8 @@ struct fpl_options {
         help(false),
         single_step(false),
         dump_dependencies(false),
+        lr_stack_reserve(1000),
+        param_stack_reserve(1000),
         new_parser(false)
     {
         for(int argi = 1; argi < argc; argi++) {
@@ -151,6 +173,14 @@ struct fpl_options {
                         if(val.empty())
                             errors.push_back("--out requires a value");
                         output_fn = val;
+                    } else if(opt == "lr-stack-reserve") {
+                        SCAN_VALUE();
+                        if(!arg_to_int(lr_stack_reserve, val))
+                            errors.push_back("--lr-stack-reserve requires a numeric value");
+                    } else if(opt == "param-stack-reserve") {
+                        SCAN_VALUE();
+                        if(!arg_to_int(param_stack_reserve, val))
+                            errors.push_back("--param-stack-reserve requires a numeric value");
                     } else if(opt == "src-path") {
                         SCAN_VALUE();
                         src_path.append(val);

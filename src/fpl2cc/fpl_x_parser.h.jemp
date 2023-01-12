@@ -361,10 +361,8 @@ public:
             set_single_step(true);
         @}@
 
-        // reserve more than we'll need so we don't have to realloc:
-// XXX check what happens when this overflows
-        lr_stack.reserve(1000);
-        param_stack.reserve(1000);
+        lr_stack.reserve(@opts.lr_stack_reserve@);
+        param_stack.reserve(@opts.param_stack_reserve@);
     }
 
     // debugging:

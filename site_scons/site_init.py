@@ -215,6 +215,7 @@ def depend_on_fpl2cc() :
 # Common fpl compile command line.
 # Can be used to construct actions.
 def fpl_compile_command():
+    # return 'bin/fpl2cc --lr-stack-reserve=2 --param-stack-reserve=3 --src-path=src/grammarlib $FPLOPTS $SOURCES --out $TARGET --depfile .deps --statedump .states'
     return 'bin/fpl2cc --src-path=src/grammarlib $FPLOPTS $SOURCES --out $TARGET --depfile .deps --statedump .states'
 
 
