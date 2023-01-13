@@ -61,6 +61,7 @@ class productions {
 
     std::vector<grammar_element>    elements;
     std::map<grammar_element, int>  element_index; // element -> element ID
+    std::multimap<grammar_element, grammar_element> masks_elements; // key el "masks" value els
 
     std::list<reducer> reducers;
 
@@ -2338,6 +2339,89 @@ public:
         }
     }
 
+    // Mark the element passed as "masking" the other element passed.
+    // In this context, if an element is "masked" by another element,
+    // it means that the existence of the element would potentially
+    // preclude the ability of the generated parser to match the other
+    // element.
+    void record_masking_element(
+        const grammar_element &masker, const grammar_element &maskee
+    ) {
+        masks_elements.insert(std::make_pair(masker, maskee));
+    }
+
+    std::list<std::string> bad_suffixes_for_element(
+        const grammar_element &el
+    ) const {
+        std::list<std::string> suffixes;
+
+        auto start = masks_elements.lower_bound(el);
+        auto end   = masks_elements.upper_bound(el);
+        for(auto sit = start; sit != end; sit++) {
+            size_t prefix_len = el.expr.length();
+            if(prefix_len > sit->second.expr.length()) {
+                // counterintuitively or not, the shorter one is the "mask"
+                internal_error(stringformat(
+                    "{} masks {}, which is backward",
+                    el, sit->second
+                ));
+            }
+            suffixes.push_back(sit->second.expr.substr(prefix_len));
+        }
+
+        return suffixes;
+    }
+
+    // 
+    // It's possible (easy, even) for madness and confusion to arise
+    // if you have terminals which are prefixes of other terminals
+    // (for example, '+' vs '++' vs '+=').  If the generated parser
+    // if naiive about this sort of thing, it can end up parsing
+    // something like "foo++" as "foo" "+" "+", which leads to surprise
+    // and annoyance all around.
+    //
+    // So, we prevent such madness and confusion in the generated parser
+    // by explicitly not matching a shorter terminal if a longer one would
+    // match.  This function figures out and records the elements for which
+    // this is relevant.
+    //
+    // I believe other parser generators (yacc etc) resolve this with
+    // the concept of word boundaries.  But, I want fpl to work 
+    // Anyway this should be more efficient for the generated parser
+    // since it only needs to look for a boundary if it actually matters
+    // for the particular terminal, and then we'd only have the check
+    // the particular suffixes which matter.
+    // 
+    // Note that (at present) we only detect/prevent masking of TERM_EXACT
+    // vs TERM_EXACT.  Checking vs TERM_REGEX is too complicated for me
+    // to deal with right now, and vs TERM_CUSTOM I don't really know
+    // what to do because custom could depend on any kind of runtime
+    // situation in the parser.  So (for now, anyway) caveat author when
+    // using regexes or custom terminals.
+    //
+    void resolve_terminal_masking() {
+        // for each terminal
+        //    for each other terminal
+        //        if other terminal starts with this terminal,
+        //            add other to this terminal's shadow list
+        for(auto el : elements) {
+            if(el.type == grammar_element::Type::TERM_EXACT) {
+                for(auto other_el : elements) {
+                    if(other_el == el)
+                        continue;
+                    if(other_el.type == grammar_element::Type::TERM_EXACT) {
+                        size_t len = el.expr.length();
+                        if(!other_el.expr.compare(0, len, el.expr)) {
+                            // el is a substring of other_el, so it could
+                            // potentially "mask" it.  record that fact:
+                            record_masking_element(el, other_el);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     const std::string default_goal() const {
         // default goal is either:
         // 1) whatever the first precedence group produces
@@ -2427,6 +2511,7 @@ public:
         }
 
         check_missing_types();
+        resolve_terminal_masking();
         resolve_goals();
 
         infer_output_type();

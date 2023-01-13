@@ -17,7 +17,17 @@ bool shift_@el.type_str()@_@el_id@(bool eject) {
     Terminal result;
     @if(el.type == grammar_element::TERM_EXACT) {@
         if(reader->read_exact_match("@match_str@")) {
-            result = Terminal("@match_str@");
+            if(
+                @-for(auto suffix : prds.bad_suffixes_for_element(el)) {-@
+                    reader->read_exact_match("@c_str_escape(suffix)@") ||
+                @-}-@ false
+            ) {
+                // though we matched the terminal, it's part of a
+                // longer terminal.  so, cancel the match/rewind:
+                reader->go_to(pos);
+            } else {
+                result = Terminal("@match_str@");
+            }
         }
     @} else if(el.type == grammar_element::TERM_REGEX) {@
         std::cmatch match = reader->read_re("@match_str@");
