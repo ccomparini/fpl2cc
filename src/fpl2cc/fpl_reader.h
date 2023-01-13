@@ -737,6 +737,13 @@ public:
         return source != nullptr;
     }
 
+    // errf.. wat?  this keeps it from magically converting to some
+    // total nonsense size_t, if, for example, we pass one of these
+    // to reader->go_to()
+    inline operator size_t() const {
+        return offset;
+    }
+
     const fpl_reader &reader()   const { return *source; }
     size_t            position() const { return offset; }
 
