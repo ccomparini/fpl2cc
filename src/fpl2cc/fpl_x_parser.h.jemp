@@ -1053,8 +1053,8 @@ public:
             return "incomplete input";
         } else if(!result_is_goal()) {
             return stringformat(
-                "parsed a {} = {}, but that's not a goal (@prds.goals@)",
-                element_str(got_id), got
+                "parsed a {} = {}, but that's not a goal ({})",
+                element_str(got_id), got, "@join(prds.goals, ", ")@"
             );
         }
         return "";
