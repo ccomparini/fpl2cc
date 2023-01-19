@@ -5,6 +5,7 @@ converting newlines: \nyay\n
 list: { string 1, things, and stuff }
 tuple: ( true, foo )
 map: { bar => 2, bat => 3, foo => 1 }
+escaped: \n\t\"woot\"\n
 a      b c
 deeeee
        e eff gee haitch

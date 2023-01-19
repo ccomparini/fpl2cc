@@ -67,6 +67,11 @@ int main() {
     };
     std::cout << stringformat("map: {}\n", some_map);
 
+    // c string escape.  this might or might not be useful.
+    // I did it because I thought I needed it but turns out
+    // there was a better plan.  nonetheless:
+    std::cout << stringformat("escaped: {::e}\n", "\n\t\"woot\"\n");
+
     // tab columnation:  this might not be the awesomest
     // interface, actually, because you probably want to
     // columnate the arguments or .. something.  anyway

@@ -1,6 +1,7 @@
 #ifndef STRINGFORMAT_H
 #define STRINGFORMAT_H
 
+#include "c_str_escape.h"
 #include "is_iterable.h"
 #include "to_hex.h"
 
@@ -12,7 +13,6 @@
 // let the reinvention commence.
 // The good thing is maybe I can fpl up the jest string formatting
 // and slap it in here.
-
 
 inline std::string _stringformat(const char * s) {
     return std::string(s);
@@ -191,6 +191,11 @@ class stringformat_post_processor {
         return out;
     }
 
+    // {::e} -> do a c string ecape
+    static std::string e(const std::string &in) {
+        return c_str_escape(in);
+    }
+
     // {::n} -> translate newlines to "\n"
     static std::string n(const std::string &in) {
         std::string out;
@@ -210,6 +215,7 @@ public:
     static std::string process(char fmt, const std::string &in) {
         switch(fmt) {
             case 'c': return c(in);
+            case 'e': return e(in);
             case 'n': return n(in);
         }
         // .. would be nice to warn about missing format here....
