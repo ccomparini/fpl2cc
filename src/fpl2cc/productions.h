@@ -903,10 +903,10 @@ public:
             code = parse_regex_separator();
         }
 
-// XXX oh yeah hey uhh... this used?  try it!
         if(!code && (allowed_src | LIB)) {
-            // expect the name of a file with the code:
-            std::string fn = inp->read_re("\\s*(.+)\\s*")[1];
+            // expect a quoted (or otherwise string-delimited)
+            // file basename:
+            std::string fn = inp->parse_string();
             if(fn.length() > 0) {
                 code = code_block::from_file(
                     fn + ".inc", opts.src_path,

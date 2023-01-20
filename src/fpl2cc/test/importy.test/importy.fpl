@@ -3,6 +3,11 @@
 @goal json.json
 @post_parse +{ std::cout << result << "\n"; }+
 
+# .. and we'll also allow c comments, but just to test
+# pulling in code blocks we'll use the @separator keyword
+# instead of @comment-style:
+@separator "comment/c"
+
 `importy_s1` -> foo ;
 
 # let's say we're supporting json but with variables
