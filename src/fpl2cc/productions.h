@@ -19,6 +19,8 @@
 #include <string>
 #include <time.h> // for profiling
 
+#include "fpl_regex_separator.h" // generated
+
 namespace fpl {
 
 class productions;
@@ -896,6 +898,11 @@ public:
             code = read_code();
         }
 
+        std::string errm;
+        if(!code && (allowed_src | REGEX)) {
+            code = parse_regex_separator();
+        }
+
 // XXX oh yeah hey uhh... this used?  try it!
         if(!code && (allowed_src | LIB)) {
             // expect the name of a file with the code:
@@ -906,12 +913,6 @@ public:
                     inp->filename(), inp->line_number()
                 );
             }
-        }
-
-        std::string errm;
-        if(!code && (allowed_src | REGEX)) {
-// XXX this error is never seen
-            errm = "XXX FIXME ALLOW REGEX LENGTH";
         }
 
         if(!code) {
@@ -1539,6 +1540,20 @@ public:
          }
 
          return code_block(code_str, inp->filename(), inp->line_number(start));
+    }
+
+    code_block parse_regex_separator() {
+        code_block code;
+        std::string regex;
+
+        if(inp->peek() == '/') {
+            regex = inp->parse_string();
+            if(regex.length()) {
+                code = code_block(fpl_regex_separator(regex));
+            }
+        }
+
+        return code;
     }
 
     // optional argument declaration for a reduction code block:
@@ -2527,6 +2542,7 @@ public:
     //  this friends thing is horrible.  can we make them members?
     //  problem then is that the generated code format is then
     //  even more tightly bound to this class.
+    //  also, that's not how headers in c++ work.
     friend std::string fpl_x_parser_state(
         const productions &,
         const productions::lr_set &,

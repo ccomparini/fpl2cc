@@ -1222,6 +1222,7 @@ public:
 
     static size_t separator_length(const utf8_byte *inp) {
         @if(prds.separator_code.size() == 0) {-@
+            // no separators specified, so separate on space:
             return space_length(inp);
         @}-@
 

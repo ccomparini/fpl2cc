@@ -1,8 +1,4 @@
 
-# https://www.ecma-international.org/publications-and-standards/standards/ecma-404/
-#  or, better:
-# https://www.crockford.com/mckeeman.html
-
 +{
     #include <list>
     #include <map>
@@ -10,15 +6,6 @@
     #include <variant>
     #include <vector>
     #include "util/to_hex.h" // debugging
-
-    inline bool is_json_space(utf8_byte in) {
-        return(
-                (in == 0x20)
-             || (in == 0x0a)
-             || (in == 0x0d)
-             || (in == 0x09)
-        );
-    }
 
     static bool is_big_endian()
     {

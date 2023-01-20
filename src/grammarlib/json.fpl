@@ -1,6 +1,19 @@
 #
 # "pure" fpl json spec.
 #
+# https://www.ecma-international.org/publications-and-standards/standards/ecma-404/
+#  or, better:
+# https://www.crockford.com/mckeeman.html
+#
+
+#
+# from crockford, whitespace is:
+#    '0020' ws
+#    '000A' ws
+#    '000D' ws
+#    '0009' ws
+#
+@separator /[\x20\x0a\x0d\x09]+/
 
 element -> json ;
 
@@ -41,27 +54,4 @@ value -> element ;
 # this will match something like "02", which is not strictly
 # legal json, but whatever:
 /(-)?([0-9]+)/:integer                           -> number ;
-
-@separator +{
-    /*
-      from crockford, whitespace is:
-        '0020' ws
-        '000A' ws
-        '000D' ws
-        '0009' ws
-      .. so it's a more limited set than default fpl handles.
-      btw our input is utf8 and all of those chars are in the ascii
-      range, so going 8 bits at a time works:
-
-      This should be part of the grammarlib.
-    */
-    size_t len = 0;
-    while(is_json_space(*inp)) {
-        inp++;
-        len++;
-    }
-
-    return len;
-}+
-
 
