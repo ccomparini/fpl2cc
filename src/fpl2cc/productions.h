@@ -328,7 +328,7 @@ class productions {
     struct lr_transition {
         using type = enum { STATE, REDUCTION, COMPLETION };
         grammar_element right_of_dot;
-        type            what;
+        type            what;  // what to do on matching right_of_dot
         int             which; // state num, or num of rule to reduce by
         bool            eject;
 
@@ -484,9 +484,11 @@ class productions {
                 if(step.gexpr.type == grammar_element::Type::NONE) {
                     none_trans = trans;
                 } else if(step.gexpr.is_nonterminal()) {
-                    nonterm_trans.push_back(trans);
+                    if(!nonterm_trans.size() || (trans.right_of_dot != nonterm_trans.back().right_of_dot))
+                        nonterm_trans.push_back(trans);
                 } else {
-                    term_trans.push_back(trans);
+                    if(!term_trans.size() || (trans.right_of_dot != term_trans.back().right_of_dot))
+                        term_trans.push_back(trans);
                 }
             }
 
