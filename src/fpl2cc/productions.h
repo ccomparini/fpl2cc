@@ -527,7 +527,7 @@ class productions {
                     auto endrl = prds.rules_for_product.upper_bound(pname);
                     if(strl == endrl) {
                         error(rule.location(), stringformat(
-                            "Bug: nothing produces '{}' ({})\n", pname, expr
+                            "nothing produces '{}' ({})\n", pname, expr
                         ));
                     }
                     for(auto rit = strl; rit != endrl; ++rit) {
