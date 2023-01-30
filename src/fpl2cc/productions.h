@@ -1989,6 +1989,17 @@ public:
         return import_name;
     }
 
+    // returns the state number for the lr_set passed, or -1
+    // if there's no such state
+    int state_num(const lr_set &state) const {
+        auto state_numi = state_index.find(state.id());
+
+        if(state_numi == state_index.end())
+            return -1;
+
+        return state_numi->second;
+    }
+
     // returns the name of the function to use for the given state
     std::string state_fn(int state_num, bool fully_qualified = false) const {
         std::string fn("state_");
