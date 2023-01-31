@@ -38,14 +38,14 @@ std::string _int_to_hex(T val) {
 
     return out;
 }
-std::string to_hex(signed int num) { return _int_to_hex(num); }
-std::string to_hex(signed long int num) { return _int_to_hex(num); }
-std::string to_hex(signed long long int num) { return _int_to_hex(num); }
-std::string to_hex(signed short int num) { return _int_to_hex(num); }
-std::string to_hex(unsigned int num) { return _int_to_hex(num); }
-std::string to_hex(unsigned long int num) { return _int_to_hex(num); }
-std::string to_hex(unsigned long long int num) { return _int_to_hex(num); }
-std::string to_hex(unsigned short int num) { return _int_to_hex(num); }
+inline std::string to_hex(signed int num) { return _int_to_hex(num); }
+inline std::string to_hex(signed long int num) { return _int_to_hex(num); }
+inline std::string to_hex(signed long long int num) { return _int_to_hex(num); }
+inline std::string to_hex(signed short int num) { return _int_to_hex(num); }
+inline std::string to_hex(unsigned int num) { return _int_to_hex(num); }
+inline std::string to_hex(unsigned long int num) { return _int_to_hex(num); }
+inline std::string to_hex(unsigned long long int num) { return _int_to_hex(num); }
+inline std::string to_hex(unsigned short int num) { return _int_to_hex(num); }
 
 template<class TT>
 std::string bs_to_hex(const TT &in, const std::string &separator = " ") {
