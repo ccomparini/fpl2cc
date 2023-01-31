@@ -12,6 +12,18 @@
 //   (etc - anything which is not a nonterminal)
 // .. where X is the element ID number.
 bool shift_@el.type_str()@_@el_id@(bool eject) {
+    if(auto next_up = lr_next()) {
+        if(next_up.mismatch && next_up.element_id == @el_id@) {
+            // parser has already determined that this element isn't
+            // leading to any legitimate production in this context
+            // (it's a "mismatch"), so "read" it and return false so
+            // that other states/shifts can try to match something
+            // else:
+            lr_read(@el_id@);
+        }
+        // Would this ever be a match?  
+        return false;
+    }
 
     const SourcePosition pos = position();
     Terminal result;
@@ -52,9 +64,12 @@ bool shift_@el.type_str()@_@el_id@(bool eject) {
     @}@
 
     if(result) {
+        clear_mismatches();  // (we matched)
+
         @if(opts.debug) {@
             std::cerr << "shifting @el_str@\n";
         @}@
+
         lr_push(@el_id@, eject, pos, Product(result));
         // assertions count as terminals.  therefore, clearing
         // bytes_eaten is (strictly speaking) correct, here.

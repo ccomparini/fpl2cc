@@ -81,7 +81,6 @@ public:
             matches.push_back(src);
         }
 
-
         template<typename Iter>
         Terminal(Iter begin, Iter end) : matches(begin, end) {
         }
@@ -165,7 +164,6 @@ public:
             return !std::holds_alternative<false_product>(red);
         }
 
-
         std::string type_name() const {
             if(std::holds_alternative<false_product>(red))
                 return "<no type>";
@@ -233,13 +231,15 @@ public:
         SourcePosition pos;        // start of match in source code
         int            param_ind;  // offset in param_stack
         bool           eject;
+        bool           mismatch;
 
         StackEntry(State st, int el_id, SourcePosition p, int pind, bool ej) :
             state(st),
             element_id(el_id),
             pos(p),
             param_ind(pind),
-            eject(ej) {
+            eject(ej),
+            mismatch(false) {
         }
 
         // creates a "false" stack entry:
@@ -247,7 +247,8 @@ public:
             state(NULL),
             element_id(-1),
             param_ind(-1),
-            eject(true) {
+            eject(true),
+            mismatch(false) {
         }
 
         StackEntry(const StackEntry &) = default;
@@ -291,7 +292,8 @@ public:
         }
 
         std::string to_str() const {
-            return stringformat("{} {} param[{}] ({})",
+            return stringformat("{}{} {} param[{}] ({})",
+                mismatch?"xxx ":"",
                 state_to_str(state),
                 element_str(element_id),
                 param_ind,  // need the owner to get the product
@@ -457,6 +459,18 @@ public:
         }
     }
 
+    void clear_mismatches() {
+        int num_cleared = 0;
+        while(lr_top().mismatch) {
+            lr_pop();
+            num_cleared++;
+        }
+
+        if(lr_read_pos > lr_top_index()) {
+            lr_read_pos -= num_cleared;
+        }
+    }
+
     StackEntry lr_stack_entry(int pos) const {
         // (as usual, negative positions are relative to the top of stack)
         if(pos < 0) pos += lr_stack_size();
@@ -481,8 +495,20 @@ public:
     // returns false.
     bool lr_read(int element_id) {
         if(element_id == lr_next().element_id) {
+            // we may be skipping a known mismatch, in which case
+            // we'll return false since it's not a correct match.
+            bool mismatch = lr_next().mismatch;
+            if(mismatch) {
+                @if(opts.debug) {@
+                    std::cerr << stringformat(
+                        "skipping mismatch el {} at lr pos {} (state {})\n",
+                        element_id, lr_read_pos, state_to_str(cur_state)
+                    );
+                @}@
+            }
+
             lr_read_pos++;
-            return true;
+            return !mismatch;
         }
         return false;
     }
@@ -491,7 +517,7 @@ public:
     // first position before pos in the lr stack which does not
     // match the element ID in question. If pos is past the top
     // of the stack, starts at the top of the stack.
-    // Recurses on subexpressions.
+    // Recurses on subexpressions.  Always skips mismatches.
     //
     // These are used to put together the arguments for reduce
     // actions.
@@ -517,7 +543,6 @@ public:
             @} else {@
                 @declare subrule: prds.rules[subrule_num]@
                 //   @subrule.to_str()@
-//std::cerr << stringformat("rewinding to before subrule @elname@\n");
                 int subp = pos;
                 int lastp;
                 bool matched_whole = true;
@@ -529,7 +554,6 @@ public:
                         @declare required: !substep.qty.optional@
                         lastp = subp;
                         subp = lr_position_before_@sename@(subp, @-mult-@);
-//std::cerr << stringformat(" .... looked for start of @sename@ ({}). got {} with last {}\n", @mult@?"multiple":"single", subp, lastp);
                         if(lastp == subp) {
                             // (didn't match)
                             if(@required@) matched_whole = false;
@@ -878,6 +902,27 @@ public:
 
     int result_product_id() const {
         return lr_top().element_id;
+    }
+
+    // mismatch() begins or continues the backtracking process when
+    // a state hits unexpected input.
+    void mismatch() {
+        // move the lr read pointer to before the last bad push:
+        while(lr_stack_entry(--lr_read_pos).mismatch)
+            ;
+
+        if(lr_read_pos < 0) {
+            lr_read_pos = 0;
+            // can't go back any more, so terminate:
+            terminate();
+        } else {
+            // mark whatever was there as a mismatch, and try that
+            // state again:
+            StackEntry &bad_entry = lr_stack[lr_read_pos];
+            bad_entry.mismatch = true;
+            cur_state = bad_entry.state;
+            reader->go_to(bad_entry.position());
+        }
     }
 
     void terminate() {

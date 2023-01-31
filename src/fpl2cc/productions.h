@@ -135,7 +135,6 @@ class productions {
     ) {
 
         if(!nge) {
-            //internal_error(stringformat(
             jerror::warning(stringformat(
                 "attempt to record invalid element '{}'", nge
             ), caller);
@@ -2544,7 +2543,6 @@ public:
 
         infer_output_type();
         apply_reducers();
-        //generate_states(goals);
         generate_states({"_fpl_goal"});
         dump_states(opts);
         resolve_actions();

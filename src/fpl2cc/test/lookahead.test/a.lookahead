@@ -1,0 +1,8 @@
+
+ok     # matches other
+abcd
+abce   # should match a-b and then other for the c and e
+a b c  # should match a-b and then c should match other
+a b
+
+afg  # should match other

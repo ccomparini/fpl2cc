@@ -7,11 +7,15 @@
 @/*
  generates the call to the reduce function for the given rule.
 */@
+    // we've matched something, and we're going to generate and
+    // push a result, so first we need to clear any mismatches
+    // from the top of the stack:
+    clear_mismatches();
 
-    @/* figure out the stack slices for each argument.
-        we have to do this outside the call because parameter evaluation
+    @/* Figure out the stack slices for each argument.
+        We have to do this outside the call because parameter evaluation
         order is not defined in c++ and we're (pseudo-)popping the stack.
-        at the moment, we create a stack slice even for things we're
+        At the moment, we create a stack slice even for things we're
         not going to pass to the reduce function.
     */@
     @for(int stind = rule.num_steps() - 1; stind >= 0; --stind) {-@

@@ -5,6 +5,12 @@
 
 // shift_NONTERM_xxx()
 bool shift_@el.type_str()@_@el_id@(bool eject) {
+    if(lr_next().mismatch && lr_next().element_id == @el_id@) {
+        @if(opts.debug) {@
+            std::cerr << "not matching mismatched terminal @el_id@";
+        @}@
+        return false;
+    }
 
     if(lr_read(@el_id@)) {
         @if(opts.debug) {@

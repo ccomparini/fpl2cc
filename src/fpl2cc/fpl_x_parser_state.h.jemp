@@ -61,13 +61,10 @@ void @sfn@() {
         } else
     @-}-@
     {
-        // else we hit something we don't specifically handle here.
-        // It could be an error, or a successful partial or full parse.
-        // Callers will decide, but for now we're done parsing:
         @if(opts.debug) {-@
-            std::cerr <<  "    terminating in @sfn@\n";
+            std::cerr <<  "    mismatch in @sfn@. attempting rewind...\n";
         @}@
-        terminate();
+        mismatch();
     }
  
     @if(opts.debug) {-@
