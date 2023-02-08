@@ -20,8 +20,8 @@
 #include "fpl_options.h"
 #include "productions.h"
 
-#define VERSION_MAJ 0
-#define VERSION_MIN 9
+#define VERSION_MAJ 1
+#define VERSION_MIN 0
 
 using namespace fpl;
 
