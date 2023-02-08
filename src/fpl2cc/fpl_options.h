@@ -241,7 +241,7 @@ struct fpl_options {
         std::cerr << stringformat(
             "\nfpl2cc {}\n"
             "\nUsage:    fpl2cc [options] <fpl source> [sources]\n\n"
-            "If no [target] is specified, prints to stdout.\n"
+            "If no [target] is specified, prints to <source>.cc.\n"
             "[sources] is 0 or more non-fpl source files to integrate\n"
             "into the target file.\n\n"
             "Options:\n"
@@ -253,7 +253,7 @@ struct fpl_options {
             "\t--generate-main - generate main() function\n"
             "\t--help - show this page\n"
             "\t--no-generate-code - parse (and other options) only\n"
-            "\t--out=<fn> - write to fn instead of stdout\n"
+            "\t--out=<fn> - write to fn (default <fpl source>.cc)\n"
             "\t--src-path=<path> - search the dirs given (':' delimited)\n"
             "\t--statedump=<fn> - dump generated states to file\n",
             version()
