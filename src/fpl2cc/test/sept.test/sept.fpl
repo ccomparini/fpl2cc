@@ -1,6 +1,6 @@
 #
 # separator test language
-# purely for testing the '~' lack-of-space pseudo-terminal
+# purely for testing the '~' lack-of-separator pseudo-terminal
 #
 @default_main
 @produces std::string
