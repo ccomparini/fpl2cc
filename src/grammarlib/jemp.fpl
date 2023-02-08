@@ -5,7 +5,8 @@
 # huh interesting reading:
 #   https://jinja.palletsprojects.com/en/3.0.x/templates/
 
-@separator none
+@separator "none"
+
 # XXX idea:  @+ starts an indented expansion where
 # everything to the left of the @+ on the same line
 # gets substituted in for newlines in the expansion.
