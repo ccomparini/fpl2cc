@@ -50,7 +50,9 @@ class @class_name@ {
     // by their c++ compiler with about 23k lines of "note:"
     // gibberish about every possible constructor in the
     // standard libraries.  To avoid this, and to give a non-0
-    // chance at a useful error message, we do this lame hack:
+    // chance at a useful error message, we do this lame hack
+    // of creating a static function whose only reason for
+    // existence is to give a scope to static_asserts:
     static void check_copy() {
         @-for(auto tp : prds.all_types) {@
             {
