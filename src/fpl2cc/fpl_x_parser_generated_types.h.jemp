@@ -1,0 +1,20 @@
+@parameter: const productions &prds@
+@realign: #line {} "{}"@
+
+@for(auto tg_req: prds.types_to_generate) {-@
+    struct @tg_req.type_name()@ {
+        @declare attrs: tg_req.attributes(prds)@
+        @for(auto mem : attrs) {-@
+            @/* to KISS, everything is std::vector (even if there
+                is only ever exactly one match) so that we don't
+                have to worry about declaration order, multiplicity,
+                or optionalness.
+            */@
+            std::vector<@mem.type@> @mem.name@;
+        @}-@
+
+        // default constructor.  everything needs a default constructor.
+        @tg_req.type_name()@() { }
+    };
+@}@
+

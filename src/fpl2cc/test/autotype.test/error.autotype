@@ -1,4 +1,4 @@
 // let's test errors
 
-not_a_token
+%%% // not a token
 

@@ -6,11 +6,29 @@
 
 @comment_style c
 @default_main
-@goal done
-@type_for done std::string
-'shaddap' -> done;
+@generate_types
 
-#@goal done2
-#@type_for done2 int
-#'woot' -> done2 +{ return 23; }+
+# what to test here?
+#  - optional/multiple (maybe want a '?'?)
+#  - terminals
+#  x subexpressions
+#    - complex subexpression?  i.e. more than one non-ejected thing?
+#  x ejectedness
+#  x unnamed things
+#  - multiple ways to get to the same thing
+
+thing+ -> stuff;
+
+list+    -> thing;
+analogy+ -> thing;
+
+@type_for word std::string
+/[A-Za-z]/ -> word;
+word (','^ word)*:fruitbat -> list;
+
+word:a ':' word:b -> relation;
+relation:ab '::'^ relation:cd -> analogy;
+
+
+
 

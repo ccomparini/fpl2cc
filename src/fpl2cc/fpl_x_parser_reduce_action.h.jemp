@@ -16,6 +16,19 @@
     @if(code_block rule_code = rule.reduce_code()) {-@
         @/* fpl-author-supplied rule code: */@
         @rule_code.format(false)@
+    @} else if(prds.generated_type(rule.product())) {@
+        @/* auto generated type - initialize from parameters */@
+        @return_type@ result;
+        @-for(int pind = 0; pind < num_params; pind++) {-@
+            @declare param: rule.reduce_param(pind)@
+            @declare pname: param.variable_name()@
+            @declare elname: prds.element_id_name(param.gexpr)@
+            result.@pname@.reserve(@pname@.count());
+            @pname@.foreach([&result](const Product &item)->void {
+                result.@pname@.push_back(item.@elname@_val());
+            });
+        @-}-@
+        return result;
     @} else {@
         @/*default is to construct/cast from all non-ejected steps. */@
         #line 1 "@rule.location()@ (default action for @c_str_escape(rule.to_str())@)"

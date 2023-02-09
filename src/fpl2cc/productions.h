@@ -57,9 +57,10 @@ class productions {
     std::vector<std::string>   precedence_group_names;
     std::map<std::string, int> product_precedence;
 
+    // rules/reduce actions/products:
     std::vector<production_rule>    rules;
     std::multimap<std::string, int> rules_for_product; // product -> rule ind
-    mutable int anon_product_count; // to generate ids for anonymous rules
+    mutable int subex_count; // to generate product names for subexpressions
 
     std::vector<grammar_element>    elements;
     std::map<grammar_element, int>  element_index; // element -> element ID
@@ -67,8 +68,11 @@ class productions {
 
     std::list<reducer> reducers;
 
-    class lr_set;
+    struct type_request;
+    std::set<type_request> types_to_generate;
+    bool generate_types;
 
+    class lr_set;
     std::map<int32_t, lr_set> states;  // keyed by state number
     std::map<std::string, int32_t> state_index; // set id -> state number
 
@@ -158,7 +162,7 @@ class productions {
         // refer to the rule itself.  So each item
         // can be encoded as a rule ID and the step
         // within that rule:
-        uint16_t rule;     // offset into rules (i.e. rule number)
+        uint16_t rule;      // offset into rules (i.e. rule number)
         uint16_t countdown; // offset from end of rule; 0 == reduce
 
         static const uint16_t no_rule = 0xffff;
@@ -756,6 +760,117 @@ class productions {
         }
     }
 
+    // Represents the need to generate a type for a particular product.
+    // Provides the information needed (by the code generator) to generate
+    // that type.
+    struct type_request {
+        std::string for_product;
+
+        type_request(const std::string &pr) : for_product(pr) { }
+
+        std::string to_str() const { return for_product; }
+
+        // this is so we can be in a std::set:
+        friend bool operator<(const type_request& left, const type_request& right) {
+            return left.for_product < right.for_product;
+        }
+
+        // the output type needs:
+        //   - One construction factory whatever code block per rule.
+        //     actually, this is for the jemp.
+        //   - One member per distinct reduce param.
+        //     If that member is multiple or optional, it's a list.
+        //     If there's exactly one member, we don't need to make
+        //     a type request - the type can be inherited.
+        //     Reduce params are distinct if they have different names.
+        //     2 params with the same name are compatible if they have
+        //     the same basic type.  If one is multiple and the other
+        //     isn't, go with multiple.
+        std::string type_name() const {
+            return stringformat("_generated_type_for_{}", for_product);
+        }
+
+        // this is for convenience in code generators.
+        // yay, lots of copies.
+        std::list<production_rule> source_rules(const productions &prds) const {
+            auto strl  = prds.rules_for_product.lower_bound(for_product);
+            auto endrl = prds.rules_for_product.upper_bound(for_product);
+            std::list<production_rule> out;
+            for(auto rit = strl; rit != endrl; ++rit) {
+                out.push_back(prds.rules[rit->second]);
+            }
+            return out;
+        }
+
+        // this is meant as a convenience for code generators:
+        struct attribute {
+            std::string name; // name of the product
+            std::string type; // name of type
+            bool multiple;    // if true, store in a way allowing 0 or more
+
+            attribute(const production_rule::step &step, const std::string &t) :
+                name(step.variable_name()),
+                type(t),
+                multiple(!step.is_single()) {
+            }
+
+            attribute(std::string n) :
+                 name(n), type("(dummy attribute)"), multiple(false) {
+            }
+
+            // so we can make a std::set
+            friend bool operator<(const attribute &lhs, const attribute &rhs) {
+                return lhs.name < rhs.name;
+            }
+        };
+        using attribute_set = std::set<attribute>;
+        attribute_set attributes(const productions &prds) const {
+            attribute_set out;
+            auto strl  = prds.rules_for_product.lower_bound(for_product);
+            auto endrl = prds.rules_for_product.upper_bound(for_product);
+            for(auto rit = strl; rit != endrl; ++rit) {
+                const production_rule &rule = prds.rules[rit->second];
+                const int num_params = rule.num_reduce_params();
+                for(int param = 0; param < num_params; param++) {
+                    const production_rule::step st = rule.reduce_param(param);
+
+                    if(st.skip_on_reduce())
+                        continue; // reducers never see this one anyway - skip
+     
+                    attribute attr(st, prds.type_for(st.gexpr));
+                    auto existing_attr = out.find(attr);
+                    if(existing_attr != out.end()) {
+                        if(existing_attr->type != attr.type) {
+                            // 2 items with different types but the same name.
+                            // this will not work (without difficulty) in c++,
+                            // but it's not inherently a problem in many
+                            // languages, so we'll warn and let later stages
+                            // toss an error if it's a real problem.
+                            // I'm not entirely sure this can even happen,
+                            // but it's better to find out the easy way if
+                            // it does.
+                            warn(stringformat(
+                                "conflict generating types for {}.{}:\n",
+                                for_product, attr.name
+                            ));
+                        }
+
+                        // if any of the possible things with this name are
+                        // not limited to being singular, the whole thing is
+                        // multiple:
+                        if(existing_attr->multiple) {
+                            attr.multiple = true;
+                        }
+                    } // else it's first time we've seen this so just add it
+                    out.insert(attr);
+                }
+            }
+
+            return out;
+        }
+    };
+
+
 public:
 
 // XXX this is currently stupid in that you pass the fpl_reader
@@ -764,7 +879,7 @@ public:
         const fpl_options &op, fpl_reader_p src, productions *p = nullptr
     ) :
         inp(src), opts(op), parent(p),
-        default_main(false), anon_product_count(0)
+        default_main(false), subex_count(0), generate_types(false)
     {
         // element 0 is a null element and can be used to
         // indicate missing/uninitialized elements or such.
@@ -781,12 +896,13 @@ public:
         return "";
     }
 
-    // if there's only one way to make a given product, the
-    // type for that product can be "inherited" from the way
-    // to make it.
-    // this is used for type inferrence in cases where there's
+    // If there's only one way to make a given product, the product
+    // may be considered an alias.
+    // This is used for type inferrence in cases where there's
     // no explicit type for a given product.
-    std::string inherited_type(const std::string &product) const {
+    // Returns the name of the product to which the given product
+    // can be considered an alias.
+    std::string product_alias(const std::string &product) const {
         auto strl  = rules_for_product.lower_bound(product);
         auto endrl = rules_for_product.upper_bound(product);
 
@@ -810,20 +926,22 @@ public:
     // returns the name of the target-language type expected as
     // the result of reducing to the product indicated:
     std::string type_for(const std::string &product) const {
+        // if there's a specific type already designated for this
+        // product, use that:
         auto tf = type_for_product.find(product);
         if(tf != type_for_product.end()) {
             return tf->second;
         }
 
         // if we are produced from only one other production,
-        // we can use that type.  (terminals too? terminal aliasing?)
-        std::string inherited = inherited_type(product);
-        if(inherited != "")
+        // we can use that type.
+        std::string inherited = product_alias(product);
+        if(inherited != "") {
             return type_for(inherited);
+        }
 
-        // last resort, use the @produces type. (possibly this part
-        // could be implemented using the inheritance, above)
-        return final_type;
+        // can't infer type:
+        return "";
     }
 
     // and this returns the type to use for a particular grammar
@@ -836,7 +954,6 @@ public:
         return "Terminal";
     }
 
-// XXX maybe fix the code and then this comment:
     // expects/scans a +{ }+ code block for the named directive.
     // the named directive is essentially for error reporting.
     // the intent is that at some point this can scan regexes
@@ -1000,6 +1117,10 @@ public:
             // TODO kill this in favor of having a default
             // main in grammarlib and importing.
             default_main = true;
+        } else if(dir == "generate_types") {
+            // tell this to generate a type for anything whose
+            // type it otherwise can't infer:
+            generate_types = true;
         } else if(dir == "goal") {
             SourcePosition whence(inp);
             std::string newgoal = arg_for_directive();
@@ -1358,7 +1479,7 @@ public:
             // need to be generated by the parentmost productions:
             return parent->make_sub_prod_name();
         }
-        return stringformat("_subex_{}", anon_product_count++);
+        return stringformat("_subex_{}", subex_count++);
     }
 
     // returns the name of the production representing the subexpression,
@@ -1916,7 +2037,7 @@ public:
     // Imports the grammar from the productions specified.
     // This will include rules and whatever's deemed necessary
     // to support those rules.
-    // returns the name of the production which this import will
+    // Returns the name of the production which this import will
     // produce, or an empty string if nothing was imported.
     // NOTE the grammar passed isn't const because we also use
     // it as a scratch pad to prevent redundant imports.
@@ -2335,36 +2456,42 @@ public:
         }
     }
 
-    void check_missing_types() {
-        std::set<std::string> missing_types;
+    void request_type_generation(const std::string &for_prod) {
+        type_request req(for_prod);
+        types_to_generate.insert(req);
+        add_type_for(for_prod,  req.type_name());
+    }
+
+    // returns true if the product passed has an auto-generated type
+    bool generated_type(const std::string &for_prod) const {
+        return types_to_generate.count(for_prod) > 0;
+    }
+
+    // generates/fills in any missing types
+    void resolve_types() {
+        std::set<std::string> prods_without_types;
         int num_rules = 0;
         for(auto prr : rules_for_product) {
             const std::string &prodn = prr.first;
             if(type_for(prodn) == "") {
-                missing_types.insert(prodn);
+                prods_without_types.insert(prodn);
                 num_rules++;
             }
         }
 
-        if(missing_types.size()) {
-            std::string msg = stringformat(
-                "missing type for {} product(s) ({} rules):\n",
-                missing_types.size(), num_rules
-            );
-            for(auto prod : missing_types) {
-                auto strl  = rules_for_product.lower_bound(prod);
-                auto endrl = rules_for_product.upper_bound(prod);
-                std::string rulestr;
-                for(auto rit = strl; rit != endrl; ++rit) {
-                    const production_rule &rule = rules[rit->second];
-                    rulestr += stringformat(
-                        "        {} {}\n", rule.location(), rule
-                    );
-                }
-                msg += stringformat("    {}:\n{}", prod, rulestr);
+        for(auto prod : prods_without_types) {
+            if(generate_types) {
+                // we've been told to make types for things
+                // whose types are otherwise unspecified:
+                request_type_generation(prod);
+            } else {
+                // default to the output type if one was specified
+                // or otherwise could be inferred:
+                add_type_for(prod, output_type());
             }
-            error(msg);
         }
+
+        resolve_output_and_goal_types();
     }
 
     // Mark the element passed as "masking" the other element passed.
@@ -2451,16 +2578,16 @@ public:
     }
 
     const std::string default_goal() const {
-        // default goal is either:
-        // 1) whatever the first precedence group produces
-        //    (i.e. the lowest precedence expression in the
-        //    grammar))
+        // 1) if there are any prcedence groups, the goal is
+        //    whatever the first (= lowest precedence) group
+        //    produces:
         if(precedence_group_names.size())
             return precedence_group_names[0];
 
         // 2) whatever the first top-level rule produces.
-        //    "top level" means not a subrule.  Ideally, this
-        //    is the first rule specified by the fpl author.
+        //    "top level" means not a subrule.  If there are
+        //    no precedence groups, this is the first rule
+        //    specified by the fpl author.
         for(auto rule : rules) {
             if(!rule.is_subexpression()) {
                 return rule.product();
@@ -2471,29 +2598,44 @@ public:
         return "goal";
     }
 
-    void infer_output_type() {
-        if(output_type().length() == 0) {
-            // We don't know our output type, so infer it from goals.
-            // In theory we could return a union or some functional
-            // equivalent, but for the moment we require that all
-            // goals have the same type.
-            std::map<std::string, std::string> goal_for_type;
+    void resolve_output_and_goal_types() {
+        // types_goals keys are the types specified in @produces 
+        // (or similar) and the known types of our goal productions.
+        // The values are a string specifying something which produces
+        // the key type and which can be used to report a reasonable
+        // error if there's a conflict.
+        // The idea is that if we end up with exactly one entry
+        // in types_goals, that entry's key will be the type the
+        // parser returns, but if not, we can report the conflict
+        // using the values.
+        std::map<std::string, std::string> types_goals;
+        if(output_type().length())
+            types_goals[output_type()] = "(output type/@produces)";
+        for(auto goal: goals) {
+            if(type_for(goal).length())
+                types_goals[type_for(goal)] = goal;
+        }
+
+        if(types_goals.size() == 1) {
+            // There's exactly one specified/inferred type among
+            // all possible goals, so they can all agree.  Make
+            // them agree:
+            set_output_type(types_goals.begin()->first);
             for(auto goal: goals) {
-                goal_for_type[type_for(goal)] = goal;
+                // (the type is the ->first element of the only item)
+                add_type_for(goal, types_goals.begin()->first);
             }
-            if(goal_for_type.size() == 1) {
-                set_output_type(goal_for_type.begin()->first);
-            } else {
-                // more than one type:  report a comflict
-                std::string conflicts;
-                for(auto gft : goal_for_type) {
-                    conflicts += stringformat(
-                        "    goal '{}' produces {}\n", gft.second, gft.first
-                    );
-                }
-                error(stringformat("can't infer output type.\n{}", conflicts));
+        } else {
+            std::string conflicts;
+            for(auto gft : types_goals) {
+                conflicts += stringformat(
+                    "\n    goal '{}' produces {}", gft.second, gft.first
+                );
             }
-        } // else we already know our output type
+            if(conflicts.length() == 0)
+                conflicts = "  no goal or @produces types have been specified";
+            error(stringformat("can't infer output type:{}\n", conflicts));
+        }
     }
 
     void resolve_goals() {
@@ -2538,11 +2680,10 @@ public:
             error("No rules found\n");
         }
 
-        check_missing_types();
         resolve_terminal_masking();
         resolve_goals();
 
-        infer_output_type();
+        resolve_types();
         apply_reducers();
         generate_states({"_fpl_goal"});
         dump_states(opts);
@@ -2561,6 +2702,7 @@ public:
         const fpl_options &opts
     );
     friend std::string fpl_x_parser(const productions &, const fpl_options &);
+    friend std::string fpl_x_parser_generated_types(const productions &);
     friend std::string fpl_x_parser_nonterm_enum(const productions &);
     friend std::string fpl_x_parser_reduce_call(
         const productions &, const production_rule &, const fpl_options &
