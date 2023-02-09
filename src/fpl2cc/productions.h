@@ -152,46 +152,6 @@ class productions {
         }
     }
 
-    // this is the name of the element for purposes of (eg) enums
-    std::string element_id_name(
-        int el_ind, src_location caller = CALLER()
-    ) const {
-        if(el_ind < 0 || el_ind >= elements.size()) {
-            internal_error(
-                stringformat("bad element id ({})\n", el_ind), caller
-            );
-        }
-
-        const grammar_element el = elements[el_ind];
-        if(el.is_nonterminal()) {
-            return el.nonterm_id_str();
-        }
-        return stringformat("_terminal_{}", el_ind);
-    }
-
-    std::string element_id_name(
-        grammar_element el, src_location caller = CALLER()
-    ) const {
-        auto eli = element_index.find(el);
-        if(eli == element_index.end()) {
-            // return the name for the "null" element:
-            return element_id_name(0, caller);
-        }
-        return element_id_name(eli->second);
-    }
-
-    int element_id(
-        grammar_element el, src_location caller = CALLER()
-    ) const {
-        auto eli = element_index.find(el);
-        if(eli == element_index.end()) {
-            internal_error(
-                stringformat("element {} is unindexed", el), caller
-            );
-        }
-        return eli->second;
-    }
-
     struct lr_item {
         // Modified from classic lr - in our case,
         // there's no "or" in rules so we can just
@@ -1228,6 +1188,47 @@ public:
     static inline std::string read_directive(fpl_reader_p &src) {
         return src->read_re("([A-Za-z][A-Za-z0-9_]+)\\s*")[1];
     }
+
+    // this is the name of the element for purposes of (eg) enums
+    std::string element_id_name(
+        int el_ind, src_location caller = CALLER()
+    ) const {
+        if(el_ind < 0 || el_ind >= elements.size()) {
+            internal_error(
+                stringformat("bad element id ({})\n", el_ind), caller
+            );
+        }
+
+        const grammar_element el = elements[el_ind];
+        if(el.is_nonterminal()) {
+            return el.nonterm_id_str();
+        }
+        return stringformat("_terminal_{}", el_ind);
+    }
+
+    std::string element_id_name(
+        grammar_element el, src_location caller = CALLER()
+    ) const {
+        auto eli = element_index.find(el);
+        if(eli == element_index.end()) {
+            // return the name for the "null" element:
+            return element_id_name(0, caller);
+        }
+        return element_id_name(eli->second);
+    }
+
+    int element_id(
+        grammar_element el, src_location caller = CALLER()
+    ) const {
+        auto eli = element_index.find(el);
+        if(eli == element_index.end()) {
+            internal_error(
+                stringformat("element {} is unindexed", el), caller
+            );
+        }
+        return eli->second;
+    }
+
 
     // Returns the set of names of all imported files.
     inline std::set<std::string> imported_files() const {
