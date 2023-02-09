@@ -160,6 +160,16 @@ public:
 
         const Var &var() const { return red; }
 
+        // Accessors for the different types are named as [element name]_val()
+        // We start at element 1 instead of 0 because we don't need/want an
+        // fpl_null accessor (it has no type anyway)
+        @for(int el_id = 1; el_id < prds.elements.size(); ++el_id) {-@
+            @declare el: prds.elements[el_id]@
+            @declare type: prds.type_for(el)@
+            @declare el_name: prds.element_id_name(el_id)@
+            @type@ @el_name@_val() const { return std::get<@type@>(var()); }
+        @-}-@
+
         operator bool() const {
             return !std::holds_alternative<false_product>(red);
         }
