@@ -2632,9 +2632,17 @@ public:
                     "\n    goal '{}' produces {}", gft.second, gft.first
                 );
             }
-            if(conflicts.length() == 0)
-                conflicts = "  no goal or @produces types have been specified";
-            error(stringformat("can't infer output type:{}\n", conflicts));
+            if(conflicts.length() == 0) {
+                if(goals.size() == 0) {
+                    conflicts = "(no goals found)";
+                } else {
+                    conflicts = stringformat(
+                        "try setting @produces or @type_for {}?", 
+                        *goals.begin()
+                    );
+                }
+            }
+            error(stringformat("can't infer output type: {}\n", conflicts));
         }
     }
 
