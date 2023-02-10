@@ -850,8 +850,10 @@ class productions {
                             // but it's better to find out the easy way if
                             // it does.
                             warn(stringformat(
-                                "conflict generating types for {}.{}:\n",
-                                for_product, attr.name
+                                "conflict generating types for {}.{}:"
+                                " {} vs {}\n",
+                                for_product, attr.name,
+                                existing_attr->type, attr.type
                             ));
                         }
 
@@ -865,7 +867,6 @@ class productions {
                     out.insert(attr);
                 }
             }
-
             return out;
         }
     };
