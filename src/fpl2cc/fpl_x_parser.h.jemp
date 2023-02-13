@@ -47,9 +47,9 @@ class @class_name@ {
 public:
     @if(prds.types_to_generate.size()) {@
         // predeclare generated types, because c++
-        @for(auto tg_req : prds.types_to_generate) {-@
+        @-for(auto tg_req : prds.types_to_generate) {-@
             struct @tg_req.type_name()@;
-        @}@
+        @-}-@
     @}@
 
 private:
