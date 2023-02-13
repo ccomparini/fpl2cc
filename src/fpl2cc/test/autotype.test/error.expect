@@ -1,5 +1,5 @@
 returncode = 255
-stderr = "Error src/fpl2cc/test/autotype.test/error.autotype:3:1 near «%%% // not a»: unrecognised input.  expected one of: /[A-Za-z]/, 
+stderr = "Error src/fpl2cc/test/autotype.test/error.autotype:3:1 near «%%% // not a»: unrecognised input.  expected one of: 'zzzzzzzzzz', /[A-Za-z]/, 
 too many errors.  aborting
 "
 stdout = ""

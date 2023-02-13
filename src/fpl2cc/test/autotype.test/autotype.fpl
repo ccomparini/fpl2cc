@@ -17,17 +17,20 @@
 #  x unnamed things
 #  - multiple ways to get to the same thing
 
-thing+ -> stuff;
+thing+ '.'^ -> thing;
+zeta -> thing;
 
 list+    -> thing;
 analogy+ -> thing;
 
 @type_for word std::string
 /[A-Za-z]/ -> word;
-word (','^ word)*:fruitbat -> list;
+word (','^ word)*:fruitbat -> list; # XXX word in the sub needs to bubble up
 
 word:a ':' word:b -> relation;
 relation:ab '::'^ relation:cd -> analogy;
+
+'zzzzzzzzzz' -> zeta;
 
 
 
