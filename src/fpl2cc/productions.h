@@ -790,17 +790,6 @@ class productions {
             return stringformat("_generated_type_for_{}", for_product);
         }
 
-        // this is for convenience in code generators.
-        // yay, lots of copies.
-        std::list<production_rule> source_rules(const productions &prds) const {
-            auto strl  = prds.rules_for_product.lower_bound(for_product);
-            auto endrl = prds.rules_for_product.upper_bound(for_product);
-            std::list<production_rule> out;
-            for(auto rit = strl; rit != endrl; ++rit) {
-                out.push_back(prds.rules[rit->second]);
-            }
-            return out;
-        }
 
         // this is meant as a convenience for code generators:
         struct attribute {
