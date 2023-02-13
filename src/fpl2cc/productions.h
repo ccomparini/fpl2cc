@@ -1032,6 +1032,7 @@ public:
         all_types.insert(rt);
         final_type = rt;
     }
+
     std::string output_type() const {
         return final_type;
     }
@@ -1041,7 +1042,7 @@ public:
     void set_default_main(bool def)            { default_main = def; }
     void add_internal(const code_block &cb)    { parser_members.push_back(cb); }
 
-    void add_type_for(const std::string &prod, const std::string &type) {
+    void add_type_for(const std::string &prod, const std::string &type, src_location caller = CALLER()) {
         type_for_product[prod] = type;
         all_types.insert(type);
     }
@@ -2470,29 +2471,34 @@ public:
 
     // generates/fills in any missing types
     void resolve_types() {
+
         std::set<std::string> prods_without_types;
-        int num_rules = 0;
         for(auto prr : rules_for_product) {
             const std::string &prodn = prr.first;
             if(type_for(prodn) == "") {
                 prods_without_types.insert(prodn);
-                num_rules++;
             }
         }
 
-        for(auto prod : prods_without_types) {
-            if(generate_types) {
+        // generate types before resolving outputs so that
+        // a generated type can be the output type:
+        if(generate_types) {
+            for(auto prod : prods_without_types) {
                 // we've been told to make types for things
                 // whose types are otherwise unspecified:
                 request_type_generation(prod);
-            } else {
-                // default to the output type if one was specified
-                // or otherwise could be inferred:
-                add_type_for(prod, output_type());
             }
         }
 
         resolve_output_and_goal_types();
+
+        // finally, if there's anything else left without
+        // a type, default it to the output type:
+        for(auto prod : prods_without_types) {
+            if(type_for(prod) == "") {
+                add_type_for(prod, output_type());
+            }
+        }
     }
 
     // Mark the element passed as "masking" the other element passed.
