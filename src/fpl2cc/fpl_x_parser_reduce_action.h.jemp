@@ -16,7 +16,7 @@
     @if(code_block rule_code = rule.reduce_code()) {-@
         @/* fpl-author-supplied rule code: */@
         @rule_code.format(false)@
-    @} else if(prds.generated_type(rule.product())) {@
+    @} else if(prds.has_generated_type(rule.product())) {@
         @/* auto generated type - initialize from parameters */@
         @return_type@ result;
         @-for(int pind = 0; pind < num_params; pind++) {-@

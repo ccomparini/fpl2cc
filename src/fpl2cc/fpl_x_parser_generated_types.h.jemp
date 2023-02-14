@@ -1,20 +1,19 @@
 @parameter: const productions &prds@
 @realign: #line {} "{}"@
 
-@for(auto tg_req: prds.types_to_generate) {-@
-    struct @tg_req.type_name()@ {
-        @declare attrs: tg_req.attributes(prds)@
-        @for(auto mem : attrs) {-@
+@for(auto gen_type: prds.generated_types) {-@
+    struct @gen_type.name()@ {
+        @for(auto mem : gen_type.attributes) {-@
             @/* to KISS, everything is std::vector (even if there
                 is only ever exactly one match) so that we don't
                 have to worry about declaration order, multiplicity,
                 or optionalness.
             */@
-            std::vector<@mem.type@> @mem.name@;
+            std::vector<@mem.type@> @mem.name@; // @mem@
         @}-@
 
         // default constructor.  everything needs a default constructor.
-        @tg_req.type_name()@() { }
+        @gen_type.name()@() { }
     };
 @}@
 

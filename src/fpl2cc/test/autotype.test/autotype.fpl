@@ -17,6 +17,8 @@
 #  x unnamed things
 #  - multiple ways to get to the same thing
 
+#thing '.'^ -> done;
+
 thing+ '.'^ -> thing;
 zeta -> thing;
 

@@ -68,8 +68,8 @@ class productions {
 
     std::list<reducer> reducers;
 
-    struct type_request;
-    std::set<type_request> types_to_generate;
+    struct generated_type;
+    std::set<generated_type> generated_types;
     bool generate_types;
 
     class lr_set;
@@ -763,58 +763,113 @@ class productions {
     // Represents the need to generate a type for a particular product.
     // Provides the information needed (by the code generator) to generate
     // that type.
-    struct type_request {
-        std::string for_product;
-
-        type_request(const std::string &pr) : for_product(pr) { }
-
-        std::string to_str() const { return for_product; }
-
-        // this is so we can be in a std::set:
-        friend bool operator<(const type_request& left, const type_request& right) {
-            return left.for_product < right.for_product;
-        }
-
-        // the output type needs:
-        //   - One construction factory whatever code block per rule.
-        //     actually, this is for the jemp.
-        //   - One member per distinct reduce param.
-        //     If that member is multiple or optional, it's a list.
-        //     If there's exactly one member, we don't need to make
-        //     a type request - the type can be inherited.
-        //     Reduce params are distinct if they have different names.
-        //     2 params with the same name are compatible if they have
-        //     the same basic type.  If one is multiple and the other
-        //     isn't, go with multiple.
-        std::string type_name() const {
-            return stringformat("_generated_type_for_{}", for_product);
-        }
-
-
-        // this is meant as a convenience for code generators:
+    struct generated_type {
         struct attribute {
             std::string name; // name of the product
-            std::string type; // name of type
+            std::set<grammar_element> elements; // set of elements possibly generating this
+            std::string type;
             bool multiple;    // if true, store in a way allowing 0 or more
 
-            attribute(const production_rule::step &step, const std::string &t) :
+            attribute(const production_rule::step &step, src_location caller = CALLER()) :
                 name(step.variable_name()),
-                type(t),
+                elements({step.gexpr}),
                 multiple(!step.is_single()) {
             }
 
-            attribute(std::string n) :
-                 name(n), type("(dummy attribute)"), multiple(false) {
+            void merge(const attribute &other) {
+                for(auto el : other.elements) {
+                    elements.insert(el);
+                }
+
+                // if any of the possible things with this name are
+                // not limited to being singular, the whole thing is
+                // multiple:
+                if(other.multiple) {
+                    multiple = true;
+                }
+            }
+
+            std::string to_str() const {
+                return stringformat(
+                    "{}: {}{} (from {})",
+                    name, multiple?"mulitple ":"", type, elements
+                );
             }
 
             // so we can make a std::set
             friend bool operator<(const attribute &lhs, const attribute &rhs) {
                 return lhs.name < rhs.name;
             }
+
+            void resolve_type(const productions &prds) {
+                std::set<std::string> types;
+                for(auto el : elements) {
+                    std::string type = prds.type_for(el);
+                    if(!type.length()) {
+                        jerror::warning(stringformat(
+                            "no type known for {}\n", el
+                        ));
+                    } else {
+                        types.insert(type);
+                    }
+                }
+
+                if(types.size() != 1) {
+                    jerror::error(stringformat(
+                        "can't determine type for {}.  Could be any of: {}",
+                        *this, join(types, ", ")
+                    ));
+                }
+                type = *(types.begin());
+            }
         };
         using attribute_set = std::set<attribute>;
-        attribute_set attributes(const productions &prds) const {
-            attribute_set out;
+        attribute_set attributes;
+        std::string type_name;
+
+        generated_type(const std::string &pr, const productions &prds) :
+            type_name(stringformat("_generated_type_for_{}", pr)) {
+            init_attributes(pr, prds);
+        }
+
+        // this is so they can be looked up by name:
+        generated_type(const std::string &tn) : type_name(tn) { }
+
+        std::string to_str() const {
+            return stringformat("{}: {}", type_name, attributes);
+        }
+
+        std::string name() const { return type_name; }
+
+        // generated types can be looked up by name in a std::set or similar:
+        friend bool operator<(
+            const generated_type &left, const generated_type &right
+        ) {
+            return left.type_name < right.type_name;
+        }
+
+        // and this comparison function allows them to be put in a set
+        // for purposes of deduplicating types:
+        static bool fold_compare(const generated_type &left, const generated_type &right) {
+            auto lattr =  left.attributes.begin();
+            auto lend  =  left.attributes.end();
+            auto rattr = right.attributes.begin();
+            auto rend  = right.attributes.end();
+            while((lattr != lend) && (rattr != rend)) {
+                if(lattr->name != rend->name) {
+                    return *lattr < *rend;
+                }
+                // names are the same - compare types.
+                if(lattr->type != rend->type) {
+                    return lattr->type < rend->type;
+                }
+            }
+            return false;
+        }
+
+        void init_attributes(
+            const std::string &for_product, const productions &prds
+        ) {
             auto strl  = prds.rules_for_product.lower_bound(for_product);
             auto endrl = prds.rules_for_product.upper_bound(for_product);
             for(auto rit = strl; rit != endrl; ++rit) {
@@ -825,41 +880,26 @@ class productions {
 
                     if(st.skip_on_reduce())
                         continue; // reducers never see this one anyway - skip
-     
-                    attribute attr(st, prds.type_for(st.gexpr));
-                    auto existing_attr = out.find(attr);
-                    if(existing_attr != out.end()) {
-                        if(existing_attr->type != attr.type) {
-                            // 2 items with different types but the same name.
-                            // this will not work (without difficulty) in c++,
-                            // but it's not inherently a problem in many
-                            // languages, so we'll warn and let later stages
-                            // toss an error if it's a real problem.
-                            // I'm not entirely sure this can even happen,
-                            // but it's better to find out the easy way if
-                            // it does.
-                            warn(stringformat(
-                                "conflict generating types for {}.{}:"
-                                " {} vs {}\n",
-                                for_product, attr.name,
-                                existing_attr->type, attr.type
-                            ));
-                        }
 
-                        // if any of the possible things with this name are
-                        // not limited to being singular, the whole thing is
-                        // multiple:
-                        if(existing_attr->multiple) {
-                            attr.multiple = true;
-                        }
-                    } // else it's first time we've seen this so just add it
-                    out.insert(attr);
+                    attribute attr(st);
+                    auto existing_attr = attributes.find(attr);
+                    if(existing_attr != attributes.end()) {
+                        attr.merge(*existing_attr);
+                    }
+                    attributes.insert(attr);
                 }
             }
-            return out;
+        }
+
+        void resolve_attribute_types(const productions &prds) {
+            attribute_set new_attrs;
+            for(auto attr : attributes) {
+                attr.resolve_type(prds);
+                new_attrs.insert(attr);
+            }
+            attributes = new_attrs;
         }
     };
-
 
 public:
 
@@ -2447,45 +2487,52 @@ public:
         }
     }
 
-    void request_type_generation(const std::string &for_prod) {
-        type_request req(for_prod);
-        types_to_generate.insert(req);
-        add_type_for(for_prod,  req.type_name());
+    // returns true if the product passed has an auto-generated type
+    bool has_generated_type(const std::string &for_prod) const {
+        std::string ptype = type_for(for_prod);
+        return generated_types.count(ptype) > 0;
     }
 
-    // returns true if the product passed has an auto-generated type
-    bool generated_type(const std::string &for_prod) const {
-        return types_to_generate.count(for_prod) > 0;
-    }
 
     // generates/fills in any missing types
     void resolve_types() {
 
-        std::set<std::string> prods_without_types;
-        for(auto prr : rules_for_product) {
-            const std::string &prodn = prr.first;
-            if(type_for(prodn) == "") {
-                prods_without_types.insert(prodn);
-            }
-        }
-
-        // generate types before resolving outputs so that
-        // a generated type can be the output type:
         if(generate_types) {
-            for(auto prod : prods_without_types) {
-                // we've been told to make types for things
-                // whose types are otherwise unspecified:
-                request_type_generation(prod);
+            std::set<generated_type> gt_candidates;
+            std::set<generated_type, decltype(generated_type::fold_compare)*> uniques;
+            for(auto prr : rules_for_product) {
+                const std::string &prodn = prr.first;
+                if(type_for(prodn) == "") {
+                    generated_type gt(prodn, *this);
+                    gt_candidates.insert(gt);
+                    add_type_for(prodn, gt.name());
+                }
             }
+            for(auto candidate : gt_candidates) {
+                candidate.resolve_attribute_types(*this);
+                generated_types.insert(candidate);
+/*
+                auto existing = uniques.find(candidate);
+                if(existing == uniques.end()) {
+                    uniques.insert(candidate);
+                } else {
+//std::cerr << stringformat("RAD it looks like {} and {} are the same\n", candidate.for_product, existing->for_product);
+                    // already got this type.  point the candidate product
+                    // at the existing type to deduplicate:
+//                    add_type_for(candidate.for_product, existing->type_name());
+                }
+ */
+            }
+//std::cerr << stringformat("LISTEN UP! HERE ARE THE GENERATED TYPES!\n{}\n", generated_types);
         }
 
         resolve_output_and_goal_types();
 
-        // finally, if there's anything else left without
-        // a type, default it to the output type:
-        for(auto prod : prods_without_types) {
-            if(type_for(prod) == "") {
-                add_type_for(prod, output_type());
+        // anything still without a type defaults to the output type:
+        for(auto prr : rules_for_product) {
+            const std::string &prodn = prr.first;
+            if(type_for(prodn) == "") {
+                add_type_for(prodn, output_type());
             }
         }
     }
