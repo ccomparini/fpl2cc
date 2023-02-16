@@ -409,7 +409,11 @@ class productions {
         //
         // Use this for code generation.
         using lr_transitions = std::list<lr_transition>;
+        mutable lr_transitions transition_cache;
         lr_transitions transitions(const productions &prds) const {
+            if(transition_cache.size())
+                return transition_cache;
+
             lr_transitions nonterm_trans;
             lr_transitions term_trans;
             lr_transition  none_trans;
@@ -461,6 +465,7 @@ class productions {
             if(none_trans) {
                 out.push_back(none_trans);
             }
+            transition_cache = out;
             return out;
         }
  
@@ -2789,6 +2794,19 @@ public:
     // debugging:
     std::string states_to_string() const {
         std::string out;
+
+        // print the actual state transitions:
+        for(int stind = 0; stind < states.size(); stind++) {
+            out += stringformat("state {}:\n", stind);
+            auto st_trans = states.at(stind).transitions(*this);
+            for(auto trans : st_trans) {
+                out += stringformat("    {}\n", trans);
+            }
+            out += "\n";
+        }
+        out += "\n\n\n";
+
+        // now print the old way as well:
         for(int stind = 0; stind < states.size(); stind++) {
             out += stringformat(
                 "state {}:\n{}\n",
