@@ -9,15 +9,17 @@ namespace fpl {
 struct grammar_element {
     std::string expr; // either a string, regex, or name of product
     typedef enum {
+        // order here matters:  earlier types are matched first
+        // in parsing
         NONE,
-        TERM_EXACT,  // exact string match
-        TERM_REGEX,  // regular expression match
-        TERM_CUSTOM, // custom code for matching terminal
-        LACK_OF_SEPARATOR, // pseudoterminal indicating no separator
         NONTERM_PRODUCTION,       // the result of reducing a rule
         NONTERM_SUBEXPRESSION,    // parenthesized expression
         NONTERM_PREC_PLACEHOLDER, // precedence placeholder
-        END_OF_PARSE, // indicates we're done parsing (good or bad)
+        TERM_CUSTOM,       // custom code for matching terminal
+        LACK_OF_SEPARATOR, // pseudoterminal indicating no separator
+        TERM_EXACT,        // exact string match
+        TERM_REGEX,        // regular expression match
+        END_OF_PARSE,      // indicates we're done parsing (good or bad)
         _TYPE_CAP
     } Type;
     Type type;
@@ -25,13 +27,13 @@ struct grammar_element {
     static const char *Type_to_str(Type t) {
         static const char *strs[] = {
             "NONE",
-            "TERM_EXACT",
-            "TERM_REGEX",
-            "TERM_CUSTOM",
-            "LACK_OF_SEPARATOR", // convert to TERM_CUSTOM?
             "NONTERM_PRODUCTION",
             "NONTERM_SUBEXPRESSION",
             "NONTERM_PREC_PLACEHOLDER",
+            "TERM_CUSTOM",
+            "LACK_OF_SEPARATOR", // convert to TERM_CUSTOM?
+            "TERM_EXACT",
+            "TERM_REGEX",
             "END_OF_PARSE"
         };
         if(t >= NONE && t < _TYPE_CAP) {
@@ -51,7 +53,11 @@ struct grammar_element {
     inline int compare(const grammar_element &other) const {
         int cmp = type - other.type;
         if(cmp == 0) {
-            cmp = expr.compare(other.expr);
+            // to avoid termianl masking, we reverse-lexical compare
+            // so that if there's a term that's a prefix of another,
+            // the prefix one comes later and thereby doesn't match
+            // first and prevent the the longer one from matching.
+            cmp = -expr.compare(other.expr);
         }
         return cmp;
     }
@@ -71,11 +77,11 @@ struct grammar_element {
     }
 
     inline bool is_nonterminal() const {
-        return (type >= NONTERM_PRODUCTION);
+        return (type > NONE) && (type < TERM_CUSTOM);
     }
 
     inline bool is_placeholder() const {
-        return (type >= NONTERM_PREC_PLACEHOLDER);
+        return (type == NONTERM_PREC_PLACEHOLDER);
     }
 
     inline bool is_end_of_parse() const {
@@ -134,6 +140,7 @@ struct grammar_element {
                 rb = "⸣";
                 break;
             case NONTERM_PRODUCTION:
+            case NONTERM_PREC_PLACEHOLDER:
                 lb = "";
                 rb = "";
                 break;
@@ -141,9 +148,8 @@ struct grammar_element {
                 lb = "(";
                 rb = ")";
                 break;
-            case NONTERM_PREC_PLACEHOLDER:
             case END_OF_PARSE:
-                lb = "";
+                lb = "␄";
                 rb = "";
                 break;
             default:
