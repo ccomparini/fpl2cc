@@ -2386,7 +2386,10 @@ public:
             // reducer to the point where it's no longer used... hmmm..
             if(!used) {
                 if(rulei_0 == rulei_l) {
-                    why_no_match = stringformat("nothing produces {}", pname);
+                    why_no_match = stringformat(
+                        "nothing produces {} for reducer {}",
+                        pname, red
+                    );
                 }
                 warn(stringformat(
                     "reducer {} doesn't match any rules: {}\n",
