@@ -316,7 +316,7 @@ public:
 
         std::string to_str() const {
             return stringformat("{}{} {} param[{}] ({})",
-                mismatch?"xxx ":"",
+                mismatch?"⏮ ":"",
                 state_to_str(state),
                 element_str(element_id),
                 param_ind,  // need the owner to get the product
