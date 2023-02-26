@@ -72,7 +72,7 @@ leading_ws?^ '@-' -> subst_start ;
 # so we need to be able to identify leading/trailing space:
 # \n is optional on leading_ws because it may have been eaten
 # by an earlier trailing_ws
-/\n?[ \t]+/:ws -> leading_ws  ;
+/\n*[ \t]+/:ws -> leading_ws  ;
 
 # there are 2 variants on trailing whitespace.
 # the first matches all space through the end of
