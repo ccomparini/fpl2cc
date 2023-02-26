@@ -7,13 +7,6 @@
 
 @separator "none"
 
-# XXX idea:  @+ starts an indented expansion where
-# everything to the left of the @+ on the same line
-# gets substituted in for newlines in the expansion.
-# that way you can keep indent or do line comments 
-# or whatever.  or maybe '@>'?
-# 
-
 # a complete template is composed of "fragments".  Each
 # fragment is the "digest" of a section of the template.
 fragment+:fragments -> complete ;
@@ -60,8 +53,6 @@ leading_ws? '@declare'^ /\s*/^ identifier:name_decl ':'^ /(?:[^@]|(?:@@))*/:valu
 # instead of in the generated location(s).
 '@realign:'^ /\s*/^ text:realign '@'^ /\n?/^ -> fragment ;
 
-# can't eject this leading_ws - it causes an eject/keep
-# conflict with other leading_ws
 leading_ws?^ '@-' -> subst_start ;
 '@'               -> subst_start ;
 
