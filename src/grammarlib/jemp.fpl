@@ -86,10 +86,10 @@ leading_ws?^ '@-' -> subst_start ;
 # expansion).  If the author wants to indent the
 # text within a multiline expansion, they can indent
 # the beginning tag.
-/[ \t]*\n[ \t]+(?!@)/:ws  -> trailing_ws ;
+/[ \t]*\n+[ \t]+(?!@)/:ws  -> trailing_ws ;
 
 # ... and this is the "normal" trailing whitespace
-# case..
+# case.  
 /[ \t]*\n/:ws  -> trailing_ws ;
 
 # you can call another template with the "@#other_template(x, y ,z)@...
