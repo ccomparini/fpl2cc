@@ -1212,7 +1212,7 @@ public:
         @for(int el_id = 0; el_id < prds.elements.size(); ++el_id) {-@
             @declare el: prds.elements[el_id]@
             @prds.element_id_name(el_id)@, // @el_id@ @el.to_str()@
-        @-}-@
+        @}-@
     } ElementID;
 
     // returns a string describing the element matching the ID
