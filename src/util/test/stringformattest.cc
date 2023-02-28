@@ -27,7 +27,7 @@ struct just_data {
 
 int main() {
     std::cout << stringformat(
-        "here's arg 1: {1} and now 0: {0} and last {}\n", "zero", 1, 2
+        "here's arg 1: {1} and now 0: {0} and last is {}\n", "zero", "oneth", 2
     );
 
     i_has_to_str foo;

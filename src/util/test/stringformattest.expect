@@ -1,4 +1,4 @@
-here's arg 1: zero
+here's arg 1: oneth and now 0: zero and last is 2
 to string function: called to_str()!
 just data (to hex): 0x000102030405060708090a0b0c0d0e0f10111213141516
 converting newlines: \nyay\n

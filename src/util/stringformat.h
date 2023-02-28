@@ -11,8 +11,7 @@
 
 // OK SO #include<format> doen't seem to exist on my machine.
 // let the reinvention commence.
-// The good thing is maybe I can fpl up the jest string formatting
-// and slap it in here.
+// Oh, interesting. this is a nightmare in c++.
 
 inline std::string _stringformat(const char * s) {
     return std::string(s);
@@ -253,7 +252,8 @@ std::string stringformat(std::string_view fmt, Args&&... args) {
     size_t ind;
     for(ind = 0; ind < inlen; ++ind) {
         if(fmt[ind] == '{') {
-            if(fmt[ind + 1] == '{') {
+            ++ind; // skip the begin brace
+            if(fmt[ind] == '{') {
                 // '{{' evaluates to a single '{' (it's how you escape '{')
                 ++ind;
                 out += '{';
@@ -268,14 +268,15 @@ std::string stringformat(std::string_view fmt, Args&&... args) {
                 size_t ts_ind = 0; // pos of to-string function, if any
                 size_t pp_ind = 0; // pos of post processing function, if any
                 long arg_num = argi;
+                if(fmt[ind] >= '0' && fmt[ind] <= '9') {
+                    size_t num_len = 1; // (there's at least one digit)
+                    const char *istart = fmt.data() + ind;
+                    char       *iend   = const_cast<char *>(istart + 1);
+                    arg_num = strtol(istart, &iend, 10);
+                    ind += iend - istart - 1;
+                }
                 while(fmt[ind] && (fmt[ind] != '}')) {
-                     if(fmt[ind] >= '0' && fmt[ind] <= '9') {
-                         size_t num_len = 1; // (there's at least one digit)
-                         const char *istart = fmt.data() + ind;
-                         char       *iend   = const_cast<char *>(istart + 1);
-                         arg_num = strtol(istart, &iend, 10);
-                         ind += iend - istart;
-                     } else if(fmt[ind] == ':') {
+                     if(fmt[ind] == ':') {
                          if(!ts_ind)
                              ts_ind = ind + 1;
                          else if(!pp_ind)
