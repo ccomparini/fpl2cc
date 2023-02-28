@@ -1,6 +1,8 @@
 #ifndef REFORMAT_CODE
 #define REFORMAT_CODE
 
+#include <ctype.h>
+
 // reformats the generated code to fix indents and what have you.
 // this is fairly rough but does result in more or less readable
 // code for most cases.
@@ -52,6 +54,40 @@ static std::string reformat_code(
             while(code[inp] != '\n') {
                 output += code[inp++];
             }
+        } else if(code[inp] == '\'') {
+            // quoted char... grrrrrrrr
+            if(code[inp] != '\\') {
+                output += code[inp++];
+            } else {
+                output += code[inp++]; // backslash
+                if(code[inp] >= '0' && code[inp] <= '7') {
+                    // octal :P
+                    for(int x = 0; x < 3; x++) {
+                        if(code[inp] >= '0' && code[inp] <= '7')
+                            output += code[inp++];
+                        else
+                            break;
+                    }
+                } else if(code[inp] == 'x') {
+                    // hex:
+                    output += code[inp++];
+                    while(isxdigit(code[inp]))
+                        output += code[inp++];
+                } else {
+                    // any other backslashed char:
+                    output += code[inp++]; // final quote
+                }
+            }
+            output += code[inp++]; // final quote
+        } else if(code[inp] == '"') {
+            // string - copy verbatim, respecting escapes
+            while(code[inp] != '"') {
+                if(code[inp] == '\\') {
+                    output += code[inp++];
+                }
+                output += code[inp++];
+            }
+            output += code[inp++]; // final quote
         } else if(code.compare(inp, 7, "#$LINE\n") == 0) {
             inp += 6;
             // this is a pseudo-macro we generated to restore
