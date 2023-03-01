@@ -7,11 +7,8 @@
 #   - check that source positions/lengths/whatever for custom
 #     scanners make sense.  if they don't, change how this whole
 #     thing works.
-#   - document that scanners MUST return something iterable
-#     or fix fpl it so that it doesn't have to. (if constexpr)
-#     or both!
-#   - also document how it's supposed to scan, which is
-#     that (at present) it just calls parser/reader methods..
+#   - document how it's supposed to scan, which is that (at present)
+#     it just calls parser/reader methods..
 #
 
 @produces std::string

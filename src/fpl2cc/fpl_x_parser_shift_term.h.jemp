@@ -53,10 +53,9 @@ bool shift_@el.type_str()@_@el_id@(bool eject) {
             result = Terminal(match.begin(), match.end());
         }
     @} else if(el.type == grammar_element::TERM_CUSTOM) {@
-        auto match = custom_scanner_@el.expr@(*reader);
-        if(match.size() > 0) {
-            result = Terminal(match.begin(), match.end());
-        }
+        result = term_custom_result(
+            custom_scanner_@el.expr@(*reader), "@el.expr@"
+        );
     @} else if(el.type == grammar_element::LACK_OF_SEPARATOR) {@
         if(!bytes_eaten) {
             result = Terminal("⦑lack-of-separator⦒");
