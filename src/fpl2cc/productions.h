@@ -2845,7 +2845,7 @@ public:
                     // we're going to complain about it anyway
                     // here because the code generator shouldn't
                     // have to be bothered checking if a given
-                    // element is actually used, 
+                    // element is actually used.
                     error(stringformat(
                         "use of undefined scanner &{} in rule {} {}",
                         scanner_name, rule, rule.location()
