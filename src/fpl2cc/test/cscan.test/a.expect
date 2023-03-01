@@ -1,0 +1,3 @@
+returncode = 0
+stderr = ""
+stdout = "block: {foo bar bat, I can put anything in here other than a terminator  }"

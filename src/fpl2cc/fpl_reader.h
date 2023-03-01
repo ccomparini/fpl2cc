@@ -505,6 +505,17 @@ public:
         return false;
     }
 
+    inline bool read_bytes_equalling(const utf8_buffer &src) {
+        size_t match_len = 0;
+        while(match_len < src.length() && src[match_len] == peek(match_len)) {
+            match_len++;
+        }
+
+        skip_bytes(match_len); // ("read" the match)
+
+        return match_len;
+    }
+
     inline bool read_byte_not_equalling(utf8_byte this_byte) {
         if(const utf8_byte *in = inpp()) {
             if(*in != this_byte) {

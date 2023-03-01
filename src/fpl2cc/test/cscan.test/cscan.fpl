@@ -1,0 +1,83 @@
+#
+# Custom scanner test
+#
+
+
+# TODO:
+#   - check that source positions/lengths/whatever for custom
+#     scanners make sense.  if they don't, change how this whole
+#     thing works.
+#   - document that scanners MUST return something iterable
+#     or fix fpl it so that it doesn't have to. (if constexpr)
+#     or both!
+#   - also document how it's supposed to scan, which is
+#     that (at present) it just calls parser/reader methods..
+#
+
+@produces std::string
+
++{
+
+const utf8_buffer LeftDoubleBracket((utf8_byte *)"⟦", 3);
+const utf8_buffer RightDoubleBracket((utf8_byte *)"⟧", 3);
+
+}+
+
+# let's say (for test purposes) that blocks are enclosed
+# in U+27E6 and U+27E7 Mathemetical Square Brackets
+# ("⟦" and "⟧").
+@scanner start_of_block +{
+    if(reader->read_bytes_equalling(LeftDoubleBracket)) {
+        return std::list{std::string("⟦")};
+    }
+    return std::list<std::string>();
+}+
+
+@scanner not_end_of_block +{
+    size_t start = reader->current_position();
+
+    while(reader->read_byte_not_equalling(RightDoubleBracket[0])) {
+        // we may have found an end bracket:
+        if(
+            reader->peek(0) == RightDoubleBracket[0] &&
+            reader->peek(1) == RightDoubleBracket[1] &&
+            reader->peek(2) == RightDoubleBracket[2]
+        ) {
+            return std::list{std::string(reader->read_range(start, reader->current_position())) };
+        } // else false alarm
+    }
+    return std::list<std::string>();
+}+
+
+@scanner end_of_block +{
+    if(reader->read_bytes_equalling(RightDoubleBracket)) {
+        return std::list{std::string("⟧")};
+    }
+    return std::list<std::string>();
+}+
+
+stuff* -> done +{
+    std::cout << stuff@join("\n");
+    return "totally done";
+}+
+
+block -> stuff;
+
+&start_of_block guts &end_of_block -> block +{
+    return stringformat("block: {{ {} }}", guts);
+}+
+
+&not_end_of_block:huh_need_this -> guts +{
+//std::cerr << stringformat("scanned guts! ⎧\n{}\n⎩", huh_need_this@join("\n⎪"));
+    //return not_end_of_block; ohhhh.... name....e.e..e.e.
+    return huh_need_this;
+}+
+
+#/.+/ -> stuff;
+
++{
+#include<iostream>
+#include<list>
+}+
+
+@default_main
