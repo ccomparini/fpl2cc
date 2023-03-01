@@ -26,7 +26,7 @@ syn match	fplAtDirective	"@main"
 syn match	fplAtDirective	"@post_parse"
 syn match	fplAtDirective	"@post_reduce"
 syn match	fplAtDirective	"@produces.*"
-syn match	fplAtDirective	"@scanner.*"
+syn match	fplAtDirective	"@scanner"
 syn match	fplAtDirective	"@separator.*"
 syn match	fplAtDirective	"@type_for.*"
 
