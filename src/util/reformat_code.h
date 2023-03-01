@@ -80,6 +80,7 @@ static std::string reformat_code(
             }
             output += code[inp++]; // final quote
         } else if(code[inp] == '"') {
+            output += code[inp++];
             // string - copy verbatim, respecting escapes
             while(code[inp] != '"') {
                 if(code[inp] == '\\') {
