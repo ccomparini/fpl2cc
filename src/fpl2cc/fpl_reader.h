@@ -13,6 +13,14 @@
 #include "util/stringformat.h"
 #include "util/to_hex.h"
 
+
+/*
+   The c++ standard regex engine doesn't work on streams or anything
+   like that, so for now anyway we just buffer the entire input.
+   Hence this class.
+   This is expedience (I don't want to have to implement a regex engine),
+   and not how it "should" be.
+ */
 typedef unsigned char utf8_byte;
 struct utf8_buffer : public std::basic_string<utf8_byte> {
     utf8_buffer() { }
@@ -158,10 +166,10 @@ class fpl_reader {
         return empty_match;
     }
 
-    // returns true if the position passed would be eof.
-    // throws an error (and returns true) if the position
-    // is entirely outside the buffer
-    // see also the simpler eof() in the public section
+    // Returns true if the position passed would be eof.
+    // Throws an error (and returns true) if the position
+    // is entirely outside the buffer.
+    // See also the simpler eof() in the public section
     inline bool eof(size_t off, src_location caller = CALLER()) const {
         bool is_eof = false;
         if(off >= buffer.length()) {
@@ -487,9 +495,19 @@ public:
         return '\0';
     }
 
-    inline bool read_byte_equalling(char chr) {
+    inline bool read_byte_equalling(utf8_byte this_byte) {
         if(const utf8_byte *in = inpp()) {
-            if(*in == chr) {
+            if(*in == this_byte) {
+                read_pos++;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    inline bool read_byte_not_equalling(utf8_byte this_byte) {
+        if(const utf8_byte *in = inpp()) {
+            if(*in != this_byte) {
                 read_pos++;
                 return true;
             }

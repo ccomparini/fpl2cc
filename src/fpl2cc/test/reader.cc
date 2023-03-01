@@ -66,6 +66,23 @@ int main(int argc, const char **argv) {
         }
     }
 
+    reader = test_reader(); // reset..
+    // fist character in utf-8 is 2 bytes, 0xc2 0xa3 (GBP sign '£')
+    utf8_byte start = reader->peek();
+    if(start != 0xc2) {
+        jerror::error(
+            stringformat("expected 0xc2 but got 0x{}\n", to_hex(start))
+        );
+    }
+    if(reader->read_byte_not_equalling(start)) {
+        jerror::error("... read-not-equalling something impossible\n");
+    }
+    if(!reader->read_byte_equalling(0xc2)) {
+        jerror::error("failed to read 0xc2 in GBP sign '£'\n");
+    }
+    if(!reader->read_byte_equalling(0xa3)) {
+        jerror::error("failed to read second byte of GBP sign '£'\n");
+    }
     return 0;
 }
 
