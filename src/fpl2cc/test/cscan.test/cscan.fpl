@@ -20,6 +20,11 @@ const utf8_buffer RightDoubleBracket((utf8_byte *)"⟧", 3);
 
 }+
 
+# end-of-file (or input) assertion:
+@scanner eof +{
+    return reader->eof();
+}+
+
 # let's say (for test purposes) that blocks are enclosed
 # in U+27E6 and U+27E7 Mathemetical Square Brackets
 # ("⟦" and "⟧").
@@ -53,15 +58,25 @@ const utf8_buffer RightDoubleBracket((utf8_byte *)"⟧", 3);
     return std::list<std::string>();
 }+
 
-stuff* -> done +{
-    std::cout << stuff@join("\n");
+stuff* the_end -> done +{
+    std::cout << stuff@join("\n") + "\n" + the_end + "\n";
     return "totally done";
 }+
 
 block -> stuff;
 
+&eof -> the_end +{
+    return "ding!";
+}+
+
+# there's a little bit of weird interplay with how spaces
+# are handled here.  the default separator code will eat
+# any space after the start_of_block, but then the guts
+# ends up including the space all the way up to the
+# end of block.  it's... correct?  the custom scanners
+# are working, anyway, and that's the point of this.
 &start_of_block guts &end_of_block -> block +{
-    return stringformat("block: {{ {} }}", guts);
+    return stringformat("block: [{}]", guts);
 }+
 
 &not_end_of_block:huh_need_this -> guts +{
