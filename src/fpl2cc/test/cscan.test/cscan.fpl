@@ -30,9 +30,9 @@ const utf8_buffer RightDoubleBracket((utf8_byte *)"⟧", 3);
 # ("⟦" and "⟧").
 @scanner start_of_block +{
     if(reader->read_bytes_equalling(LeftDoubleBracket)) {
-        return std::list{std::string("⟦")};
+        return std::string("⟦");
     }
-    return std::list<std::string>();
+    return false; // no match
 }+
 
 @scanner not_end_of_block +{
@@ -45,17 +45,17 @@ const utf8_buffer RightDoubleBracket((utf8_byte *)"⟧", 3);
             reader->peek(1) == RightDoubleBracket[1] &&
             reader->peek(2) == RightDoubleBracket[2]
         ) {
-            return std::list{std::string(reader->read_range(start, reader->current_position())) };
-        } // else false alarm
+            return reader->read_range(start, reader->current_position());
+        } // else false alarm but keep looking
     }
-    return std::list<std::string>();
+    return false;
 }+
 
 @scanner end_of_block +{
     if(reader->read_bytes_equalling(RightDoubleBracket)) {
-        return std::list{std::string("⟧")};
+        return "⟧";
     }
-    return std::list<std::string>();
+    return false;
 }+
 
 stuff* the_end -> done +{

@@ -89,12 +89,28 @@ public:
 
         Terminal() { } // false valued terminal
 
-        Terminal(const std::string &src, const std::string &caller = CALLER()) {
+        Terminal(const std::string &src) {
             matches.push_back(src);
+        }
+
+        // this prevents stuff like Terminal("foo") from matching
+        // the Iterable one, below
+        Terminal(const char *src) {
+            matches.push_back(std::string(src));
+        }
+
+        // this is so that bool "just works" in return values from
+        // custom scanners
+        Terminal(bool matched) {
+            if(matched) matches.push_back("");
         }
 
         template<typename Iter>
         Terminal(Iter begin, Iter end) : matches(begin, end) {
+        }
+
+        template<typename Iterable>
+        Terminal(const Iterable &src) : matches(src.begin(), src.end()) {
         }
 
         std::string to_str() const {
@@ -418,34 +434,6 @@ public:
         return reader->eof();
     }
 
-    // this pertains to stuff in fpl_x_parser_shift_term.h.jemp
-    // but needs to be here because the constexpr stuff needs
-    // to be in a template (?) :P
-    template<typename T>
-    auto term_custom_result(const T &match, const char tname[]) {
-        Terminal result;
-
-        static_assert(
-            // NOTE: because c++, this must match the "if constexpr"
-            // cases, below.  (an "else" at the end of the constexprs
-            // seems to always be evaluated, even if other constexprs
-            // matched)
-            std::is_same<bool, T>::value || is_iterable(T),
-            "scanner must return iterable or bool"
-        );
-
-        if constexpr(std::is_same<bool, T>::value) {
-            // boolean result - "scanner" is an assertion.
-            if(match) {
-                result = Terminal(tname);
-            }
-        } else if constexpr(is_iterable(T)) {
-            if(match.size() > 0) {
-                result = Terminal(match.begin(), match.end());
-            }
-        } 
-        return result;
-    }
 
 public:
 
@@ -1219,7 +1207,7 @@ private:
     @for(auto &[scanner_name, scanner_code] : prds.scanners) {@
         // OH HAI I IS CUSTOM SCANNER
         #line @scanner_code.line@ "@scanner_code.source_file@"
-        auto custom_scanner_@scanner_name@(fpl_reader &input) {
+        Terminal custom_scanner_@scanner_name@(fpl_reader &input) {
             @scanner_code.format()@
         }
     @}@
