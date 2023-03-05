@@ -1006,17 +1006,17 @@ public:
     ) {
 
         code_block code;
-        if(allowed_src | INLINE) {
+        if(allowed_src & INLINE) {
             // try "regular" +{ }+ code blocks:
             code = read_code();
         }
 
         std::string errm;
-        if(!code && (allowed_src | REGEX)) {
+        if(!code && (allowed_src & REGEX)) {
             code = parse_regex_separator();
         }
 
-        if(!code && (allowed_src | LIB)) {
+        if(!code && (allowed_src & LIB)) {
             // expect a quoted (or otherwise string-delimited)
             // file basename:
             std::string fn = inp->parse_string();
@@ -1189,7 +1189,7 @@ public:
             parse_scanner();
         } else if(dir == "separator") {
             add_separator_code(
-                code_for_directive(dir, code_source::INLINE_OR_LIB)
+                code_for_directive(dir, code_source::ANY)
             );
         } else if(dir == "type_for") {
             inp->eat_separator();
