@@ -52,6 +52,7 @@ syn region	fplExpression	start="/" end="/" skip=+\\/+
 syn region	fplExpression	start=+"+ end=+"+
 syn region	fplExpression	start=+'+ end=+'+
 syn match	fplExpression	"&"
+syn match	fplExpression	"!"
 syn match	fplExpression	"\~"
 
 " expression suffixes:
