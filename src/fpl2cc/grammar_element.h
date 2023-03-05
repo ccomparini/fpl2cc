@@ -11,14 +11,16 @@ struct grammar_element {
     typedef enum {
         // order here matters:  earlier types are matched first
         // in parsing
-        NONE,
+        NONE = 0,
         NONTERM_PRODUCTION,       // the result of reducing a rule
         NONTERM_SUBEXPRESSION,    // parenthesized expression
         NONTERM_PREC_PLACEHOLDER, // precedence placeholder
         TERM_CUSTOM,       // custom code for matching terminal
         LACK_OF_SEPARATOR, // pseudoterminal indicating no separator
         TERM_EXACT,        // exact string match
+        TERM_EXACT_INV,    // match anything -but- this exact string
         TERM_REGEX,        // regular expression match
+        TERM_REGEX_INV,    // match anything -but- this regex
         END_OF_PARSE,      // indicates we're done parsing (good or bad)
         _TYPE_CAP
     } Type;
@@ -33,7 +35,9 @@ struct grammar_element {
             "TERM_CUSTOM",
             "LACK_OF_SEPARATOR", // convert to TERM_CUSTOM?
             "TERM_EXACT",
+            "TERM_EXACT_INV",
             "TERM_REGEX",
+            "TERM_REGEX_INV",
             "END_OF_PARSE"
         };
         if(t >= NONE && t < _TYPE_CAP) {
@@ -106,6 +110,35 @@ struct grammar_element {
         return Type_to_str(type);
     }
 
+    // Returns the element type to use when the match-sense of the
+    // given type is inverted (eg !"foo" to mean match anything but
+    // "foo"), or grammar_element::NONE if there's no appropriate
+    // inverse.
+    static grammar_element::Type inverse_type(grammar_element::Type type) {
+        switch(type) {
+            // I'm not sure how to support nonterms, or if it's
+            // even possible, because there may be any number
+            // of other things matched within the nonterm.  Also,
+            // what would it mean and when would you use it?
+            // Custom can't really be supported, because, though
+            // we could invert the sense of the result, there's
+            // no general way to invert read pointer changes or
+            // whatever.  The inverse of lack-of-separator is
+            // just not having a lack-of-separator, so we don't
+            // need or want to support that.
+            // So, really, it's just the 2 basic terminal types:
+            // XXX actually will want inverse nonterms if the
+            // nonterm can be considered an alias - say it has
+            // exactly one step and that step is a terminal.
+            // But, in that case, the implementation would be
+            // to add it as the inverse of whatever that terminal
+            // is.
+            case TERM_EXACT: return TERM_EXACT_INV;
+            case TERM_REGEX: return TERM_REGEX_INV;
+            default:         return NONE;
+        }
+    }
+
     void resolve_placeholder(
         const std::string prod_name, src_location caller = CALLER()
     ) {
@@ -127,8 +160,16 @@ struct grammar_element {
                 lb = "'";
                 rb = "'";
                 break;
+            case TERM_EXACT_INV:
+                lb = "!'";
+                rb = "'";
+                break;
             case TERM_REGEX:
                 lb = "/";
+                rb = "/";
+                break;
+            case TERM_REGEX_INV:
+                lb = "!/";
                 rb = "/";
                 break;
             case TERM_CUSTOM:

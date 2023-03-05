@@ -1551,6 +1551,7 @@ public:
     int parse_expressions(production_rule &rule) {
         int num_read = 0;
         bool done = false;
+        bool invert_next = false;
         do {
             inp->eat_separator();
 
@@ -1595,6 +1596,10 @@ public:
                 case ')':
                     // end of a subrule, or else a stray ')'
                     done = true;
+                    break;
+                case '!':
+                    invert_next = !invert_next;
+                    inp->read_byte();
                     break;
                 case '-':
                     // end of rule steps (expressions), or else stray '-'
@@ -1643,6 +1648,17 @@ public:
             }
 
             if(type != grammar_element::Type::NONE) {
+                if(invert_next) {
+                    auto new_type = grammar_element::inverse_type(type);
+                    if(new_type) {
+                        type = new_type;
+                    } else {
+                        error(inp, stringformat(
+                            "can't invert type {}", type
+                        ));
+                    }
+                }
+
                 if(expr_str.length() >= 1) {
                     production_rule::step expr(expr_str, type);
                     read_quantifier(inp, expr);
@@ -1650,6 +1666,7 @@ public:
                     if(type == grammar_element::Type::LACK_OF_SEPARATOR)
                         expr.eject = true;
                     rule.add_step(expr);
+                    invert_next = false;
                     num_read++;
                 } else {
                     error(inp, stringformat(

@@ -1,6 +1,7 @@
 @parameter: const productions &prds @
 @parameter: const grammar_element &el @
 @parameter: const fpl_options &opts @
+@realign: #line {} "{}" @
 @declare el_id: prds.element_id_name(el)@
 @declare el_str: c_str_escape(el.to_str())@
 @declare match_str: c_str_escape(el.expr)@
@@ -41,6 +42,10 @@ bool shift_@el.type_str()@_@el_id@(bool eject) {
                 result = Terminal("@match_str@");
             }
         }
+    @} else if(el.type == grammar_element::TERM_EXACT_INV) {@
+        std::string match = reader->read_to_exact_match("@match_str@");
+        if(match.length())
+            result = Terminal(match);
     @} else if(el.type == grammar_element::TERM_REGEX) {@
         std::cmatch match = reader->read_re("@match_str@");
         @/* XXX bug:  if there's a 0-byte match but multiple
@@ -52,12 +57,21 @@ bool shift_@el.type_str()@_@el_id@(bool eject) {
         if(!match.empty()) {
             result = Terminal(match.begin(), match.end());
         }
+    @} else if(el.type == grammar_element::TERM_REGEX_INV) {@
+        std::string match = reader->read_to_re("@match_str@");
+        if(match.length())
+            result = Terminal(match);
+    @} else if(el.type == grammar_element::TERM_REGEX) {@
     @} else if(el.type == grammar_element::TERM_CUSTOM) {@
         result = custom_scanner_@el.expr@(*reader);
     @} else if(el.type == grammar_element::LACK_OF_SEPARATOR) {@
         if(!bytes_eaten) {
             result = Terminal("⦑lack-of-separator⦒");
         }
+    @} else if(el.type == grammar_element::END_OF_PARSE) {@
+        @/* placeholder.  can't get here */@
+    @} else {@
+        #error Unimplemented terminal type: @el.type@
     @}@
 
     if(result) {

@@ -1,7 +1,11 @@
 returncode = 0
 stderr = ""
-stdout = "block: [foo bar bat, I can put anything in here other than a terminator ]
+stdout = "
+block: [foo bar bat, I can put anything in here other than a terminator ]
 block: [here's another block
 ]
+hi there
+other stuff: 'not_a_variable'
+
 ding!
 "

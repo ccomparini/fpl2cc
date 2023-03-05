@@ -1,23 +1,18 @@
 #
 # Custom scanner test
+# ... and also inverted match test
 #
 
-
-# TODO:
-#   - check that source positions/lengths/whatever for custom
-#     scanners make sense.  if they don't, change how this whole
-#     thing works.
-#   - document how it's supposed to scan, which is that (at present)
-#     it just calls parser/reader methods..
-#
++{
+#include<iostream>
+#include<list>
+#include<map>
+}+
 
 @produces std::string
 
-+{
-
-const utf8_buffer LeftDoubleBracket((utf8_byte *)"⟦", 3);
-const utf8_buffer RightDoubleBracket((utf8_byte *)"⟧", 3);
-
+@internal +{
+    std::map<std::string, std::string> symtab;
 }+
 
 # end-of-file (or input) assertion:
@@ -25,38 +20,24 @@ const utf8_buffer RightDoubleBracket((utf8_byte *)"⟧", 3);
     return reader->eof();
 }+
 
-# let's say (for test purposes) that blocks are enclosed
-# in U+27E6 and U+27E7 Mathemetical Square Brackets
-# ("⟦" and "⟧").
-@scanner start_of_block +{
-    if(reader->read_bytes_equalling(LeftDoubleBracket)) {
-        return std::string("⟦");
+# "scans" and expands a variable
+@scanner variable +{
+    auto start = reader->current_position();
+    auto match = reader->read_re("[a-zA-Z0-9_-]+");
+    if(!match.empty()) {
+        // ... we read something which might be a variable..
+        auto found = symtab.find(match.str());
+        if(found != symtab.end()) {
+            // ... viola, it is one.  Return its value:
+            return Terminal(found->second);
+        }
     }
-    return false; // no match
+    reader->go_to(start); // no match; put the scan back
+    return Terminal();
+    
 }+
 
-@scanner not_end_of_block +{
-    size_t start = reader->current_position();
-
-    while(reader->read_byte_not_equalling(RightDoubleBracket[0])) {
-        // we may have found an end bracket:
-        if(
-            reader->peek(0) == RightDoubleBracket[0] &&
-            reader->peek(1) == RightDoubleBracket[1] &&
-            reader->peek(2) == RightDoubleBracket[2]
-        ) {
-            return reader->read_range(start, reader->current_position());
-        } // else false alarm but keep looking
-    }
-    return false;
-}+
-
-@scanner end_of_block +{
-    if(reader->read_bytes_equalling(RightDoubleBracket)) {
-        return "⟧";
-    }
-    return false;
-}+
+# XXX custom scanner with args here.. like, string scanning?
 
 stuff* the_end -> done +{
     std::cout << stuff@join("\n") + "\n" + the_end + "\n";
@@ -69,27 +50,35 @@ block -> stuff;
     return "ding!";
 }+
 
-# there's a little bit of weird interplay with how spaces
+# Let's say (for test purposes) that blocks are enclosed
+# in U+27E6 and U+27E7 Mathemetical Square Brackets
+# ("⟦" and "⟧"). (
+# There's a little bit of weird interplay with how spaces
 # are handled here.  the default separator code will eat
 # any space after the start_of_block, but then the guts
 # ends up including the space all the way up to the
-# end of block.  it's... correct?  the custom scanners
-# are working, anyway, and that's the point of this.
-&start_of_block guts &end_of_block -> block +{
+# end of block.  it's... correct?  yes. counterintuitive
+# though.
+"⟦" !"⟧":guts "⟧" -> block +{
     return stringformat("block: [{}]", guts);
 }+
 
-&not_end_of_block:huh_need_this -> guts +{
-//std::cerr << stringformat("scanned guts! ⎧\n{}\n⎩", huh_need_this@join("\n⎪"));
-    //return not_end_of_block; ohhhh.... name....e.e..e.e.
-    return huh_need_this;
+assignment -> stuff;
+
+# assign a variable for later expansion:
+/[a-zA-Z0-9_-]+/:name '='^ string -> assignment +{
+    symtab[name] = string;
+    return "";
 }+
 
-#/.+/ -> stuff;
+# strings are double quoted; quotes can be escaped with
+# a backslash.  really, this is to test inverting revex match.
+'"'^ !/"|(:?\")/:guts '"'^ -> string;
 
-+{
-#include<iostream>
-#include<list>
+&variable  -> stuff;
+
+/.+/:anything_else -> stuff +{
+    return stringformat("other stuff: '{}'\n", anything_else);
 }+
 
 @default_main

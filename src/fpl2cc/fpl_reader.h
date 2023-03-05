@@ -1,6 +1,12 @@
 #ifndef FPL_READER_H
 #define FPL_READER_H
 
+/*
+   The c++ standard regex engine doesn't work on streams or anything
+   like that, so for now anyway we just buffer the entire input.
+   Hence this class.
+ */
+
 #include <fstream>
 #include <functional>
 #include <memory>
@@ -14,13 +20,6 @@
 #include "util/to_hex.h"
 
 
-/*
-   The c++ standard regex engine doesn't work on streams or anything
-   like that, so for now anyway we just buffer the entire input.
-   Hence this class.
-   This is expedience (I don't want to have to implement a regex engine),
-   and not how it "should" be.
- */
 typedef unsigned char utf8_byte;
 struct utf8_buffer : public std::basic_string<utf8_byte> {
     utf8_buffer() { }
@@ -77,9 +76,6 @@ using ErrorCallback = std::function<void(const std::string &error)>;
 
 using LengthCallback = std::function<size_t(const utf8_byte *inp)>;
 
-inline std::string to_std_string(const utf8_byte *str, int len) {
-    return std::string(reinterpret_cast<const char *>(str), len);
-}
 
 // Returns the length in bytes of the utf-8 character at *at,
 // or 0 if that character isn't a space.
@@ -505,17 +501,6 @@ public:
         return false;
     }
 
-    inline bool read_bytes_equalling(const utf8_buffer &src) {
-        size_t match_len = 0;
-        while(match_len < src.length() && src[match_len] == peek(match_len)) {
-            match_len++;
-        }
-
-        skip_bytes(match_len); // ("read" the match)
-
-        return match_len;
-    }
-
     inline bool read_byte_not_equalling(utf8_byte this_byte) {
         if(const utf8_byte *in = inpp()) {
             if(*in != this_byte) {
@@ -610,8 +595,10 @@ public:
         return "";
     }
 
-    inline std::string read_range(size_t start, size_t end) const {
-        return to_std_string(buffer.data() + start, end - start);
+    inline std::string read_string(size_t length) {
+        auto result = std::string(inpp_as_char(), length);
+        skip_bytes(length);
+        return result;
     }
 
     // reads until we pass the next newline.
@@ -647,6 +634,25 @@ public:
         } // else fewer bytes left than length sought -> no match
 
         return result;
+    }
+
+    // Returns a (possibly empty) string with all characters -until-
+    // (but not including) the string passed (or end of input).
+    inline std::string read_to_exact_match(const std::string &str) {
+        size_t result_len = 0;
+        size_t match_len = 0;
+
+        while(utf8_byte nb = peek(result_len + match_len)) {
+            if(match_len >= str.length()) {
+                break;
+            } else if(nb == (utf8_byte)str[match_len]) {
+                match_len++;
+            } else {
+                result_len += match_len + 1;
+                match_len = 0;
+            }
+        }
+        return read_string(result_len);
     }
 
     inline std::cmatch read_re(
@@ -703,6 +709,30 @@ public:
             matched = no_match();
         }
         return matched;
+    }
+
+    // Reads everything -up to- the regular expression passed
+    // (or to end of input, if there's no match)
+    inline std::string read_to_re(
+        const std::string &re, src_location caller = CALLER()
+    ) {
+        size_t length = bytes_left();
+        if(const char *in = inpp_as_char()) {
+            std::cmatch matched;
+            // as above, should really compile the regex first.
+            try {
+                const std::regex cre(re);
+                if(std::regex_search(in, matched, cre)) {
+                    length = matched.position();
+                }
+            }
+            catch(const std::regex_error& err) {
+                on_error(stringformat(
+                    "/{}/ <- {} (caller: {})", re, err.what(), caller
+                ));
+            }
+        }
+        return read_string(length);
     }
 
     // pos is the position in the input at which to look; size_t(-1)

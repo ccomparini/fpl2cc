@@ -1,6 +1,8 @@
-
+a_variable = "hi there"
 ⟦ foo bar bat, I can put anything in here other than a terminator ⟧
 ⟦
 here's another block
 ⟧
 
+a_variable
+not_a_variable
