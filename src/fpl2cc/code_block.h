@@ -7,20 +7,29 @@
 #include "util/src_location.h"
 #include "util/stringformat.h"
 
+
 namespace fpl {
 
 struct code_block {
+    enum source_language {
+        UNKNOWN = 0,
+        DEFAULT, // effectively c++ at the moment, but treated as plain text
+        REGEX,
+    } language;
+
     std::string source_file;
     int line;
     std::string code;
 
-    code_block() : line(0) { }
+    code_block() : language(UNKNOWN), line(0) { }
 
     code_block(
         const std::string &cd,
+        source_language lang = DEFAULT,
         const std::string &file = CALLER_FILE(),
         int ln = CALLER_LINE()
     ) :
+        language(lang),
         source_file(file),
         line(ln),
         code(cd) {
@@ -46,13 +55,15 @@ struct code_block {
                     "#error \"unable to open '{}' for reading: {}\n",
                     context_ln, context_fn,
                     filename, std::string(strerror(errno))
-                ), filename, 1
+                ),
+                DEFAULT, filename, 1
             );
         }
 
         using BufIt = std::istreambuf_iterator<char>;
         return code_block(
-            std::string(BufIt(in.rdbuf()), BufIt()), filename, 1
+            std::string(BufIt(in.rdbuf()), BufIt()),
+            DEFAULT, filename, 1
         );
     }
 

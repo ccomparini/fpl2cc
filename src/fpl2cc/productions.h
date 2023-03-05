@@ -19,8 +19,6 @@
 #include <string>
 #include <time.h> // for profiling
 
-#include "fpl_regex_separator.h" // generated
-
 namespace fpl {
 
 class productions;
@@ -989,11 +987,10 @@ public:
         return "Terminal";
     }
 
-    // expects/scans a +{ }+ code block for the named directive.
-    // the named directive is essentially for error reporting.
-    // the intent is that at some point this can scan regexes
-    // or whatever more portable thing.
     enum code_source{
+        // these are bit fields so that parsers or users of the code
+        // block can specify what types might be valid in a particular
+        // context:
         INLINE = 1,
         LIB    = 2,
         REGEX  = 4,
@@ -1013,7 +1010,7 @@ public:
 
         std::string errm;
         if(!code && (allowed_src & REGEX)) {
-            code = parse_regex_separator();
+            code = parse_regex_code_block();
         }
 
         if(!code && (allowed_src & LIB)) {
@@ -1099,6 +1096,7 @@ public:
             ));
         }
 
+// XXX test scanners from lib or restrict this:
         scanners[name] = code_for_directive("scanner", code_source::ANY);
     }
 
@@ -1188,9 +1186,7 @@ public:
         } else if(dir == "scanner") {
             parse_scanner();
         } else if(dir == "separator") {
-            add_separator_code(
-                code_for_directive(dir, code_source::ANY)
-            );
+            add_separator_code(code_for_directive(dir, code_source::ANY));
         } else if(dir == "type_for") {
             inp->eat_separator();
             std::string prod = read_production_name(inp);
@@ -1715,17 +1711,23 @@ public:
              ));
          }
 
-         return code_block(code_str, inp->filename(), inp->line_number(start));
+         return code_block(
+             code_str, code_block::DEFAULT,
+             inp->filename(), inp->line_number(start)
+         );
     }
 
-    code_block parse_regex_separator() {
+    code_block parse_regex_code_block() {
         code_block code;
         std::string regex;
 
         if(inp->peek() == '/') {
+            int line = inp->line_number();
             regex = inp->parse_string();
             if(regex.length()) {
-                code = code_block(fpl_regex_separator(regex));
+                code = code_block(
+                    regex, code_block::REGEX, inp->filename(), line
+                );
             }
         }
 

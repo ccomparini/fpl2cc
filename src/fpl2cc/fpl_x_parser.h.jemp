@@ -1331,7 +1331,12 @@ public:
 
         @for(auto sepc : prds.separator_code) {-@
             {
-                @sepc.format()@
+                @if(sepc.language == code_block::REGEX) {@
+                    // grrr.. cleaner way to do this multi language stuff?
+                    @#fpl_regex_separator(sepc.code)@
+                @} else /* assume it's just plain code */ {@
+                    @sepc.format()@
+                @}@
             }
         @}-@
 
