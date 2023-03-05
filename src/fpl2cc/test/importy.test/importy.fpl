@@ -1,6 +1,7 @@
 
 @produces std::string
 @goal json.json
+@goal other_stuff
 @post_parse +{ std::cout << result << "\n"; }+
 
 # .. and we'll also allow c comments, but just to test
@@ -8,7 +9,7 @@
 # instead of @comment-style:
 @separator "comment/c"
 
-`importy_s1` -> foo ;
+`importy_s1` -> other_stuff ;
 
 # let's say we're supporting json but with variables
 # allowed for values, and we're stealing the definition
