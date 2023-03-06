@@ -32,7 +32,6 @@
 #include <vector>
 
 #include "fpl2cc/fpl_reader.h"
-#include "util/is_iterable.h"
 #include "util/jerror.h"
 #include "util/src_location.h"
 #include "util/stringformat.h"
