@@ -145,6 +145,15 @@ public:
         std::string operator+(const std::string & rhs) const {
             return to_str() + rhs;
         }
+
+        friend bool operator==(const Terminal &lhs, const char *rhs) {
+            return lhs.to_str() == rhs;
+        }
+
+        friend bool operator==(const char *lhs, const Terminal &rhs) {
+            return lhs == rhs.to_str();
+        }
+
     };
 
     @#fpl_x_parser_generated_types(prds)@
