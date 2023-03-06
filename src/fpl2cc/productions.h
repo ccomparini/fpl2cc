@@ -995,8 +995,9 @@ public:
         LIB    = 2,
         REGEX  = 4,
 
-        INLINE_OR_LIB = INLINE | LIB,
-        ANY           = INLINE | LIB | REGEX
+        INLINE_OR_REGEX = INLINE | REGEX,
+        INLINE_OR_LIB   = INLINE | LIB,
+        ANY             = INLINE | LIB | REGEX
     };
     inline code_block code_for_directive(
         const std::string &dir, code_source allowed_src = INLINE
@@ -1096,8 +1097,10 @@ public:
             ));
         }
 
-// XXX test scanners from lib or restrict this:
-        scanners[name] = code_for_directive("scanner", code_source::ANY);
+        // (scanners from LIB isn't yet supported - inline or regex only)
+        scanners[name] = code_for_directive(
+            "scanner", code_source::INLINE_OR_REGEX
+        );
     }
 
     std::string arg_for_directive() {
