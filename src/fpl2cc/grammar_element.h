@@ -127,12 +127,6 @@ struct grammar_element {
             // just not having a lack-of-separator, so we don't
             // need or want to support that.
             // So, really, it's just the 2 basic terminal types:
-            // XXX actually will want inverse nonterms if the
-            // nonterm can be considered an alias - say it has
-            // exactly one step and that step is a terminal.
-            // But, in that case, the implementation would be
-            // to add it as the inverse of whatever that terminal
-            // is.
             case TERM_EXACT: return TERM_EXACT_INV;
             case TERM_REGEX: return TERM_REGEX_INV;
             default:         return NONE;
