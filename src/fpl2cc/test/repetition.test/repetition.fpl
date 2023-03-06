@@ -72,11 +72,11 @@ block -> statement ;
     return xxx_or_def + aaa_or_def;
 }+
 
-'aaa'    -> aaa_or_def ;
-&default -> aaa_or_def +{ return "bbb"; }+
+'aaa'     -> aaa_or_def ;
+&default^ -> aaa_or_def +{ return "bbb"; }+
 
-'xxx'    -> xxx_or_def ;
-&default -> xxx_or_def +{ return "yyy"; }+
+'xxx'     -> xxx_or_def ;
+&default^ -> xxx_or_def +{ return "yyy"; }+
 
 # realistically you wouldn't do /[a-zA-Z_]/+ (you'd do
 # /[a-zA-Z_]+/), but we're testing repetition:

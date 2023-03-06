@@ -133,11 +133,14 @@ public:
         inline std::string variable_name() const {
             if(varname.length()) {
                 return varname;
-            } else if(gexpr.type == grammar_element::NONTERM_PRODUCTION) {
-                // if it's a production, default the variable name to
-                // the name of that production, so that you don't have
+            } else if(
+                gexpr.type == grammar_element::NONTERM_PRODUCTION ||
+                gexpr.type == grammar_element::TERM_CUSTOM
+             ) {
+                // if it's a production or custom terminal, we can use that
+                // name as the variable name so that authors don't have
                 // to name everything explicitly but can still do
-                // the abtracted implementation match thing:
+                // the abstracted implementation match thing:
                 return gexpr.expr;
             }
             // else caller will need to fill in something contextually
