@@ -1207,17 +1207,18 @@ private:
         private:
     @}@
 
-    @/* custom scanners:
-        these are expected to return something iterable.
-        an empty iterable indicates no match; otherwise
-        the generated Terminal will contain the items
-        returned.
-    */@
+    // custom scanners:
     @for(auto &[scanner_name, scanner_code] : prds.scanners) {@
         // OH HAI I IS CUSTOM SCANNER
         #line @scanner_code.line@ "@scanner_code.source_file@"
         Terminal custom_scanner_@scanner_name@(fpl_reader &input) {
-            @scanner_code.format()@
+            @if(scanner_code.language == code_block::REGEX) {@
+                return Terminal(
+                    "ERROR @scanner_name@ should never have been generated"
+                );
+            @} else /* assume default */ {@
+                @scanner_code.format()@
+            @}@
         }
     @}@
 

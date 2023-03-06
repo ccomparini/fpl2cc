@@ -1263,6 +1263,11 @@ public:
         for(int stp = 0; stp < rule.num_steps(); stp++) {
             grammar_element ge = rule.nth_step(stp).gexpr;
 
+// defer?  if possible.
+// a better structure might be to resolve() prior to generating
+// states... OR actualllllyl make imports be a grammar element
+// and expand/import it later.  or a combination.  there's some
+// simplification to be had.
             record_element(ge);
 
             if(ge.type == grammar_element::Type::NONTERM_SUBEXPRESSION) {
@@ -1643,24 +1648,15 @@ public:
             }
 
             if(type != grammar_element::Type::NONE) {
-                if(invert_next) {
-                    auto new_type = grammar_element::inverse_type(type);
-                    if(new_type) {
-                        type = new_type;
-                    } else {
-                        error(inp, stringformat(
-                            "can't invert type {}", type
-                        ));
-                    }
-                }
 
                 if(expr_str.length() >= 1) {
-                    production_rule::step expr(expr_str, type);
-                    read_quantifier(inp, expr);
-                    read_suffix(inp, expr);
+                    production_rule::step step(expr_str, type);
+                    read_quantifier(inp, step);
+                    read_suffix(inp, step);
                     if(type == grammar_element::Type::LACK_OF_SEPARATOR)
-                        expr.eject = true;
-                    rule.add_step(expr);
+                        step.eject = true;
+                    step.invert = invert_next;
+                    rule.add_step(step);
                     invert_next = false;
                     num_read++;
                 } else {
@@ -2506,6 +2502,10 @@ public:
                         rule.resolve_placeholder(
                             stepi, precedence_group_names[pg_ind]
                         );
+// defer?  oh, can't, because of the imports thing.
+// So maybe this needs a restructure wherein we split the resolve
+// such that we resolve everything needed for an import separately
+// from code generation.
                         record_element(rule.nth_step(stepi).gexpr);
                     }
                 } // else it's not something we need to resolve
@@ -2594,6 +2594,47 @@ public:
         }
 
         return suffixes;
+    }
+
+    void resolve_steps() {
+        for(int rulei = 0; rulei < rules.size(); ++rulei) {
+            production_rule &rule = rules[rulei];
+            for(int stepi = 0; stepi < rule.num_steps(); stepi++) {
+                auto step = rule.nth_step(stepi);
+                if(step.type() == grammar_element::TERM_CUSTOM) {
+                    std::string scanner_name = step.gexpr.expr;
+                    auto found = scanners.find(scanner_name);
+                    if(found == scanners.end()) {
+                        // it is possible that the rule isn't
+                        // used, so the scanner won't be used, but
+                        // we're going to complain about it anyway
+                        // here because the code generator shouldn't
+                        // have to be bothered checking if a given
+                        // element is actually used.
+                        error(stringformat(
+                            "use of undefined scanner &{} in rule {} {}",
+                            scanner_name, rule, rule.location()
+                        ));
+                    } else if(found->second.language == code_block::REGEX) {
+                        // regex-implemented scanners are just TERM_REGEX,
+                        // so we don't need special jemp code for them.
+                        // just resolve them here:
+                        rule.resolve_regex_custom(stepi, found->second.code);
+                    }
+                }
+            }
+            // deal with inverted matches last, after having done all other
+            // type resolution:
+            rule.resolve_inverts();
+
+            // .. and now, brute-force ensure that all elements
+            // are recorded, because elements may have changed
+            // due to TERM_CUSTOM or match-inversion or whatever
+            // else:
+            for(int stepi = 0; stepi < rule.num_steps(); stepi++) {
+                record_element(rule.nth_step(stepi).gexpr);
+            }
+        }
     }
 
     // 
@@ -2758,6 +2799,7 @@ public:
         }
 
         resolve_terminal_masking();
+        resolve_steps();
         resolve_goals();
 
         resolve_types();
@@ -2849,6 +2891,7 @@ public:
         }
     }
 
+// XXX might not be needed now (see resolve_scanners)
     void check_rule(const production_rule &rule) const {
         for(int stepi = 0; stepi < rule.num_steps(); stepi++) {
             auto step = rule.nth_step(stepi);

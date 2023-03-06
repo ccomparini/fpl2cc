@@ -63,6 +63,24 @@ block -> stuff;
     return stringformat("block: [{}]", guts);
 }+
 
+# also for test purposes, other blocks can be specified,
+# let's say, like this:
+@scanner block_2_start /([+-])\{/
+@scanner block_2_end   /\}([+-])/
+&block_2_start !&block_2_end:guts &block_2_end -> block +{
+    auto start = block_2_start.capgroup(0);
+    auto end   = block_2_end.capgroup(0);
+    std::string description = "confusing";
+    if(start != end) {
+        description = "mixed";
+    } else if(start == "-") {
+        description = "minus";
+    } else if(start == "+") {
+        description = "plus";
+    }
+    return stringformat("{} block: [{}]\n", description, guts);
+}+
+
 assignment -> stuff;
 
 # assign a variable for later expansion:
