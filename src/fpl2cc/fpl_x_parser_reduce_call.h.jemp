@@ -55,7 +55,6 @@
     @for(int stind = 0; stind < rule.num_steps(); ++stind) {-@
         @declare step: rule.nth_step(stind)@
         @if(!step) {-@
-            // XXX real error here
             #error Bug: no expression for step @stind@ @rule.to_str()@ @rule.location()@
         @-} else {-@
             @declare el_id: prds.element_index.at(step.gexpr)@

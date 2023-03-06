@@ -18,7 +18,9 @@ SetOption('num_jobs', cpu_count + 1);
 # to get a working c++20 compiler
 ccflags = "-std=c++20 -Wno-parentheses"
 if debugger : ccflags += " -g"
-else        : ccflags += " -O2"
+# commenting out optimizations for now because fpl-generated test
+# code takes forever to compile:
+#else        : ccflags += " -O2"
 
 # if you tell scons:
 #    tools = [ 'default', 'clangxx', ],

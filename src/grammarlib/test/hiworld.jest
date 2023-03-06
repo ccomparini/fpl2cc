@@ -1,4 +1,7 @@
-uses "libc";
+// figure this out.
+// should be able to implement in jest terms.
+// also, should not have to use libc per se.
+// uses "libc";
 
 // this is a line comment
 
@@ -7,6 +10,7 @@ uses "libc";
 message:string = "hi world\n";
 
 foo := message.length;
+; // empty statement
 
 /*
 #libc.write(fd = libc.stdout, buf = message, count = message.length);

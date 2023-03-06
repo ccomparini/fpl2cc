@@ -1,4 +1,4 @@
 returncode = 0
 stderr = ""
-stdout = "ct_statement* -> compilation_unit ()
+stdout = "0 statements.
 "

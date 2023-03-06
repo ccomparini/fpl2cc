@@ -6,13 +6,18 @@ ascii_number_sign:uint8 = 0x23;
 
 boolean:type = uint1;
 
-key_type := uint2048;
+// key_type is a type:
+key_type: = uint2048;
 
-neg := -10;
+// neg is an integer:
+neg: = -10;
 
-// this should be allowed (to declare a constant):
-//#e:float = 2.71828182845904523536028;
-e:float = 2.71828182845904523536028;
+// '#' means evaluate at compile time.
+// In this case,we would expect this thing to be evaluated at
+// compile time anyway, but it would not be guaranteed, and
+// anyway the point of this test is to check that it parses
+// correctly
+#e:float = 2.71828182845904523536028;
 
 pi := 3.1415926535 8979323846 2643383279 5028841971 6939937510 5820974944
         5923078164 0628620899 8628034825 3421170679 8214808651 3282306647
@@ -20,7 +25,7 @@ pi := 3.1415926535 8979323846 2643383279 5028841971 6939937510 5820974944
 
 planck := 6.62607015e-34; // J⋅Hz−1
 
-five := 0x1.4p2; // c99 notation. is this even useful?
+five := 0x1.4p2; // c99 notation. is this even useful?  Probably not.
 
 //foo:[int * 10];
 
