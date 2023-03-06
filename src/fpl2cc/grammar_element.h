@@ -127,9 +127,28 @@ struct grammar_element {
             // just not having a lack-of-separator, so we don't
             // need or want to support that.
             // So, really, it's just the 2 basic terminal types:
-            case TERM_EXACT: return TERM_EXACT_INV;
-            case TERM_REGEX: return TERM_REGEX_INV;
-            default:         return NONE;
+            case TERM_EXACT:    return TERM_EXACT_INV;
+            case TERM_REGEX:    return TERM_REGEX_INV;
+
+            // (and, of course, you can invert back)
+            case TERM_EXACT_INV: return TERM_EXACT;
+            case TERM_REGEX_INV: return TERM_REGEX;
+
+            default:             return NONE; // (no inverse)
+        }
+    }
+
+    // ... and this changes the element type to whatever the
+    // appropriate inverse is:
+    void invert_type(src_location caller = CALLER()) {
+        auto new_type = inverse_type(type);
+        if(new_type) {
+            type = new_type;
+        } else {
+            jerror::warning(stringformat(
+                "can't invert type {} {} at {}",
+                type, *this, caller
+            ));
         }
     }
 
