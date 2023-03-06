@@ -1588,9 +1588,7 @@ public:
                     break;
                 case '(':
                     expr_str = parse_subexpression();
-                    if(expr_str.length()) {
-                        type = grammar_element::Type::NONTERM_SUBEXPRESSION;
-                    } // else ... ? error? XXX
+                    type = grammar_element::Type::NONTERM_SUBEXPRESSION;
                     break;
                 case ')':
                     // end of a subrule, or else a stray ')'
