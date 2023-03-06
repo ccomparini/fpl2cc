@@ -906,8 +906,6 @@ class productions {
 
 public:
 
-// XXX this is currently stupid in that you pass the fpl_reader
-// but then you have to make a separate call to parse it.  fix that.
     productions(
         const fpl_options &op, fpl_reader_p src, productions *p = nullptr
     ) :
