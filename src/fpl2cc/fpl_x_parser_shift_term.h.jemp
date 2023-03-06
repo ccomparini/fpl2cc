@@ -61,7 +61,6 @@ bool shift_@el.type_str()@_@el_id@(bool eject) {
         std::string match = reader->read_to_re("@match_str@");
         if(match.length())
             result = Terminal(match);
-    @} else if(el.type == grammar_element::TERM_REGEX) {@
     @} else if(el.type == grammar_element::TERM_CUSTOM) {@
         result = custom_scanner_@el.expr@(*reader);
     @} else if(el.type == grammar_element::LACK_OF_SEPARATOR) {@
