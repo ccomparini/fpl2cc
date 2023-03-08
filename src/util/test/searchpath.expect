@@ -1,0 +1,11 @@
+path contains: .
+path contains: ../../../src/util/test/searchpath.data/b
+path contains: ./../../../src/util/test/searchpath.data/a
+path contains: ../../../src/util/test/searchpath.data
+path contains: ./nonexistent_dir
+found: ./searchpath.cc
+found: ../../../src/util/test/searchpath.data/foobar.a.b
+begins with 'some': ../../../src/util/test/searchpath.data/b/some_file.foo
+begins with 'some': ./../../../src/util/test/searchpath.data/a/some_file.foo
+ends with 'foo': ../../../src/util/test/searchpath.data/b/some_file.foo
+ends with 'foo': ./../../../src/util/test/searchpath.data/a/some_file.foo

@@ -15,11 +15,12 @@ for scons_tprog in Glob('*.cc'):
 
     # tests may want to find themselves and/or data directories:
     src_dir = source_dir(scons_tprog)
-    env['ENV']['SRC_DIR'] = src_dir
+    env['ENV']['SRC_DIR'] = src_dir.get_abspath()
     data_dir = src_dir.get_abspath() + '/' + tprog + '.data'
+    #print(f"data dir: {data_dir}", file=sys.stderr)
     if(os.path.isdir(data_dir)):
         #print(f"EXISTS!!! {data_dir}", file=sys.stderr)
-        env['ENV']['DATA_DIR'] = data_dir
+        env['ENV']['DATA_DIR'] = os.path.relpath(data_dir)
 
         # output depends on everything in the output dir:
         for root, dirnames, filenames in os.walk(data_dir):

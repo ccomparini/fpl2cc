@@ -1,10 +1,14 @@
 #ifndef SEARCHPATH_H
 #define SEARCHPATH_H
 
+#include<cstdlib>
 #include<list>
+#include<regex>
 #include<string>
 
 #include"fs.h"
+#include"stringformat.h" // debugging - remove me
+#include<iostream>       // debugging - remove me
 
 class Searchpath {
 
@@ -18,6 +22,10 @@ public:
 
     // takes a ':' delimited set of directories to search.
     Searchpath(const std::string &path) : initialized(true) {
+        append_path(path);
+    }
+
+    void append_path(const std::string &path) {
         size_t start = 0;
         size_t colon;
         while((colon = path.find(':', start)) != std::string::npos) {
@@ -29,6 +37,13 @@ public:
         }
         if(start < path.length()) {
             append(path.substr(start, path.length() - start));
+        }
+        initialized = true;
+    }
+
+    void append_from_env(const std::string &var) {
+        if(const char *env_p = std::getenv(var.c_str())) {
+            append_path(env_p);
         }
     }
 
@@ -82,6 +97,30 @@ public:
         // reasonable error message based on what was returned.
         return fn;
     }
+
+    // Searches the path for all files matching the regex string passed.
+    // Returns a list of matches.
+    // Throws an unhelpful exception if the regex string passed
+    // doesn't compile.
+    std::list<std::string> find_re(const std::string &search) const {
+        std::regex re(search);
+        std::list<std::string> found;
+        for(auto dir : directories) {
+            if(fs::exists(dir)) { // or else throws exceptions!
+                for(auto file_i : fs::directory_iterator{dir}) {
+                    std::string file_name = file_i.path();
+                    std::smatch match;
+                    if(std::regex_search(file_name, match, re)) {
+                        found.push_back(file_name);
+                    }
+                }
+            }
+        }
+        return found;
+    }
+
+    auto begin() const { return directories.begin(); }
+    auto end()   const { return directories.end();   }
 };
 
 #endif // SEARCHPATH_H
