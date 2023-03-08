@@ -212,6 +212,21 @@ def depend_on(primary):
 def depend_on_fpl2cc() :
     return depend_on('#bin/fpl2cc')
 
+# We use variant_dir so as not to clutter up the source dirs
+# with generated files, and we use duplicate=False so as not to
+# clutter up the build dir with source files.  This is good
+# and well, but it means that (for example) data files for
+# tests (or whatever) stay in the source tree, which is also
+# good and well but I can't find a way to get scons to tell me
+# the REAL source path for getting at (eg) checked in data files.
+# Hence this hack.
+# source_in_variant_dir is a scons Node 
+def source_dir(source_in_variant_dir) :
+    components = source_in_variant_dir.get_tpath().split('/')
+    components[0] = 'src';
+    return Entry('#'+'/'.join(components[:-1]));
+    
+
 # Common fpl compile command line.
 # Can be used to construct actions.
 def fpl_compile_command():

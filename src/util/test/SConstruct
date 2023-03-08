@@ -1,4 +1,5 @@
 import os
+import sys
 
 Import('env')
 env = env.Clone()
@@ -6,15 +7,32 @@ env = env.Clone()
 env.Jemp2h('jemptest.jemp')
 
 for scons_tprog in Glob('*.cc'):
+    # (tprog is a scons Node, not a python thingo)
     tprog, ext = os.path.splitext(scons_tprog.name)
     env.Program(tprog, [ tprog + '.cc' ])
+
+    output_file = tprog + '.out'
+
+    # tests may want to find themselves and/or data directories:
+    src_dir = source_dir(scons_tprog)
+    env['ENV']['SRC_DIR'] = src_dir
+    data_dir = src_dir.get_abspath() + '/' + tprog + '.data'
+    if(os.path.isdir(data_dir)):
+        #print(f"EXISTS!!! {data_dir}", file=sys.stderr)
+        env['ENV']['DATA_DIR'] = data_dir
+
+        # output depends on everything in the output dir:
+        for root, dirnames, filenames in os.walk(data_dir):
+            for fn in filenames:
+                env.Depends(output_file, f"{root}/{fn}")
 
     # Run the test:
     #    Command(target, source, action, [key=val, ...])
     # (note $SOURCE is the path to the tprog)
-    env.Command(tprog + '.out', tprog, '$SOURCE > $TARGET')
+    env.Command(output_file, tprog, '$SOURCE > $TARGET')
 
     # compare the output of the test to the expected output;
     # .success file is/becomes up to date if output matched
     env.CompareOut(tprog + '.success', [ tprog + '.out', tprog + '.expect' ])
+
 

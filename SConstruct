@@ -149,6 +149,8 @@ env.Append(BUILDERS = {
 
 src_subdirs = [
     # these are specified roughly in compile/dependency order:
+    # coincidentally, it looks like they are reverse alphabetical.
+    # interesting.
     'util/',
     'util/test/',
     'fpl2cc/',
@@ -157,7 +159,7 @@ src_subdirs = [
     'compiler/',
 ]
 
-for sdir in src_subdirs: 
+for sdir in src_subdirs:
     SConscript('src/' + sdir + 'SConstruct', exports='env', variant_dir='build/'+sdir, duplicate=False)
 
 # Stolen from:
