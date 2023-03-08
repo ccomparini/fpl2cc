@@ -14,7 +14,11 @@
 // Oh, interesting. this is a nightmare in c++.
 
 inline std::string _stringformat(const char * s) {
-    return std::string(s);
+    if(!s) {
+        return "";
+    } else {
+        return std::string(s);
+    }
 }
 
 inline std::string _stringformat(char * s) {

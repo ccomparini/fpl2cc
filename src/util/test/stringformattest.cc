@@ -83,6 +83,10 @@ int main() {
         "\t\teye"
     );
 
+    const char *maybenull = nullptr;
+    std::cout << stringformat("{} null pointer doesn't crash\n", maybenull);
+    maybenull = "for sure a const char *";
+    std::cout << stringformat("and it's {}\n", maybenull);
     return 0;
 }
 

@@ -10,3 +10,5 @@ a      b c
 deeeee
        e eff gee haitch
          eye 
+ null pointer doesn't crash
+and it's for sure a const char *
