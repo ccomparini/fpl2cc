@@ -507,7 +507,6 @@ public:
     //   - at the moment, this is all byte oriented, so it probably
     //     won't handle any non-ascii delimiters
     //
-    
     inline std::string parse_string(src_location caller = CALLER()) {
         const size_t start_position = current_position();
         const utf8_byte end_byte = string_end_delimiter(read_byte());
@@ -528,8 +527,9 @@ public:
                 break;
             }
 
-            if(in == '\\')
+            if(in == '\\') {
                 read_byte(); // next byte is escaped - just skip
+            }
         }
 
         const char *end = inpp_as_char();

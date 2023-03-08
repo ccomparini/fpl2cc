@@ -7,12 +7,14 @@
 #include "reducer.h"
 
 #include "util/c_str_escape.h"
+#include "util/from_hex.h" // XXX kill
 #include "util/jerror.h"
 #include "util/join.h"
 #include "util/reformat_code.h"
 #include "util/src_location.h"
 #include "util/stringformat.h"
 #include "util/to_hex.h"
+#include "util/to_utf8ish.h"
 
 #include <list>
 #include <map>
@@ -1130,7 +1132,9 @@ public:
     }
 
     void parse_directive(const std::string &dir) {
-        if(dir == "comment_style") {
+        if(dir == "comment") {
+            // specifies a comment as a set of 2 terminals - start and end.
+        } else if(dir == "comment_style") {
             // this is a near synonym with @separator
             int line_num = inp->line_number();
             std::string style = arg_for_directive();
@@ -1550,6 +1554,101 @@ public:
         return subname;
     }
 
+    //
+    // converts c-like escape sequences:
+    //   \a          0x07 ascii BEL ("alert")
+    //   \b          0x08 ascii BS (backspace/ctrl-h)
+    //   \t          0x09 ascii HT (horizontal tab)
+    //   \n          0x0A ascii NL (newline)
+    //   \v          0x0B ascii VT (vertical tab)
+    //   \f          0x0C ascii FF (formfeed/page break)
+    //   \r          0x0D ascii CR (carriage return)
+    //   \e          0x1B ascii ESC (escape) (differs from c)
+    //   \xhh?       One or 2 hex digits -> 1 byte 
+    //   \[uU]h{1,8} "Unicode" -> utf8-ish (differs from c,
+    //               and not strictly unicode - see below)
+    //   \.          whatever byte follows the backslash
+    //               (differs from c - see below)
+    //
+    // Differences from c:
+    //  - no octal support
+    //  - \e is apparently nonstandard in c, but we have it
+    //  - \[anything else] silently resolves to [anything else],
+    //    which implicitly supports '\\', '\'', '"' and '\?'
+    //    NOTE that this applies to things like invalid hex or
+    //    \[uU] sequences: if the input is "\xyubba", the 
+    //    output is "xyubba", and this is not treated as an error.
+    //  - \xh is a valid 1 digit hex sequence. As with most
+    //    numerals, leading 0 is implied, so \xf = 0x0f etc.
+    //  - For "Unicode", U and u are interchangable, and you can
+    //    specify 1 to 8 hex digits.  Whatever you give it will
+    //    0-padded on the left and encoded into a utf-8 style
+    //    series of bytes (i.e. high order bits signifying how
+    //    many additional bytes follow in the current code point).
+    //    No checks for valid unicode are performed.
+    //    As such, anything <= 0x7f is the same in \Uhh or \xhh
+    //    notation, and anything > 0x10ffff is guaranteed not to
+    //    be actual unicode.  Also (because the encoding "runs
+    //    out" of bits in the first byte), the maximum encodable
+    //    value is \u7fffffff.  Attempting
+    //
+    std::string convert_escapes(const std::string &src) const {
+        std::string out;
+        std::string tmp;
+        char u_or_U = 'U';
+        out.reserve(src.length());
+        int ind = 0;
+        while(ind < src.length()) {
+            if(src[ind] == '\\') {
+                ++ind; // skip the backslash
+                switch(src[ind]) {
+                    case 'a': out += '\x07'; ind++; break;
+                    case 'b': out += '\x08'; ind++; break;
+                    case 't': out += '\x09'; ind++; break;
+                    case 'n': out += '\x0A'; ind++; break;
+                    case 'v': out += '\x0B'; ind++; break;
+                    case 'f': out += '\x0C'; ind++; break;
+                    case 'r': out += '\x0D'; ind++; break;
+                    case 'e': out += '\x1B'; ind++; break;
+                    case 'x':  // 2 hex chars max
+                        ind++; // skip 'x'
+                        tmp = from_hex<char>(src, ind, 2); // modifies ind
+                        if(tmp.length()) {
+                            out += tmp;
+                        } else {
+                            // no/invalid hex digits, so it's not a proper
+                            // hex escape sequence: copy the x "normally":
+                            out += "x";
+                        }
+                        break;
+                    case 'u':
+                        u_or_U = 'u';
+                    case 'U': {
+                        ind++; // skip the 'u'/'U'
+                        uint32_t codepoint = from_hex<uint32_t>(src, ind);
+                        tmp = to_utf8ish<std::string>(codepoint);
+                        if(tmp.length()) {
+                            out += tmp;
+                        } else {
+                            // unencodable pseudo-codepoint, so again
+                            // we're just copying the 'u' as if it had
+                            // been any other escaped character
+                            out += u_or_U;
+                        }
+                        u_or_U = 'U';
+                        break;
+                    }
+                    default:
+                        out += src[ind++]; // just copy the char
+                        break;
+                }
+            } else {
+                out += src[ind++];
+            }
+        }
+        return out;
+    }
+
     int parse_expressions(production_rule &rule) {
         int num_read = 0;
         bool done = false;
@@ -1570,7 +1669,15 @@ public:
                     inp->read_line();
                     break;
                 case '"':
+                    // within double quotes, c-like escape sequences
+                    // are supported:
+                    expr_str = convert_escapes(inp->parse_string());
+                    type     = grammar_element::Type::TERM_EXACT;
+                    break;
                 case '\'':
+                    // Within single quotes, there's no escaping - not
+                    // even for single quotes.  If you want to match
+                    // a single quote, use "'".
                     expr_str = inp->parse_string();
                     type     = grammar_element::Type::TERM_EXACT;
                     break;

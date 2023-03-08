@@ -1,6 +1,7 @@
 #
-# Custom scanner test
-# ... and also inverted match test
+# Test all kinds of scanner/terminal match and inverted match.
+#
+# (Formerly, this tested "custom" scanners.)
 #
 
 +{
@@ -50,6 +51,31 @@ block -> stuff;
     return "ding!";
 }+
 
+"\xF0\x9F\x98\x81" -> stuff +{ return "yay 😁"; }+
+
+"\x23" -> stuff +{ return "hash"; }+ # one byte '#'
+'\x23' -> stuff;                     # 4 chars: literal \x23
+
+'\b'   -> stuff +{ return "backslash b"; }+ # 2 chars: backslash, then b
+"\b"   -> stuff +{ return "I take that last byte back"; }+
+"\e\b" -> stuff +{ return "no escape!"; }+ # 2 bytes: ESC and 
+
+"\U3069":to   -> stuff +{ return "don't stub your " + to.to_str(); }+
+#"\U1F408":cat -> stuff +{ return cat + " says meow"; }+  # XXX this should work! gar..
+#"\U0001F408":cat -> stuff +{ return cat + " says meow"; }+ # XXX this should work too! w/out to_str()
+"\u0001F408":cat -> stuff +{ return cat.to_str() + " says meow"; }+
+
+#"\u1F1FA\u1F1F8" -> us_flag... check if this works..
+
+"\"" -> literal_double_quote +{ return "double quote"; }+ #"
+literal_double_quote -> stuff;
+# yay, this correctly causes conflict warning. (integrate with tests?)
+#'"'  -> also_double_quote +{ return "also double quote; cant get here"; }+
+#also_double_quote -> stuff;
+
+# this is identical to 'U'
+"\U" -> stuff +{ return "you? no, U!"; }+
+
 # Let's say (for test purposes) that blocks are enclosed
 # in U+27E6 and U+27E7 Mathemetical Square Brackets
 # ("⟦" and "⟧"). (
@@ -81,13 +107,13 @@ block -> stuff;
     return stringformat("{} block: [{}]\n", description, guts);
 }+
 
-assignment -> stuff;
-
 # assign a variable for later expansion:
 /[a-zA-Z0-9_-]+/:name '='^ string -> assignment +{
     symtab[name] = string;
     return "";
 }+
+assignment -> stuff;
+
 
 # strings are double quoted; quotes can be escaped with
 # a backslash.  really, this is to test inverting revex match.
