@@ -53,17 +53,22 @@ leading_ws? '@declare'^ /\s*/^ identifier:name_decl ':'^ /(?:[^@]|(?:@@))*/:valu
 # instead of in the generated location(s).
 '@realign:'^ /\s*/^ text:realign '@'^ /\n?/^ -> fragment ;
 
+# this is for importing template "variants", and must come before
+# subst_end/rest_of_sub (or else it doesn't get matched)
+'#'^ !'#':variant_expression '#'^ -> template_variant ;
+
 leading_ws?^ '@-' -> subst_start ;
 '@'               -> subst_start ;
 
 '-@' trailing_ws?^ -> subst_end ;
 '@'                -> subst_end ;
+/(?:[^-@]|-[^@])+/ -> rest_of_sub ;
 
 # template authors may wish to elide leading or trailing space,
 # so we need to be able to identify leading/trailing space:
 # \n is optional on leading_ws because it may have been eaten
 # by an earlier trailing_ws
-/\n*[ \t]+/:ws -> leading_ws  ;
+/\n*[ \t]+/:ws -> leading_ws ;
 
 # there are 2 variants on trailing whitespace.
 # the first matches all space through the end of
@@ -83,8 +88,18 @@ leading_ws?^ '@-' -> subst_start ;
 # case.  
 /[ \t]*\n/:ws  -> trailing_ws ;
 
-# you can call another template with the "@#other_template(x, y ,z)@...
-subst_start^ /#\s*/^ identifier:jempl_name /(?:[^-@]|-[^@])+/:jempl_args subst_end^ -> fragment ;
+# variant templates are a special case, because they have to
+# be expanded to some conditional code to match the variant:
+#   eg:  "@#other_template#some_code_returning_string()#(x, y ,z)@:
+# ... interesting fpl note here.  would be nice if template_variant could
+# be defined right here and have it match first by virtue of this
+# containing rule being before the other import... hmm.
+# alternately, what if we did "longest match" precedence on productions
+# based on the number of steps in the rule? hmmmm
+subst_start^ /#\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^ -> fragment ;
+
+# normal other-template calls are like: "@#other_template(x, y ,z)@:
+subst_start^ /#\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^ -> fragment ;
 
 # Control statements (loops and if/else) are identified
 # by ending with an opening or closing curly brace.
@@ -95,10 +110,7 @@ subst_start^ /#\s*/^ identifier:jempl_name /(?:[^-@]|-[^@])+/:jempl_args subst_e
 # @} else {@
 #   something is false 
 # @}@
-# (note: the above is 3 "control statements" - if, else, and the closing })
-# we -don't- eject the subst_end so that we can use its
-# location to realign line numbers. (though hmm can
-# we just have the end of match somehow?)
+# Note that the above is 3 "control statements" - if, else, and the closing }.
 subst_start^ /(?:[^-{}@]|-[^@]|[{}][^-@])*[{}]/:control_statement subst_end^ -> fragment ;
 
 # substitute a variable into the output
