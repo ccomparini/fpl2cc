@@ -87,6 +87,8 @@ int main() {
     std::cout << stringformat("{} null pointer doesn't crash\n", maybenull);
     maybenull = "for sure a const char *";
     std::cout << stringformat("and it's {}\n", maybenull);
+
+    std::cout << stringformat("and I want to embed a {{ with stuff after it\n");
     return 0;
 }
 

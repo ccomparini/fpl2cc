@@ -259,7 +259,6 @@ std::string stringformat(std::string_view fmt, Args&&... args) {
             ++ind; // skip the begin brace
             if(fmt[ind] == '{') {
                 // '{{' evaluates to a single '{' (it's how you escape '{')
-                ++ind;
                 out += '{';
             } else {
                 // parse the contents of the {}:
