@@ -25,6 +25,10 @@ inline std::string _stringformat(char * s) {
     return std::string(s);
 }
 
+inline std::string _stringformat(char c) {
+    return std::string(1, c);
+}
+
 inline std::string _stringformat(bool b) {
     if(b) return "true";
     return "false";
