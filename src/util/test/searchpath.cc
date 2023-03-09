@@ -27,6 +27,8 @@ int main() {
         return 1;
     }
 
+    // the current working directory is now SRC_DIR so '.' should
+    // match SRC_DIR.  DATA_DIR is expected to be relative to that:
     Searchpath path(stringformat(
         ".:{}/b:./{}/a:{}",
         getenv("DATA_DIR"), getenv("DATA_DIR"), getenv("DATA_DIR")

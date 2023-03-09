@@ -14,16 +14,16 @@ for scons_tprog in Glob('*.cc'):
     output_file = tprog + '.out'
 
     # tests may want to find themselves and/or data directories:
-    src_dir = source_dir(scons_tprog)
-    env['ENV']['SRC_DIR'] = src_dir.get_abspath()
-    data_dir = src_dir.get_abspath() + '/' + tprog + '.data'
-    #print(f"data dir: {data_dir}", file=sys.stderr)
-    if(os.path.isdir(data_dir)):
-        #print(f"EXISTS!!! {data_dir}", file=sys.stderr)
-        env['ENV']['DATA_DIR'] = os.path.relpath(data_dir)
+    src_dir = source_dir(scons_tprog).get_abspath();
+    #print(f"THIS IS PYTHON AND src_dir is {src_dir}\n", file=sys.stderr)
+    env['ENV']['SRC_DIR'] = src_dir
+    fp_data_dir = src_dir + '/' + tprog + '.data' # (full path)
+    if(os.path.isdir(fp_data_dir)):
+        # DATA_DIR environment variable is relative to SRC_DIR
+        env['ENV']['DATA_DIR'] = os.path.relpath(fp_data_dir, src_dir)
 
-        # output depends on everything in the output dir:
-        for root, dirnames, filenames in os.walk(data_dir):
+        # output depends on everything in the data dir:
+        for root, dirnames, filenames in os.walk(fp_data_dir):
             for fn in filenames:
                 env.Depends(output_file, f"{root}/{fn}")
 
