@@ -104,7 +104,8 @@ def run_and_capture_action(program, varlist=[]):
         try:
             pout, perr = proc.communicate(timeout=timeout)
             if(not quiet and len(perr)):
-                print(perr.decode("utf-8"), file=sys.stderr)
+                #print(perr.decode("utf-8"), file=sys.stderr)
+                sys.stderr.buffer.write(perr);
         except:
             proc.kill()
             raise
