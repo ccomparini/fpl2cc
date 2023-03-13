@@ -281,7 +281,8 @@ public:
         return input_filename;
     }
 
-    inline std::string location_str(size_t offset) const {
+    inline std::string location_str(size_t offset=0) const {
+        if(offset == 0) offset = read_pos;
         int ch;
         int ln = line_number(offset, &ch);
         return stringformat("{}:{}:{}", filename(), ln, ch);
