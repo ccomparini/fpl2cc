@@ -32,6 +32,13 @@ class productions {
     const fpl_options opts;
 
     // for imports and such:
+    //   - @grammar is used when you want to implement a parser based
+    //     on an exising grammar
+    //   - @import imports sets of rules from another fpl into the
+    //     current rulespace
+    //   - backticks import a nonterminal (including any rules to produce
+    //     that nonterminal) for use in an expression context.  eg:
+    //       `ansi-c`.declaration -> declaration
     using subgrammar_p = std::unique_ptr<productions>;
     const productions *parent; // prods of which we are a sub, or nullptr
     std::map<std::string, subgrammar_p> sub_productions; // grammar name -> productions
@@ -1169,9 +1176,15 @@ public:
                 add_goal(newgoal, whence);
             }
         } else if(dir == "grammar") {
-            // import the grammar from another fpl:
+            // @grammar <grammar name> means this fpl is an implementation
+            // or augmentation of the specified (possibly abstract) grammar,
+            // so we'll want to import it:
             SourcePosition whence(inp);
             import_grammar(subgrammar(arg_for_directive(), whence));
+        } else if(dir == "import") {
+            // import the rules from another fpl:
+            SourcePosition whence(inp);
+            import_rules(subgrammar(arg_for_directive(), whence));
         } else if(dir == "internal") {
             // a code block which goes in the "private" part
             // of the parser class itself.  This is either
@@ -1427,7 +1440,6 @@ public:
         const std::string &fpl_name,
         const SourcePosition whence
     ) {
-
         Searchpath searchp = opts.src_path;
 
         // search relative to the source fpl as well.
@@ -1493,10 +1505,10 @@ public:
         return out;
     }
 
-    // syntax: '`' grammar_name '`' ~ /(.production_to_import)/?
+    // syntax: '`' grammar_name '`' ~ /.(production_to_import)/?
     // imports relevant rules into this and returns the name of
     // the top level production created
-    std::string parse_import() {
+    std::string parse_backtick_import() {
         SourcePosition whence(inp);
         std::string grammar_name(inp->parse_string());
         if(!grammar_name.length()) {
@@ -1505,7 +1517,7 @@ public:
         }
 
         // `grammarname`.production means import only the
-        // specified production:
+        // specified production (rules and whatever):
         std::string prod_name;
         if(inp->read_byte_equalling('.')) {
             prod_name = read_production_name(inp);
@@ -1714,7 +1726,7 @@ public:
                     break;
                 case '`':
                     // parse/import the sub-fpl, and use whatever it produces:
-                    expr_str = parse_import();
+                    expr_str = parse_backtick_import();
                     type     = grammar_element::Type::NONTERM_PRODUCTION;
                     break;
                 case /*{*/ '}':
@@ -1965,7 +1977,7 @@ public:
             size_t rew_pos = inp->current_position();
             std::string this_product;
             if(inp->peek() == '`') {
-                this_product = parse_import();
+                this_product = parse_backtick_import();
             } else {
                 this_product = read_production_name(inp);
             }
@@ -2191,6 +2203,44 @@ public:
         return out;
     }
 
+    int import_rules(
+        productions *from, const std::set<std::string> &wanted = {}
+    ) {
+        if(!from) return 0;
+
+        // NOTE that we import the rules IN ORDER because
+        // changing the rule order changes precedence.
+        // (hence we don't do this via rules_for_product)
+        std::set<std::string> found;
+        for(auto rule : from->rules) {
+            const std::string &prd = rule.product();
+            // if the "wanted" set is empty, it means import
+            // everything:
+            if(!wanted.size() || (wanted.count(prd) > 0)) {
+                found.insert(prd);
+                if(from->exported_products.count(prd) == 0) {
+                    add_rule(rule);
+                } // else rules for this product are already imported
+            }
+        }
+
+        // In order to prevent duplicate imports and import loops,
+        // we mark the exported products.
+        // This is a separate pass from the rules import because it's
+        // by product and there's frequently more than one rule per
+        // product.
+        // Also, we mark the product exported regardless of if the rules
+        // were successfully imported - if it failed once, there's
+        // (presently) no reason it wouldn't fail again and we don't
+        // want to keep trying.
+        for(auto got : found) {
+            from->exported_products.insert(got);
+        }
+
+        return found.size();
+    }
+
+
     // Imports the grammar from the productions specified.
     // This will include rules and whatever's deemed necessary
     // to support those rules.
@@ -2198,6 +2248,9 @@ public:
     // produce, or an empty string if nothing was imported.
     // NOTE the grammar passed isn't const because we also use
     // it as a scratch pad to prevent redundant imports.
+// XXX this really imports a rule and all its subs.... I guess that's a grammar?
+// there's a case, though, where we want to import all the constructs
+// in some import. hmmm...  more and more I want to be able to alias things.
     std::string import_grammar(
         productions *fromp, const std::string &pname = ""
     ) {
@@ -2240,22 +2293,7 @@ public:
         std::set<std::string> wanted = from.dependent_products(import_name);
 
         // ... and now import the relevant rules.
-        // NOTE that we import the rules IN ORDER because
-        // changing the rule order changes precedence.
-        // (hence we don't do this via rules_for_product)
-        int num_found = 0;
-        for(auto rule : from.rules) {
-            if(wanted.count(rule.product()) > 0) {
-                num_found++;
-                if(from.exported_products.count(rule.product()) == 0) {
-                    add_rule(rule);
-                } // else rules for this product are already imported
-            }
-        }
-
-        for(auto got : wanted) {
-            from.exported_products.insert(got);
-        }
+        int num_found = import_rules(&from, wanted);
 
         if(num_found <= 0) {
             warn(

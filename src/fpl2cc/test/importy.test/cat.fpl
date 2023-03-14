@@ -1,0 +1,4 @@
+
+'🐈'^ value*:values '🐈'^ -> cat; # concatenate
+
+cat -> value;

@@ -9,6 +9,8 @@
 # instead of @comment-style:
 @separator "comment/c"
 
+@import cat
+
 `importy_s1` -> other_stuff ;
 
 # let's say we're supporting json but with variables
@@ -72,9 +74,12 @@
     return out;
 }+
 
-
 +member(key value) +{
     return key + " = " + value;
+}+
+
++cat(values) +{
+    return values@join("");
 }+
 
 @default_main
