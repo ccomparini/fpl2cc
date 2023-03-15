@@ -31,7 +31,7 @@ using LengthCallback = std::function<size_t(const utf8_byte *inp)>;
 
 // Returns the length in bytes of the utf-8 character at *at,
 // or 0 if that character isn't a space.
-size_t space_length(const utf8_byte *at) {
+inline size_t space_length(const utf8_byte *at) {
     if(at == NULL) return 0;
 
     switch(*at) {
