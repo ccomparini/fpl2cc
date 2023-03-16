@@ -15,7 +15,8 @@ struct fpl_options {
 
     std::string src_fpl;
     Searchpath src_path;
-    std::string output_fn;
+    std::string out;
+    mutable std::string output_fn; // derived from "out"
 
     bool check_only;
     bool debug;
@@ -53,28 +54,31 @@ struct fpl_options {
         }
     }
 
-    // for some options, we allow the user to specify
+    // For some options, we allow the user to specify
     // just a filename extension (by starting the name
     // with a '.'), in which case the full filename
-    // will be based on the output_fn.
+    // will be based on the output filename (which, in
+    // turn, may be based on the source filename).
+    // This simplifies calling from build scripts and
+    // similar - callers don't need to compose pathnames
+    // or swap extensions for things like dependecy files
+    // or state dumps.
     std::string infer_filename(const std::string &spec) {
-        if(spec[0] != '.') {
-            // assume it's a full filename:
-            return spec;
-        } else {
+        if(spec[0] == '.') {
             // starts with a "." so it's a filename extension:
-            if(!output_fn.length()) {
+            std::string outfn = out_filename();
+            if(!outfn.length()) {
                 error("can't infer file name: no output specified");
             } else {
-                std::filesystem::path pt(output_fn);
+                std::filesystem::path pt(outfn);
                 pt.remove_filename();
-                std::string bn = std::filesystem::path(output_fn).stem();
+                std::string bn = std::filesystem::path(outfn).stem();
                 return pt.string() + bn + spec;
             }
         }
-        // theoretically, we can't get here:
-        error("mass confusion in infer_filename");
-        return "";
+
+        // presumably it's a filename:
+        return spec;
     }
 
     static bool arg_to_int(int &val, const std::string &arg) {
@@ -172,7 +176,7 @@ struct fpl_options {
                         SCAN_VALUE();
                         if(val.empty())
                             errors.push_back("--out requires a value");
-                        output_fn = val;
+                        out = val;
                     } else if(opt == "lr-stack-reserve") {
                         SCAN_VALUE();
                         if(!arg_to_int(lr_stack_reserve, val))
@@ -216,19 +220,29 @@ struct fpl_options {
     }
 
     std::string out_filename() const {
-        if(output_fn.length()) {
-            return output_fn;
-        } else {
-            // no output filename was specified.
-            // base it on the input name.
-            if(src_fpl.length()) {
-                std::filesystem::path pt(src_fpl);
-                pt.replace_extension("cc");
-                return pt.filename();
+        if(!output_fn.length()) {
+            if(!out.length()) {
+                // no output name/template was specified.
+                // base it entirely on the input name.
+                if(src_fpl.length()) {
+                    fs::path pt(src_fpl);
+                    pt.replace_extension("cc");
+                    output_fn = pt.filename().string();
+                }
+            } else {
+                // for each '%', substitute the source basename
+                std::string sbn(fs::path(src_fpl).filename().stem());
+                output_fn = out;
+                auto spos = output_fn.find_first_of('%');
+                const auto incr = sbn.length();
+                while(spos != output_fn.npos) {
+                    output_fn.replace(spos, 1, sbn);
+                    spos = output_fn.find_first_of('%', spos + incr);
+                }
             }
         }
 
-        return "";
+        return output_fn;
     }
 
     int version_major() const { return version_maj; }
@@ -253,7 +267,7 @@ struct fpl_options {
             "\t--generate-main - generate main() function\n"
             "\t--help - show this page\n"
             "\t--no-generate-code - parse (and other options) only\n"
-            "\t--out=<fn> - write to fn (default <fpl source>.cc)\n"
+            "\t--out=<fnt> - output file name template - \% = input base\n"
             "\t--src-path=<path> - search the dirs given (':' delimited)\n"
             "\t--statedump=<fn> - dump generated states to file\n",
             version()
@@ -266,11 +280,11 @@ struct fpl_options {
         out += stringformat(
             "    src: {}\n"
             "    src_path: {}\n"
-            "    output: {}\n"
+            "    out: {}\n"
             "    generate_main: {}\n"
             "    debug: {}\n"
             "    single_step: {}\n",
-            src_fpl, src_path, output_fn, generate_main, debug, single_step
+            src_fpl, src_path, out, generate_main, debug, single_step
         );
 
         if(entry_points.size() > 0) {

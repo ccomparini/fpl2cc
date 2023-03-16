@@ -178,12 +178,13 @@ void write_depfile(const productions &prds, const fpl_options &opts) {
 ExitVal fpl2cc(const fpl_options &opts) {
     std::shared_ptr<fpl_reader> inp;
 
-    if(opts.src_fpl.size() == 0) {
+    std::string sfn = opts.src_filename();
+    if(sfn.size() == 0) {
         inp = make_shared<fpl_reader>(
             std::cin, "<stdin>", fail_reader_adapter
         );
     } else {
-        inp = make_shared<fpl_reader>(opts.src_fpl, fail_reader_adapter);
+        inp = make_shared<fpl_reader>(sfn, fail_reader_adapter);
     }
 
     std::string output_fn;
