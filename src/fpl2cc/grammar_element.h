@@ -1,6 +1,7 @@
 #ifndef GRAMMAR_ELEMENT_H
 #define GRAMMAR_ELEMENT_H
 
+#include "util/c_str_escape.h"
 #include "util/jerror.h"
 #include "util/src_location.h"
 
@@ -214,7 +215,7 @@ struct grammar_element {
 
         std::string out;
         out += lb;
-        out += expr;
+        out += c_str_escape(expr);
         out += rb;
 
         return out;
