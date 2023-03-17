@@ -18,6 +18,10 @@ mission -> value +{
     return "(redacted)";
 }+
 
+# check if we can import disparate things from one sub:
+#@import 'zeta_rs'.woo
+`zeta_rs`.woo -> value +{ return "WOO: " + woo; }+
+
 `importy_s1` -> other_stuff ;
 
 # let's say we're supporting json but with variables

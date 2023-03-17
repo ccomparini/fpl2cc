@@ -1,0 +1,7 @@
+returncode = 0
+stderr = ""
+stdout = "object {
+ \"woowoo\" = \"hi\",
+\"loopy\" = WOO: 🌀}
+
+"
