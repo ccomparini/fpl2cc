@@ -1,0 +1,10 @@
+
+'👽' -> zeta_reticulan;
+
+# these are the various possible missions of the zeta reticulans
+'abduction'         -> mission;
+'cattle mutilation' -> mission;
+'come in peace'     -> mission;
+
+# if there are a lot of them....
+zeta_reticulan+ -> alien_invasion;

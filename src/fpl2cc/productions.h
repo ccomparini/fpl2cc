@@ -1114,7 +1114,30 @@ public:
         // Reads an argument to the end of the line.
         // End of line is any ascii vertical space (for now).
         // Leading and trailing spaces/tabs are stripped.
+        // oh.. there's also fpl_reader::read_line().. ohwell.
+        // oh.. but this also ends at '@'. great.
         return inp->read_re("[ \\t]*([^@\\x0a-\\x0d]+)[ \\t]*\n")[1];
+    }
+
+    // this is some kind of utility thing which probably doesn't
+    // belong here, but it here because we need it and I'm already
+    // layers deep in yak shave..
+    // splits the given string on spaces and returns a set of the things
+    // in it.
+    // actually it's a reverse join (on space).  maybe nioj()?
+    static std::set<std::string> space_set(const std::string &in) {
+        std::set<std::string> out;
+        const std::string ws("\t "); // just tab or space actually
+        size_t next = in.npos;
+        for(auto start = in.find_first_of(ws); start != in.npos; start = next) {
+            next = in.find_first_of(ws, start);
+            if(next != in.npos) {
+                out.insert(in.substr(start, next - start));
+            } else {
+                out.insert(in.substr(start));
+            }
+        }
+        return out;
     }
 
     void add_goal(const std::string raw_goal, const SourcePosition &whence) {
@@ -1183,8 +1206,8 @@ public:
             import_grammar(subgrammar(arg_for_directive(), whence));
         } else if(dir == "import") {
             // import the rules from another fpl:
-            SourcePosition whence(inp);
-            import_rules(subgrammar(arg_for_directive(), whence));
+            inp->eat_separator();
+            parse_import();
         } else if(dir == "internal") {
             // a code block which goes in the "private" part
             // of the parser class itself.  This is either
@@ -1441,6 +1464,13 @@ public:
         // search relative to the source fpl as well.
         searchp.append(inp->input_dir());
         std::string filename = searchp.find(fpl_name + ".fpl");
+        std::ifstream in(filename);
+        if(!in.is_open()) {
+            error(whence, stringformat(
+                "can't open '{}': {}\n",
+                filename, std::string(strerror(errno))
+            ));
+        }
 
         // Check to see if importing the given filename would cause an
         // "import loop".  For example, if a given fpl imports itself,
@@ -1501,10 +1531,17 @@ public:
         return out;
     }
 
-    // syntax: '`' grammar_name '`' ~ /.(production_to_import)/?
-    // imports relevant rules into this and returns the name of
+    // Imports relevant rules into this and returns the name of
     // the top level production created
-    std::string parse_backtick_import() {
+    // syntax: quote grammar_name quote ('.' product_name)?
+    // So the grammar name is quoted with whatever kind of quotes,
+    // and is optiinally followed by '.' and the name of
+    // the product to import from the grammar.
+    // Returns the name of the top level product imported
+    // (which should be the specified product if specified,
+    // and otherwise is the goal....)
+    // except what if there are multiple goals?
+    std::string parse_import() {
         SourcePosition whence(inp);
         std::string grammar_name(inp->parse_string());
         if(!grammar_name.length()) {
@@ -1722,7 +1759,7 @@ public:
                     break;
                 case '`':
                     // parse/import the sub-fpl, and use whatever it produces:
-                    expr_str = parse_backtick_import();
+                    expr_str = parse_import();
                     type     = grammar_element::Type::NONTERM_PRODUCTION;
                     break;
                 case /*{*/ '}':
@@ -1974,7 +2011,7 @@ public:
             size_t rew_pos = inp->current_position();
             std::string this_product;
             if(inp->peek() == '`') {
-                this_product = parse_backtick_import();
+                this_product = parse_import();
             } else {
                 this_product = read_production_name(inp);
             }

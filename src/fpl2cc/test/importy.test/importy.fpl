@@ -9,7 +9,14 @@
 # instead of @comment-style:
 @separator "comment/c"
 
-@import cat
+@import 'cat'
+
+@import 'zeta_rs'.mission
+mission -> value +{
+    // no one knows what the zeta reticulans want, so we
+    // redact it here:
+    return "(redacted)";
+}+
 
 `importy_s1` -> other_stuff ;
 
