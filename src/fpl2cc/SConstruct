@@ -3,19 +3,7 @@ Import('env')
 env = env.Clone()
 
 env.Jemp2h('fpl_x_parser.h.jemp')
-# these are used within fpl_x_parser.h.jemp:
-env.Jemp2h('fpl_x_parser_generated_types.h.jemp')
-env.Jemp2h('fpl_x_parser_reduce_action.h.jemp')
-env.Jemp2h('fpl_x_parser_reduce_action_meta.h.jemp')
-env.Jemp2h('fpl_x_parser_reduce_call.h.jemp')
-env.Jemp2h('fpl_x_parser_reduce_constructor_args.h.jemp')
-env.Jemp2h('fpl_x_parser_shift_none.h.jemp')
-env.Jemp2h('fpl_x_parser_shift_nonterm.h.jemp')
-env.Jemp2h('fpl_x_parser_shift_term.h.jemp')
-env.Jemp2h('fpl_x_parser_state.h.jemp')
 
-env.Jemp2h('fpl_default_main.h.jemp')
-env.Jemp2h('fpl_regex_separator.h.jemp')
 
 env.Program('#bin/fpl2cc', [ 'fpl2cc.cc', ])
 
