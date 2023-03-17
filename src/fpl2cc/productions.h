@@ -1331,10 +1331,6 @@ public:
                 expr.qty.multiple = false;
                 src->skip_bytes(1);
                 break;
-            default:
-                expr.qty.optional = false;
-                expr.qty.multiple = false;
-                break;
         }
     }
 
@@ -1771,7 +1767,8 @@ public:
                 if(expr_str.length() >= 1) {
                     production_rule::step step(expr_str, type);
                     read_quantifier(inp, step);
-                    read_suffix(inp, step);
+                    read_suffix(inp, step); // optional :name or ^
+                    if(step.is_single()) read_quantifier(inp, step);
                     if(type == grammar_element::Type::LACK_OF_SEPARATOR)
                         step.eject = true;
                     step.invert = invert_next;
@@ -2670,7 +2667,6 @@ public:
 
         if(generate_types) {
             std::set<generated_type> gt_candidates;
-            std::set<generated_type, decltype(generated_type::fold_compare)*> uniques;
             for(auto prr : rules_for_product) {
                 const std::string &prodn = prr.first;
                 if(type_for(prodn) == "") {
@@ -2682,17 +2678,6 @@ public:
             for(auto candidate : gt_candidates) {
                 candidate.resolve_attribute_types(*this);
                 generated_types.insert(candidate);
-/*
-                auto existing = uniques.find(candidate);
-                if(existing == uniques.end()) {
-                    uniques.insert(candidate);
-                } else {
-//std::cerr << stringformat("RAD it looks like {} and {} are the same\n", candidate.for_product, existing->for_product);
-                    // already got this type.  point the candidate product
-                    // at the existing type to deduplicate:
-//                    add_type_for(candidate.for_product, existing->type_name());
-                }
- */
             }
 //std::cerr << stringformat("LISTEN UP! HERE ARE THE GENERATED TYPES!\n{}\n", generated_types);
         }
@@ -2752,8 +2737,8 @@ public:
                     if(found == scanners.end()) {
                         // it is possible that the rule isn't
                         // used, so the scanner won't be used, but
-                        // we're going to complain about it anyway
-                        // here because the code generator shouldn't
+                        // we're going to complain about it here
+                        // anyway because the code generator shouldn't
                         // have to be bothered checking if a given
                         // element is actually used.
                         error(stringformat(

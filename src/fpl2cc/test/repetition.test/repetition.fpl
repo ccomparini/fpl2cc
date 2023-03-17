@@ -89,7 +89,7 @@ block -> statement ;
 #    return "yo nothing";
 #}+
 
-'#'+:pounds ";"^ -> statement +{
+'#':pounds+ ";"^ -> statement +{
     return pounds@join("x");
 }+
 
