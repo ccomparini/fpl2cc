@@ -2199,6 +2199,10 @@ public:
         // this is a reasonable thing to ask from std::list,
         // but have no documentation/spec saying it's ok.
         for(auto wanted : all_wanted) {
+            if(out.count(wanted)) {
+                continue;
+            }
+
             out.insert(wanted);
 
             auto strl  = rules_for_product.lower_bound(wanted);
@@ -2212,8 +2216,8 @@ public:
                 for(int stepi = 0; stepi < rule.num_steps(); ++stepi) {
                      production_rule::step step = rule.nth_step(stepi);
                      if(step && step.is_nonterminal()) {
-                         if(!out.count(step.production_name())) {
-                             const std::string next = step.production_name();
+                         const std::string next = step.production_name();
+                         if(!out.count(next)) {
                              all_wanted.push_back(next);
                              if(nothing_creates(next)) {
                                  missing.insert(stringformat(
