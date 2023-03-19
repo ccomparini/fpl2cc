@@ -1140,24 +1140,24 @@ public:
         return out;
     }
 
-    void add_goal(const std::string raw_goal, const SourcePosition &whence) {
-        // the goal is either simply a production name,
-        // or grammar_name.production_name.  so, see which:
-        size_t grammar_end = raw_goal.find('.');
-        if(grammar_end != std::string::npos) {
-            // if the dot is at the start or end, we're missing
-            // either the production or the grammar:
-            if(grammar_end >= raw_goal.length() || grammar_end == 0) {
-                error(stringformat("invalid goal '{}'\n", raw_goal));
-            }
-
-            std::string grammar_name = raw_goal.substr(0, grammar_end);
-            std::string production   = raw_goal.substr(grammar_end + 1);
-            import_grammar(subgrammar(grammar_name, whence), production);
-            goals.push_back(production);
+    void parse_goal() {
+        std::string goal;
+        if(inp->peek() == '`') {
+            // you can specify that you're importing a goal with
+            // backtick syntax; eg: `grammar name`.goal_product
+            // ... maybe we need some more generic parse_product...
+            goal = parse_import();
         } else {
-            // it's a simple goal name:
-            goals.push_back(raw_goal);
+            goal = read_identifier(inp);
+            if(inp->read_re("[\t ]*\n").empty()) {
+                error("unexpected input after goal identifier");
+            }
+        }
+
+        if(!goal.length()) {
+            error("expected goal name");
+        } else {
+            goals.push_back(goal);
         }
     }
 
@@ -1191,19 +1191,12 @@ public:
             // type it otherwise can't infer:
             generate_types = true;
         } else if(dir == "goal") {
-            SourcePosition whence(inp);
-            std::string newgoal = arg_for_directive();
-            if(!newgoal.length()) {
-                error("can't parse the @goal");
-            } else {
-                add_goal(newgoal, whence);
-            }
+            parse_goal();
         } else if(dir == "grammar") {
             // @grammar <grammar name> means this fpl is an implementation
             // or augmentation of the specified (possibly abstract) grammar,
             // so we'll want to import it:
-            SourcePosition whence(inp);
-            import_grammar(subgrammar(arg_for_directive(), whence));
+            import_grammar(arg_for_directive());
         } else if(dir == "import") {
             // import the rules from another fpl:
             inp->eat_separator();
@@ -1467,8 +1460,8 @@ public:
         std::ifstream in(filename);
         if(!in.is_open()) {
             error(whence, stringformat(
-                "can't open '{}': {}\n",
-                filename, std::string(strerror(errno))
+                "can't open '{}' ({}) for import: {}\n",
+                filename, fpl_name, std::string(strerror(errno))
             ));
         }
 
@@ -1549,14 +1542,40 @@ public:
             return "<failed import>";
         }
 
+        auto subg = subgrammar(grammar_name, whence);
+
         // `grammarname`.production means import only the
         // specified production (rules and whatever):
         std::string prod_name;
         if(inp->read_byte_equalling('.')) {
             prod_name = read_production_name(inp);
+            if(!prod_name.length()) {
+                error("couldn't read production name after '.'");
+            } else {
+                auto dependencies = subg->dependent_products(prod_name);
+                import_rules_for_products(subg, dependencies);
+            }
+        } else {
+            // (empty products set means import everything)
+            import_rules_for_products(subg, {});
+
+            int num_goals = subg->goals.size();
+            if(num_goals == 0) {
+                prod_name = subg->default_goal();
+            } else {
+                // errf.. need better structure. check this higher.
+                // Alternately, if there's more than one goal,
+                // we _could_ create an intermediate product
+                // and jam some rules in like:
+                //   for each goal -> that intermediate product
+                // (and return the name of the intermediate..)
+                if(num_goals > 1) 
+                    std::cerr << "TOO MANY GOALS\n";
+                prod_name = *(subg->goals.begin());
+            }
         }
 
-        return import_grammar(subgrammar(grammar_name, whence), prod_name);
+        return prod_name;
     }
 
     std::string make_sub_prod_name() const {
@@ -2241,7 +2260,47 @@ public:
         return out;
     }
 
-    int import_rules(
+    // OK all cases:
+    //   - `foo`.prod : importing specificlly one production
+    //   - `foo`: SHOULD BE importing all goal productions.  If there's more than
+    //      one, I don't think we can handle it here right now and should throw
+    //      an error, OR make an intermediate rule 
+    //   - @import, which always just imports productions as themselves.  2 cases:
+    //     - @import 'grammar':  import each and every thing in the grammar file,
+    //       regardless of if it's a goal or needed for a goal  or what
+    //     - @import 'grammar'.prod:  import prod (and everything needed to produce it)
+    //   - @grammar <full grammar> is basically saying we're implementing or
+    //     specializing one particular grammar.  In this case, we should import
+    //     the goals and make them our goals.
+    //
+    // How it (kinda) is:
+    //   CASE                  WHICH RULES (+ depends)  ALSO
+    //   @import 'foo'         all foo's rules
+    //   @grammar 'foo'        foo's goals             separators, all supporting stuff
+    //  `foo`                  foo's goals
+    //   @import 'foo'.bar     rules for bar
+    //  `foo`.bar              rules for bar
+    //
+    // But maybe we want:
+    //   CASE                  WHICH RULES (+ depends)  ALSO
+    //   @import 'foo'         all foo's rules
+    //   @grammar 'foo'        all foo's rules          GOALS, separators, all supporting stuff
+    //  `foo`                  all foo's rules          evaluate to goal or set of goals
+    //   @import 'foo'.bar     rules for bar
+    //  `foo`.bar              rules for bar
+    //
+    // which normalizses the cases..
+    // @grammar could, in theory, support a grammar based on a subgrammar
+    // too, if we normalize the syntax.
+    // (alternately, always refer to subproducts with backticks?  it's ugly
+    // syntax though).
+    // maybe the key is to normalize the filenames so we don't have to
+    // worry about '-' in them, and then they can just be symbols.  But
+    // then, filenames are case-insensitive also (or might be).
+    // Also it would be better if subgrammar elements were in the namespace
+    // of that subgrammar.  But sometimes we want to import them into
+    // our namespace (eg abnf-CORE)
+    int import_rules_for_products(
         productions *from, const std::set<std::string> &wanted = {}
     ) {
         if(!from) return 0;
@@ -2286,61 +2345,35 @@ public:
     // produce, or an empty string if nothing was imported.
     // NOTE the grammar passed isn't const because we also use
     // it as a scratch pad to prevent redundant imports.
-// XXX this really imports a rule and all its subs.... I guess that's a grammar?
-// there's a case, though, where we want to import all the constructs
-// in some import. hmmm...  more and more I want to be able to alias things.
-    std::string import_grammar(
-        productions *fromp, const std::string &pname = ""
-    ) {
+    void import_grammar(const std::string &grammar_name) {
+        productions *fromp = subgrammar(grammar_name, inp);
         if(!fromp) {
             error(stringformat(
-                "can't import {}: no source productions.\n", pname
+                "can't load subgrammar '{}'\n", grammar_name
             ));
+            return;
         }
         productions &from = *fromp;
 
-        std::string src_fn = from.inp->filename();
-
-        // if we're importing everything, import separator and preamble
-        // code as well:
-        if(!pname.length()) {
-            for(auto sepc : from.separator_code) {
-                add_separator_code(sepc);
-            }
-
-            for(auto primp : from.preamble) {
-                add_preamble(primp);
-            }
+        for(auto sepc : from.separator_code) {
+            add_separator_code(sepc);
         }
 
-        // these are the names of the products whose rules (and elements)
-        // we need to import:
-        std::string import_name;
-        if(pname.size()) {
-            import_name = pname;
-        } else if(from.rules.size()) {
-            // no particular production specified.  import the
-            // default (first) production.
-            // (should this use goals, now?  probably, yes)
-            import_name = from.rules[0].product();
+        for(auto primp : from.preamble) {
+            add_preamble(primp);
         }
 
-        // get the list of all products which we'll need to
-        // import (i.e. the one we wanted to import, plus
-        // anything needed to generate that)
-        std::set<std::string> wanted = from.dependent_products(import_name);
+        int num_found = import_rules_for_products(&from);
 
-        // ... and now import the relevant rules.
-        int num_found = import_rules(&from, wanted);
+        for(auto goal : from.goals) {
+            goals.push_back(goal);
+        }
 
         if(num_found <= 0) {
-            warn(
-                stringformat("No rules imported for {} from {}",
-                import_name, from.inp->filename())
-            );
+            warn(stringformat(
+                "No rules imported from {}", from.inp->filename()
+            ));
         }
-
-        return import_name;
     }
 
     // returns the state number for the lr_set passed, or -1
@@ -2859,7 +2892,7 @@ public:
     }
 
     const std::string default_goal() const {
-        // 1) if there are any prcedence groups, the goal is
+        // 1) if there are any precedence groups, the goal is
         //    whatever the first (= lowest precedence) group
         //    produces:
         if(precedence_group_names.size())

@@ -17,7 +17,8 @@ SetOption('num_jobs', cpu_count + 1);
 #   sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/gcc-10 100
 # to get a working c++20 compiler
 ccflags = "-std=c++20 -Wno-parentheses"
-if debugger : ccflags += " -g"
+ccflags += " -g"
+#if debugger : ccflags += " -g"
 # commenting out optimizations for now because fpl-generated test
 # code takes forever to compile:
 #else        : ccflags += " -O2"

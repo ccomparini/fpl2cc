@@ -1,6 +1,6 @@
 
 @produces std::string
-@goal json.json
+@goal `json`.json
 @goal other_stuff
 @post_parse +{ std::cout << result << "\n"; }+
 

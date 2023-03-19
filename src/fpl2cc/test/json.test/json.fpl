@@ -127,7 +127,9 @@
     std::cout << stringformat("======\n{}\n======\n", result);
 }+
 
-@grammar json
+# extra whitespace at the end of the next line is deliberate -
+# checking if it breaks the parsing.
+@grammar json 
 
 @type_for boolean bool
 +boolean(true_val)  +{ return true;  }+
