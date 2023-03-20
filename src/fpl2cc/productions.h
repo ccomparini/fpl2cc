@@ -1114,9 +1114,9 @@ public:
         // Reads an argument to the end of the line.
         // End of line is any ascii vertical space (for now).
         // Leading and trailing spaces/tabs are stripped.
-        // oh.. there's also fpl_reader::read_line().. ohwell.
-        // oh.. but this also ends at '@'. great.
-        return inp->read_re("[ \\t]*([^@\\x0a-\\x0d]+)[ \\t]*\n")[1];
+        // (note the non-greedy +? match to keep the trailing
+        // space out)
+        return inp->read_re("[ \\t]*([^\\x0a\\x0d]+?)[ \\t]*[\\x0a\\x0d]")[1];
     }
 
     // this is some kind of utility thing which probably doesn't
