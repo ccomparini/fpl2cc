@@ -78,7 +78,7 @@ public:
     // Searches the path for the file of the name passed.
     // Returns the name of the first file found, or an empty
     // string if no match was found.
-    std::string find(const std::string &fn) const {
+    std::string search(const std::string &fn) const {
         for(auto dir = directories.begin(); dir != directories.end(); ++dir) {
             fs::path fp = fs::path(*dir);
             fp.append(fn);
@@ -93,8 +93,8 @@ public:
     // Searches the path for the file of the name passed.
     // Returns the name of the first file found, or the
     // name passed if no matching file was found.
-    std::string search(const std::string &fn) const {
-        std::string found = find(fn);
+    std::string find(const std::string &fn) const {
+        std::string found = search(fn);
         if(found.length())
             return found;
 

@@ -5,6 +5,8 @@ path contains: searchpath.data
 path contains: ./nonexistent_dir
 found: ./searchpath.cc
 found: searchpath.data/foobar.a.b
+find  (no_such_file): 'no_such_file'
+search(no_such_file): ''
 begins with 'some': searchpath.data/b/some_file.foo
 begins with 'some': ./searchpath.data/a/some_file.foo
 ends with 'foo': searchpath.data/b/some_file.foo

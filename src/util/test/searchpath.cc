@@ -39,14 +39,12 @@ int main() {
         std::cout << stringformat("path contains: {}\n", dir);
     }
 
-/*
-these are misleading because they (deliberately) return
-the string given 
-.. so I guess they are misnamed :P
-FIXME
- */
     std::cout << stringformat("found: {}\n", path.find("searchpath.cc"));
     std::cout << stringformat("found: {}\n", path.find("foobar.a.b"));
+
+    std::string nsf = "no_such_file";
+    std::cout << stringformat("find  ({}): '{}'\n", nsf, path.find  (nsf));
+    std::cout << stringformat("search({}): '{}'\n", nsf, path.search(nsf));
 
     for(auto file : path.find_re("some.*")) {
         std::cout << stringformat("begins with 'some': {}\n", file);
