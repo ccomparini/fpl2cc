@@ -25,10 +25,40 @@ env.Append(BUILDERS = {
     )
 })
 
+# this is like the above, but doesn't expect to actually
+# generate a .cc file - instead, it expects to generate
+# a .fpl_result file (generaally one with error messages
+# in it)
+env.Append(BUILDERS = {
+    'CaptureFplFailure': Builder(
+        action = run_and_capture_action(
+            fpl_compile_command(), varlist=["FPLOPTS"]
+        ),
+        emitter = depend_on_fpl2cc(),
+	src_suffix = '.fpl',
+	suffix = '.fpl_result'
+    )
+})
+
 # fpl_reader has its own (fairly straightforward) test:
 env.Program('reader', [ 'reader.cc' ])
 env.Command('reader.out', 'reader', '$SOURCE > $TARGET')
 env.CompareOut('reader.success', [ 'reader.expect', 'reader.out' ])
+
+# the "fpl_errors" directory contains fpl source files which
+# contain/generate errors, and thus (generally) should not
+# compile, but which should give reasonable error messages etc.
+for expected in Glob('fpl_errors/*.fpl_expect'):
+    basename, foo = os.path.splitext(expected.name)
+    capfile = 'fpl_errors/' + basename + '.fpl_result'
+    source  = 'fpl_errors/' + basename + '.fpl' # needed?
+    env.CaptureFplFailure(
+        [ capfile ],  [ source ],
+        FPLOPTS=fpl_options, IGNORE_EXIT=True, QUIET=True
+    )
+    env.CompareOut(
+        basename + '.success', [ expected, capfile ]
+    )
 
 #
 # fpl language tests:
