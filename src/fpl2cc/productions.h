@@ -973,6 +973,11 @@ public:
             return tf->second;
         }
 
+        // if it's a goal, use the output type
+        if(is_goal(product)) {
+            return output_type();
+        }
+
         // if we are produced from only one other production,
         // we can use that type.
         std::string inherited = product_alias(product);
@@ -2912,6 +2917,26 @@ public:
         return "goal";
     }
 
+    bool is_goal(const std::string &prod) const {
+        // Linear search of goals here.  I'm thinking this is
+        // ok because normally there's only one goal, and
+        // one might expect (say) 3 at most.  I think you'd
+        // have to have a fairly complex grammar for this
+        // to be toooo terrible (though it could end up NxN
+        // if the callers are iterating all products, and
+        // all products are goals or something.. anyway,
+        // moving on)
+        for(auto goal : goals) {
+            if(goal == prod)
+                return true;
+        }
+
+        return prod == default_goal();
+    }
+
+
+    // This checks for and tries to resolve inconsistencies in goal types.
+    // It only really matters if there's more than one goal.
     void resolve_output_and_goal_types() {
         // types_goals keys are the types specified in @produces 
         // (or similar) and the known types of our goal productions.
