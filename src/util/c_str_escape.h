@@ -9,7 +9,7 @@
  */
 inline std::string c_str_escape(const std::string src) {
     std::string escaped;
-    for(const char &inch : src) {
+    for(const uint8_t &inch : src) {
         switch(inch) {
             case 0x00: escaped += "\\0";  break;
             case 0x07: escaped += "\\a";  break; // Alert (Beep, Bell)
@@ -23,7 +23,7 @@ inline std::string c_str_escape(const std::string src) {
             case 0x22: escaped += "\\\""; break;
             case 0x3F: escaped += "\\?";  break; // (to avoid trigraphs)
             default:
-                if(inch < 0x20 || inch >= 0x7f) {
+                if(inch < 0x20 || inch == 0x7f) {
                     // other non-printable ascii char not handled above.
                     // note that this will (effectively) cover utf-8
                     // or whatever - it's a case of "bytes is bytes".
@@ -42,6 +42,7 @@ inline std::string c_str_escape(const std::string src) {
                     snprintf(buf, sizeof(buf), "\\%03o", unsigned(inch) & 0xff);
                     escaped += buf;
                 } else {
+                    // either normal, or utf-8.  just copy it verbatim! yay
                     escaped += inch;
                 }
                 break;
