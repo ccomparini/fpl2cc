@@ -7,7 +7,7 @@
 #include "reducer.h"
 
 #include "util/c_str_escape.h"
-#include "util/from_hex.h" // XXX kill
+#include "util/from_hex.h"
 #include "util/jerror.h"
 #include "util/join.h"
 #include "util/reformat_code.h"
@@ -936,33 +936,6 @@ public:
         return "";
     }
 
-    // If there's only one way to make a given product, the product
-    // may be considered an alias.
-    // This is used for type inferrence in cases where there's
-    // no explicit type for a given product.
-    // Returns the name of the product to which the given product
-    // can be considered an alias.
-    std::string product_alias(const std::string &product) const {
-        auto strl  = rules_for_product.lower_bound(product);
-        auto endrl = rules_for_product.upper_bound(product);
-
-        std::string in_type;
-
-        for(auto rit = strl; rit != endrl; ++rit) {
-            const production_rule &rule = rules[rit->second];
-            const std::string alias = rule.potential_type_alias();
-            if(in_type == "") {
-                in_type = alias;
-            } else if(in_type != alias) {
-                // apparently there's more than one way to make
-                // this product, so we can't simply alias
-                return "";
-            }
-        }
-
-        return in_type;
-    }
-
     // returns the name of the target-language type expected as
     // the result of reducing to the product indicated:
     std::string type_for(const std::string &product) const {
@@ -978,13 +951,6 @@ public:
             return output_type();
         }
 
-        // if we are produced from only one other production,
-        // we can use that type.
-        std::string inherited = product_alias(product);
-        if(inherited != "") {
-            return type_for(inherited);
-        }
-
         // can't infer type:
         return "";
     }
@@ -996,6 +962,7 @@ public:
             return type_for(ge.expr);
         }
         // assertions are terminals as well:
+// OH LOOK we already have a type for terminals.  Perhaps use this
         return "Terminal";
     }
 
@@ -1086,9 +1053,16 @@ public:
     void set_default_main(bool def)            { default_main = def; }
     void add_internal(const code_block &cb)    { parser_members.push_back(cb); }
 
-    void add_type_for(const std::string &prod, const std::string &type, src_location caller = CALLER()) {
-        type_for_product[prod] = type;
-        all_types.insert(type);
+    void add_type_for(
+        const std::string &prod, const std::string &type,
+        src_location caller = CALLER()
+    ) {
+        if(type == "") {
+            jerror::warning("Bug in fpl2cc {}: adding empty type\n", caller);
+        } else {
+            type_for_product[prod] = type;
+            all_types.insert(type);
+        }
     }
 
     void set_precedence(const std::string &product, int precedence) {
@@ -2740,9 +2714,82 @@ public:
         return generated_types.count(ptype) > 0;
     }
 
+private:
+    // recursively attempt to fill in types for products
+    // based on the types for the rules which produce those
+    // products.
+    std::string inherit_type(const std::string &prod) {
+        auto existing_type = type_for(prod);
+        if(existing_type != "")
+            return existing_type;
+
+        // Use an empty type in the "type for" list as a sort
+        // of flag to prevent infinite recursion in cases where
+        // you have something like:
+        //       a -> b; b -> a;
+        // ('a' would explicitly have the "unknonwn" type "",
+        // which we then return when this function gets called
+        // again).
+        // We clear these empty types in resolve_inherited_types()
+        auto tf = type_for_product.find(prod);
+        if(tf != type_for_product.end()) {
+            return "";
+        }
+        type_for_product[prod] = "";
+
+        // and here's where we recurse:
+        //  if all rules creating this product produce the same
+        //  type, we can use that type for this product:
+        auto strl  = rules_for_product.lower_bound(prod);
+        auto endrl = rules_for_product.upper_bound(prod);
+        std::string inherited;
+        for(auto rit = strl; rit != endrl; ++rit) {
+            auto rule = rules[rit->second];
+            const std::string alias = rule.potential_type_alias();
+            if(alias != "") {
+                auto itype = inherit_type(alias);
+                if((inherited != "") && (itype != inherited)) {
+                    // differing inherited types, so can't inherit
+                    return "";
+                }
+                inherited = itype;
+            }
+        }
+        if(inherited != "") {
+            add_type_for(prod, inherited);
+        }
+
+        return type_for(prod);
+    }
+public:
+
+    void resolve_inherited_types() {
+        const auto end = rules_for_product.end();
+        for(auto rit = rules_for_product.begin(); rit != end; rit++) {
+            const std::string &prodn = rit->first;
+            inherit_type(prodn);
+            rit = rules_for_product.upper_bound(prodn);
+            if(rit == end) break; // because stl is very fragile
+        }
+
+        // clear all the temporary empty-string types which we might
+        // have used for markers:
+        auto tfp = type_for_product.begin();
+        while(tfp != type_for_product.end()) {
+            if(tfp->second != "") {
+                tfp++;
+            } else {
+                auto cur = tfp++;
+                type_for_product.erase(cur);
+            }
+        }
+
+        return;
+    }
 
     // generates/fills in any missing types
     void resolve_types() {
+        resolve_inherited_types();
 
         if(generate_types) {
             std::set<generated_type> gt_candidates;
@@ -2758,7 +2805,6 @@ public:
                 candidate.resolve_attribute_types(*this);
                 generated_types.insert(candidate);
             }
-//std::cerr << stringformat("LISTEN UP! HERE ARE THE GENERATED TYPES!\n{}\n", generated_types);
         }
 
         resolve_output_and_goal_types();
