@@ -9,6 +9,16 @@
 # if there are a lot of them....
 zeta_reticulan+ -> alien_invasion;
 
+
+# .. purely for checking if we correctly import
+# custom scanners:
+#  ୬ = utf-8 e0 ad ac
+#  ୭ = utf-8 e0 ad ad
+# regexes are byte based here, because that's what
+# std::regex is, so here's the hack:
+@scanner swirly_thing /\xe0\xad[\xac-\xad]/
+
 '🌀' -> woo;
 '🕸️' -> woo;
+&swirly_thing -> woo;
 

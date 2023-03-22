@@ -2239,6 +2239,22 @@ public:
         return out;
     }
 
+    // Imports any missing custom scanners needed by the rule passed.
+    // Custom scanners which already exist (either through having been
+    // imported already, or from being defined previously in the importing
+    // productions) are not imported.
+    void import_scanners(productions *from, const production_rule &rule) {
+        const int num_steps = rule.num_steps();
+        for(int sti = 0; sti < num_steps; sti++) {
+            auto scanner = rule.nth_step(sti).custom_scanner_name();
+            if(scanner != "") {
+                if(scanners.count(scanner) == 0) {
+                    scanners[scanner] = from->scanners[scanner];
+                }
+            }
+        }
+    }
+
     // OK all cases:
     //   - `foo`.prod : importing specificlly one production
     //   - `foo`: SHOULD BE importing all goal productions.  If there's more than
@@ -2295,6 +2311,7 @@ public:
             if(!wanted.size() || (wanted.count(prd) > 0)) {
                 found.insert(prd);
                 if(from->exported_products.count(prd) == 0) {
+                    import_scanners(from, rule);
                     add_rule(rule);
                 } // else rules for this product are already imported
             }

@@ -156,6 +156,15 @@ public:
             return "";
         }
 
+        // returns the name of the custom scanner used by this
+        // step, or empty string if there's no such thing:
+        inline std::string custom_scanner_name() const {
+            if(gexpr.type == grammar_element::TERM_CUSTOM) {
+                return gexpr.expr;
+            }
+            return "";
+        }
+
         inline grammar_element::Type type() const {
             return gexpr.type;
         }

@@ -2,6 +2,7 @@ returncode = 0
 stderr = ""
 stdout = "object {
  \"woowoo\" = \"hi\",
-\"loopy\" = WOO: 🌀}
+\"loopy\" = WOO: 🌀,
+\"other woo\" = WOO: ୭}
 
 "
