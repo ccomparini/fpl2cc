@@ -22,11 +22,14 @@ array    -> value ;
 string   -> value ;
 number   -> value ;
 
-"null":null_val   -> value ;
+'null'^ -> null_value;
+null_value -> value;
 
-"true":true_val   -> boolean ;
-"false":false_val -> boolean ;
-boolean           -> value ;
+'true'      -> true_value;
+'false'     -> false_value;
+true_value  -> boolean;
+false_value -> boolean;
+boolean     -> value ;
 
 '{'^ (member (','^ member)*)?:members '}'^ -> object ;
 string:key ':'^ value -> member ;
@@ -35,6 +38,7 @@ string:key ':'^ value -> member ;
 
 value -> element ;
 
+# this might be better implemented with !match now
 /"((?:[^"\\]|\\.)*)"/:src -> string ;
 
 # json number specification appears to actually be fairly fussy.

@@ -112,9 +112,8 @@
 }+
 
 @main +{
-// XXX see if we can default_main this
     if(argc < 2) {
-        // use jerror?  read stdin?
+        // use jerror?  read stdin? anyway doesn't matter for this test.
         fpl_reader::default_fail("Please provide a source file name.\n");
     }
     fpl_reader_p inp = std::make_shared<fpl_reader>(argv[1]);
@@ -131,12 +130,11 @@
 # checking if it breaks the parsing.
 @grammar json 
 
-@type_for boolean bool
-+boolean(true_val)  +{ return true;  }+
-+boolean(false_val) +{ return false; }+
++null_value  +{ return bkv_item(); }+
++true_value  +{ return true;  }+
++false_value +{ return false; }+
 
 @type_for value bkv_item
-+value(null_val)    +{ return bkv_item(); }+
 
 @type_for object bkv_object
 @type_for member bkv_obj_member

@@ -56,9 +56,12 @@ mission -> value +{
     return op + number;
 }+
 
-`ansi-c`.unary_operator:op boolean -> boolean +{
++true_value  +{ return "true";  }+
++false_value +{ return "false"; }+
+
+`ansi-c`.unary_operator:op boolean:val -> boolean +{
     if(op == "!") {
-        if(boolean == "true")
+        if(val == "true")
             return "false";
         return "true";
     }
