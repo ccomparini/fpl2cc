@@ -88,6 +88,11 @@ public:
         grammar_element gexpr;
         std::string varname; // if set, name of this expression in reduce code
 
+        static step &false_step() {
+            static step fs;
+            return fs;
+        }
+
         struct quantifier {
             bool optional;
             bool multiple;
@@ -146,9 +151,9 @@ public:
                 gexpr.type == grammar_element::TERM_CUSTOM
              ) {
                 // if it's a production or custom terminal, we can use that
-                // name as the variable name so that authors don't have
-                // to name everything explicitly but can still do
-                // the abstracted implementation match thing:
+                // name as the variable name so that authors don't have to
+                // name everything explicitly but can still do the abstracted
+                // implementation match thing:
                 return gexpr.expr;
             }
             // else caller will need to fill in something contextually
@@ -213,33 +218,51 @@ public:
         }
     };
 
+    void check_duplicate_varname(const std::string name, int step_num) const {
+        if(step_vars.contains(name)) {
+            jerror::warning(stringformat(
+                "duplicate name '{}' in step {} {}",
+                name, step_num, location()
+            ));
+        }
+    }
+
     void add_step(step st) {
         int stepi = rsteps.size();
 
         // if this step will be passed to the reduce function....
         if(!st.skip_on_reduce()) {
-            // ... then we need a name for the variable representing it.
-            // if the step already knows what its variable name should be,
-            // we just use that, but otherwise assign it a name based on
-            // it's index within the set of steps for this rule:
-            if(!st.variable_name().length()) {
-                st.varname = "arg_" + std::to_string(stepi);
+            std::string name = st.variable_name();
+
+            // .. then step will need a variable name.  If no name is
+            // assigned, assign it a name based on its index within
+            // the set of steps for this rule:
+            if(!name.length()) {
+                name       = stringformat("arg_{}", stepi);
+                st.varname = name;
             }
 
-            // .. and now make sure that that name doesn't collide with
-            // the name of another step:
-            const std::string name = st.variable_name();
-            if(step_vars.contains(name)) {
-                jerror::warning(stringformat(
-                    "duplicate name '{}' in step {} {}",
-                    name, stepi, location()
-                ));
+            // If the previous parameter has the same name, we "meld" them
+            // into one parameter by not adding another pstep.  This allows
+            // authors to write (for example):
+            //    '('^ (arg (','^ arg)*)? ')'^ -> argument_list;
+            // and then:
+            //    +argument_list(arg) +{ arg@foreach ... }+
+            //
+            // This will only work if the reduce types are the same,
+            // of course, but it covers useful cases.
+            std::string prior_pname;
+            if(auto prior_step = reduce_param(psteps.size() - 1)) {
+                prior_pname = prior_step.variable_name();
             }
-            step_vars.insert(name);
 
-            // and, finally, register the index of the step for the
-            // nth parameter:
-            psteps.push_back(stepi);
+            // (prior_pname will be the empty string if no prior param)
+            if(prior_pname != name) {
+                // No melding fr this one:  go ahead and add it
+                check_duplicate_varname(name, stepi);
+                step_vars.insert(name);
+                psteps.push_back(stepi);
+            } // else it's melded with the prior parameter
         }
 
         rsteps.push_back(st);
@@ -318,14 +341,11 @@ public:
         return step_vars;
     }
 
-    int reduce_param_step_num(
+    unsigned reduce_param_step_num(
         unsigned int pind, src_location ca = CALLER()
     ) const {
         if(pind >= psteps.size()) {
-            jerror::error(stringformat(
-                "index {} out of bounds in {}", pind, ca
-            ));
-            pind = 0; // so that there's some chance we don't go out of bounds
+            return -1;
         }
         return psteps[pind];
     }
@@ -335,7 +355,10 @@ public:
     const step &reduce_param(
         unsigned int index, src_location ca = CALLER()
     ) const {
-        return rsteps[reduce_param_step_num(index, ca)];
+        unsigned stepi = reduce_param_step_num(index, ca);
+        if(stepi < rsteps.size())
+            return rsteps[reduce_param_step_num(index, ca)];
+        return step::false_step();
     }
 
     // returns a false step if index is out of bounds
@@ -348,6 +371,16 @@ public:
 
     step nth_from_end(unsigned int index) const {
         return nth_step(rsteps.size() - index);
+    }
+
+    // if this rule has exactly one reduce parameter,
+    // return a reference to the step for that parameter.
+    // otherwise, return a false step.
+    const step &single_param() const {
+        if(num_reduce_params() == 1) {
+            return reduce_param(0);
+        }
+        return step::false_step();
     }
 
     // if this rule could potentially be a type alias,

@@ -20,6 +20,8 @@ sum -> expression ;
 # element:
 '('^ (expression (','^ expression)*)?:args ')'^ -> argument_list ;
 
+#'['^ (number (','^ number)*)? ']'^ -> number_list;
+
 ####### implementations:
 +{
 #include<math.h>
@@ -60,6 +62,11 @@ sum -> expression ;
     });
     return out;
 }+
+
+#+number_list(number) +{
+#    // std::cerr << stringformat("YAY we got a number list:\n{}\n", number@join(", "));
+#    return number@count(); // XXX just to return something.
+#}+
 
 +sum(args) +{
     double sum = 0;

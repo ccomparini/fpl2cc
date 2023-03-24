@@ -1254,6 +1254,19 @@ public:
         return dummy;
     }
 
+    // If there's exactly one rule for the product passed, this
+    // returns a reference to it.
+    // Otherwise, returns a reference to a false rule.
+    const production_rule &single_rule_for_product(
+        const std::string &prodname
+    ) const {
+        static production_rule no_rule;
+        if(rules_for_product.count(prodname) == 1) {
+            return rule(rules_for_product.lower_bound(prodname)->second);
+        }
+        return no_rule;
+    }
+
     // Traverses the set of parent rules until it comes to a
     // rule with no parents, and returns a ref to that rule.
     // Used for determining the context of subrules.
@@ -1698,6 +1711,19 @@ public:
         return out;
     }
 
+    // If there's a single, obvious name for the variable to use
+    // for the subexpression passed, this returns it.  Otherwise,
+    // returns an empty string.
+    std::string subex_varname(const std::string subex) const {
+        if(auto rule = single_rule_for_product(subex)) {
+            if(auto step = rule.single_param()) {
+                return step.variable_name();
+            }
+        }
+
+        return "";
+    }
+
     int parse_expressions(production_rule &rule) {
         int num_read = 0;
         bool done = false;
@@ -1810,9 +1836,12 @@ public:
                     read_quantifier(inp, step);
                     read_suffix(inp, step); // optional :name or ^
                     if(step.is_single()) read_quantifier(inp, step);
-                    if(type == grammar_element::Type::LACK_OF_SEPARATOR)
+                    if(type == grammar_element::LACK_OF_SEPARATOR)
                         step.eject = true;
                     step.invert = invert_next;
+                    if(type == grammar_element::NONTERM_SUBEXPRESSION)
+                        if(step.varname == "")
+                            step.varname = subex_varname(expr_str);
                     rule.add_step(step);
                     invert_next = false;
                     num_read++;
@@ -2816,6 +2845,35 @@ public:
         return;
     }
 
+    // Warns if any reduce parameters would or could have more than
+    // one type.  This can happen due to parameter melding - say you
+    // have:
+    //    foo:a bar:a -> bat;
+    // +bat() will then get one parameter (a) for both the foo and the
+    // bar, but if foo and bar have different types that's likely to lead
+    // to surprises.
+    void check_reduce_parameter_types() {
+        for(auto rule : rules) {
+            std::map<std::string, std::string> t_for_v;
+            for(auto step : rule.steps()) {
+                if(!step.skip_on_reduce()) {
+                    auto vname = step.variable_name();
+                    auto tname = type_for(step.gexpr);
+                    if(t_for_v.count(vname)) {
+                        if(t_for_v[vname] != tname) {
+                            warn(stringformat( 
+                                "type conflict on {} in rule {}: {} vs {}",
+                                 vname, rule, t_for_v[vname], tname
+                            ));
+                        }
+                    } else {
+                        t_for_v[vname] = tname;
+                    }
+                }
+            }
+        }
+    }
+
     // generates/fills in any missing types
     void resolve_types() {
         resolve_inherited_types();
@@ -2845,6 +2903,8 @@ public:
                 add_type_for(prodn, output_type(), "default to output type");
             }
         }
+
+        check_reduce_parameter_types();
     }
 
     // Mark the element passed as "masking" the other element passed.
@@ -2907,6 +2967,7 @@ public:
                     }
                 }
             }
+
             // deal with inverted matches last, after having done all other
             // type resolution:
             rule.resolve_inverts();
@@ -3248,6 +3309,9 @@ public:
                     "Rule {} producing {} at {} is unused\n",
                     rind, rule.product(), rule.location()
                 ));
+                // ... should we remove the rule so we don't
+                // generate code for it?  or somehow prevent
+                // generating code?
             }
 
             check_rule(rule);

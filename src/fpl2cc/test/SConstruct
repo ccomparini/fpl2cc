@@ -25,20 +25,6 @@ env.Append(BUILDERS = {
     )
 })
 
-# this is like the above, but doesn't expect to actually
-# generate a .cc file - instead, it expects to generate
-# a .fpl_result file (generaally one with error messages
-# in it)
-env.Append(BUILDERS = {
-    'CaptureFplFailure': Builder(
-        action = run_and_capture_action(
-            fpl_compile_command(), varlist=["FPLOPTS"]
-        ),
-        emitter = depend_on_fpl2cc(),
-	src_suffix = '.fpl',
-	suffix = '.fpl_result'
-    )
-})
 
 # fpl_reader has its own (fairly straightforward) test:
 env.Program('reader', [ 'reader.cc' ])
@@ -51,15 +37,17 @@ env.CompareOut('reader.success', [ 'reader.expect', 'reader.out' ])
 # compile, but which should give reasonable error messages etc.
 for expected in Glob('fpl_itself/*.fpl_expect'):
     basename, foo = os.path.splitext(expected.name)
-    capfile = 'fpl_itself/' + basename + '.fpl_result'
-    source  = 'fpl_itself/' + basename + '.fpl' # needed?
-    env.CaptureFplFailure(
-        [ capfile ],  [ source ],
-        FPLOPTS=fpl_options, IGNORE_EXIT=True, QUIET=True
+    target_path = os.path.dirname(expected.get_abspath())
+    source  = 'fpl_itself/' + basename + '.fpl'
+    ccfile  = target_path + '/' + basename + '.cc'
+    capfile = target_path + '/' + basename + '.fpl_result'
+    success = target_path + '/' + basename + '.success'
+    env.CaptureFplCompile(
+        [ ccfile, capfile ],  [ source ],
+        FPLOPTS=fpl_options, CAPFILE=capfile,
+        IGNORE_EXIT=True, QUIET=True
     )
-    env.CompareOut(
-        basename + '.success', [ expected, capfile ]
-    )
+    env.CompareOut(success, [ expected, capfile ])
 
 #
 # fpl language tests:
