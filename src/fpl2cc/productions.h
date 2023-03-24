@@ -2793,11 +2793,12 @@ public:
 
     void resolve_inherited_types() {
         const auto end = rules_for_product.end();
-        for(auto rit = rules_for_product.begin(); rit != end; rit++) {
+        auto rit = rules_for_product.begin();
+        while(rit != end) {
             const std::string &prodn = rit->first;
             inherit_type(prodn);
+            // ("upper bound" is actually "lower bound of next")
             rit = rules_for_product.upper_bound(prodn);
-            if(rit == end) break; // because stl is very fragile
         }
 
         // clear all the temporary empty-string types which we might
