@@ -2981,6 +2981,9 @@ public:
     }
 
     bool is_goal(const std::string &prod) const {
+        if(goals.size() == 0)
+            return prod == default_goal();
+
         // Linear search of goals here.  I'm thinking this is
         // ok because normally there's only one goal, and
         // one might expect (say) 3 at most.  I think you'd
@@ -2994,7 +2997,7 @@ public:
                 return true;
         }
 
-        return prod == default_goal();
+        return false;
     }
 
 
