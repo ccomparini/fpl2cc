@@ -9,10 +9,10 @@
     @-if(param.is_optional()){-@
 
         #line @rule.line_number()@ "@rule.filename()@"
-        #error "no default for optional '@vname@' in rule @rule.to_str()@"
+        #error "no default for optional constructor arg '@vname@' in rule @rule.to_str()@"
     @-} else if(!param.is_single()){-@
         #line @rule.line_number()@ "@rule.filename()@"
-        #error "no default for multiple '@vname@' in rule @rule.to_str()@"
+        #error "no default for multiple constructor arg '@vname@' in rule @rule.to_str()@"
     @-} else {-@
         @-if(parmi > 0){@,@}-@ @/* argument separator */@
         @-if(param.is_nonterminal()) {-@
