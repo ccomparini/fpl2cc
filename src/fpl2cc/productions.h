@@ -1055,11 +1055,17 @@ public:
 
     void add_type_for(
         const std::string &prod, const std::string &type,
+        const std::string &why = "just cuz",
         src_location caller = CALLER()
     ) {
         if(type == "") {
             jerror::warning("Bug in fpl2cc {}: adding empty type\n", caller);
         } else {
+            if(opts.debug_types) {
+                std::cerr << stringformat(
+                    "{} gets type {} ({})\n", prod, type, why
+                );
+            }
             type_for_product[prod] = type;
             all_types.insert(type);
         }
@@ -1206,7 +1212,7 @@ public:
             inp->eat_separator();
             std::string type = inp->read_re(".*")[0];
             if(prod.length() && type.length()) {
-                add_type_for(prod, type);
+                add_type_for(prod, type, "@type_for");
             } else {
                 error("type_for expects <product name> <type>");
             }
@@ -2760,6 +2766,7 @@ private:
         auto strl  = rules_for_product.lower_bound(prod);
         auto endrl = rules_for_product.upper_bound(prod);
         std::string inherited;
+        std::set<std::string> aliases; // debug info
         for(auto rit = strl; rit != endrl; ++rit) {
             auto rule = rules[rit->second];
             const std::string alias = rule.potential_type_alias();
@@ -2769,11 +2776,15 @@ private:
                     // differing inherited types, so can't inherit
                     return "";
                 }
+                aliases.insert(alias);
                 inherited = itype;
             }
         }
         if(inherited != "") {
-            add_type_for(prod, inherited);
+            add_type_for(
+                prod, inherited,
+                stringformat("inheritance from {}", aliases)
+            );
         }
 
         return type_for(prod);
@@ -2815,7 +2826,7 @@ public:
                 if(type_for(prodn) == "") {
                     generated_type gt(prodn, *this);
                     gt_candidates.insert(gt);
-                    add_type_for(prodn, gt.name());
+                    add_type_for(prodn, gt.name(), "generated");
                 }
             }
             for(auto candidate : gt_candidates) {
@@ -2830,7 +2841,7 @@ public:
         for(auto prr : rules_for_product) {
             const std::string &prodn = prr.first;
             if(type_for(prodn) == "") {
-                add_type_for(prodn, output_type());
+                add_type_for(prodn, output_type(), "default to output type");
             }
         }
     }
@@ -3028,7 +3039,7 @@ public:
             set_output_type(types_goals.begin()->first);
             for(auto goal: goals) {
                 // (the type is the ->first element of the only item)
-                add_type_for(goal, types_goals.begin()->first);
+                add_type_for(goal, types_goals.begin()->first, "goal type");
             }
         } else {
             std::string conflicts;

@@ -20,6 +20,7 @@ struct fpl_options {
 
     bool check_only;
     bool debug;
+    bool debug_types;
     std::list<std::string> entry_points;
     bool generate_code;
     bool generate_main;
@@ -107,6 +108,7 @@ struct fpl_options {
         src_path(),
         check_only(false),
         debug(false),
+        debug_types(false),
         generate_code(true),
         generate_main(false),
         help(false),
@@ -146,6 +148,8 @@ struct fpl_options {
                         check_only = true;
                     } else if(opt == "debug") {
                         debug = true;
+                    } else if(opt == "debug-types") {
+                        debug_types = true;
                     } else if(opt == "debug-single-step") {
                         debug = true;
                         single_step = true;
@@ -260,6 +264,7 @@ struct fpl_options {
             "into the target file.\n\n"
             "Options:\n"
             "\t--debug - emebed debug blather in target code\n"
+            "\t--debug-types - tell why fpl chose each type\n"
             "\t--debug-single-step - as above plus pauses\n"
             "\t--depfile=<fn> - generate ninja/make depend file\n"
             "\t--dump-dependencies - print import dependencies\n"
@@ -278,13 +283,25 @@ struct fpl_options {
         std::string out;
 
         out += stringformat(
-            "    src: {}\n"
-            "    src_path: {}\n"
-            "    out: {}\n"
-            "    generate_main: {}\n"
-            "    debug: {}\n"
-            "    single_step: {}\n",
-            src_fpl, src_path, out, generate_main, debug, single_step
+            // :P why can't I iterate members in c++ :P
+            "    src_fpl: "             + stringformat("{}", src_fpl) + "\n"
+            "    src_path: "            + stringformat("{}", src_path) + "\n"
+            "    out: "                 + stringformat("{}", out) + "\n"
+            "    output_fn: "           + stringformat("{}", output_fn) + "\n"
+            "    check_only: "          + stringformat("{}", check_only) + "\n"
+            "    debug: "               + stringformat("{}", debug) + "\n"
+            "    debug_types: "         + stringformat("{}", debug_types) + "\n"
+            "    entry_points: "        + stringformat("{}", entry_points) + "\n"
+            "    generate_code: "       + stringformat("{}", generate_code) + "\n"
+            "    generate_main: "       + stringformat("{}", generate_main) + "\n"
+            "    help: "                + stringformat("{}", help) + "\n"
+            "    single_step: "         + stringformat("{}", single_step) + "\n"
+            "    depfile: "             + stringformat("{}", depfile) + "\n"
+            "    statedump: "           + stringformat("{}", statedump) + "\n"
+            "    dump_dependencies: "   + stringformat("{}", dump_dependencies) + "\n"
+            "    lr_stack_reserve: "    + stringformat("{}", lr_stack_reserve) + "\n"
+            "    param_stack_reserve: " + stringformat("{}", param_stack_reserve) + "\n"
+            "    new_parser: "          + stringformat("{}", new_parser) + "\n"
         );
 
         if(entry_points.size() > 0) {
