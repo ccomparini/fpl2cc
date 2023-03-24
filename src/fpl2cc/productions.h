@@ -3083,10 +3083,22 @@ private:
         for(auto rit = strl; rit != endrl; ++rit) {
             auto rule = rules[rit->second];
             const std::string alias = rule.potential_type_alias();
-            if(alias != "") {
+            if(alias == "") {
+                if(opts.debug_types) {
+                    std::cerr << stringformat(
+                        "  {} has no potential type aliases\n", prod
+                    );
+                }
+            } else {
                 auto itype = inherit_type(alias);
                 if((inherited != "") && (itype != inherited)) {
                     // differing inherited types, so can't inherit
+                    if(opts.debug_types) {
+                        std::cerr << stringformat(
+                            "  {} can't inherit type from {} ({} != {})\n",
+                            prod, alias, inherited, itype
+                        );
+                    }
                     return "";
                 }
                 aliases.insert(alias);
