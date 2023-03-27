@@ -45,13 +45,14 @@ env.Program('reader', [ 'reader.cc' ])
 env.Command('reader.out', 'reader', '$SOURCE > $TARGET')
 env.CompareOut('reader.success', [ 'reader.expect', 'reader.out' ])
 
-# the "fpl_errors" directory contains fpl source files which
-# contain/generate errors, and thus (generally) should not
+# The "fpl_iteself" directory contains fpl source files which
+# which we compile and check the output of.  They may deliberately
+# contain/generate errors, and thus may or may not be expected to
 # compile, but which should give reasonable error messages etc.
-for expected in Glob('fpl_errors/*.fpl_expect'):
+for expected in Glob('fpl_itself/*.fpl_expect'):
     basename, foo = os.path.splitext(expected.name)
-    capfile = 'fpl_errors/' + basename + '.fpl_result'
-    source  = 'fpl_errors/' + basename + '.fpl' # needed?
+    capfile = 'fpl_itself/' + basename + '.fpl_result'
+    source  = 'fpl_itself/' + basename + '.fpl' # needed?
     env.CaptureFplFailure(
         [ capfile ],  [ source ],
         FPLOPTS=fpl_options, IGNORE_EXIT=True, QUIET=True

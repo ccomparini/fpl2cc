@@ -1,0 +1,11 @@
+@goal fruitbat
+@type_for fruitbat int
+
+'🍐' '🦇' -> fruitbat +{ return 23; }+
+
+# this is completely meaningless and should fail to compile.
+# it should -not- induce an endless loop.
+cycle_0 -> cycle_1;
+cycle_1 -> cycle;
+cycle   -> cycle_0;
+

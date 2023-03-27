@@ -1,0 +1,10 @@
+
+@produces int
+foo -> bar;
+
+
++{
+// this is a comment
+}+
+
+
