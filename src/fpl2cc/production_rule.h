@@ -118,27 +118,27 @@ public:
             return gexpr.type != grammar_element::Type::NONE;
         }
 
-        inline bool is_single() const {
+        bool is_single() const {
             return !(qty.optional || qty.multiple);
         }
 
-        inline bool is_optional() const {
+        bool is_optional() const {
             return qty.optional;
         }
 
-        inline bool is_multiple() const {
+        bool is_multiple() const {
             return qty.multiple;
         }
 
-        inline bool matches(const grammar_element &other) const {
+        bool matches(const grammar_element &other) const {
             return gexpr.compare(other) == 0;
         }
 
-        inline bool is_named() const {
+        bool is_named() const {
             return variable_name().length() > 0;
         }
        
-        inline std::string variable_name() const {
+        std::string variable_name() const {
             if(varname.length()) {
                 return varname;
             } else if(
@@ -158,26 +158,26 @@ public:
 
         // returns the name of the custom scanner used by this
         // step, or empty string if there's no such thing:
-        inline std::string custom_scanner_name() const {
+        std::string custom_scanner_name() const {
             if(gexpr.type == grammar_element::TERM_CUSTOM) {
                 return gexpr.expr;
             }
             return "";
         }
 
-        inline grammar_element::Type type() const {
+        grammar_element::Type type() const {
             return gexpr.type;
         }
 
-        inline bool is_nonterminal() const {
+        bool is_nonterminal() const {
             return gexpr.is_nonterminal();
         }
 
-        inline bool skip_on_reduce() const {
+        bool skip_on_reduce() const {
             return eject;
         }
 
-        inline std::string production_name() const {
+        std::string production_name() const {
             if(is_nonterminal()) {
                 return gexpr.expr;
             } else {
@@ -185,7 +185,7 @@ public:
             }
         }
 
-        inline std::string to_str() const {
+        std::string to_str() const {
             std::string out;
 
             if(invert) {
@@ -305,20 +305,20 @@ public:
         }
     }
 
-    inline int num_steps() const { return rsteps.size(); }
+    int num_steps() const { return rsteps.size(); }
 
     // the result of a given step may or may not be passed to the
     // reduction code (for example, "ejected" parameters are not
     // passed).  this tells how many are actually passed.
-    inline int num_reduce_params() const {
+    int num_reduce_params() const {
         return psteps.size();
     }
 
-    inline const std::set<std::string> reduce_params() const {
+    const std::set<std::string> reduce_params() const {
         return step_vars;
     }
 
-    inline int reduce_param_step_num(
+    int reduce_param_step_num(
         unsigned int pind, src_location ca = CALLER()
     ) const {
         if(pind >= psteps.size()) {
@@ -332,7 +332,7 @@ public:
 
     // ..and this is how you can get the step for a given parameter
     // (by parameter position)
-    inline const step &reduce_param(
+    const step &reduce_param(
         unsigned int index, src_location ca = CALLER()
     ) const {
         return rsteps[reduce_param_step_num(index, ca)];
