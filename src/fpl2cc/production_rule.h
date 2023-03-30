@@ -88,11 +88,6 @@ public:
         grammar_element gexpr;
         std::string varname; // if set, name of this expression in reduce code
 
-        static step &false_step() {
-            static step fs;
-            return fs;
-        }
-
         struct quantifier {
             bool optional;
             bool multiple;
@@ -101,6 +96,11 @@ public:
 
         bool eject;  // if set, don't pass this to reduce code
         bool invert; // invert match (!"foo" = match anything but "foo")
+
+        static step &false_step() {
+            static step fs;
+            return fs;
+        }
 
         step() :
             gexpr("", grammar_element::Type::NONE),
@@ -142,7 +142,7 @@ public:
         bool is_named() const {
             return variable_name().length() > 0;
         }
-       
+
         std::string variable_name() const {
             if(varname.length()) {
                 return varname;
@@ -407,6 +407,10 @@ public:
             }
         }
         return "";
+    }
+
+    bool is_potential_type_alias() const {
+        return potential_type_alias() != "";
     }
 
     const std::vector<step> &steps() const {

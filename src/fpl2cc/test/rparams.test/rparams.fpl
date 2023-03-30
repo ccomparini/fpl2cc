@@ -1,4 +1,9 @@
-@goal shopping_list
+@goal lists
+
+@produces std::string
+@comment_style sh
+
+list+ -> lists;
 
 #
 # test parameters for:
@@ -17,41 +22,93 @@ tangerine -> fruit;
 lemon     -> fruit;
 banana    -> fruit;
 apple     -> fruit;
+'tomato'  -> fruit;
 
 # Common subexpression w/ melding and bubble-up:
 # The reduce action should expect one "fruit" parameter
-#'('^ fruit (','^ fruit)* ')'^ -> shopping_list; ain't right
-#'('^ (fruit (','^ fruit)*)? ')'^ -> shopping_list;
+# with multiple items:
 '('^ (fruit (','^ fruit)*) ')'^ -> fruit_list;
+fruit_list -> list;
 
-fruit_list -> shopping_list;
+/[0-9]+/:digits -> integer;
+
+# these should both parse, and reducers need to see all
+# the args:
+'['^ (integer:el ','^ integer:el                ) ']'^ -> two_tuple;
+# '['^ integer:el ','^ integer:el ','^ integer:el ']'^ -> three_tuple;
+'['^ (integer:el ','^ integer:el ','^ integer:el) ']'^ -> three_tuple;
+
+# expect all these to inherit list's type:
+two_tuple   -> tuple;
+three_tuple -> tuple;
+tuple       -> list;
+
+# this one should toss a warning, and all bets are off
+# as to what it does.
+integer:foo list:foo -> doom;
 
 ######### reduce actions/implementations
 
-@type_for grapes std::string
-@type_for tangerine std::string
-@type_for lemon std::string
-@type_for banana std::string
-@type_for apple std::string
-# wtb not the above^^.  either inherit "up" or generate types which work.
-
+@type_for integer std::string
 @type_for fruit std::string
-@type_for shopping_list std::list<std::string>
-@type_for fruit_list std::list<std::string>
+@type_for list std::list<std::string>
+
 @default_main
-@post_parse +{
-    for(auto item : result) {
-        std::cerr << stringformat("{}\n", item);
+
++two_tuple(el) +{
+    if(el@count() != 2) {
+        jerror::error(stringformat(
+            "element count is {} for a 2-tuple!\n", el@count()
+        ));
+        return {0, 0};
     }
+    return { "fip" , "splat" };
+    //return { el[0], el[1] };
+}+
+
++three_tuple(el) +{
+    if(el@count() != 3) {
+        jerror::error(stringformat(
+            "element count is {} for a 3-tuple!\n", el@count()
+        ));
+        return {0, 0, 0};
+    }
+    //return { el[0], el[1], el[2] };
+    return { "foo" , "bar", "bat" };
 }+
 
 +fruit_list(fruit) +{
     std::list<std::string> list;
     // OMG we need a reasonable grammar for this
     fruit@foreach([&list](const Product &fr)->void {
-        //list.push_back(stringformat("{}", fr));
         list.push_back(fr.var_str());
     });
+    std::cout << stringformat(
+        "fruit list input has {} elements and output has {} elements\n",
+        fruit@count(), list.size()
+    );
     return list;
+}+
+
++doom(foo) +{
+    // first parameter to this is integer (= string, in this case),
+    // but the second is a list, so this shouldn't be able to work.
+    // or can it?
+    return stringformat(
+        "{} params to doom: {}",
+        foo@count(), foo@join(", ")
+    );
+}+
+
++{
+#include"util/join.h"
+}+
++lists(list) +{
+    std::string out;
+    list@foreach([&out](const Product &lin)->void {
+        out += join(lin, ", ") + "\n";
+    });
+    std::cout << out;
+    return out;
 }+
 

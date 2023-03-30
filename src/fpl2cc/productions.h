@@ -966,6 +966,12 @@ public:
         return "Terminal";
     }
 
+    // .. and one more convenience, because this is many-layered
+    // in places:
+    std::string type_for(const production_rule::step &st) const {
+        return type_for(st.gexpr);
+    }
+
     enum code_source{
         // these are bit fields so that parsers or users of the code
         // block can specify what types might be valid in a particular
@@ -2767,9 +2773,17 @@ public:
     }
 
 private:
-    // recursively attempt to fill in types for products
+
+    // 
+    // Recursively attempt to fill in types for products
     // based on the types for the rules which produce those
     // products.
+    // i.e., if we have:
+    //    foo -> bat;
+    //    bar -> bat;
+    // and foo and bar both have the same type, bat can also
+    // have that type.
+    // 
     std::string inherit_type(const std::string &prod) {
         auto existing_type = type_for(prod);
         if(existing_type != "")
@@ -2818,9 +2832,65 @@ private:
 
         return type_for(prod);
     }
+
+    // This inheritance goes in the opposite direction -
+    // Following the prior example,
+    //    foo -> bat;
+    //    bar -> bat;
+    // if bat has a known type -and- neither foo nor bar have
+    // known types, foo and bar are given bat's type.
+    // I'm not sure if this is the "reverse" or the normal,
+    // and I actually wonder a bit if the "normal" could be
+    // replaced by always generating types.
+    // (Or is this "pass type down"?)
+    void reverse_inherit_type(const std::string &prod) {
+        auto known_type = type_for(prod);
+        if(known_type != "") {
+            auto strl  = rules_for_product.lower_bound(prod);
+            auto endrl = rules_for_product.upper_bound(prod);
+            for(auto rit = strl; rit != endrl; ++rit) {
+                auto rule = rules[rit->second];
+                if(rule.is_potential_type_alias()) {
+                    auto subp = rule.reduce_param(0).gexpr;
+                    if(type_for(subp) == "") {
+                        if(!subp.is_nonterminal()) {
+                            // so afaik we can't get here.
+                            // I'm not sure what happens if we do, though,
+                            // so I want to at least flag it:
+                            warn(stringformat(
+                                "{} in {} is a nonterminal but "
+                                "we're passing down a type for it",
+                                subp, rule
+                            ));
+                        }
+                        add_type_for(
+                            subp.expr, known_type,
+                            stringformat("passed down from {}", prod)
+                        );
+                        reverse_inherit_type(subp.expr);
+                    }
+                }
+            }
+        }
+    }
+
+    void reverse_inherit_types() {
+        auto rit = rules_for_product.begin();
+        auto end = rules_for_product.end();
+        while(rit != end) {
+            const std::string &prodn = rit->first;
+            reverse_inherit_type(prodn);
+            // ("upper bound" is actually "lower bound of next")
+            rit = rules_for_product.upper_bound(prodn);
+        }
+    }
+
 public:
 
     void resolve_inherited_types() {
+
+        reverse_inherit_types();
+
         const auto end = rules_for_product.end();
         auto rit = rules_for_product.begin();
         while(rit != end) {

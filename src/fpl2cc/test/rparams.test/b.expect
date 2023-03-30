@@ -1,0 +1,5 @@
+returncode = 0
+stderr = ""
+stdout = "std::list<std::string> «{ foo, bar, bat }»
+std::list<std::string> «{ fip, splat }»
+"
