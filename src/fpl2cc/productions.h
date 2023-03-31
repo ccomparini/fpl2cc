@@ -2932,8 +2932,11 @@ public:
                     if(t_for_v.count(vname)) {
                         if(t_for_v[vname] != tname) {
                             warn(stringformat( 
-                                "type conflict on {} in rule {}: {} vs {}",
-                                 vname, rule, t_for_v[vname], tname
+                                "type conflict at {} on {} in {}rule {}: "
+                                "{} vs {}",
+                                 rule.location(), vname,
+                                 rule.is_subexpression()?"sub":"", rule,
+                                 t_for_v[vname], tname
                             ));
                         }
                     } else {

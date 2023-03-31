@@ -497,11 +497,7 @@ public:
         }
 
         out += "-> ";
-        if(parent_rulenum >= 0) {
-            out += stringformat("rule {}:{}", parent_rulenum, parent_cpos);
-        } else {
-            out += product();
-        }
+        out += product();
 
         return out;
     }
