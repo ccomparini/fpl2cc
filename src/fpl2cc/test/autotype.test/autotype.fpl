@@ -27,7 +27,7 @@ analogy+ -> thing;
 
 @type_for word std::string
 /[A-Za-z]/ -> word;
-word (','^ word)*:fruitbat -> list; # XXX word in the sub needs to bubble up
+word (','^ word)* -> list;
 
 word:a ':' word:b -> relation;
 relation:ab '::'^ relation:cd -> analogy;
