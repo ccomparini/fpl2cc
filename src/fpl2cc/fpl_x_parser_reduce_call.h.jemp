@@ -60,8 +60,10 @@
             @declare el_id: prds.element_index.at(step.gexpr)@
             @declare elname: prds.element_id_name(el_id)@
             slice_size = lr_count_of_@elname@(arg_start, @step.qty.multiple@);
-            ReductionParameter<@prds.type_for(step.gexpr)@>
-                arg_@stind@(*this, arg_start, slice_size);
+            @if(!step.skip_on_reduce()) {@
+                ReductionParameter<@prds.type_for(step.gexpr)@>
+                    arg_@stind@(*this, arg_start, slice_size);
+            @}@
             arg_start += slice_size;
             @if(opts.debug) {@
                 std::cerr << stringformat(
@@ -92,7 +94,7 @@
     @}@
 
     @/* (must come before the pop or the position gets lost) */@
-    auto src_pos = arg_0.position();
+    auto src_pos = lr_stack_entry(lr_read_pos).position();
 
     @/*
         This is what actually pops the stack. Note we pop after
