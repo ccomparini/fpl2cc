@@ -20,5 +20,7 @@ int main() {
     // possibly mostly somewhat portable a little bit:
     unsigned long long sz = 0xf8070605040302f1;
     std::cout << to_hex(sz) << "\n";
+
+    return 0;
 }
 
