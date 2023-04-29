@@ -23,6 +23,8 @@ int main() {
 
     std::cout << join(kvs, ", and another thing! ", str_int_fmt) << "\n";
 
+    std::cout << join(clist, "... ", [] (const std::string &) { return "etc"; } ) << "\n";
+
     return 0;
 }
 
