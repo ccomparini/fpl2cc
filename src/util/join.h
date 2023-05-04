@@ -11,12 +11,18 @@
 
 // Iterator based formatter - this is the implementation for the other
 // 2 join functions, but it's actually less awkward for iterating maps
-// or similar as well...
+// or similar as well.
+// So, for example, something like this should work:
+//    std::string foo = join(step_vars, ", ",
+//        [] (std::map<std::string, int>::iterator &arg) -> std::string {
+//            return stringformat("{} -> {}", arg->first, arg->second);
+//        })
+//    );
 template<typename T>
 std::string join(
     T elements,
     const std::string &jv,
-    std::function<std::string(typename T::iterator)> fmtr,
+    std::function<std::string(typename T::iterator &)> fmtr,
     src_location caller = CALLER()
 ) {
     if constexpr(!is_iterable(T)) {
