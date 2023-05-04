@@ -38,7 +38,7 @@ text+:chunks -> fragment ;
 # or expressions. For example, to set "fruitbat" to 10 more
 # than the current value of x, you might do:
 #   @declare fruitbat: x + 10@
-leading_ws? '@declare'^ /\s+/^ identifier:name_decl ':'^ /(?:[^@]|(?:@@))*/:value '@'^ /\n?/^ -> fragment ;
+leading_ws? /@declare\s+/^ identifier:name_decl ':'^ /(?:[^@]|(?:@@))*/:value '@'^ /\n?/^ -> fragment ;
 
 # Tells the jemp processor to use the given text as the format
 # string in a call to stringformat() whenever it appears that
@@ -51,7 +51,7 @@ leading_ws? '@declare'^ /\s+/^ identifier:name_decl ':'^ /(?:[^@]|(?:@@))*/:valu
 #   @realign:  #line {0} "{1}" @
 # .. so that errors or whatever will be reported in the .jemp source
 # instead of in the generated location(s).
-'@realign:'^ /\s*/^ text:realign '@'^ /\n?/^ -> fragment ;
+/@realign:\s*/^ text:realign '@'^ /\n?/^ -> fragment ;
 
 # this is for importing template "variants", and must come before
 # subst_end/rest_of_sub (or else it doesn't get matched)
