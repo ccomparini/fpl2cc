@@ -174,8 +174,9 @@ public:
             check_only(Args&&... args) { }
         };
 
+        // different fpl rules may or may not evaluate to different
+        // types, so we use a std::variant:
         using Var = std::variant<
-            // consider adding std::monostate here
             false_product,
             @-for(auto type : prds.all_types) {-@
                 @type@,

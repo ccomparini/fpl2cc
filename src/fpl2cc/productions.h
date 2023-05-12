@@ -1730,6 +1730,14 @@ public:
         return "";
     }
 
+    // subexpressions also add stuff to the containing rule...
+    void add_subexpression(production_rule &rule, production_rule::step sub) {
+        if(sub.varname == "")
+            sub.varname = subex_varname(sub.gexpr.expr);
+
+        rule.add_step(sub);
+    }
+
     int parse_expressions(production_rule &rule) {
         int num_read = 0;
         bool done = false;
@@ -1845,11 +1853,13 @@ public:
                     if(type == grammar_element::LACK_OF_SEPARATOR)
                         step.eject = true;
                     step.invert = invert_next;
-                    if(type == grammar_element::NONTERM_SUBEXPRESSION)
-                        if(step.varname == "")
-                            step.varname = subex_varname(step.gexpr.expr);
-                    rule.add_step(step);
                     invert_next = false;
+
+                    if(type == grammar_element::NONTERM_SUBEXPRESSION)
+                        add_subexpression(rule, step);
+                    else
+                        rule.add_step(step);
+
                     num_read++;
                 } else {
                     error(inp, stringformat(

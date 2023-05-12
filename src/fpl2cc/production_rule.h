@@ -20,8 +20,7 @@ class production_rule {
 
     std::string prod;
     std::vector<step>     rsteps;
-    std::vector<int>      psteps;        // index of step for parameter number
-    std::set<std::string> step_vars;     // for finding conflicts
+    std::map<std::string, int> step_vars; // key = name; val = rstep
     code_block            code_for_rule; // reduce code, if known yet
     reducer               abs_impl;      // abstracted implementation, if any
     std::string           file;
@@ -242,27 +241,27 @@ public:
                 st.varname = name;
             }
 
-            // If the previous parameter has the same name, we "meld" them
-            // into one parameter by not adding another pstep.  This allows
-            // authors to write (for example):
-            //    '('^ (arg (','^ arg)*)? ')'^ -> argument_list;
-            // and then:
-            //    +argument_list(arg) +{ arg@foreach ... }+
-            //
-            // This will only work if the reduce types are the same,
-            // of course, but it covers useful cases.
-            std::string prior_pname;
-            if(auto prior_step = reduce_param(psteps.size() - 1)) {
-                prior_pname = prior_step.variable_name();
+            const int existing_si = reduce_param_step_num(name);
+            if(existing_si < 0) {
+                // no existing step with this name, so we can do a simple add:
+                step_vars[name] = stepi;
+            } else {
+                // Check if we can "meld" with the existing step parameter.
+                // At the moment, we can "meld" if there are no non-ejected
+                // steps between them (though I intend to change this).
+                const int new_step_num = rsteps.size();
+                for(int sti = existing_si + 1; sti < new_step_num; ++sti) {
+                    if(!rsteps[sti].skip_on_reduce()) {
+                        if(rsteps[sti].variable_name() != name) {
+                            // Can't meld (for the moment) - warn:
+                            jerror::warning(stringformat(
+                                "duplicate name '{}' in step {} {}",
+                                name, rsteps.size(), location()
+                            ));
+                        }
+                    }
+                }
             }
-
-            // (prior_pname will be the empty string if no prior param)
-            if(prior_pname != name) {
-                // No melding fr this one:  go ahead and add it
-                check_duplicate_varname(name, stepi);
-                step_vars.insert(name);
-                psteps.push_back(stepi);
-            } // else it's melded with the prior parameter
         }
 
         rsteps.push_back(st);
@@ -328,30 +327,69 @@ public:
         }
     }
 
-    int num_steps() const { return rsteps.size(); }
-
-    // the result of a given step may or may not be passed to the
-    // reduction code (for example, "ejected" parameters are not
-    // passed).  this tells how many are actually passed.
+    // The number of reduce parameters is not necessarily the same
+    // as the number of steps - steps may be "ejected", in which
+    // case they're not passed at all, "melded", in which case
+    // 2 steps with the same name are combined into one parameter,
+    // or, if a given step is a subexpression, it may have multiple
+    // reduce parameters.
     int num_reduce_params() const {
-        return psteps.size();
+        return step_vars.size();
     }
 
+    // Returns a std::set containing the names of the reduce parameters
+    // (in order).
     const std::set<std::string> reduce_params() const {
-        return step_vars;
+        // .. this is maybe not the most efficient.  shipit.
+        std::set<std::string> names;
+        for(auto step : step_vars) {
+            names.insert(step.first);
+        }
+        return names;
     }
 
-    unsigned reduce_param_step_num(
+    // Returns the index in the rsteps array of the nth parameter
+    // to the reduce action.
+    // Reduce action parameters are ordered by name, so, eg:
+    //   key '=>' val -> kv_pair;
+    //   val '<=' key -> kv_pair;
+    //   +kx_pair(key val) +{
+    //       // ... code here works for both
+    //   }+
+    // .. which means that the order in which parameters are passed
+    // to reduce actions doesn't necessarily match the step order.
+    int reduce_param_step_num(
         unsigned int pind, src_location ca = CALLER()
     ) const {
-        if(pind >= psteps.size()) {
-            return -1;
+        // we're iterating step vars so that they're in parameter
+        // order.  I'm thinking linear search here isn't going
+        // to kill us because normally you'd only have a handful
+        // of parameters.  almost certainly under 10, say, and probably
+        // far fewer.
+        for(auto sv : step_vars) {
+            if(pind-- <= 0) {
+                return sv.second;
+            }
         }
-        return psteps[pind];
+        return -1; // step out of range
     }
 
-    // ..and this is how you can get the step for a given parameter
-    // (by parameter position)
+    // Returns the index in the rsteps array for the parameter with
+    // the given name, or -1 if there's no such parameter.
+    int reduce_param_step_num(
+        const std::string &pname, src_location ca = CALLER()
+    ) {
+        auto found = step_vars.find(pname);
+        if(found == step_vars.end())
+            return -1;
+        return found->second;
+    }
+
+
+    // .. and this is how you can get the step for a given parameter
+    // by parameter position.
+    // Returns a ref to the step if the index is valid, or a
+    // ref to the false step otherwise.
     const step &reduce_param(
         unsigned int index, src_location ca = CALLER()
     ) const {
@@ -361,7 +399,27 @@ public:
         return step::false_step();
     }
 
-    // returns a false step if index is out of bounds
+    // ... or by name (as above), though this will warn if given
+    // an invalid name.  (should it?)
+    const step &reduce_param(
+        const std::string &pname, src_location ca = CALLER()
+    ) const {
+        auto stepi = step_vars.find(pname);
+        if(stepi != step_vars.end())
+            return rsteps[stepi->second];
+
+        jerror::warning(stringformat(
+            "no reduce param called '{}' in rule {}. caller: {}\n",
+            pname, *this, ca
+        ));
+
+        return step::false_step();
+    }
+
+    int num_steps() const { return rsteps.size(); }
+
+    // Returns the nth (in match order) step for this rule,
+    // or a false step if index is out of bounds.
     step nth_step(unsigned int index) const {
         if(index < rsteps.size()) {
             return rsteps[index];
@@ -369,6 +427,8 @@ public:
         return step();
     }
 
+    // As above, but the offset is from the end of the rule
+    // instead of the start.
     step nth_from_end(unsigned int index) const {
         return nth_step(rsteps.size() - index);
     }
