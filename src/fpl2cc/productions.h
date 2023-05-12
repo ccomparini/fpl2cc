@@ -1847,7 +1847,7 @@ public:
                     step.invert = invert_next;
                     if(type == grammar_element::NONTERM_SUBEXPRESSION)
                         if(step.varname == "")
-                            step.varname = subex_varname(expr_str);
+                            step.varname = subex_varname(step.gexpr.expr);
                     rule.add_step(step);
                     invert_next = false;
                     num_read++;
