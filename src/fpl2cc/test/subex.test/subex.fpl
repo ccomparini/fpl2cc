@@ -3,11 +3,17 @@
 @goal statements
 @comment_style c
 
-(expression ';'^)*:statement -> statements ;
+# An expression followed by a ';' is a statement.
+# We do this in a subexpression to make sure the "statement"
+# name within the subexpression "bubbles up".
+# Writing:
+#   (expression ';'^):statement* -> statements;
+# is probably clearer, but this tests name bubble-up.
+(expression:statement ';'^)* -> statements;
 
 # Primary expressions are in their own fpl not because it's
-# good structure (it's not), but to test if subexpressions
-# in subfpl dtrt.  (At one point, there was a bug involving
+# good structure (it's not), but to test if subexpressions in
+# imported fpl dtrt.  (At one point, there was a bug involving
 # name collisions among imported subexpressions)
 `expression` -> expression ;
 
