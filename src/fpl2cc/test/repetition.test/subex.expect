@@ -1,0 +1,8 @@
+returncode = 0
+stderr = ""
+stdout = "======
+block with one percent, 2 percent
+close enough to foo
+close enough to foo
+======
+"

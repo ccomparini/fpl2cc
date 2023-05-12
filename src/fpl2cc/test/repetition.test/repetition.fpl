@@ -35,27 +35,36 @@
     return std::array{""};
 }+
 
-# in order to test subexpression repetition, let's say
-# statements can be followed by an optional comma
-#(statement ','?^ block)*:statements -> done +{ # should fail compile; does not XXX
-(statement ','?^)*:statements -> done +{
-    return statements@join("\n");
++{
+#include"join.h"
+}+
+statements -> done +{
+    return join(statements, "\n");
 }+
 
-block -> statement ;
+# in order to test subexpression repetition, let's say
+# statements can be followed by an optional comma
+@type_for statements std::list<std::string>
+(statement ','?^)* -> statements +{
+    // hmmm.. instead of type_for all the time, what if
+    // default reduce was a no-op and just left the stack
+    // slices intact?  then we don't have to jump through
+    // these hoops (and would be way more efficient).
+    std::list<std::string> out;
+    statement@foreach([&out](const Product &st)->void {
+        out.push_back(st.val());
+    });
+    return out;
+}+
 
-"{"^ statement* "}"^ -> block +{
-    if(statement@count() == 0)
+block -> statement;
+
+@type_for block std::string
+"{"^ statements "}"^ -> block +{
+    if(statements.size() == 0)
         return "empty block";
 
-    std::string out("block with ");
-    for(int sti = 0; sti < statement@count(); sti++) {
-        out += statement[sti];
-        if(sti + 1 < statement@count())
-            out += ", ";
-    }
-
-    return out;
+    return "block with " + join(statements, ", ");
 }+
 
 # this checks that params are sliced correctly when
@@ -120,8 +129,8 @@ digit*:leading digit?:penultimate digit:last -> statement +{
 'xxx'     -> xxx_or_def ;
 &default^ -> xxx_or_def +{ return "yyy"; }+
 
-# realistically you wouldn't do /[a-zA-Z_]/+ (you'd do
-# /[a-zA-Z_]+/), but we're testing repetition:
+# realistically, you wouldn't do /[a-zA-Z_]/+ (you'd do /[a-zA-Z_]+/),
+# but we're testing repetition:
 /[a-zA-Z_]/+:letters ";"^ -> statement +{
     return letters@concatenate();
 }+
