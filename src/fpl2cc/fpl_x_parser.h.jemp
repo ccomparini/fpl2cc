@@ -200,7 +200,7 @@ public:
         const Var &var() const { return red; }
 
         // Accessors for the different types are named as [element name]_val()
-        // We start at element 1 instead of 0 because we don't need/want an
+        // We start at type 1 instead of 0 because we don't need/want an
         // fpl_null accessor (it has no type anyway)
         @for(int el_id = 1; el_id < prds.elements.size(); ++el_id) {-@
             @declare el: prds.elements[el_id]@
@@ -264,6 +264,9 @@ public:
             return std::get<@prds.output_type()@>(red);
         }
 
+        // if it's a (regex) terminal with capture groups, this returns
+        // the contents of the nth capgroup.  otherwise, returns an
+        // empty string.
         std::string capgroup(int capi) const {
             if(std::holds_alternative<Terminal>(red))
                 return std::get<Terminal>(red).capgroup(capi);
@@ -442,7 +445,6 @@ public:
     bool eof() const {
         return reader->eof();
     }
-
 
 public:
 
@@ -685,18 +687,20 @@ public:
     // all_matched_steps(), below), or any other slice of the lr_stack.
     class StackSlice {
         int base_index; // in lr_stack
-        int size;       // also in lr_stack
+        int size;       // number of elements in lr_stack
 
         // owner here is annoying because we should be able to
         // infer it... jest feature?
         const @class_name@ &owner;
 
     public:
-        // returns the number of lr_stack entries in this slice:
+        // Returns the number of lr_stack entries in this slice:
         int count() const { return size; }
 
-        // returns the number of parameter stack entries for this
-        // entire slice.
+        // Returns the number of parameter stack entries for this
+        // entire slice.  This can be different from the number of
+        // lr_stack entries due to ejectedness (in which case
+        // there are 0 parameters) as well stuff like repetition.
         int param_count() const {
             StackEntry sel = owner.lr_stack_entry(base_index);
 
@@ -758,7 +762,9 @@ public:
         // If the index passed is out of bounds, returns a 
         // default product.
         // Note that there may be 0 products for any slice,
-        // so the 0th is not guaranteed to be anything real.
+        // so the 0th is not guaranteed to be anything real,
+        // though if it's not it will still return a valid
+        // (though false) Product,
         Product product(int ind = 0, src_location caller = CALLER()) const {
             const int pbase = param_base();
             const int num_args = param_count();
