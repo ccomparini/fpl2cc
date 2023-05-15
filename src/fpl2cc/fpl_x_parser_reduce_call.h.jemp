@@ -12,6 +12,11 @@
     // from the top of the stack:
     clear_mismatches();
 
+    // INTERESTING... now that we're tracking per-step reserves, we
+    // -could- come up with the params in one (backward) pass, as
+    // long as we change the reserve counts to go backward instead
+    // of forward through the rule...
+
     @/* Figure out the stack slices for each argument.
         We have to do this outside the call because parameter evaluation
         order is not defined in c++ and we're (pseudo-)popping the stack.
@@ -55,11 +60,24 @@
     @for(int stind = 0; stind < rule.num_steps(); ++stind) {-@
         @declare step: rule.nth_step(stind)@
         @if(!step) {-@
-            #error Bug: no expression for step @stind@ @rule.to_str()@ @rule.location()@
+            // no step means there's a bug..
+            #error no expression for step @stind@ @rule.to_str()@ @rule.location()@
         @-} else {-@
             @declare el_id: prds.element_index.at(step.gexpr)@
             @declare elname: prds.element_id_name(el_id)@
-            slice_size = lr_count_of_@elname@(arg_start, @step.qty.multiple@);
+
+            slice_size = lr_count_of_@elname@(arg_start, @step.qty.multiple || step.reserve@);
+
+            @if(step.reserve) {@
+                // this step is followed by other steps with the same
+                // expression but higher priority w/respect to parameters,
+                // so we need to reserve @step.reserve@ matches for those
+                // params:
+                slice_size -= @step.reserve@;
+                if(slice_size < 0)
+                    slice_size = 0;
+            @}@
+
             @if(!step.skip_on_reduce()) {@
                 ReductionParameter<@prds.type_for(step.gexpr)@>
                     arg_@stind@(*this, arg_start, slice_size);

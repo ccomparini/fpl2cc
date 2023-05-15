@@ -91,10 +91,60 @@ public:
             bool optional;
             bool multiple;
             quantifier() : optional(false), multiple(false) { }
+
+/*
+            // This determines the precedence with which steps
+            // will be assigned to parameters in cases where there
+            // are multiple consecutive steps which can match the
+            // same things.
+            //
+            // In general, an attempt is made to pass at least one
+            // matching product per parameter-step, with priority
+            // (increasing order):
+            //   - zero or more ('*')
+            //   - zero or one  ('?')
+            //   - one or more  ('+')
+            //   - exactly one  (normal/unquantified)
+            //
+            // So, for example, say we have this rule:
+            //   'p'*:a 'p'+:b 'p'?:c 'p':d -> woo;
+            //
+            // Observe that this will match 2 or more consecutive p's.
+            // But say it does.  Should the first parameter ("a") get
+            // all the p's?  That hardly seems the author's intent,
+            // and would in fact be quite surprising if the "b" and
+            // "d" parameters didn't get any, as they were specified
+            // as matching at least 1.  Therefore, non-optional steps
+            // get first priority when distributing paramters.
+            //
+            // How about this case?
+            //   'p'*:a 'p'?:b -> foo;
+            //
+            // Here, both are optional, so this rule matches 0 or more
+            // p's.  But the b parameter has priority, so it will get
+            // one of the matching p's (if there are any).
+            // 
+            friend bool operator<(
+                const quantifier &left, const quantifier &right
+            ) {
+                // Optional is lower than non-optional:
+                if(left.optional != right.optional)
+                    return left.optional;
+
+                // Either both or neither is optional.
+                // If one of them is multiple, it has lower priority:
+                if(left.multiple != right.multiple)
+                    return left.multiple;
+
+                // .. otherwise, apparently, they're the same:
+                return false;
+            }
+*/
         } qty;
 
         bool eject;  // if set, don't pass this to reduce code
         bool invert; // invert match (!"foo" = match anything but "foo")
+        int reserve; // number of matches to reserve for following steps
 
         static step &false_step() {
             static step fs;
@@ -104,7 +154,8 @@ public:
         step() :
             gexpr("", grammar_element::Type::NONE),
             eject(true),
-            invert(false) {
+            invert(false),
+            reserve(0) {
         }
 
         step(
@@ -115,7 +166,8 @@ public:
             gexpr(expr_str,tp),
             varname(vn),
             eject(false),
-            invert(false) {
+            invert(false),
+            reserve(0) {
         }
 
         operator bool() const {
@@ -140,6 +192,51 @@ public:
 
         bool is_named() const {
             return variable_name().length() > 0;
+        }
+
+        // This determines the precedence with which steps
+        // will be assigned to parameters in cases where there
+        // are multiple consecutive steps which can match the
+        // same things.
+        //
+        // In general, an attempt is made to pass at least one
+        // matching product per parameter-step, with priority
+        // (increasing order):
+        //   - zero or more ('*')
+        //   - zero or one  ('?')
+        //   - one or more  ('+')
+        //   - exactly one  (normal/unquantified)
+        //
+        // So, for example, say we have this rule:
+        //   'p'*:a 'p'+:b 'p'?:c 'p':d -> woo;
+        //
+        // Observe that this will match 2 or more consecutive p's.
+        // But say it does.  Should the first parameter ("a") get
+        // all the p's?  That hardly seems the author's intent,
+        // and would in fact be quite surprising if the "b" and
+        // "d" parameters didn't get any, as they were specified
+        // as matching at least 1.  Therefore, non-optional steps
+        // get first priority when distributing paramters.
+        //
+        // How about this case?
+        //   'p'*:a 'p'?:b -> foo;
+        //
+        // Here, both are optional, so this rule matches 0 or more
+        // p's.  But the b parameter has priority, so it will get
+        // one of the matching p's (if there are any).
+        // 
+        bool lower_priority_than(const step &other) const {
+            // Optional is lower than non-optional:
+            if(is_optional() != other.is_optional())
+                return is_optional();
+
+            // Either both or neither is optional.
+            // If one of them is multiple, it has lower priority:
+            if(is_multiple() != other.is_multiple())
+                return is_multiple();
+
+            // .. otherwise, apparently, they're the same:
+            return false;
         }
 
         std::string variable_name() const {
@@ -207,6 +304,9 @@ public:
                 out += "+";
             }
 
+            if(reserve)
+                out += stringformat("(r:{})", reserve);
+
             if(varname.length())
                 out += ":" + varname;
 
@@ -228,6 +328,22 @@ public:
 
     void add_step(step st) {
         int stepi = rsteps.size();
+
+        // to support stuff like:
+        //   'foo'*:pre 'foo':penultimate 'foo':final -> bar;
+        // .. the "pre" step needs to know to not pop the 
+        // "penultimate" and "final" steps.  to that end:
+        for(int prior = stepi - 1; prior >= 0; --prior) {
+            if(rsteps[prior].gexpr != st.gexpr) {
+                // (different grammar expressions, so they
+                // it won't pop/steal the parameter anyway)
+                break;
+            } else if(rsteps[prior].lower_priority_than(st)) {
+                // the earlier step is lower priority, so tell
+                // it to reserve another for us:
+                rsteps[prior].reserve++;
+            }
+        }
 
         // if this step will be passed to the reduce function....
         if(!st.skip_on_reduce()) {

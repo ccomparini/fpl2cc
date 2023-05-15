@@ -58,8 +58,50 @@ block -> statement ;
     return out;
 }+
 
-'%':pct -> statement +{
-    return "one percent";
+# this checks that params are sliced correctly when
+# there's a repetition adjacent to something else
+# same element (token) type:
+'%':pct '%'*:more_pct-> statement +{
+    if(more_pct@count() == 0)
+        return "one percent";
+
+    return stringformat("{} percent", more_pct@count() + 1);
+}+
+
+# .. and this checks if they are sliced correctly with
+# leading repetition:
+'~'*:leading '~':last_tilde -> statement +{
+    if(leading@count() > 0) {
+        return leading@join(" tilde 'nother time ");
+    }
+
+    if(last_tilde@count() != 1) {
+        jerror::error(stringformat(
+            "lead/last repetition error: {} and {}\n",
+            leading@count(), last_tilde@count()
+        ));
+    }
+
+    return "just the last tilde";
+}+
+
+# .. and now let's see if it works with repetition on both sides:
+'$':beginning '$'*:middle '$':end -> statement +{
+    return stringformat("{} dollars between", middle@count());
+}+
+
+# .. and even more complicated:
+# In this case, we expect "last" to always exist,
+# "penultimate" to exist if there's more than one
+# digit, and "leading" to get all the leading digits
+# if there are more than 2 digits.
+/[0-9]/ -> digit;
+digit*:leading digit?:penultimate digit:last -> statement +{
+    return stringformat(
+        "{}, {}, {} = {} + {} + {} digits",
+        leading@join(""), penultimate@join(""), last,
+        leading@count(), penultimate@count(), last@count()
+    );
 }+
 
 # heh... bug:  foo becomes foo.var() within the string.
