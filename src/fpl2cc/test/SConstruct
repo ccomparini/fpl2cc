@@ -115,12 +115,12 @@ def make_language_rules(env, directory):
     #print(f"fpl options on {langsource}: {fpl_options}", file=sys.stderr)
     env.CaptureFplCompile(
         [ langcc, capfile ],  [ langsource ],
-        FPLOPTS=fpl_options, CAPFILE=capfile
+        FPLOPTS=fpl_options, CAPFILE=capfile,
     )
 
     compiler = env.Program(langprog, [ langprog + '.cc' ])
 
-
+# (Note this is the scons Glob, so it returns target-path dirs)
 test_dirs = Glob('*.test')
 
 # sets up:
@@ -129,6 +129,7 @@ test_dirs = Glob('*.test')
 #   [x].result: [lang] [x].[lang]
 # for each "expect" file.
 for test_dir in test_dirs:
+    # (Note: test_dir.get_abspath() gets the target path, not the source)
     make_language_rules(env, test_dir.get_abspath())
 
     language, foo = os.path.splitext(test_dir.name)
@@ -143,7 +144,6 @@ for test_dir in test_dirs:
             test_name + '.success', [ expected, test_name + '.fpl_result' ]
         )
 
-
     expecteds = Glob(test_dir.name + '/*.expect')
     for expected in expecteds:
         test_name, foo = os.path.splitext(expected.get_path())
@@ -156,6 +156,7 @@ for test_dir in test_dirs:
             result_file, [ src_file ],
             INTERACTIVE=interactive,
             IGNORE_EXIT=True, # so we can test failure cases
+            PROFILE='prof/' + test_name + '.prof_out',
             QUIET=True  # avoid spam when testing failures
         )
         env.CompareOut(success_file, [ expected, result_file ])
