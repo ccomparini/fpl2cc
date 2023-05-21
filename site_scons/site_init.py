@@ -1,15 +1,45 @@
 import asyncio
 import esml
+import io
 import os
 import pprint
 import signal
 import subprocess
+import subprof
+import sys
+import warnings
+
+
+# In order to make profiling work, I'm going to monkeypatch
+# os.waitpid() to call wait4() and store the results of that
+# in a dictionary.  This seems to be the only (?) way to get
+# the usage info about a child process at its exit (though,
+# splitting hairs, this will also record resource usage on
+# other child state changes.  It's not clear to me how to
+# check if the child terminated or what from here.
+#
+# I'm not sure what this will do on Windows - hopefully
+# wait4() will cleanly fail to exist, which we can detect,
+# and just call the real_waitpid()
+real_waitpid = os.waitpid
+exit_results = { }
+def waitpid_interceptor(pid, options, /):
+    if callable(getattr(os, 'wait4')):
+        result = os.wait4(pid, options)
+        if result[0] > 0:
+            exit_results[result[0]] = result
+        return result[0], result[1]
+    else:
+        # wait4 isn't available, so just call the normal waitpid:
+        return real_waitpid(pid, options)
+
+os.waitpid = waitpid_interceptor
 
 def run_and_capture_action(program, varlist=[]):
     """
         Returns a scons Builder action which runs the source program
         specified, capturing stderr, stdout, and the exit value, and
-        writes them as esml to the target file.
+        writing them as esml to a file.
 
         env.Append(BUILDERS = {
             # compile a foo file to a bar file
@@ -23,15 +53,22 @@ def run_and_capture_action(program, varlist=[]):
         env.CompileFoo("xyz.bar", [ "xyz.foo" ], CAPFILE="xyz.out")
 
         The following environment variables apply:
-            CAPFILE=<filename>  - Tells where to put the capture.  Default is
-                                  the (scons) target.
+            CAPFILE=<filename>  - Tells where to put the captured output and
+                                  exit value .  Default is the (scons) target.
             IGNORE_EXIT=<val>   - If set, ignore the exit value for purposes
                                   of determining if the action worked.
                                   The specific exit value is still captured
                                   and written to the capfile.
             INTERACTIVE=<val>   - If true, run interactively, passing stderr
                                   through and reading input from stdin
-            QUIET               - If true and we're not in INTERACTIVE mode,
+            PROFILE=<filename>  - Tells where to append profiling info.
+                                  The file (with path) is created if it doesn't
+                                  already exist.
+                                  Ignored if INTERACTIVE is true.
+            TIMEOUT=<seconds>   - Kill the subproc if it's not done after this
+                                  many seconds.  Ignored if INTERACTIVE is
+                                  true; otherwise, defaults to 5.
+            QUIET=<val>         - If true and we're not in INTERACTIVE mode,
                                   write stderr it to the capture file without
                                   echoing it to scons's stderr.
 
@@ -43,74 +80,76 @@ def run_and_capture_action(program, varlist=[]):
 
     """
 
-    # Run the proc passed "interactively", printing stderr and
-    # stdout as well as buffering them.
-    # Presently, stderr is the only stream which is "interactive"
-    # (stdout actually just gets buffered and printed at the end),
-    # because it so happens that the way tests work is that stdout
-    # contains the output of the parser or whatever we're testing,
-    # but stderr may contain (among other things) interactive
-    # debugging info and prompts.
-    # Returns a tuple of bytes objects containing whatever the subproc
-    # wrote to stdout and stderr (respectively)
-    def run_interactively(command):
-        print(f"running {command} interactively\n", file=sys.stderr);
-        pout = b""
-        perr = b""
+
+    # Duplicates whatever it reads from the "from" file-like object
+    # into the other file-like objects passed.
+    async def duplicate_output(from_stream, *outs):
+        done = False
+        while not done:
+            inp = await from_stream.read(1024) # (arbitrary buffer size)
+            if len(inp) <= 0: # eof
+                done = True
+            else:
+                for out in outs:
+                    out.write(inp)
+                    out.flush()
+
+    # Returns a tuple containing the exit code, and 2 bytes objects containing
+    # whatever the subproc wrote to stdout and stderr (respectively).
+    def run_command(command, env, timeout, quiet=False, profile=None):
+        pout = io.BytesIO(b"")
+        perr = io.BytesIO(b"")
         returncode = -255
+        exception = None
+
         async def runit():
-            nonlocal command, pout, perr, returncode
+            nonlocal command, env, pout, perr, returncode
+
             proc = await asyncio.create_subprocess_exec(
                 *command,
                 stdin=sys.stdin,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             )
-            async def tee_stderr():
-                nonlocal proc, perr
-                done = False
-                while not done:
-                    inp = await proc.stderr.read(256)
-                    if len(inp) <= 0: # eof
-                        done = True
-                    else:
-                        # we use stderr interactively, so send it on directly
-                        # as well as saving it:
-                        sys.stderr.buffer.write(inp)
-                        sys.stderr.flush()
-                        perr += inp
 
-            async def read_stdout():
-                nonlocal proc, pout
-                done = False
-                while not done:
-                    inp = await proc.stdout.read(256) # 256 is an arbitrary buffer size
-                    if len(inp) <= 0: # eof
-                        done = True
-                    else:
-                        pout += inp
+            err_outputs = [ perr ]
+            # we use stderr interactively, so unless we're told
+            # otherwise, send it on directly as well as saving it:
+            if not quiet:
+                # stderr seems (on my system, anyway) to be opened in
+                # "text" mode, while the subproc stderr seems to be in
+                # binary mode, resulting in:
+                #  "TypeError : write() argument must be str, not bytes"
+                # So, to avoid that, we open a binary version of stderr
+                # here and use that instead of the default stderr:
+                stderr_b = os.fdopen(sys.stdout.fileno(), "wb", closefd=False)
+                err_outputs.append(stderr_b)
 
-            await asyncio.gather(read_stdout(), tee_stderr(), proc.wait())
+            task = asyncio.gather(
+                duplicate_output(proc.stdout, pout), 
+                duplicate_output(proc.stderr, *err_outputs), 
+                proc.wait()
+            )
+
+            try:
+                await asyncio.wait_for(task, timeout=timeout)
+            except asyncio.TimeoutError:
+                # subproc is taking too long.  kill it:
+                warnings.warn(f"Timeout on {proc.pid} {command}\n")
+                proc.kill()
+
             returncode = proc.returncode
 
+            if profile:
+                subprof.Profile(*exit_results[proc.pid]).write_tsv(profile)
+                print(f"profile written to {profile}", file=sys.stderr)
+
         asyncio.run(runit())
+
+        if exception is not None:
+            raise exception
+
         return returncode, pout, perr
 
-    # runs the proc passed normally (blocking), and returns
-    # a tuple with whatever was written to (stdout, stderr).
-    def run_normally(command, timeout=5, quiet=False):
-        proc = subprocess.Popen(command,
-            stdin=sys.stdin, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        )
-        try:
-            pout, perr = proc.communicate(timeout=timeout)
-            if(not quiet and len(perr)):
-                #print(perr.decode("utf-8"), file=sys.stderr)
-                sys.stderr.buffer.write(perr);
-        except:
-            proc.kill()
-            raise
-
-        return proc.returncode, pout, perr
 
     # program should really be program + arguments, but support
     # just passing the name of the program:
@@ -131,8 +170,7 @@ def run_and_capture_action(program, varlist=[]):
     # This is the scons Builder action we return:
     def run_and_cap(target, source, env):
 
-        interactive = env.get('INTERACTIVE', None)
-        capfile     = env.get('CAPFILE', None)
+        capfile = env.get('CAPFILE', None)
 
         # If we haven't been told the name of the file in which
         # to dump the capture, use the first target.  This is a
@@ -154,31 +192,45 @@ def run_and_capture_action(program, varlist=[]):
         strcommand = strfunction(target, source, env)
         #print(f"Going to run:\n    {strcommand}\n", file=sys.stderr);
 
-        if interactive:
-            returncode, pout, perr = run_interactively(command)
+        if env.get('INTERACTIVE', None):
+            profile = None
+            timeout = None
+            quiet   = False
         else:
-            quiet = env.get('QUIET', False)
-            returncode, pout, perr = run_normally(command, quiet=quiet)
+            profile = env.get('PROFILE', None)
+            timeout = env.get('TIMEOUT', 5)
+            quiet   = env.get('QUIET', False)
 
-        if(returncode < 0):
+        returncode, pout, perr = run_command(
+            command, env, timeout, quiet, profile
+        )
+
+        if (returncode is not None) and (returncode < 0):
             # process died of some signal (interrupt, segfault, whatever):
-            signame = signal.Signals(-returncode).name
+            try:
+                signame = signal.Signals(-returncode).name
+            except ValueError:
+                signame = "(unknown signal)"
             msg = f"\n{signame} ({returncode}) failure on command \"{strcommand}\"\n"
             print(msg, file=sys.stderr)
 
-        with open(capfile, mode='wb') as outf:
-            outf.write(bytes(esml.dumps( {
-                    'returncode': returncode,
-                    'stderr':     perr,
-                    'stdout':     pout
-                }
-            ), encoding='utf-8', errors='ignore'))
+        output = {
+            'stderr': perr.getvalue(),
+            'stdout': pout.getvalue()
+        }
+        if returncode is not None:
+            output['returncode'] = returncode
 
-        if(env.get('IGNORE_EXIT', False)):
+        with open(capfile, mode='wb') as outf:
+            outf.write(
+                bytes(esml.dumps(output), encoding='utf-8', errors='ignore')
+            )
+
+        if env.get('IGNORE_EXIT', False):
             # ignore "real" exit codes (which came from the program),
             # but do consider it failed if the program was killed by
             # a signal (by falling through)
-            if(returncode >= 0):
+            if (returncode is not None) and (returncode >= 0):
                 return 0;
 
         return returncode
