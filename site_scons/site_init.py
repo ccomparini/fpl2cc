@@ -161,7 +161,7 @@ def run_and_capture_action(program, varlist=[]):
 
             if profile:
                 subprof.Profile(*exit_results[proc.pid]).write_tsv(profile)
-                print(f"profile written to {profile}", file=sys.stderr)
+                #print(f"profile written to {profile}", file=sys.stderr)
 
         asyncio.run(runit())
 
