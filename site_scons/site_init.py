@@ -1,5 +1,6 @@
 import asyncio
 import esml
+import functools
 import io
 import os
 import pathlib
@@ -10,6 +11,18 @@ import subprof
 import sys
 import warnings
 
+@functools.cache
+def git_branch():
+    branch = ''
+    try:
+        git_result = subprocess.run(
+            [ 'git', 'rev-parse', '--abbrev-ref', 'HEAD' ],
+            stdout=subprocess.PIPE
+        )
+        branch = git_result.stdout.decode('ascii').rstrip()
+    except Exception as ex:
+        warnings.warn(ex)
+    return branch
 
 # Returns the "variant" filename (including path)
 # for the filename passed.  This basically means
@@ -223,7 +236,8 @@ def run_and_capture_action(program, varlist=[]):
             timeout = None
             quiet   = False
         else:
-            profile = env.get('PROFILE', None)
+            # (profiling output goes in the yprof dir:)
+            profile = variant_dir(env.get('PROFILE', None), 'yprof')
             timeout = env.get('TIMEOUT', 5)
             quiet   = env.get('QUIET', False)
 

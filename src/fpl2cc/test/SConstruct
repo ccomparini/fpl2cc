@@ -154,6 +154,14 @@ for test_dir in test_dirs:
     expecteds = Glob(test_dir.name + '/*.expect')
     for expected in expecteds:
         test_name, foo = os.path.splitext(expected.get_path())
+
+        # only write profiling information if we're on the master branch,
+        # so as to not generate too much noise:
+        if git_branch() == 'master':
+            profile=this_dir + '/' + test_name + '.prof_out'
+        else:
+            profile=False
+
         #print(f"test name is {test_name}", file=sys.stderr)
         src_file = test_name + '.' + language
         success_file = test_name + '.success'
@@ -164,8 +172,8 @@ for test_dir in test_dirs:
             result_file, [ src_file ],
             INTERACTIVE=interactive,
             IGNORE_EXIT=True, # so we can test failure cases
-            PROFILE=variant_dir(this_dir + '/' + test_name + '.prof_out', 'yprof'),
-            QUIET=True  # avoid spam when testing failures
+            PROFILE=profile,
+            QUIET=True,  # avoid spam when testing failures
         )
         env.CompareOut(success_file, [ expected, result_file ])
 
