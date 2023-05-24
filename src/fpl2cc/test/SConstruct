@@ -34,7 +34,7 @@ env.CompareOut('reader.success', [ 'reader.expect', 'reader.out' ])
 # The "fpl_iteself" directory contains fpl source files which
 # which we compile and check the output of.  They may deliberately
 # contain/generate errors, and thus may or may not be expected to
-# compile, but which should give reasonable error messages etc.
+# compile, but should give reasonable error messages etc.
 for expected in Glob('fpl_itself/*.fpl_expect'):
     basename, foo = os.path.splitext(expected.name)
     target_path = os.path.dirname(expected.get_abspath())
@@ -123,6 +123,9 @@ def make_language_rules(env, directory):
 # (Note this is the scons Glob, so it returns target-path dirs)
 test_dirs = Glob('*.test')
 
+if len(test_dirs) > 0:
+    this_dir = os.path.dirname(test_dirs[0].relpath)
+
 # sets up:
 #   [lang].test/[t].success: [lang].test/[t].expect [lang].test/[t].result
 # and the invocation of the generated language program:
@@ -131,6 +134,10 @@ test_dirs = Glob('*.test')
 for test_dir in test_dirs:
     # (Note: test_dir.get_abspath() gets the target path, not the source)
     make_language_rules(env, test_dir.get_abspath())
+
+    #print(f"this dir: {this_dir}", file=sys.stderr)
+    #print(f"test dir relpath is {test_dir.relpath}", file=sys.stderr)
+    #print(f"test dir name    is {test_dir.name}", file=sys.stderr)
 
     language, foo = os.path.splitext(test_dir.name)
 
@@ -147,6 +154,7 @@ for test_dir in test_dirs:
     expecteds = Glob(test_dir.name + '/*.expect')
     for expected in expecteds:
         test_name, foo = os.path.splitext(expected.get_path())
+        #print(f"test name is {test_name}", file=sys.stderr)
         src_file = test_name + '.' + language
         success_file = test_name + '.success'
         result_file  = test_name + '.result'
@@ -156,7 +164,7 @@ for test_dir in test_dirs:
             result_file, [ src_file ],
             INTERACTIVE=interactive,
             IGNORE_EXIT=True, # so we can test failure cases
-            PROFILE='prof/' + test_name + '.prof_out',
+            PROFILE=variant_dir(this_dir + '/' + test_name + '.prof_out', 'yprof'),
             QUIET=True  # avoid spam when testing failures
         )
         env.CompareOut(success_file, [ expected, result_file ])

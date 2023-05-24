@@ -2,6 +2,7 @@ import asyncio
 import esml
 import io
 import os
+import pathlib
 import pprint
 import signal
 import subprocess
@@ -9,6 +10,25 @@ import subprof
 import sys
 import warnings
 
+
+# Returns the "variant" filename (including path)
+# for the filename passed.  This basically means
+# returning the same path with the top level directory
+# changed.
+# Scons also has a facility for doing this, but it
+# only works with generated targets and has some
+# peculiarities.  I want this for putting profiling
+# data in a separate parallel tree, so here it is.
+def variant_dir(fn, variant):
+    path = pathlib.Path(fn)
+    parts = list(path.parts)
+    if len(parts) > 1:
+       parts[0] = variant
+    # else there's no directory, so, I'm going to
+    # say that the "variant" is just the filename;
+    # i.e., there's nothing to vary, so there's no
+    # variation from what's been passed.
+    return os.path.join(*parts)
 
 # In order to make profiling work, I'm going to monkeypatch
 # os.waitpid() to call wait4() and store the results of that
