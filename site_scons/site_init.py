@@ -15,11 +15,17 @@ import warnings
 # for the filename passed.  This basically means
 # returning the same path with the top level directory
 # changed.
+# If the filename passed is any false value, returns
+# that value.  This allows pass-through when a filename
+# is set to None (or similar).
 # Scons also has a facility for doing this, but it
 # only works with generated targets and has some
 # peculiarities.  I want this for putting profiling
 # data in a separate parallel tree, so here it is.
 def variant_dir(fn, variant):
+    if not fn:
+        return fn
+
     path = pathlib.Path(fn)
     parts = list(path.parts)
     if len(parts) > 1:
