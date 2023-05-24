@@ -6,6 +6,7 @@
 """
 
 import collections
+import functools
 import os
 import pathlib
 import platform
@@ -114,15 +115,18 @@ class Profile(collections.namedtuple("Subprof", FIELDS)):
 #    ru_nivcsw=46
 #  )
 
-GIT_COMMIT_COMMAND = ['git', 'log', '-1', '--pretty=format:%h']
+@functools.cache
 def _git_commit_id():
 
     git_id = "[unavailable]"
     try:
         # this is a good-enough stab at getting the git commit ID,
         # and doesn't require anyone to install any special modules.
-        git_result = subprocess.run(GIT_COMMIT_COMMAND, stdout=subprocess.PIPE)
-        git_id = git_result.stdout.decode('ascii')
+        git_result = subprocess.run(
+            ['git', 'log', '-1', '--pretty=format:%h'],
+            stdout=subprocess.PIPE
+        )
+        git_commit_id = git_result.stdout.decode('ascii')
     except ex:
         warn(ex)
 
