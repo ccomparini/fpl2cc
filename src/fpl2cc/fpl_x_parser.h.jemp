@@ -238,8 +238,8 @@ public:
 
             @-for(auto type : prds.all_types) {-@
                 if(std::holds_alternative<@type@>(var())) {
-                    // using stringformat here because it supports
-                    // several ways of converting to string:
+                    @/* using stringformat here because it supports
+                        several ways of converting to string: */@
                     return stringformat("{}", std::get<@type@>(var()));
                 }
             @-}@
