@@ -91,9 +91,12 @@ struct code_block {
         return stringformat("{}:{}", source_file, line);
     }
 
+    std::string source_filename() const { return source_file; }
+    int         line_number()     const { return line; }
+
     std::string format(bool restore_line = true) const {
         std::string out;
-        out += "\n#line " + std::to_string(line) + " \"" + source_file + "\"\n";
+        out += stringformat("\n#line {} \"{}\"\n", line, source_file);
         out += code;
         if(restore_line) {
             out += "\n#$LINE\n"; // restore compiler's idea of source file/pos
