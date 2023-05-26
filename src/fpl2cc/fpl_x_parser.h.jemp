@@ -704,8 +704,11 @@ public:
         int param_count() const {
             StackEntry sel = owner.lr_stack_entry(base_index);
 
-            // ejected -> 0 params
-            if(sel.ejected()) return 0;
+            // no params if we're an empty slice.
+            // without this check, we can end up returning a
+            // negative size, and no one wants that.
+            if(count() == 0) return 0;
+
 
             // this slice "contains" all arguments starting
             // at the position in the argument stack starting
