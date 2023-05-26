@@ -87,6 +87,11 @@ public:
         grammar_element gexpr;
         std::string varname; // if set, name of this expression in reduce code
 
+        static step &false_step() {
+            static step fs;
+            return fs;
+        }
+
         struct quantifier {
             bool optional;
             bool multiple;
@@ -146,10 +151,6 @@ public:
         bool invert; // invert match (!"foo" = match anything but "foo")
         int reserve; // number of matches to reserve for following steps
 
-        static step &false_step() {
-            static step fs;
-            return fs;
-        }
 
         step() :
             gexpr("", grammar_element::Type::NONE),
