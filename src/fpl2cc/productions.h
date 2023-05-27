@@ -2803,7 +2803,7 @@ private:
         // of flag to prevent infinite recursion in cases where
         // you have something like:
         //       a -> b; b -> a;
-        // ('a' would explicitly have the "unknonwn" type "",
+        // ('a' would explicitly have the "unknown" type "",
         // which we then return when this function gets called
         // again).
         // We clear these empty types in resolve_inherited_types()
