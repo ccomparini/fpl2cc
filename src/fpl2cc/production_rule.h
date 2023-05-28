@@ -96,55 +96,6 @@ public:
             bool optional;
             bool multiple;
             quantifier() : optional(false), multiple(false) { }
-
-/*
-            // This determines the precedence with which steps
-            // will be assigned to parameters in cases where there
-            // are multiple consecutive steps which can match the
-            // same things.
-            //
-            // In general, an attempt is made to pass at least one
-            // matching product per parameter-step, with priority
-            // (increasing order):
-            //   - zero or more ('*')
-            //   - zero or one  ('?')
-            //   - one or more  ('+')
-            //   - exactly one  (normal/unquantified)
-            //
-            // So, for example, say we have this rule:
-            //   'p'*:a 'p'+:b 'p'?:c 'p':d -> woo;
-            //
-            // Observe that this will match 2 or more consecutive p's.
-            // But say it does.  Should the first parameter ("a") get
-            // all the p's?  That hardly seems the author's intent,
-            // and would in fact be quite surprising if the "b" and
-            // "d" parameters didn't get any, as they were specified
-            // as matching at least 1.  Therefore, non-optional steps
-            // get first priority when distributing paramters.
-            //
-            // How about this case?
-            //   'p'*:a 'p'?:b -> foo;
-            //
-            // Here, both are optional, so this rule matches 0 or more
-            // p's.  But the b parameter has priority, so it will get
-            // one of the matching p's (if there are any).
-            // 
-            friend bool operator<(
-                const quantifier &left, const quantifier &right
-            ) {
-                // Optional is lower than non-optional:
-                if(left.optional != right.optional)
-                    return left.optional;
-
-                // Either both or neither is optional.
-                // If one of them is multiple, it has lower priority:
-                if(left.multiple != right.multiple)
-                    return left.multiple;
-
-                // .. otherwise, apparently, they're the same:
-                return false;
-            }
-*/
         } qty;
 
         bool eject;  // if set, don't pass this to reduce code
