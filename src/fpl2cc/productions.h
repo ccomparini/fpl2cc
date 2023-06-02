@@ -938,28 +938,52 @@ public:
 
     // returns the name of the target-language type expected as
     // the result of reducing to the product indicated:
-    std::string type_for(const std::string &product) const {
+    std::string type_for(
+        const std::string &product,
+        src_location caller = CALLER()
+    ) const {
         // if there's a specific type already designated for this
         // product, use that:
         auto tf = type_for_product.find(product);
         if(tf != type_for_product.end()) {
+            if(opts.debug_types) {
+                std::cerr << stringformat(
+                    "telling {} that {} has specific type {}\n",
+                    caller, product, tf->second
+                );
+            }
             return tf->second;
         }
 
         // if it's a goal, use the output type
         if(is_goal(product)) {
+            if(opts.debug_types) {
+                std::cerr << stringformat(
+                    "telling {} that {} has goal type {}\n",
+                    caller, product, output_type()
+                );
+            }
             return output_type();
         }
 
         // can't infer type:
+        if(opts.debug_types) {
+            std::cerr << stringformat(
+                "telling {} that we don't know the type for {}",
+                caller, product
+            );
+        }
         return "";
     }
 
     // and this returns the type to use for a particular grammar
     // element, which covers terminals as well:
-    std::string type_for(const grammar_element &ge) const {
+    std::string type_for(
+        const grammar_element &ge,
+        src_location caller = CALLER()
+    ) const {
         if(ge.is_nonterminal()) {
-            return type_for(ge.expr);
+            return type_for(ge.expr, caller);
         }
         // assertions are terminals as well:
 // OH LOOK we already have a type for terminals.  Perhaps use this
@@ -968,8 +992,11 @@ public:
 
     // .. and one more convenience, because this is many-layered
     // in places:
-    std::string type_for(const production_rule::step &st) const {
-        return type_for(st.gexpr);
+    std::string type_for(
+        const production_rule::step &st,
+        src_location caller = CALLER()
+    ) const {
+        return type_for(st.gexpr, caller);
     }
 
     enum code_source{
