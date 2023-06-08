@@ -15,6 +15,7 @@ import subprocess
 import sys
 import time
 import unittest
+import warnings
 
 FIELDS = [
     # order here is based on how we want the columns to show up in the output,
@@ -22,7 +23,7 @@ FIELDS = [
     # by default.
     'timestamp',       # unix epoch time at which this was created
                        #   (typically at the end of the process)
-    'cpu_total',        # sys + user cpu seconds
+    'cpu_total',       # sys + user cpu seconds
     'cpu_user',        # user space cpu seconds
     'cpu_system',      # system cpu seconds
     'max_rss',         # max resident size (rss) in memory
@@ -124,11 +125,11 @@ def _git_commit_id():
         # and doesn't require anyone to install any special modules.
         git_result = subprocess.run(
             ['git', 'log', '-1', '--pretty=format:%h'],
-            stdout=subprocess.PIPE
+            stdout=subprocess.PIPE, check=True
         )
-        git_commit_id = git_result.stdout.decode('ascii')
-    except ex:
-        warn(ex)
+        git_id = git_result.stdout.decode('ascii')
+    except Exception as ex:
+        warnings.warn(f"can't get git commit id: {ex}")
 
     return git_id
 
