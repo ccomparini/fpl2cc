@@ -88,6 +88,10 @@
     struct bkv_obj_member {
         std::string key;
         bkv_item    val;
+
+        // (anything returned in fpl needs to be default constructible)
+        bkv_obj_member() { }
+
         bkv_obj_member(const std::string &k, const bkv_item &v) :
             key(k),
             val(v) {
@@ -140,9 +144,7 @@
 @type_for member bkv_obj_member
 +object(members) +{
     bkv_object out;
-    members@foreach([&out](const Product &memi)->void {
-        // this is.. super ugly
-        const bkv_obj_member &mem = std::get<bkv_obj_member>(memi.var());
+    members@foreach([&out](const bkv_obj_member &mem)->void {
         out[mem.key] = mem.val;
     });
     return out;
@@ -152,8 +154,8 @@
 +array(elements) +{
     bkv_array out;
     // WTB automatic way to do this.  construct from iterators?
-    elements@foreach([&out](const Product &item)->void {
-        out.push_back(item.val());
+    elements@foreach([&out](const bkv_item &item)->void {
+        out.push_back(item);
     });
     return out;
 }+

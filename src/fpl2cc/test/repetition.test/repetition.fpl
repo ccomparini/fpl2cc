@@ -51,8 +51,8 @@ statements -> done +{
     // slices intact?  then we don't have to jump through
     // these hoops (and would be way more efficient).
     std::list<std::string> out;
-    statement@foreach([&out](const Product &st)->void {
-        out.push_back(st.val());
+    statement@foreach([&out](const std::string &st)->void {
+        out.push_back(st);
     });
     return out;
 }+

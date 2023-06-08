@@ -63,8 +63,8 @@ sum -> expression ;
 +argument_list(args) +{
     std::vector<double> out;
     out.reserve(args@count());
-    args@foreach([&out](const Product &el)->void {
-        out.push_back(el.val());
+    args@foreach([&out](double el)->void {
+        out.push_back(el);
     });
     return out;
 }+
@@ -83,8 +83,10 @@ sum -> expression ;
 }+
 
 +statements(statement) +{
-    statement@foreach([](const Product &el)->void {
-       std::cout << stringformat("{}\n", el.val());
+    // (each statement has been reduced to a numeric result,
+    // so we're just printing them at this point)
+    statement@foreach([](double st)->void {
+       std::cout << stringformat("{}\n", st);
     });
     return statement@count();
 }+

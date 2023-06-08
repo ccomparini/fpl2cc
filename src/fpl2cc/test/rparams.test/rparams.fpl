@@ -27,7 +27,7 @@ apple     -> fruit;
 # Common subexpression w/ melding and bubble-up:
 # The reduce action should expect one "fruit" parameter
 # with multiple items:
-'('^ (fruit (','^ fruit)*) ')'^ -> fruit_list;
+'('^ (fruit (','^ fruit)*)? ')'^ -> fruit_list;
 fruit_list -> list;
 
 /[0-9]+/:digits -> integer;
@@ -79,9 +79,8 @@ integer:foo list:foo -> doom;
 
 +fruit_list(fruit) +{
     std::list<std::string> list;
-    // OMG we need a reasonable grammar for this
-    fruit@foreach([&list](const Product &fr)->void {
-        list.push_back(fr.var_str());
+    fruit@foreach([&list](const std::string &fr)->void {
+        list.push_back(fr);
     });
     std::cout << stringformat(
         "fruit list input has {} elements and output has {} elements\n",

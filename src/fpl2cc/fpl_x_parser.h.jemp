@@ -862,6 +862,9 @@ public:
                 // try to return a default item of the ReduceType.
                 // this may or may not be possible, depending on the
                 // type, but it's better than crashing.
+                // ACTUALLY let's just say it's a requirement that
+                // the reduce type must be default constructible. shipit.
+                // move on.
                 return ReduceType();
             }
 
@@ -882,13 +885,22 @@ public:
             return out;
         }
 
-        // XXX we pass the Product here so that callers can get at
-        // line numbers etc, but ... oh that's outdated.
-        // See if we can jsut pass ReduceType
-        using ForeachFunc = std::function<void(const Product &)>;
+        @/*
+           foreach() is a convenience method for iterating everything
+           in the parameter.  In fpl, you'd use this with a closure,
+           like:
+              things+ -> group +{
+                  std::list<thing> grp;
+                  things@foreach([&grp](const thing &th)->void {
+                      grp.push_back(th); // or whatever..
+                  });
+                  return grp;
+              }+
+        */@
+        using ForeachFunc = std::function<void(const ReduceType &)>;
         void foreach(ForeachFunc func) const {
             for(int ind = 0; ind < count(); ++ind) {
-                func(lr_slice.product(ind));
+                func(val(ind));
             }
         }
 
