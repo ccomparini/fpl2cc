@@ -72,13 +72,15 @@
                 // this step is followed by other steps with the same
                 // expression but higher priority w/respect to parameters,
                 // so we need to reserve @step.reserve@ matches for those
-                // params:
+                // params. (example case: foo:a* foo:b -> bar;  need to
+                // reserve 1 slot for the b)
                 slice_size -= @step.reserve@;
                 if(slice_size < 0)
                     slice_size = 0;
             @}@
 
             @if(!step.skip_on_reduce()) {@
+                @/* here's where we declare the argument to pass */@
                 ReductionParameter<@prds.type_for(step.gexpr)@>
                     arg_@stind@(*this, arg_start, slice_size);
                 @if(opts.debug) {@
@@ -92,7 +94,9 @@
         @}-@
     @}-@
 
-    @/* this is the call to the reduce code: */@
+    @/* this is the call to the reduce code.  Note that here we just label
+        all the parameters "arg_xxx" and don't worry about their "real" names.
+    */@
     @-prds.type_for(rule.product())@ result = @prds.rule_fn(rule) -@ (
         @-for(int pind = 0; pind < num_params; pind++) {-@
             @- pind?",":"" -@ arg_@-rule.reduce_param_step_num(pind)-@

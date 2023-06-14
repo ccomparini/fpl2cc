@@ -3105,12 +3105,12 @@ public:
     // match.  This function figures out and records the elements for which
     // this is relevant.
     //
-    // I believe other parser generators (yacc etc) resolve this with
-    // the concept of word boundaries.  But, I want fpl to work 
-    // Anyway this should be more efficient for the generated parser
-    // since it only needs to look for a boundary if it actually matters
-    // for the particular terminal, and then we'd only have the check
-    // the particular suffixes which matter.
+    // I believe other parser generators (yacc etc) resolve this with the
+    // concept of word boundaries.  But, I want fpl to be able to work
+    // without that concept.  Anyway, in principle this should be more
+    // efficient for the generated parser since it only needs to look
+    // for a boundary if it actually matters for the particular terminal,
+    // and then we'd only have the check the particular suffixes which matter.
     // 
     // Note that (at present) we only detect/prevent masking of TERM_EXACT
     // vs TERM_EXACT.  Checking vs TERM_REGEX is too complicated for me
@@ -3369,7 +3369,6 @@ public:
         }
     }
 
-// XXX might not be needed now (see resolve_scanners)
     void check_rule(const production_rule &rule) const {
         for(int stepi = 0; stepi < rule.num_steps(); stepi++) {
             auto step = rule.nth_step(stepi);
