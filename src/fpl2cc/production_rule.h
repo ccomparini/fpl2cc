@@ -138,6 +138,10 @@ public:
             return qty.multiple;
         }
 
+        bool is_subexpression() const {
+            return gexpr.type == grammar_element::Type::NONTERM_SUBEXPRESSION;
+        }
+
         bool matches(const grammar_element &other) const {
             return gexpr.compare(other) == 0;
         }
