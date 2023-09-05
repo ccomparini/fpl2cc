@@ -221,9 +221,9 @@ class stringformat_post_processor {
 public:
     static std::string process(char fmt, const std::string &in) {
         switch(fmt) {
-            case 'c': return c(in);
-            case 'e': return e(in);
-            case 'n': return n(in);
+            case 'c': return c(in);  // columnate (tab-delimited)
+            case 'e': return e(in);  // c-string escape
+            case 'n': return n(in);  // translate newlines to '\n'
         }
         // .. would be nice to warn about missing format here....
         return in;
