@@ -83,8 +83,8 @@ integer:foo list:foo -> doom;
         list.push_back(fr);
     });
     std::cout << stringformat(
-        "fruit list input has {} elements and output has {} elements\n",
-        fruit@count(), list.size()
+        "fruit list input has {} elements ({}) and output has {} elements\n",
+        fruit@count(), fruit@join(", "), list.size()
     );
     return list;
 }+

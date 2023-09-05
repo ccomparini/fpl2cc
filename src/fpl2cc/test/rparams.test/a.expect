@@ -1,5 +1,5 @@
 returncode = 0
 stderr = ""
-stdout = "fruit.val() list input has 3 elements and output has 3 elements
+stdout = "fruit.val() list input has 3 elements (🍇, 🍇, 🍎) and output has 3 elements
 std::list<std::string> «{ 🍇, 🍇, 🍎 }»
 "
