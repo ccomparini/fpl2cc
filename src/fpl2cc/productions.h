@@ -969,7 +969,7 @@ public:
         // can't infer type:
         if(opts.debug_types) {
             std::cerr << stringformat(
-                "telling {} that we don't know the type for {}",
+                "telling {} that we don't know the type for {}\n",
                 caller, product
             );
         }
