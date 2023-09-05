@@ -65,7 +65,7 @@ private:
             if(chan > error_channel) {
                 std::cerr << ensure_nl(stringformat(" at {}", caller));
             } else {
-                std::cerr << ensure_nl(stringformat("Aborting at {}", caller));
+                std::cerr << ensure_nl(stringformat("Fatal error at {}", caller));
                 exit(2112);
             }
         }
