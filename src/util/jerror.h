@@ -61,11 +61,10 @@ private:
         if(handlers.size()) {
             (handlers.back())(msg, caller);
         } else {
-            std::cerr << msg;
             if(chan > error_channel) {
-                std::cerr << ensure_nl(stringformat(" at {}", caller));
+                std::cerr << ensure_nl(stringformat("{} at {}", msg, caller));
             } else {
-                std::cerr << ensure_nl(stringformat("Fatal error at {}", caller));
+                std::cerr << ensure_nl(stringformat("Fatal error: {}\tat {}", msg, caller));
                 exit(2112);
             }
         }
