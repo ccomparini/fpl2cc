@@ -10,6 +10,7 @@
 #include "util/src_location.h"
 #include "util/stringformat.h"
 
+#include <map>
 #include <string>
 #include <vector>
 
