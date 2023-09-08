@@ -55,6 +55,11 @@ public:
         parent_cpos(0) {
     }
 
+    static const production_rule &false_rule() {
+        static production_rule fr;
+        return fr;
+    }
+
     operator bool() const {
         return prod_type != grammar_element::Type::NONE;
     }
