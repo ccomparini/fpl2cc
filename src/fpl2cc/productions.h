@@ -886,9 +886,9 @@ class productions {
             auto endrl = prds.rules_for_product.upper_bound(for_product);
             for(auto rit = strl; rit != endrl; ++rit) {
                 const production_rule &rule = prds.rules[rit->second];
-                const int num_params = rule.num_reduce_params();
+                const int num_params = rule.parameter_count();
                 for(int param = 0; param < num_params; param++) {
-                    const production_rule::step st = rule.reduce_param(param);
+                    const production_rule::step st = rule.parameter_step(param);
 
                     if(st.skip_on_reduce())
                         continue; // reducers never see this one anyway - skip
@@ -2888,7 +2888,7 @@ private:
             for(auto rit = strl; rit != endrl; ++rit) {
                 auto rule = rules[rit->second];
                 if(rule.is_potential_type_alias()) {
-                    auto subp = rule.reduce_param(0).gexpr;
+                    auto subp = rule.parameter_step(0).gexpr;
                     if(type_for(subp) == "") {
                         if(!subp.is_nonterminal()) {
                             // so afaik we can't get here.

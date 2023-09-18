@@ -1,7 +1,7 @@
 @parameter: const productions &prds @
 @parameter: const production_rule &rule @
 @parameter: const fpl_options &opts @
-@declare num_params: rule.num_reduce_params()@
+@declare num_params: rule.parameter_count()@
 @realign: #line {} "{}" @
 
 @/*
@@ -43,7 +43,7 @@
         std::cerr << stringformat(
             "reducing by {}  ({} steps, {} params)\n",
             "@c_str_escape(rule.to_str())@", // (rule might have {} in it)
-            @rule.num_steps()@, @rule.num_reduce_params()@
+            @rule.num_steps()@, @rule.parameter_count()@
         );
         std::cerr << stringformat(
             "all_matched_steps: {}\n", all_matched_steps()
@@ -99,7 +99,7 @@
     */@
     @-prds.type_for(rule.product())@ result = @prds.rule_fn(rule) -@ (
         @-for(int pind = 0; pind < num_params; pind++) {-@
-            @- pind?",":"" -@ arg_@-rule.reduce_param_step_num(pind)-@
+            @- pind?",":"" -@ arg_@-rule.parameter_step_number(pind)-@
         @-}-@
     );
 

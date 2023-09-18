@@ -1,12 +1,12 @@
 @parameter: const productions &prds@
 @parameter: const production_rule &rule@
 @declare return_type: prds.type_for(rule.product())@
-@declare num_params: rule.num_reduce_params()@
+@declare num_params: rule.parameter_count()@
 @realign: #line {} "{}" @
 
 @return_type@ @rule.rule_fn()@(
     @-for(int pind = 0; pind < num_params; pind++) {-@
-        @declare step: rule.reduce_param(pind) @
+        @declare step: rule.parameter_step(pind) @
         @- pind?", ":"" -@ ReductionParameter<@prds.type_for(step.gexpr)@> @step.variable_name()-@
     @-}-@
 ) {
@@ -20,7 +20,7 @@
         @/* auto generated type - initialize from parameters */@
         @return_type@ result;
         @-for(int pind = 0; pind < num_params; pind++) {-@
-            @declare param: rule.reduce_param(pind)@
+            @declare param: rule.parameter_step(pind)@
             @declare pname: param.variable_name()@
             @declare elname: prds.element_id_name(param.gexpr)@
             result.@pname@.reserve(@pname@.count());
@@ -34,8 +34,8 @@
         #line 1 "@rule.location()@ (default action for @c_str_escape(rule.to_str())@)"
         // @source.filename()@:@source.line_number()@
         return @return_type@(
-            @-for(int parmi = 0; parmi < rule.num_reduce_params(); parmi++) {-@
-                @declare param: rule.reduce_param(parmi)@
+            @-for(int parmi = 0; parmi < rule.parameter_count(); parmi++) {-@
+                @declare param: rule.parameter_step(parmi)@
                 @declare vname: param.variable_name()@
                 @-if(param.is_optional()){-@
                     #line @rule.line_number()@ "@rule.filename()@"

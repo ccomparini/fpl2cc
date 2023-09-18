@@ -178,7 +178,7 @@ public:
         // and would in fact be quite surprising if the "b" and
         // "d" parameters didn't get any, as they were specified
         // as matching at least 1.  Therefore, non-optional steps
-        // get first priority when distributing paramters.
+        // get first priority when distributing parameters.
         //
         // How about this case?
         //   'p'*:a 'p'?:b -> foo;
@@ -319,7 +319,7 @@ public:
                 st.varname = name;
             }
 
-            const int existing_si = reduce_param_step_num(name);
+            const int existing_si = parameter_step_number(name);
             if(existing_si < 0) {
                 // no existing step with this name, so we can do a simple add:
                 step_vars[name] = stepi;
@@ -411,13 +411,13 @@ public:
     // 2 steps with the same name are combined into one parameter,
     // or, if a given step is a subexpression, it may have multiple
     // reduce parameters.
-    int num_reduce_params() const {
+    int parameter_count() const {
         return step_vars.size();
     }
 
     // Returns a std::set containing the names of the reduce parameters
     // (in order).
-    const std::set<std::string> reduce_params() const {
+    const std::set<std::string> parameter_names() const {
         // .. this is maybe not the most efficient.  shipit.
         std::set<std::string> names;
         for(auto step : step_vars) {
@@ -436,7 +436,7 @@ public:
     //   }+
     // .. which means that the order in which parameters are passed
     // to reduce actions doesn't necessarily match the step order.
-    int reduce_param_step_num(
+    int parameter_step_number(
         unsigned int pind, src_location ca = CALLER()
     ) const {
         // we're iterating step vars so that they're in parameter
@@ -454,7 +454,7 @@ public:
 
     // Returns the index in the rsteps array for the parameter with
     // the given name, or -1 if there's no such parameter.
-    int reduce_param_step_num(
+    int parameter_step_number(
         const std::string &pname, src_location ca = CALLER()
     ) {
         auto found = step_vars.find(pname);
@@ -468,18 +468,18 @@ public:
     // by parameter position.
     // Returns a ref to the step if the index is valid, or a
     // ref to the false step otherwise.
-    const step &reduce_param(
+    const step &parameter_step(
         unsigned int index, src_location ca = CALLER()
     ) const {
-        unsigned stepi = reduce_param_step_num(index, ca);
+        unsigned stepi = parameter_step_number(index, ca);
         if(stepi < rsteps.size())
-            return rsteps[reduce_param_step_num(index, ca)];
+            return rsteps[parameter_step_number(index, ca)];
         return step::false_step();
     }
 
     // ... or by name (as above), though this will warn if given
     // an invalid name.  (should it?)
-    const step &reduce_param(
+    const step &parameter_step(
         const std::string &pname, src_location ca = CALLER()
     ) const {
         auto stepi = step_vars.find(pname);
@@ -514,9 +514,10 @@ public:
     // if this rule has exactly one reduce parameter,
     // return a reference to the step for that parameter.
     // otherwise, return a false step.
+// XXX rename this or figure it out:
     const step &single_param() const {
-        if(num_reduce_params() == 1) {
-            return reduce_param(0);
+        if(parameter_count() == 1) {
+            return parameter_step(0);
         }
         return step::false_step();
     }
@@ -529,8 +530,8 @@ public:
 
         // the rule is a potential alias if it has
         // exactly one reduce parameter.... 
-        if(num_reduce_params() == 1) {
-            const step &rp = reduce_param(0);
+        if(parameter_count() == 1) {
+            const step &rp = parameter_step(0);
             // and it's not optional or multiple.
             // multiples need to be represented with a different
             // type (eg array of x instead of x), and optionals
@@ -619,7 +620,7 @@ public:
             out = code_for_rule;
         // else return a false code block
 
-        out.mangle_stack_slice_args(reduce_params());
+        out.mangle_stack_slice_args(parameter_names());
         return out;
     }
 

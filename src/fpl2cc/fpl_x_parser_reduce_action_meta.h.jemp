@@ -17,7 +17,7 @@
             return @rule.num_steps()@;
         }
         static int num_params() {
-            return @rule.num_reduce_params()@;
+            return @rule.parameter_count()@;
         }
         static int line_number() {
             return @rule.line_number()@;
@@ -33,11 +33,11 @@
         }
         static const char *param_name(unsigned int ind) {
             static const char *pname[] = {
-                @for(int rpi = 0; rpi < rule.num_reduce_params(); ++rpi) {-@
-                    "@rule.reduce_param(rpi).variable_name()@"
+                @for(int rpi = 0; rpi < rule.parameter_count(); ++rpi) {-@
+                    "@rule.parameter_step(rpi).variable_name()@"
                 @}-@
             };
-            if(ind < @rule.num_reduce_params()@) {
+            if(ind < @rule.parameter_count()@) {
                 return pname[ind];
             } else {
                 return "param_name index out of bounds at "

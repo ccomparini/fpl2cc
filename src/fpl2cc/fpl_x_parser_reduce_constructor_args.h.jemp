@@ -2,8 +2,8 @@
 @parameter: const production_rule &rule@
 @realign: #line {} "{}" @
 
-@-for(int parmi = 0; parmi < rule.num_reduce_params(); parmi++) {-@
-    @declare param: rule.reduce_param(parmi)@
+@-for(int parmi = 0; parmi < rule.parameter_count(); parmi++) {-@
+    @declare param: rule.parameter_step(parmi)@
     @declare vname: param.variable_name()@
 
     @-if(param.is_optional()){-@
