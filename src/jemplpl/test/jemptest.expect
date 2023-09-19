@@ -1,0 +1,69 @@
+24
+
+
+This is a template with some arbitrary  text, including an @ sign.
+
+This line comes from src/jemplpl/test/jemptest.jemp line 22.
+
+The sub str is "hello world" and maybe we'll do it 23 times.
+
+For the 0th time, we're substituting in this string: "hello world".
+For the 1th time, we're substituting in this string: "hello world".
+For the 2th time, we're substituting in this string: "hello world".
+For the 3th time, we're substituting in this string: "hello world".
+For the 4th time, we're substituting in this string: "hello world".
+For the 5th time, we're substituting in this string: "hello world".
+For the 6th time, we're substituting in this string: "hello world".
+For the 7th time, we're substituting in this string: "hello world".
+For the 8th time, we're substituting in this string: "hello world".
+For the 9th time, we're substituting in this string: "hello world".
+For the 10th time, we're substituting in this string: "hello world".
+For the 11th time, we're substituting in this string: "hello world".
+For the 12th time, we're substituting in this string: "hello world".
+For the 13th time, we're substituting in this string: "hello world".
+For the 14th time, we're substituting in this string: "hello world".
+For the 15th time, we're substituting in this string: "hello world".
+For the 16th time, we're substituting in this string: "hello world".
+For the 17th time, we're substituting in this string: "hello world".
+For the 18th time, we're substituting in this string: "hello world".
+For the 19th time, we're substituting in this string: "hello world".
+For the 20th time, we're substituting in this string: "hello world".
+For the 21th time, we're substituting in this string: "hello world".
+For the 22th time, we're substituting in this string: "hello world".
+
+I hope we did it 23 times.  23 + 2 = 25.
+
+does if/else work?
+I think yes, because this is else.
+
+some even numbers, for your enjoyment:
+22 20 18 16 14 12 10 8 6 4 2 
+and now the source line is 47
+
+     0 1 2 3 4
+     0 2 4 6 8
+     0 3 6 9 12
+     0 4 8 12 16
+     0 5 10 15 20
+message for you, Rudy: regular imports seem to work
+
+ 
+src/jemplpl/test/jemptest_sub_0.h.jemp line 7: importing sub 0 for 0
+ 
+src/jemplpl/test/jemptest_sub_1.h.jemp line 7: importing sub 1 for 1
+
+ 
+src/jemplpl/test/jemptest_sub_0.h.jemp line 7: importing sub 0 for 2
+ 
+src/jemplpl/test/jemptest_sub_1.h.jemp line 7: importing sub 1 for 3
+
+ 
+src/jemplpl/test/jemptest_sub_0.h.jemp line 7: importing sub 0 for 4
+ 
+src/jemplpl/test/jemptest_sub_1.h.jemp line 7: importing sub 1 for 5
+
+
+declared seems to parse correctly
+cool, we can declare realign
+
+the line at the end is 64

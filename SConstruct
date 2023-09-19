@@ -154,6 +154,8 @@ src_subdirs = [
     # interesting.
     'util/',
     'util/test/',
+    'jemplpl/',
+    'jemplpl/test/',
     'fpl2cc/',
     'fpl2cc/test/',
     'grammarlib/test/',

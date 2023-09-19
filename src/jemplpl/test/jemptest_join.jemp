@@ -1,0 +1,9 @@
+@parameter: const std::list<std::string> &const_inputs @
+@parameter: std::list<std::string> &inputs @
+
+@-join(const_inputs -> named_input, " - ") {-@
+    @named_input@ on one line with dashes
+@-}-@
+
+
+

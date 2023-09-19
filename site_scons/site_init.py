@@ -326,4 +326,40 @@ def fpl_compile_command():
     # return 'bin/fpl2cc --lr-stack-reserve=2 --param-stack-reserve=3 --src-path=src/grammarlib $FPLOPTS $SOURCES --out $TARGET --depfile .deps --statedump .states'
     return 'bin/fpl2cc --src-path=src/grammarlib $FPLOPTS $SOURCES --out $TARGET --depfile .deps --statedump .states'
 
+# Runs .cc-based tests for each file matching "*.expect".
+# At the moment, if there are any .expect files which 
+# don't correspond to .cc based programs, this will probably
+# break.
+# But, this serves my purposes at this moment.
+def run_cc_tests(env):
+    for scons_expect in Glob('*.expect'):
+        # (tprog is a scons Node, not a python thingo)
+        tprog, ext = os.path.splitext(scons_expect.name)
+        env.Program(tprog, [ tprog + '.cc' ])
+    
+        output_file = tprog + '.out'
+    
+        # tests may want to find themselves and/or data directories:
+        src_dir = source_dir(scons_expect).get_abspath();
+        #print(f"THIS IS PYTHON AND src_dir is {src_dir}\n", file=sys.stderr)
+        env['ENV']['SRC_DIR'] = src_dir
+        fp_data_dir = src_dir + '/' + tprog + '.data' # (full path)
+        if(os.path.isdir(fp_data_dir)):
+            # DATA_DIR environment variable is relative to SRC_DIR
+            env['ENV']['DATA_DIR'] = os.path.relpath(fp_data_dir, src_dir)
+    
+            # output depends on everything in the data dir:
+            for root, dirnames, filenames in os.walk(fp_data_dir):
+                for fn in filenames:
+                    env.Depends(output_file, f"{root}/{fn}")
+    
+        # Run the test:
+        #    Command(target, source, action, [key=val, ...])
+        # (note $SOURCE is the path to the tprog)
+        env.Command(output_file, tprog, '$SOURCE > $TARGET')
+    
+        # compare the output of the test to the expected output;
+        # .success file is/becomes up to date if output matched
+        env.CompareOut(tprog + '.success', [ tprog + '.out', tprog + '.expect' ])
+
 

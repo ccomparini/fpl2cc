@@ -1,0 +1,8 @@
+Import('env')
+env = env.Clone()
+
+# Note: jemplpl.cc is generated from jemplp.fpl, but checked
+# in for bootstrapping (and to avoid circular dependencies).
+# To recreate it, run util/rejemp.
+env.Program('#bin/jemplpl', [ 'jemplpl.cc' ])
+
