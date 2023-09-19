@@ -60,7 +60,15 @@
     }+
 
     /[0-9]+/:digits -> integer +{
-        return std::stod(digits);
+        // we matched an integer, so return one (at the c++ level).
+        // this is less exciting than it looks, because basically
+        // that integer is going to get reduced to a term before
+        // anything else happens at the wcalc level,  which will
+        // mean it gets converted to a double (like everything else
+        // here), but it does place the integer on the stack before
+        // that, so we are testing handling multiple types to that
+        // degree.
+        return std::stoi(digits);
     }+
 ] -> term;
 
