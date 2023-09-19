@@ -3050,31 +3050,38 @@ public:
         return suffixes;
     }
 
+    void resolve_custom_step(production_rule &rule, int stepi) {
+        auto step = rule.nth_step(stepi);
+        std::string scanner_name = step.gexpr.expr;
+        auto found = scanners.find(scanner_name);
+        if(found == scanners.end()) {
+            // it is possible that the rule isn't
+            // used, so the scanner won't be used, but
+            // we're going to complain about it here
+            // anyway because the code generator shouldn't
+            // have to be bothered checking if a given
+            // element is actually used.
+            error(stringformat(
+                "use of undefined scanner &{} in rule {} {}",
+                scanner_name, rule, rule.location()
+            ));
+        } else if(found->second.language == code_block::REGEX) {
+            // regex-implemented scanners are just TERM_REGEX,
+            // so we don't need special jemp code for them.
+            // just resolve them here:
+            rule.resolve_regex_custom(stepi, found->second.code);
+        }
+    }
+
+    // figures out what to do with weird cases like custom or inverted steps.
+    // this may change steps within rules or even create or delete rules.
     void resolve_steps() {
         for(int rulei = 0; rulei < rules.size(); ++rulei) {
             production_rule &rule = rules[rulei];
             for(int stepi = 0; stepi < rule.num_steps(); stepi++) {
                 auto step = rule.nth_step(stepi);
                 if(step.type() == grammar_element::TERM_CUSTOM) {
-                    std::string scanner_name = step.gexpr.expr;
-                    auto found = scanners.find(scanner_name);
-                    if(found == scanners.end()) {
-                        // it is possible that the rule isn't
-                        // used, so the scanner won't be used, but
-                        // we're going to complain about it here
-                        // anyway because the code generator shouldn't
-                        // have to be bothered checking if a given
-                        // element is actually used.
-                        error(stringformat(
-                            "use of undefined scanner &{} in rule {} {}",
-                            scanner_name, rule, rule.location()
-                        ));
-                    } else if(found->second.language == code_block::REGEX) {
-                        // regex-implemented scanners are just TERM_REGEX,
-                        // so we don't need special jemp code for them.
-                        // just resolve them here:
-                        rule.resolve_regex_custom(stepi, found->second.code);
-                    }
+                    resolve_custom_step(rule, stepi);
                 }
             }
 
