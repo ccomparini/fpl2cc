@@ -116,7 +116,7 @@ assignment -> stuff;
 
 
 # strings are double quoted; quotes can be escaped with
-# a backslash.  really, this is to test inverting revex match.
+# a backslash.  really, this is to test inverting regex match.
 '"'^ !/"|(:?\")/:guts '"'^ -> string;
 
 &variable  -> stuff;
