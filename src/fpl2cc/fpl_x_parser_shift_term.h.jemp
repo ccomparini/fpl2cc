@@ -62,13 +62,13 @@ bool shift_@el.type_str()@_@el_id@(bool eject) {
         if(match.length())
             result = Terminal(match);
     @} else if(el.type == grammar_element::TERM_CUSTOM) {@
-        result = custom_scanner_@el.expr@(*reader);
+        result = custom_scanner_@match_str@(*reader);
     @} else if(el.type == grammar_element::LACK_OF_SEPARATOR) {@
         if(!bytes_eaten) {
             result = Terminal("⦑lack-of-separator⦒");
         }
     @} else if(el.type == grammar_element::END_OF_PARSE) {@
-        @/* placeholder.  can't get here */@
+        // end of parse placeholder.  can't get here.
     @} else {@
         #error Unimplemented terminal type: @el.type@
     @}@
