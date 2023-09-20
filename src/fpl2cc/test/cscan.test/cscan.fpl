@@ -38,8 +38,6 @@
     
 }+
 
-# XXX custom scanner with args here.. like, string scanning?
-
 stuff* the_end -> done +{
     std::cout << stuff@join("\n") + "\n" + the_end + "\n";
     return "totally done";
@@ -119,7 +117,7 @@ assignment -> stuff;
 # a backslash.  really, this is to test inverting regex match.
 '"'^ !/"|(:?\")/:guts '"'^ -> string;
 
-&variable  -> stuff;
+&variable -> stuff;
 
 /.+/:anything_else -> stuff +{
     return stringformat("other stuff: '{}'\n", anything_else);
