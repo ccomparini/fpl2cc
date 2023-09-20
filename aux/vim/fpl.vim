@@ -50,9 +50,9 @@ syn match	fplImport	"`.*`"
 
 " expressions:
 syn region	fplExpression	start="/" end="/" skip=+\\/+
-syn region	fplExpression	start=+"+ end=+"+
+syn region	fplExpression	start=+"+ end=+"+ skip=+\\"+
 syn region	fplExpression	start=+'+ end=+'+
-syn match	fplExpression	"&"
+syn match	fplExpression	"&[a-zA-Z_]\+"
 syn match	fplExpression	"!"
 syn match	fplExpression	"\~"
 
@@ -61,6 +61,11 @@ syn match	fplSuffix	"\^"
 
 " rules (treat as variables)
 syn match	fplProductionName	"[A-Za-z][A-Za-z0-9_]*"
+syn match	fplProductionName	"\."
+syn match	fplProductionName	"<<"
+syn match	fplProductionName	">"
+syn match	fplProductionName	"<<"
+syn match	fplProductionName	">"
 
 " embedded c++
 syntax include @CPP syntax/cpp.vim
