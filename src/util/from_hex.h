@@ -22,7 +22,6 @@
 
     If no hex digits were found at the position passed, this returns 0.
 
-    Example:
  */
 template<typename OUT_T, typename IN_T, typename LEN_T>
 OUT_T from_hex(IN_T src, LEN_T &pos, size_t max_len = 0) {
