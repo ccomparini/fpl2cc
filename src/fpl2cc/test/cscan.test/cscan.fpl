@@ -60,7 +60,7 @@ block -> stuff;
 "\b"   -> stuff +{ return "I take that last byte back"; }+
 "\e\b" -> stuff +{ return "no escape!"; }+ # 2 bytes: ESC and 
 
-"\U3069":to   -> stuff +{ return "don't stub your " + to.to_str(); }+
+"\U3068":to   -> stuff +{ return "don't stub your " + to.to_str(); }+
 #"\U1F408":cat -> stuff +{ return cat + " says meow"; }+  # XXX this should work! gar..
 #"\U0001F408":cat -> stuff +{ return cat + " says meow"; }+ # XXX this should work too! w/out to_str()
 "\u0001F408":cat -> stuff +{ return cat.to_str() + " says meow"; }+
