@@ -51,7 +51,7 @@ syn match	fplImport	"`.*`"
 " expressions:
 syn region	fplExpression	start="/" end="/" skip=+\\/+
 syn region	fplExpression	start=+"+ end=+"+ skip=+\\"+
-syn region	fplExpression	start=+'+ end=+'+
+syn region	fplExpression	start=+'+ end=+'+ skip=+\\'+
 syn match	fplExpression	"&[a-zA-Z_]\+"
 syn match	fplExpression	"!"
 syn match	fplExpression	"\~"

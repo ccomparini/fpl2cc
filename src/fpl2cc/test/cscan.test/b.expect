@@ -4,6 +4,7 @@ stdout = "mixed block: [x ]
 
 I take that last byte back
 backslash b
+regular b
 no escape!
 \\x23
 yay 😁

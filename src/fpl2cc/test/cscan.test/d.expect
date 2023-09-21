@@ -1,0 +1,9 @@
+returncode = 0
+stderr = ""
+stdout = "single backslash: \\
+single quote: '
+single quote: '
+single quote: '
+single backslash: \\
+ding!
+"

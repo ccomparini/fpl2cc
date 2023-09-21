@@ -54,9 +54,10 @@ block -> stuff;
 "\x23" -> stuff +{ return "hash"; }+ # one byte '#'
 '\x23' -> stuff;                     # 4 chars: literal \x23
 
-'\b'   -> stuff +{ return "backslash b"; }+ # 2 chars: backslash, then b
+'\b'   -> stuff +{ return "backslash b"; }+ # 2 chars: backslash and 'b'
+'b'    -> stuff +{ return "regular b"; }+ # 1 char: 'b'
 "\b"   -> stuff +{ return "I take that last byte back"; }+
-"\e\b" -> stuff +{ return "no escape!"; }+ # 2 bytes: ESC and 
+"\e\b" -> stuff +{ return "no escape!"; }+ # 2 bytes: ESC and backspace
 
 "\U3068":to   -> stuff +{ return "don't stub your " + to.to_str(); }+
 #"\U1F408":cat -> stuff +{ return cat + " says meow"; }+  # XXX this should work! gar..
@@ -70,6 +71,9 @@ literal_double_quote -> stuff;
 # yay, this correctly causes conflict warning. (integrate with tests?)
 #'"'  -> also_double_quote +{ return "also double quote; cant get here"; }+
 #also_double_quote -> stuff;
+
+'\'':sq -> stuff +{ return stringformat("single quote: {}", sq); }+
+'\\':sb -> stuff +{ return stringformat("single backslash: {}", sb); }+
 
 # this is identical to 'U'
 "\U" -> stuff +{ return "you? no, U!"; }+

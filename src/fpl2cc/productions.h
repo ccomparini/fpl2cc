@@ -1683,9 +1683,12 @@ public:
     //    No checks for valid unicode are performed.
     //    As such, anything <= 0x7f is the same in \Uhh or \xhh
     //    notation, and anything > 0x10ffff is guaranteed not to
-    //    be actual unicode.  Also (because the encoding "runs
-    //    out" of bits in the first byte), the maximum encodable
-    //    value is \u7fffffff.  Attempting
+    //    be actual unicode (though it may still be utf-8 encodable).
+    //    Also (because the encoding "runs out" of bits in the
+    //    first byte), the maximum encodable value is \u7fffffff.
+    //    If the sequence specified can't be utf-8-style encoded,
+    //    it will be treated as an escaped U or u followed by
+    //    arbitrary text.
     //
     std::string convert_escapes(const std::string &src) const {
         std::string out;
@@ -1694,6 +1697,10 @@ public:
         out.reserve(src.length());
         int ind = 0;
         while(ind < src.length()) {
+            // utf-8 note:  backslash is 0x5f = 0b01011100.
+            // multi-byte utf-8 chars all have their high bits
+            // set, so (on valid utf-8) the backslash will never
+            // abridge a utf-8 character (thus this should dtrt)
             if(src[ind] == '\\') {
                 ++ind; // skip the backslash
                 switch(src[ind]) {
@@ -1744,6 +1751,21 @@ public:
         return out;
     }
 
+    // Remove backslashes which were used for escapes in single
+    // quoted strings.  The 2 cases are '\'' and '\\'.  Everything
+    // else is left intact.
+    static void remove_single_quote_escapes(std::string &str) {
+        for(size_t pos = 0; pos < str.length(); ++pos) {
+            if(str[pos] == '\\') {
+                if(pos + 1 < str.length()) {
+                    if((str[pos+1] == '\\') || (str[pos+1] == '\'')) {
+                        str.replace(pos, 1, "");
+                    }
+                }
+            }
+        }
+    }
+
     // If there's a single, obvious name for the variable to use
     // for the subexpression passed, this returns it.  Otherwise,
     // returns an empty string.
@@ -1791,10 +1813,13 @@ public:
                     type     = grammar_element::Type::TERM_EXACT;
                     break;
                 case '\'':
-                    // Within single quotes, there's no escaping - not
-                    // even for single quotes.  If you want to match
-                    // a single quote, use "'".
+                    // Within single quotes, a backslash simply removes any
+                    // special meaning of the next char.  The only 2 chars
+                    // with special meaning are the end quote and backslashes.
+                    // So, '\\' means one backslash, '\'' means one single
+                    // quote, but '\n' means 2 chars: backslash and 'n'.
                     expr_str = inp->parse_string();
+                    remove_single_quote_escapes(expr_str);
                     type     = grammar_element::Type::TERM_EXACT;
                     break;
                 case '/':
