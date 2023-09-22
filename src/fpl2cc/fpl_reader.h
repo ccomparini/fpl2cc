@@ -411,16 +411,22 @@ public:
 
     inline void go_to(size_t position) {
         read_pos = position;
+        if(read_pos >= buffer.length()) {
+            read_pos = buffer.length() - 1;
+        } else if(read_pos < 0) {
+            read_pos = 0;
+        }
     }
 
     inline size_t skip_bytes(size_t skip) {
-        read_pos += skip;
-        return skip;
+        size_t start = read_pos;
+        go_to(read_pos + skip);
+        return read_pos - start;
     }
 
     // skips the current utf-8 character
     inline void skip_char() {
-        read_pos += char_length(read_pos);
+        skip_bytes(char_length(read_pos));
     }
 
     size_t separator_length(LengthCallback separator_cb) {
