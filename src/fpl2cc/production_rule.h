@@ -252,8 +252,7 @@ public:
             std::string out;
 
             if(invert) {
-                // if you see this, inverse has not been resolved yet:
-                out += "¡";
+                out += "!";
             }
 
             out += gexpr.to_str();
@@ -400,7 +399,6 @@ public:
             step &st = rsteps[stepi];
             if(st.invert) {
                 st.gexpr.invert_type();
-                st.invert = false;
             }
         }
     }
