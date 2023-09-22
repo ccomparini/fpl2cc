@@ -435,6 +435,12 @@ public:
         skip_bytes(char_length_abs(read_pos));
     }
 
+    // moves the read pointed past the next character
+    // and returns the number of bytes it was advanced
+    size_t eat_char() {
+        return skip_bytes(char_length());
+    }
+
     size_t separator_length(LengthCallback separator_cb) {
         size_t len = 0;
         while(size_t adv = separator_cb(inpp(len))) {
@@ -700,6 +706,34 @@ public:
         return read_string(length);
     }
 
+    // "eat" equivalents of the "read" method above simply
+    // consume the matching input (without returning it).
+    // Instead, they return the number of bytes consumed (i.e.
+    // how far the read pointer went forward)
+    size_t eat_exact_match(const std::string &match) {
+        if(read_exact_match(match))
+            return match.length();
+        return 0;
+    }
+
+    // eats input not matching the string passed (i.e.,
+    // consumes input up to the match or to end of input)
+    size_t eat_not_exact_match(const std::string &match) {
+        // might be more efficient to do read_to_exact_match in
+        // term of this (instead of the other way around).  ohwell.
+        return read_to_exact_match(match).length();
+    }
+
+    size_t eat_re(const std::string &match) {
+        return read_re(match).length();
+    }
+
+    // as with eat_not_exact_match, consumes input not
+    // matching the regular expression string passed
+    size_t eat_not_re(const std::string &match) {
+        return read_to_re(match).length();
+    }
+
     // pos is the position in the input at which to look; size_t(-1)
     // means use the current read position (the default).
     // num_chars is the maximum number of utf8 chars to
@@ -736,6 +770,7 @@ public:
         return out;
     }
 
+    // errrf paramse here are differnt from peek()
     inline std::string debug_peek(int num_chars = 12) const {
         return debug_peek(size_t(-1), num_chars);
     }
