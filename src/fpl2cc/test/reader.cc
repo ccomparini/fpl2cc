@@ -5,6 +5,7 @@
 #include "util/to_hex.h"
 
 #include <iostream>
+#include <list>
 #include <set>
 #include <vector>
 
@@ -28,7 +29,16 @@ static fpl_reader_p test_reader() {
     );
 }
 
+int num_errors = 0;
+void error_or_warning(const std::string &msg, src_location caller) {
+    std::cerr << stringformat("{}: {}\n", caller, msg);
+    num_errors++;
+}
+
 int main(int argc, const char **argv) {
+
+    jerror::handler _eh(jerror::error_channel, error_or_warning);
+    jerror::handler _wh(jerror::warning_channel, error_or_warning);
 
     // testing char_length:
     fpl_reader_p reader = test_reader();
@@ -37,7 +47,7 @@ int main(int argc, const char **argv) {
     do {
         size_t cur_pos = reader->current_position();
         char_pos.push_back(cur_pos);
-        sizes.insert(reader->char_length(cur_pos));
+        sizes.insert(reader->char_length());
         reader->skip_char();
     } while(!reader->eof());
 
@@ -51,7 +61,7 @@ int main(int argc, const char **argv) {
 
     for(int pind = 1; pind < char_pos.size(); pind++) {
         reader->go_to(char_pos[pind - 1]);
-        if(reader->char_length(reader->current_position()) > 1) {
+        if(reader->char_length() > 1) {
             // (this checks to make sure we can't be derailed
             // by not starting at an actual character)
             reader->read_byte();
@@ -60,7 +70,7 @@ int main(int argc, const char **argv) {
         reader->skip_char();
         if(reader->current_position() != char_pos[pind]) {
              jerror::error(stringformat(
-                 "char {}: expected to be at {} but am at {}\n",
+                 "char {}: expected to be at {} but am at {}",
                  pind, char_pos[pind], reader->current_position()
              ));
         }
@@ -83,6 +93,9 @@ int main(int argc, const char **argv) {
     if(!reader->read_byte_equalling(0xa3)) {
         jerror::error("failed to read second byte of GBP sign '£'\n");
     }
+
+    std::cout << stringformat("{} errors/warnings\n", num_errors);
+
     return 0;
 }
 

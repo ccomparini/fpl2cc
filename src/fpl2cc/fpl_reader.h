@@ -191,7 +191,7 @@ class fpl_reader {
         int line_no = 1;
         int chars_this_line = 0;
         size_t pos;
-        for(pos = 0; pos < at; pos += char_length(pos)) {
+        for(pos = 0; pos < at; pos += char_length_abs(pos)) {
             if(newline_length(pos)) {
                 chars_this_line = 0;
                 line_no++;
@@ -368,15 +368,8 @@ public:
         return newline_length(at - buffer.data());
     }
 
-    // Returns the length in bytes of the encoding of the character at the
-    // position passed.
-    // For purposes of this function, a character is a single utf-8 encoded
-    // character, or a multi-ascii-character newline, such as is used by
-    // ms dos and descendants.
-    // If the pointer passed points to the middle of a character, returns
-    // the length of the remaining bytes (or tries to - GIGO, at this point).
-    // Returns 0 if given a NULL pointer.
-    int char_length(size_t pos) const {
+private:
+    int char_length_abs(size_t pos) const {
         if(size_t nll = newline_length(pos))
             return nll;
 
@@ -409,6 +402,19 @@ public:
         return len;
     }
 
+public:
+    // Returns the length in bytes of the the character at the relative
+    // position passed. (relative to the current read pointers)
+    // For purposes of this function, a character is a single utf-8 encoded
+    // character, or a multi-ascii-character newline such as is used by
+    // ms dos and descendants (which we count as one character).
+    // If the position passed is in the middle of a character, returns
+    // the length of the remaining bytes (or tries to - GIGO, at this point).
+    // Returns 0 if given a NULL pointer.
+    int char_length(size_t offset = 0) const {
+        return char_length_abs(offset += read_pos);
+    }
+
     inline void go_to(size_t position) {
         read_pos = position;
         if(read_pos >= buffer.length()) {
@@ -426,7 +432,7 @@ public:
 
     // skips the current utf-8 character
     inline void skip_char() {
-        skip_bytes(char_length(read_pos));
+        skip_bytes(char_length_abs(read_pos));
     }
 
     size_t separator_length(LengthCallback separator_cb) {
