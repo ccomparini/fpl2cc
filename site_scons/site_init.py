@@ -94,6 +94,7 @@ def run_and_capture_action(program, varlist=[]):
         The following environment variables apply:
             CAPFILE=<filename>  - Tells where to put the captured output and
                                   exit value .  Default is the (scons) target.
+            ENV=<assoc. array>  - If set, run with this os environment
             IGNORE_EXIT=<val>   - If set, ignore the exit value for purposes
                                   of determining if the action worked.
                                   The specific exit value is still captured
@@ -140,6 +141,7 @@ def run_and_capture_action(program, varlist=[]):
         perr = io.BytesIO(b"")
         returncode = -255
         exception = None
+        os_env = env.get('ENV', None);
 
         async def runit():
             nonlocal command, env, pout, perr, returncode
@@ -148,6 +150,7 @@ def run_and_capture_action(program, varlist=[]):
                 *command,
                 stdin=sys.stdin,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                env=os_env
             )
 
             err_outputs = [ perr ]
@@ -353,10 +356,9 @@ def run_cc_tests(env):
                 for fn in filenames:
                     env.Depends(output_file, f"{root}/{fn}")
     
-        # Run the test:
-        #    Command(target, source, action, [key=val, ...])
-        # (note $SOURCE is the path to the tprog)
-        env.Command(output_file, tprog, '$SOURCE > $TARGET')
+        # Run the test, dumping stderr, stdout etc to the output
+        # file:
+        env.RunAndCapture(output_file, tprog)
     
         # compare the output of the test to the expected output;
         # .success file is/becomes up to date if output matched

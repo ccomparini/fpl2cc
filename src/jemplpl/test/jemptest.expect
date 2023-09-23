@@ -1,35 +1,37 @@
-24
+returncode = 0
+stderr = ""
+stdout = "24
 
 
 This is a template with some arbitrary  text, including an @ sign.
 
 This line comes from src/jemplpl/test/jemptest.jemp line 22.
 
-The sub str is "hello world" and maybe we'll do it 23 times.
+The sub str is \"hello world\" and maybe we'll do it 23 times.
 
-For the 0th time, we're substituting in this string: "hello world".
-For the 1th time, we're substituting in this string: "hello world".
-For the 2th time, we're substituting in this string: "hello world".
-For the 3th time, we're substituting in this string: "hello world".
-For the 4th time, we're substituting in this string: "hello world".
-For the 5th time, we're substituting in this string: "hello world".
-For the 6th time, we're substituting in this string: "hello world".
-For the 7th time, we're substituting in this string: "hello world".
-For the 8th time, we're substituting in this string: "hello world".
-For the 9th time, we're substituting in this string: "hello world".
-For the 10th time, we're substituting in this string: "hello world".
-For the 11th time, we're substituting in this string: "hello world".
-For the 12th time, we're substituting in this string: "hello world".
-For the 13th time, we're substituting in this string: "hello world".
-For the 14th time, we're substituting in this string: "hello world".
-For the 15th time, we're substituting in this string: "hello world".
-For the 16th time, we're substituting in this string: "hello world".
-For the 17th time, we're substituting in this string: "hello world".
-For the 18th time, we're substituting in this string: "hello world".
-For the 19th time, we're substituting in this string: "hello world".
-For the 20th time, we're substituting in this string: "hello world".
-For the 21th time, we're substituting in this string: "hello world".
-For the 22th time, we're substituting in this string: "hello world".
+For the 0th time, we're substituting in this string: \"hello world\".
+For the 1th time, we're substituting in this string: \"hello world\".
+For the 2th time, we're substituting in this string: \"hello world\".
+For the 3th time, we're substituting in this string: \"hello world\".
+For the 4th time, we're substituting in this string: \"hello world\".
+For the 5th time, we're substituting in this string: \"hello world\".
+For the 6th time, we're substituting in this string: \"hello world\".
+For the 7th time, we're substituting in this string: \"hello world\".
+For the 8th time, we're substituting in this string: \"hello world\".
+For the 9th time, we're substituting in this string: \"hello world\".
+For the 10th time, we're substituting in this string: \"hello world\".
+For the 11th time, we're substituting in this string: \"hello world\".
+For the 12th time, we're substituting in this string: \"hello world\".
+For the 13th time, we're substituting in this string: \"hello world\".
+For the 14th time, we're substituting in this string: \"hello world\".
+For the 15th time, we're substituting in this string: \"hello world\".
+For the 16th time, we're substituting in this string: \"hello world\".
+For the 17th time, we're substituting in this string: \"hello world\".
+For the 18th time, we're substituting in this string: \"hello world\".
+For the 19th time, we're substituting in this string: \"hello world\".
+For the 20th time, we're substituting in this string: \"hello world\".
+For the 21th time, we're substituting in this string: \"hello world\".
+For the 22th time, we're substituting in this string: \"hello world\".
 
 I hope we did it 23 times.  23 + 2 = 25.
 
@@ -67,3 +69,4 @@ declared seems to parse correctly
 cool, we can declare realign
 
 the line at the end is 64
+"

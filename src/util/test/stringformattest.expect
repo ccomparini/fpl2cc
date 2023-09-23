@@ -1,11 +1,13 @@
-here's arg 1: oneth and now 0: zero and last is 2
+returncode = 0
+stderr = ""
+stdout = "here's arg 1: oneth and now 0: zero and last is 2
 to string function: called to_str()!
 just data (to hex): 0x000102030405060708090a0b0c0d0e0f10111213141516
-converting newlines: \nyay\n
+converting newlines: \\nyay\\n
 list: { string 1, things, and stuff }
 tuple: ( true, foo )
 map: { bar => 2, bat => 3, foo => 1 }
-escaped: \n\t\"woot\"\n
+escaped: \\n\\t\\\"woot\\\"\\n
 a      b c
 deeeee
        e eff gee haitch
@@ -13,3 +15,4 @@ deeeee
  null pointer doesn't crash
 and it's for sure a const char *
 and I want to embed a { with stuff after it
+"

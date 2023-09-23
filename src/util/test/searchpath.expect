@@ -1,4 +1,6 @@
-path contains: .
+returncode = 0
+stderr = ""
+stdout = "path contains: .
 path contains: searchpath.data/b
 path contains: ./searchpath.data/a
 path contains: searchpath.data
@@ -11,3 +13,4 @@ begins with 'some': searchpath.data/b/some_file.foo
 begins with 'some': ./searchpath.data/a/some_file.foo
 ends with 'foo': searchpath.data/b/some_file.foo
 ends with 'foo': ./searchpath.data/a/some_file.foo
+"

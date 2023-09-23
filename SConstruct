@@ -106,6 +106,18 @@ env.Append(BUILDERS = {
     )
 })
 
+# RunAndCapture is a "builder" which runs the source program
+# (similar to the scons builtin "Command()") but which captures
+# stderr, stdout, and the return code.  see run_and_capture_action
+# in site_scons/site_init.py
+env.Append(BUILDERS = {
+    'RunAndCapture': Builder(
+        action = run_and_capture_action(
+            "$SOURCE",
+        ),
+    )
+})
+
 env.Append(BUILDERS = {
     'Fpl2cc' : Builder(
         action = fpl_compile_command(),
