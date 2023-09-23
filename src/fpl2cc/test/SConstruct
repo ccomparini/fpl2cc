@@ -28,8 +28,8 @@ env.Append(BUILDERS = {
 
 # fpl_reader has its own (fairly straightforward) test:
 env.Program('reader', [ 'reader.cc' ])
-env.Command('reader.out', 'reader', '$SOURCE > $TARGET')
-env.CompareOut('reader.success', [ 'reader.expect', 'reader.out' ])
+env.RunAndCapture('reader.out', 'reader')
+env.CompareOut('reader.success', [ 'reader.out', 'reader.expect' ])
 
 # The "fpl_iteself" directory contains fpl source files which
 # which we compile and check the output of.  They may deliberately

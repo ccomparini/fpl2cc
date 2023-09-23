@@ -1,4 +1,6 @@
-there's a char at 0
+returncode = 0
+stderr = ""
+stdout = "there's a char at 0
 there's a char at 2
 there's a char at 3
 there's a char at 4
@@ -169,3 +171,4 @@ there's at least one char of size 1
 there's at least one char of size 2
 there's at least one char of size 3
 there's at least one char of size 4
+"
