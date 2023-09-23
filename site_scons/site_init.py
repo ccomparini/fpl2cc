@@ -357,8 +357,10 @@ def run_cc_tests(env):
                     env.Depends(output_file, f"{root}/{fn}")
     
         # Run the test, dumping stderr, stdout etc to the output
-        # file:
-        env.RunAndCapture(output_file, tprog)
+        # file.  We ignore the exit value for purposes of determining
+        # test success, but (of course) we do check the return code
+        # vs the one in the .expect file, so it's not actually ignored.
+        env.RunAndCapture(output_file, tprog, IGNORE_EXIT=True)
     
         # compare the output of the test to the expected output;
         # .success file is/becomes up to date if output matched
