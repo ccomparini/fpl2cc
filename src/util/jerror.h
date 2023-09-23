@@ -17,8 +17,10 @@
      void my_warning_handler(const std::string &msg), src_location caller ...
 
      // install my_error_handler_func as the error handler
-     jerror::handler(jerror::error_channel, my_error_handler);
-     jerror::handler(jerror::warning_channel, my_warning_handler);
+     // (they need names so that the destructors don't get
+     // called right away)
+     jerror::handler x(jerror::error_channel, my_error_handler);
+     jerror::handler y(jerror::warning_channel, my_warning_handler);
 
      if(something_of_concern)
          jerror::warning("we have concerns...");
@@ -38,18 +40,21 @@
  */
 class jerror {
 public:
-    using callback = std::function<
-        void(const std::string &error, src_location caller)
-    >;
-
     using channel = enum {
         error_channel   = 0,
         warning_channel,
         NUM_CHANNELS
     };
 
+    using callback = std::function<
+        void(const std::string &error, src_location caller)
+    >;
+    using callback_with_channel = std::function<
+        void(channel chan, const std::string &error, src_location caller)
+    >;
+
 private:
-    using handler_stack = std::list<callback>;
+    using handler_stack = std::list<callback_with_channel>;
 
     static inline handler_stack channels[NUM_CHANNELS];
 
@@ -59,7 +64,7 @@ private:
         handler_stack handlers = channels[chan];
 
         if(handlers.size()) {
-            (handlers.back())(msg, caller);
+            (handlers.back())(chan, msg, caller);
         } else {
             if(chan > error_channel) {
                 std::cerr << ensure_nl(stringformat("{} at {}", msg, caller));
@@ -70,27 +75,51 @@ private:
         }
     }
 
+    static void push_handler(
+        channel chan, callback_with_channel cb, src_location caller
+    ) {
+        if((chan >= 0) && (chan < NUM_CHANNELS)) {
+            jerror::channels[chan].push_back(cb);
+        } else {
+            error(stringformat(
+                "{} Can't install handler - there's no channel {}\n",
+                 caller, chan
+            ));
+        }
+    }
+
+    static void pop_handler(channel chan) {
+        if((chan >= 0) && (chan < NUM_CHANNELS)) {
+            jerror::channels[chan].pop_back();
+        }
+    }
+
 public:
 
+    // handler is a class so that it can push itself to the handler list
+    // and pop itself when it goes out of scope
     class handler {
         channel which_chan;
     public:
         handler(channel chan, callback cb, src_location caller = CALLER()) :
-            which_chan(chan)
-        {
-            if((which_chan >= 0) && (which_chan < NUM_CHANNELS)) {
-                jerror::channels[which_chan].push_back(cb);
-            } else {
-                error(stringformat(
-                    "{} Can't install handler - there's no channel {}\n",
-                     caller, which_chan
-                ));
-            }
+            which_chan(chan) {
+            push_handler(
+                which_chan,
+                [cb](channel, const std::string &err, src_location caller) {
+                    cb(err, caller);
+                },
+                caller
+            );
         }
+
+        handler(channel chan, callback_with_channel cb, src_location caller = CALLER()) :
+            which_chan(chan) {
+            push_handler(which_chan, cb, caller);
+        }
+
         ~handler() {
-            if((which_chan >= 0) && (which_chan < NUM_CHANNELS)) {
-                jerror::channels[which_chan].pop_back();
-            }
+
+            pop_handler(which_chan);
         }
     };
 
