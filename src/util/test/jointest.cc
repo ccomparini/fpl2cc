@@ -5,6 +5,18 @@
 #include <list>
 #include <map>
 #include <string>
+#include <vector>
+
+struct has_to_str {
+    std::string contents;
+
+    has_to_str(const char *str): contents(str) {
+    }
+
+    std::string to_str() const {
+        return contents;
+    }
+};
 
 std::string str_int_fmt(std::map<std::string, int>::iterator it) {
     return stringformat("{} is like totally: {}", it->first, it->second);
@@ -24,6 +36,10 @@ int main() {
     std::cout << join(kvs, ", and another thing! ", str_int_fmt) << "\n";
 
     std::cout << join(clist, "... ", [] (const std::string &) { return "etc"; } ) << "\n";
+
+    std::vector<has_to_str> vlist = { "vector", "works" };
+    std::cout << join(vlist, " totally ") << "\n";
+    std::cout << stringformat("{}", join(vlist, "\n    "));
 
     return 0;
 }

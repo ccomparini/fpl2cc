@@ -73,7 +73,7 @@ std::string join(
         return stringformat("{}", elements);
     } else { 
         auto formatter = [] (typename T::iterator it) {
-            return *it;
+            return stringformat("{}", *it);
         };
         return join(elements, jv, formatter, caller);
     }
