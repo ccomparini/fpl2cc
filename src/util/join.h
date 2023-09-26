@@ -9,15 +9,38 @@
 #include <functional>
 #include <string>
 
-// Iterator based formatter - this is the implementation for the other
-// 2 join functions, but it's actually less awkward for iterating maps
-// or similar as well.
+// Iterator based formatter with indexes - this is the implementation
+// for the other join functions, but it's actually less awkward for
+// iterating maps or similar as well.
 // So, for example, something like this should work:
 //    std::string foo = join(step_vars, ", ",
-//        [] (std::map<std::string, int>::iterator &arg) -> std::string {
+//        [] (std::map<std::string, int>::iterator &arg, int) -> std::string {
 //            return stringformat("{} -> {}", arg->first, arg->second);
 //        })
 //    );
+template<typename T>
+std::string join(
+    T elements,
+    const std::string &jv,
+    std::function<std::string(typename T::iterator &, int)> fmtr,
+    src_location caller = CALLER()
+) {
+    if constexpr(!is_iterable(T)) {
+        jerror::error("type for first argument is not iterable", caller);
+    } else { 
+        std::string out;
+        int index = 0;
+        for(auto el = elements.begin(); el != elements.end(); el++) {
+            if(out.length())
+                out += jv;
+            out += fmtr(el, index++);
+        }
+        return out;
+    }
+    return "";
+}
+
+// Iterator based formatter without indexes.  See above.
 template<typename T>
 std::string join(
     T elements,
@@ -42,7 +65,7 @@ std::string join(
 /**
    join(iterable, join_value, formatter) -
    returns a string containing each element formatted according to
-   the formatter passed, join using the join value string passed.
+   the formatter passed, joined using the join value string passed.
  */
 template<typename T>
 std::string join(
@@ -51,7 +74,7 @@ std::string join(
     std::function<std::string(typename T::iterator::reference)> fmtr,
     src_location caller = CALLER()
 ) {
-    auto adapter = [fmtr] (typename T::iterator it) {
+    auto adapter = [fmtr] (typename T::iterator it, int) {
         return fmtr(*it);
     };
     return join(elements, jv, adapter, caller);
@@ -72,7 +95,7 @@ std::string join(
         // it's not iterable?  try formatting it anyway:
         return stringformat("{}", elements);
     } else { 
-        auto formatter = [] (typename T::iterator it) {
+        auto formatter = [] (typename T::iterator &it) {
             return stringformat("{}", *it);
         };
         return join(elements, jv, formatter, caller);

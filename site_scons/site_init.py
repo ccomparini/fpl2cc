@@ -146,6 +146,7 @@ def run_and_capture_action(program, varlist=[]):
         async def runit():
             nonlocal command, env, pout, perr, returncode
 
+            # print(' '.join(command) + f" {os_env}")
             proc = await asyncio.create_subprocess_exec(
                 *command,
                 stdin=sys.stdin,

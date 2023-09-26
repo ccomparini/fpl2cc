@@ -35,11 +35,21 @@ int main() {
 
     std::cout << join(kvs, ", and another thing! ", str_int_fmt) << "\n";
 
-    std::cout << join(clist, "... ", [] (const std::string &) { return "etc"; } ) << "\n";
+    std::cout << join(clist, "... ",
+        [] (const std::string &) {
+            return "etc";
+        }
+    ) << "\n";
 
     std::vector<has_to_str> vlist = { "vector", "works" };
     std::cout << join(vlist, " totally ") << "\n";
-    std::cout << stringformat("{}", join(vlist, "\n    "));
+    std::cout << stringformat("{}", join(vlist, "\n    ")) << "\n";
+
+    std::cout << join(kvs, "; ",
+        [] (std::map<std::string, int>::iterator item, int index) {
+            return stringformat("{}th key is {}", index, item->first);
+        }
+    ) << "\n";
 
     return 0;
 }

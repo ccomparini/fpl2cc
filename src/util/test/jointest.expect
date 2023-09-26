@@ -6,4 +6,6 @@ bar is like totally: 55, and another thing! bat is like totally: 63, and another
 etc... etc... etc... etc
 vector totally works
 vector
-    works"
+    works
+0th key is bar; 1th key is bat; 2th key is foo
+"
