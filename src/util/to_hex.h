@@ -26,7 +26,6 @@ std::string to_hex(const T &inst) {
 
 // Because of various endianess issues, to get reasonable results
 // for various normal ints, we need this.
-// For example, 0x
 template<class T>
 std::string _int_to_hex(T val) {
     int shift = sizeof(val) * 8;
