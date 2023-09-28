@@ -1,0 +1,10 @@
+
+# this should match one empty string ("") between the parens:
+()
+
+# this should match one string "x" and then one string ""
+# (2 items)
+(x)
+
+# ... similarly, this is 3 items:
+(xx)
