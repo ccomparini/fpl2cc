@@ -803,6 +803,11 @@ public:
         return offset;
     }
 
+    bool operator==(const SourcePosition &other) const {
+        return (offset == other.offset)
+            && (source == other.source);
+    }
+
     const fpl_reader &reader()   const { return *source; }
     size_t            position() const { return offset; }
 
