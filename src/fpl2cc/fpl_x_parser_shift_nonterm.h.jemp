@@ -3,7 +3,7 @@
 @parameter: const fpl_options &opts @
 @declare el_id: prds.element_id_name(el)@
 
-// shift_NONTERM_xxx()
+// @el.to_str()@
 bool shift_@el.type_str()@_@el_id@(bool eject) {
     if(lr_next().mismatch && lr_next().element_id == @el_id@) {
         @if(opts.debug) {@

@@ -14,7 +14,14 @@
 
   calculated goal(s):
     @prds.goals@
+
  */
+
+//  elements:
+//    @join(prds.elements, "\n//    ")@
+  
+//  rules:
+//     @join(prds.rules, "\n//    ")@
 
 @for(auto fn : opts.impl_sources) {@
     @code_block::from_file(fn, opts.src_path, "(command line)", 1).format()@
@@ -587,7 +594,7 @@ public:
                 pos = lr_top_index();
 
             @if(subrule_num < 0) {@
-                // normal case - not a subexpression
+                // @element.to_str()@
                 // (checking pos >= 0 because negative indexes are relative
                 // to end of stack)
                 while(pos >= 0 && lr_stack_entry(pos).element_id == @el_id@) {
@@ -1229,7 +1236,6 @@ private:
 
     // custom scanners:
     @for(auto &[scanner_name, scanner_code] : prds.scanners) {@
-        // OH HAI I IS CUSTOM SCANNER
         #line @scanner_code.line@ "@scanner_code.source_file@"
         Terminal custom_scanner_@scanner_name@(fpl_reader &input) {
             @if(scanner_code.language == code_block::REGEX) {@
@@ -1270,7 +1276,7 @@ public:
         switch(id) {
             @for(int el_id = 0; el_id < prds.elements.size(); ++el_id) {-@
                 @declare el: prds.elements[el_id]@
-                case @el_id@: return "@c_str_escape(el.expr)@";
+                case @el_id@: return "@c_str_escape(el.expr)@ (@el_id@)";
             @-}-@
         }
         return stringformat("¡unknown element id {}!", id);

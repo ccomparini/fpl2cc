@@ -6,12 +6,15 @@
 @declare el_str: c_str_escape(el.to_str())@
 @declare match_str: c_str_escape(el.expr)@
 
-// this creates a function named like:
-//   shift_TERM_EXACT__terminal_X()
-//   shift_TERM_REGEX__terminal_X()
-//   shift_TERM_CUSTOM__terminal_X()
-//   (etc - anything which is not a nonterminal)
-// .. where X is the element ID number.
+@/*
+ this creates a function named like:
+   shift_TERM_EXACT__terminal_X()
+   shift_TERM_REGEX__terminal_X()
+   shift_TERM_CUSTOM__terminal_X()
+   (etc - anything which is not a nonterminal)
+ .. where X is the element ID number.
+ */@
+// @el.to_str()@ 
 bool shift_@el.type_str()@_@el_id@(bool eject) {
     if(auto next_up = lr_next()) {
         if(next_up.mismatch && next_up.element_id == @el_id@) {
