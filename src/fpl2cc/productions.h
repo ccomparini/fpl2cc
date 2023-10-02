@@ -322,9 +322,13 @@ class productions {
         }
 
         std::string to_str() const {
-            return stringformat("{}: ({} {})",
-                right_of_dot, type_to_str(what), which
-            );
+            if(right_of_dot) {
+                return stringformat("{}: ({} {})",
+                    right_of_dot, type_to_str(what), which
+                );
+            } else {
+                return stringformat("({} {})", type_to_str(what), which);
+            }
         }
     };
 
