@@ -105,14 +105,12 @@ public:
         } qty;
 
         bool eject;  // if set, don't pass this to reduce code
-        bool invert; // invert match (!"foo" = match anything but "foo")
         int reserve; // number of matches to reserve for following steps
 
 
         step() :
             gexpr("", grammar_element::Type::NONE),
             eject(true),
-            invert(false),
             reserve(0) {
         }
 
@@ -124,7 +122,6 @@ public:
             gexpr(expr_str,tp),
             varname(vn),
             eject(false),
-            invert(false),
             reserve(0) {
         }
 
@@ -251,9 +248,6 @@ public:
         std::string to_str() const {
             std::string out;
 
-            if(invert) {
-                out += "!";
-            }
 
             out += gexpr.to_str();
 
@@ -287,8 +281,16 @@ public:
         }
     }
 
-    void add_step(step st) {
+    void add_step(step st, bool invert) {
         int stepi = rsteps.size();
+
+        // if the step is inverted, change the grammar element
+        // to the appropriate type.
+        // Note: probably better to do this in the constructor
+        // at this point.  Keeping this this way for now so I
+        // don't have the change callers.
+        if(invert)
+            st.gexpr.invert_type();
 
         // to support stuff like:
         //   'foo'*:pre 'foo':penultimate 'foo':final -> bar;
@@ -355,51 +357,6 @@ public:
         } else {
             grammar_element &ge = rsteps[stepi].gexpr;
             ge.resolve_placeholder(prod, caller);
-        }
-    }
-
-    // A "custom" terminal implemented as a regular expression is
-    // (in the target parser) equivalent to a normal regex terminal.
-    // So, if a given step is (or resolves to) a regex TERM_CUSTOM,
-    // we convert it to a regular TERM_REGEX, thus saving some
-    // special cases down the line.
-    void resolve_regex_custom(int stepi, const std::string regex) {
-        if(stepi < 0 || stepi >= rsteps.size()) {
-            jerror::warning(stringformat(
-                "step {} is out of range in resolve_regex_custom",
-                stepi
-            ));
-        } else {
-            grammar_element &ge = rsteps[stepi].gexpr;
-            if(ge.type == grammar_element::TERM_CUSTOM) {
-                // set the variable name to the name of the
-                // custom scanner, so that reducers can
-                // refer to it by that:
-                if(!rsteps[stepi].varname.length()) {
-                    rsteps[stepi].varname = ge.expr;
-                }
-
-                // convert to a regex expression:
-                ge.expr = regex;
-                ge.type = grammar_element::TERM_REGEX;
-            } else {
-                jerror::warning(stringformat(
-                    "step {} is {} and not a custom terminal",
-                    stepi, ge
-                ));
-            }
-        }
-    }
-
-    // Steps are _actually_ inverted by changing the grammar element
-    // type to the inverse type.  This is because, in the target parser,
-    // inverse matches are generally completely different code.
-    void resolve_inverts() {
-        for(int stepi = 0; stepi < rsteps.size(); ++stepi) {
-            step &st = rsteps[stepi];
-            if(st.invert) {
-                st.gexpr.invert_type();
-            }
         }
     }
 

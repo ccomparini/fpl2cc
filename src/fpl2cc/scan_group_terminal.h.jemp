@@ -1,0 +1,41 @@
+@parameter: std::set<std::string> &exact_matches @
+@parameter: std::set<std::string> &regex_matches @
+
+{
+    auto start = reader->current_position();
+    int longest_match = 0;
+
+    @for(auto match : exact_matches) {@
+        @declare match_str: c_str_escape(match)@
+        if(reader->eat_exact_match("@match_str@")) {
+            if(reader->current_position() - start > longest_match) {
+                longest_match = reader->current_position() - start;
+            }
+        }
+        reader->go_to(start);
+    @}@
+
+    @for(auto match : regex_matches) {@
+        @declare match_ex: c_str_escape(match)@
+        std::cmatch match = reader->eat_re("@match_ex@");
+        if(!match.empty()) {
+            if(reader->current_position() - start > longest_match) {
+                longest_match = reader->current_position() - start;
+            }
+        }
+        reader->go_to(start);
+    @}@
+
+    if(longest_match > 0) {
+        return Terminal(reader->read_string(longest_match));
+    } else if(longest_match < 0) {
+        // if we get here, it's a bug
+        std::cerr << stringformat(
+            // .... errf.. need more info
+            "\nNEGATIVE MATCH LENGTH {}\n",
+            longest_match
+        );
+    }
+
+    return Terminal(); // no match
+}

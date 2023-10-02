@@ -8,6 +8,7 @@
 #include<iostream>
 #include<list>
 #include<map>
+#include<set>
 }+
 
 @produces std::string
@@ -22,7 +23,7 @@
 }+
 
 # "scans" and expands a variable
-@scanner variable +{
+@terminal variable +{
     auto start = reader->current_position();
     auto match = reader->read_re("[a-zA-Z0-9_-]+");
     if(!match.empty()) {
@@ -38,9 +39,57 @@
     
 }+
 
+# matches any unicode-encoded 2 byte character
+# (i.e. any codepoint between \u00a0 and \u00ff)
+@terminal two_byte_char +{
+    if(reader->char_length() == 2) {
+        return Terminal(reader->read_string(2));
+    }
+    return Terminal(); // not 2 byte utf-8 char
+}+ inverse +{
+    // inverse is to read until finding a two byte utf8 char
+    // or hitting end of input (i.e. we're reading a single
+    // terminal consisting of no two_byte characters)
+    size_t len = 0;
+    while(reader->char_length(len) != 2) {
+        len += reader->char_length(len);
+    }
+
+    if(len)
+        return Terminal(reader->read_string(len));
+    else
+        return Terminal(); // (no match)
+}+
+
 stuff* the_end -> done +{
     std::cout << stuff@join("\n") + "\n" + the_end + "\n";
     return "totally done";
+}+
+
+
+&two_byte_char:start !&two_byte_char:guts? &two_byte_char:end -> stuff +{
+    return stringformat(
+        "'{}' bracketed by 2 byte chars '{}' and '{}'",
+        guts@join(""), start, end
+    );
+}+
+
+# we're allowing mix-and-match on these quotes in order to test
+# inverse match on grouped terminals
+@terminal fancy_string_start [ "\u275d" "\u301f" "\u2e42" "\u201f"  ]
+@terminal fancy_string_end   [ "\u275E" "\u301d" "\u301e" "\u201d"  ]
+
+&fancy_string_start^ !&fancy_string_end:contents? &fancy_string_end^ -> stuff +{
+    if(contents@count() == 0) {
+        return stringformat("empty fancy string.");
+    }
+    return stringformat("fancy string: «{}»", contents);
+    
+}+ 
+
+@terminal flag [ '🇺🇸' '🇯🇵' '🇰🇷' '🇩🇪'  '🇪🇸' '🇮🇹' '🇬🇧' ]
+&flag+:flags -> stuff +{
+    return stringformat("{} flags: {}\n", flags@count(), flags);
 }+
 
 block -> stuff;
@@ -64,7 +113,6 @@ block -> stuff;
 #"\U0001F408":cat -> stuff +{ return cat + " says meow"; }+ # XXX this should work too! w/out to_str()
 "\u0001F408":cat -> stuff +{ return cat.to_str() + " says meow"; }+
 
-#"\u1F1FA\u1F1F8" -> us_flag... check if this works..
 
 "\"" -> literal_double_quote +{ return "double quote"; }+ #"
 literal_double_quote -> stuff;

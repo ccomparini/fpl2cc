@@ -5,6 +5,10 @@
 #include "fpl_options.h"
 #include "production_rule.h"
 #include "reducer.h"
+#include "scan_group_terminal.h"
+#include "scan_inv_group_terminal.h"
+#include "scan_inv_regex_terminal.h"
+#include "scan_regex_terminal.h"
 
 #include "util/c_str_escape.h"
 #include "util/from_hex.h"
@@ -619,13 +623,13 @@ class productions {
             ));
         }
 
-        // recursively generates any following states, adding them
-        // to the productions passed.
+        // recursively generates any following states (i.e., states to
+        // which we might transition from this one), adding them to the
+        // productions passed.
         void generate_following_states(
             productions &prds,
             src_location caller = CALLER()
         ) {
-
             if(next_state_for_el.size() > 0)
                 return; // (already generated)
 
@@ -990,7 +994,6 @@ public:
             return type_for(ge.expr, caller);
         }
         // assertions are terminals as well:
-// OH LOOK we already have a type for terminals.  Perhaps use this
         return "Terminal";
     }
 
@@ -1112,24 +1115,160 @@ public:
         product_precedence[product] = precedence;
     }
 
-    void parse_scanner() {
+    // Tries to parse a [ ]-bracketed set of terminals (a "group terminal"),
+    // adding each to the std::sets passed.
+    // Returns true if it parsed one, or false if it didn't recognize
+    // a compound terminal.
+    // Throws parse errors on malformed input.
+    bool parse_terminal_list(
+        std::set<std::string> &exact_terminals,
+        std::set<std::string> &regex_terminals
+    ) {
+        if(!inp->read_exact_match("[")) {
+            return false;
+        }
+
+        inp->eat_separator();
+        while(!inp->read_exact_match("]")) {
+            std::string expr;
+            grammar_element::Type type;
+            if(!parse_terminal(expr, type)) {
+                error("expected some kind of terminal in terminal list");
+            } else {
+                if(type == grammar_element::TERM_EXACT) {
+                    exact_terminals.insert(expr);
+                } else if(type == grammar_element::TERM_REGEX) {
+                    regex_terminals.insert(expr);
+                } else {
+                    error(stringformat(
+                        "{} '{}' not supported in terminal list",
+                        grammar_element::Type_to_str(type), expr
+                    ));
+                }
+            }
+            inp->eat_separator();
+        }
+
+        return true;
+    }
+
+    std::string parse_scanner_name() {
         std::string name = read_identifier(inp);
+        if(name != "") {
+            if(scanners.count(name)) {
+                const code_block &existing = scanners[name];
+                warn(stringformat(
+                    "scanner {} overwrites existing scanner at {}\n",
+                    name, existing.location()
+                ));
+            }
+        }
+
+        return name;
+    }
+
+    void parse_scanner() {
+        std::string name = parse_scanner_name();
+
         if(name == "") {
             error("expected name of scanner");
-        }
+        } else {
+            code_block scanner = code_for_directive(
+                "scanner", code_source::INLINE_OR_REGEX
+            );
+            code_block inverse;
 
-        if(scanners.count(name)) {
-            const code_block &existing = scanners[name];
-            warn(stringformat(
-                "scanner {} overwrites existing scanner at {}\n",
-                name, existing.location()
-            ));
+            // if the scanner is regex-implemented, convert
+            // that scanner to target code and make an inverse
+            // so that we have fewer special cases down the line
+            if(scanner.language == code_block::REGEX) {
+                auto regex = scanner.code;
+                inverse = code_block(
+                    scan_inv_regex_terminal(regex),
+                    code_block::DEFAULT,
+                    scanner.source_filename(), scanner.line_number()
+                );
+                scanner = code_block(
+                    scan_regex_terminal(regex),
+                    code_block::DEFAULT,
+                    scanner.source_filename(), scanner.line_number()
+                );
+            }
+          
+            scanners[name] = scanner;
+            if(inverse) {
+                scanners[inverse_scanner_name(name)] = inverse;
+            }
         }
+    }
 
-        // (scanners from LIB isn't yet supported - inline or regex only)
-        scanners[name] = code_for_directive(
-            "scanner", code_source::INLINE_OR_REGEX
-        );
+    // given the name of a custom scanner, returns the name to use
+    // for the corresponding inverse scanner (which may or may not
+    // actually exist)
+    std::string inverse_scanner_name(const std::string &name) const {
+        return stringformat("_inv_{}", name);
+    }
+
+    // As parse_scanner, this creates a custom terminal.
+    // This version, however, allows syntax for terminal
+    // groups and inverting matches.
+    void parse_custom_terminal() {
+        std::string name = parse_scanner_name();
+        if(name == "") {
+            error("expected name for terminal definition");
+        } else {
+            inp->eat_separator();
+            if(inp->peek() == '[') {
+                // this terminal is the set of the terminals
+                // within the [ ]
+                std::set<std::string> exacts;
+                std::set<std::string> regexes;
+                auto start = inp->current_position();
+                if(parse_terminal_list(exacts, regexes)) {
+                    scanners[name] = code_block(
+                        scan_group_terminal(exacts, regexes),
+                        code_block::DEFAULT,
+                        inp->filename(), inp->line_number(start)
+                    );
+                    scanners[inverse_scanner_name(name)] = code_block(
+                        scan_inv_group_terminal(exacts, regexes),
+                        code_block::DEFAULT,
+                        inp->filename(), inp->line_number(start)
+                    );
+                }
+            } else {
+                scanners[name] = code_for_directive(
+                    stringformat(
+                        "custom terminal {} at {}",
+                        name, inp->location_str()
+                    ),
+                    code_source::INLINE_OR_REGEX
+                );
+                inp->eat_separator();
+                if(inp->read_exact_match("inverse")) {
+                    if(scanners[name].language == code_block::REGEX) {
+                        // regex scanner inversion is already covered,
+                        // and I'm thinking it'll lead to inconsistencies
+                        // and confusion if someone tries to hand code an
+                        // inverse of a regex match (which, in the present
+                        // implementation, wouldn't even get called), so
+                        // for now I'm just going to disallow it.
+                        error(stringformat(
+                            "can't override inverse of regex scanner '{}'",
+                            name
+                        ));
+                    }
+                    inp->eat_separator();
+                    scanners[inverse_scanner_name(name)] = code_for_directive(
+                        stringformat(
+                            "inverse of custom terminal {} at {}",
+                            name, inp->location_str()
+                        ),
+                        code_source::INLINE
+                    );
+                }
+            }
+        }
     }
 
     std::string arg_for_directive() {
@@ -1240,9 +1379,16 @@ public:
         } else if(dir == "produces") {
             set_output_type(arg_for_directive());
         } else if(dir == "scanner") {
+            // Note: this is superceded by @terminal; perhaps
+            // it shall be deprecated.
             parse_scanner();
         } else if(dir == "separator") {
             add_separator_code(code_for_directive(dir, code_source::ANY));
+        } else if(dir == "terminal") {
+            // @terminal is like @scanner.  both generate custom scanners.
+            // @terminal supports inverting matches and multiple terminal
+            // syntax.
+            parse_custom_terminal();
         } else if(dir == "type_for") {
             inp->eat_separator();
             std::string prod = read_production_name(inp);
@@ -1788,7 +1934,44 @@ public:
         if(sub.varname == "")
             sub.varname = subex_varname(sub.gexpr.expr);
 
-        rule.add_step(sub);
+        rule.add_step(sub, false);
+    }
+
+    bool parse_terminal(
+        std::string &expr_str,
+        grammar_element::Type &type
+    ) {
+        switch(inp->peek()) {
+            case '"':
+                // within double quotes, c-like escape sequences
+                // are supported:
+                expr_str = convert_escapes(inp->parse_string());
+                type     = grammar_element::Type::TERM_EXACT;
+                break;
+            case '\'':
+                // Within single quotes, a backslash simply removes any
+                // special meaning of the next char.  The only 2 chars
+                // with special meaning are the end quote and backslashes.
+                // So, '\\' means one backslash, '\'' means one single
+                // quote, but '\n' means 2 chars: backslash and 'n'.
+                expr_str = inp->parse_string();
+                remove_single_quote_escapes(expr_str);
+                type     = grammar_element::Type::TERM_EXACT;
+                break;
+            case '/':
+                expr_str = inp->parse_string();
+                type     = grammar_element::Type::TERM_REGEX;
+                break;
+            case '&':
+                inp->read_byte(); // (read the '&')
+                expr_str = read_identifier(inp);
+                type     = grammar_element::Type::TERM_CUSTOM;
+                break;
+            default:
+                type     = grammar_element::Type::NONE;
+                return false; // not a terminal
+        }
+        return true;
     }
 
     int parse_expressions(production_rule &rule) {
@@ -1811,29 +1994,10 @@ public:
                     inp->read_line();
                     break;
                 case '"':
-                    // within double quotes, c-like escape sequences
-                    // are supported:
-                    expr_str = convert_escapes(inp->parse_string());
-                    type     = grammar_element::Type::TERM_EXACT;
-                    break;
                 case '\'':
-                    // Within single quotes, a backslash simply removes any
-                    // special meaning of the next char.  The only 2 chars
-                    // with special meaning are the end quote and backslashes.
-                    // So, '\\' means one backslash, '\'' means one single
-                    // quote, but '\n' means 2 chars: backslash and 'n'.
-                    expr_str = inp->parse_string();
-                    remove_single_quote_escapes(expr_str);
-                    type     = grammar_element::Type::TERM_EXACT;
-                    break;
                 case '/':
-                    expr_str = inp->parse_string();
-                    type     = grammar_element::Type::TERM_REGEX;
-                    break;
                 case '&':
-                    inp->read_byte(); // (read the '&')
-                    expr_str = read_identifier(inp);
-                    type     = grammar_element::Type::TERM_CUSTOM;
+                    parse_terminal(expr_str, type);
                     break;
                 case '~':
                     // lack-of-separator assertion:
@@ -1908,14 +2072,13 @@ public:
                     if(step.is_single()) read_quantifier(inp, step);
                     if(type == grammar_element::LACK_OF_SEPARATOR)
                         step.eject = true;
-                    step.invert = invert_next;
-                    invert_next = false;
 
                     if(type == grammar_element::NONTERM_SUBEXPRESSION)
                         add_subexpression(rule, step);
                     else
-                        rule.add_step(step);
+                        rule.add_step(step, invert_next);
 
+                    invert_next = false;
                     num_read++;
                 } else {
                     error(inp, stringformat(
@@ -2196,7 +2359,7 @@ public:
             group_rule.add_step(production_rule::step(
                 ">", grammar_element::Type::NONTERM_PREC_PLACEHOLDER,
                 group_rule.product()
-            ));
+            ), false);
             std::string group_name = group_rule.product();
 
             inp->eat_separator();
@@ -2226,7 +2389,7 @@ public:
                 rule.add_step(production_rule::step(
                     prod, grammar_element::Type::NONTERM_PRODUCTION,
                     group_rule.product()
-                ));
+                ), false);
                 rule.code(group_rule.code());
                 rule.product(group_name);
                 add_rule(rule);
@@ -3079,10 +3242,15 @@ public:
         return suffixes;
     }
 
+    // Formerly, this matched custom scanner steps to their
+    // implementations.  We no longer do that here, so at
+    // the moment, all it does is report if a custom scanner
+    // is undefined.
     void resolve_custom_step(production_rule &rule, int stepi) {
         auto step = rule.nth_step(stepi);
         std::string scanner_name = step.gexpr.expr;
         auto found = scanners.find(scanner_name);
+
         if(found == scanners.end()) {
             // it is possible that the rule isn't
             // used, so the scanner won't be used, but
@@ -3094,11 +3262,6 @@ public:
                 "use of undefined scanner &{} in rule {} {}",
                 scanner_name, rule, rule.location()
             ));
-        } else if(found->second.language == code_block::REGEX) {
-            // regex-implemented scanners are just TERM_REGEX,
-            // so we don't need special jemp code for them.
-            // just resolve them here:
-            rule.resolve_regex_custom(stepi, found->second.code);
         }
     }
 
@@ -3113,10 +3276,6 @@ public:
                     resolve_custom_step(rule, stepi);
                 }
             }
-
-            // deal with inverted matches last, after having done all other
-            // type resolution:
-            rule.resolve_inverts();
 
             // .. and now, brute-force ensure that all elements
             // are recorded, because elements may have changed
@@ -3298,7 +3457,7 @@ public:
                 // the rule is always a single step (product -> _fpl_goal)
                 goal_rule.add_step(production_rule::step(
                     goal, grammar_element::Type::NONTERM_PRODUCTION
-                ));
+                ), false);
                 add_rule(goal_rule);
             }
         }

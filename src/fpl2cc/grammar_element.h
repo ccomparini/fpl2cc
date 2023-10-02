@@ -17,6 +17,7 @@ struct grammar_element {
         NONTERM_SUBEXPRESSION,    // parenthesized expression
         NONTERM_PREC_PLACEHOLDER, // precedence placeholder
         TERM_CUSTOM,       // custom code for matching terminal
+        TERM_CUSTOM_INV,   // match anything -but- this custom
         LACK_OF_SEPARATOR, // pseudoterminal indicating no separator
         TERM_EXACT,        // exact string match
         TERM_EXACT_INV,    // match anything -but- this exact string
@@ -34,6 +35,7 @@ struct grammar_element {
             "NONTERM_SUBEXPRESSION",
             "NONTERM_PREC_PLACEHOLDER",
             "TERM_CUSTOM",
+            "TERM_CUSTOM_INV",
             "LACK_OF_SEPARATOR", // convert to TERM_CUSTOM?
             "TERM_EXACT",
             "TERM_EXACT_INV",
@@ -117,25 +119,30 @@ struct grammar_element {
     // inverse.
     static grammar_element::Type inverse_type(grammar_element::Type type) {
         switch(type) {
-            // I'm not sure how to support nonterms, or if it's
-            // even possible, because there may be any number
-            // of other things matched within the nonterm.  Also,
-            // what would it mean and when would you use it?
-            // Custom can't really be supported, because, though
-            // we could invert the sense of the result, there's
-            // no general way to invert read pointer changes or
-            // whatever.  The inverse of lack-of-separator is
-            // just not having a lack-of-separator, so we don't
-            // need or want to support that.
-            // So, really, it's just the 2 basic terminal types:
-            case TERM_EXACT:    return TERM_EXACT_INV;
-            case TERM_REGEX:    return TERM_REGEX_INV;
+            // the 2 basic terminal types have built in inverses:
+            case TERM_EXACT:     return TERM_EXACT_INV;
+            case TERM_REGEX:     return TERM_REGEX_INV;
+
+            // assuming a given custom terminal has implemented
+            // an inverse implemented someplace, it too can
+            // have an inverse:
+            case TERM_CUSTOM:    return TERM_CUSTOM_INV;
 
             // (and, of course, you can invert back)
-            case TERM_EXACT_INV: return TERM_EXACT;
-            case TERM_REGEX_INV: return TERM_REGEX;
+            case TERM_EXACT_INV:  return TERM_EXACT;
+            case TERM_REGEX_INV:  return TERM_REGEX;
+            case TERM_CUSTOM_INV: return TERM_CUSTOM;
 
-            default:             return NONE; // (no inverse)
+
+            // I'm not sure how to support nonterms, or if it's
+            // even possible, because there may be any number
+            // of other things matched within the nonterm.
+            // Inverting the lack-of-separator assertion is the
+            // same as just leaving it out of the rule, so I
+            // we don't need the ability to invert it.
+            // So, at present, nothing else has an inverse
+            // type.
+            default: return NONE; // (no inverse)
         }
     }
 
@@ -188,6 +195,10 @@ struct grammar_element {
                 break;
             case TERM_CUSTOM:
                 lb = "&";
+                rb = "";
+                break;
+            case TERM_CUSTOM_INV:
+                lb = "!&";
                 rb = "";
                 break;
             case LACK_OF_SEPARATOR:

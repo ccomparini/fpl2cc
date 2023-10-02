@@ -1238,13 +1238,7 @@ private:
     @for(auto &[scanner_name, scanner_code] : prds.scanners) {@
         #line @scanner_code.line@ "@scanner_code.source_file@"
         Terminal custom_scanner_@scanner_name@(fpl_reader &input) {
-            @if(scanner_code.language == code_block::REGEX) {@
-                return Terminal(
-                    "ERROR @scanner_name@ should never have been generated"
-                );
-            @} else /* assume default */ {@
-                @scanner_code.format()@
-            @}@
+            @scanner_code.format()@
         }
     @}@
 

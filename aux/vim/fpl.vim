@@ -29,6 +29,7 @@ syn match	fplAtDirective	"@post_reduce"
 syn match	fplAtDirective	"@produces.*"
 syn match	fplAtDirective	"@scanner"
 syn match	fplAtDirective	"@separator.*"
+syn match	fplAtDirective	"@terminal"
 syn match	fplAtDirective	"@type_for.*"
 
 syn match	fplQuantifier	"[*+?]"
@@ -44,6 +45,8 @@ syn match	fplOperator	")"
 syn match	fplOperator	","
 syn match	fplOperator	"\["
 syn match	fplOperator	"\]"
+
+syn match	fplOperator	"inverse"
 
 " imports
 syn match	fplImport	"`.*`"

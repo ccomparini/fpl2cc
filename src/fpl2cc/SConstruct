@@ -2,6 +2,11 @@
 Import('env')
 env = env.Clone()
 
+env.Jemp2h('scan_group_terminal.h.jemp')
+env.Jemp2h('scan_inv_group_terminal.h.jemp')
+env.Jemp2h('scan_inv_regex_terminal.h.jemp')
+env.Jemp2h('scan_regex_terminal.h.jemp')
+
 env.Jemp2h('fpl_x_parser.h.jemp')
 
 

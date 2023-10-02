@@ -113,6 +113,18 @@ digit*:leading digit?:penultimate digit:last -> statement +{
     );
 }+
 
+# there appears to have been a bug where we were treating
+# inverted steps as the same as non-inverted for purposes
+# of calculating reserves.  oh dear. this tests that.
+# BTW, !'"':contents* is a bad construct anyway - match
+# 0 or-more of everything-up-to '"' is really a 0 or 1
+# match.  So, don't use this as an example of how to
+# actually do this.
+'"'^ !'"':contents* '"'^ -> statement +{
+    //return stringformat("quoted string: \"{}\"", contents@concatenate());
+    return stringformat("quoted string: \"{}\"", contents);
+}+
+
 # heh... bug:  foo becomes foo.var() within the string.
 #/f[aeiou]o/:foo -> statement +{
 /f[aeiou]o/ -> statement +{
@@ -133,6 +145,10 @@ digit*:leading digit?:penultimate digit:last -> statement +{
 # but we're testing repetition:
 /[a-zA-Z_]/+:letters ";"^ -> statement +{
     return letters@concatenate();
+}+
+
+/[a-zA-Z_]/+:letters -> statement +{
+    return letters@concatenate(); // maybe this could be the default for unejected mutliples
 }+
 
 # this will have an eject conflict with the above:

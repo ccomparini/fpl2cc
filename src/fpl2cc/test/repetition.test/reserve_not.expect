@@ -1,0 +1,8 @@
+returncode = 0
+stderr = ""
+stdout = "======
+quoted string: \"And what is the use of a book,\"
+thoughtAlice
+quoted string: \"without pictures or conversation?\"
+======
+"

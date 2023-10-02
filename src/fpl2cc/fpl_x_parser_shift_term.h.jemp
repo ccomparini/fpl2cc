@@ -50,33 +50,16 @@ bool shift_@el.type_str()@_@el_id@(bool eject) {
         if(match.length())
             result = Terminal(match);
     @} else if(el.type == grammar_element::TERM_REGEX) {@
-        std::cmatch match = reader->read_re("@match_str@");
-        if(!match.empty()) {
-            @/*
-               to avoid looping infinitely in cases like:
-                   '('^ /x?/+ ')'^ -> y;
-               where the /x?/ can match an empty string, and
-               the step says match multiple times, don't allow
-               it to do more than one empty match, because
-               otherwise it'll loop indefinitely matching and
-               pushing empty strings to the stack.
-               This does mean that if you have multiple consecutive
-               regexes which might match empty strings, only the
-               first will match as an empty string.  These are
-               all pathological cases which probably have no real
-               application, but we need to handle them somehow
-               other than stack overflows. So, here we are:
-             */@
-            if(match.length() || (lr_top().position() != position())) {
-                result = Terminal(match.begin(), match.end());
-            }
-        }
+        @#regex_term_guts(el.expr)@
     @} else if(el.type == grammar_element::TERM_REGEX_INV) {@
         std::string match = reader->read_to_re("@match_str@");
         if(match.length())
             result = Terminal(match);
     @} else if(el.type == grammar_element::TERM_CUSTOM) {@
         result = custom_scanner_@match_str@(*reader);
+    @} else if(el.type == grammar_element::TERM_CUSTOM_INV) {@
+        @declare inv_name: prds.inverse_scanner_name(match_str)@
+        result = custom_scanner_@inv_name@(*reader);
     @} else if(el.type == grammar_element::LACK_OF_SEPARATOR) {@
         if(!bytes_eaten) {
             result = Terminal("⦑lack-of-separator⦒");

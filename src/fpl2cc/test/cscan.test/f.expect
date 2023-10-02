@@ -1,0 +1,7 @@
+returncode = 0
+stderr = ""
+stdout = "'よの' bracketed by 2 byte chars '§' and '¿'
+'creature' bracketed by 2 byte chars 'ò' and 'ÿ'
+'is the highest codepoint in 2 bytes of utf-8 ' bracketed by 2 byte chars 'ÿ' and '£'
+ding!
+"

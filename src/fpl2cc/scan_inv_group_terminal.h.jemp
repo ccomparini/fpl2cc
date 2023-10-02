@@ -1,0 +1,33 @@
+@parameter: std::set<std::string> &exact_matches @
+@parameter: std::set<std::string> &regex_matches @
+
+{
+    auto start = reader->current_position();
+    size_t shortest_match = std::numeric_limits<size_t>::max();
+
+    @for(auto match : exact_matches) {@
+        @declare match_str: c_str_escape(match)@
+        reader->eat_not_exact_match("@match_str@");
+        if(reader->current_position() - start < shortest_match) {
+            shortest_match = reader->current_position() - start;
+        }
+        reader->go_to(start);
+    @}@
+
+    @for(auto match : regex_matches) {@
+        @declare match_ex: c_str_escape(match)@
+        std::cmatch match = reader->eat_not_re("@match_ex@");
+        if(reader->current_position() - start < shortest_match) {
+            shortest_match = reader->current_position() - start;
+        }
+        reader->go_to(start);
+    @}@
+
+    if(shortest_match) { // 0-char match is not a match
+        if(shortest_match < std::numeric_limits<size_t>::max()) {
+            return Terminal(reader->read_string(shortest_match));
+        }
+    }
+
+    return Terminal(); // no match
+}
