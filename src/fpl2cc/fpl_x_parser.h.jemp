@@ -1276,7 +1276,7 @@ public:
         switch(id) {
             @for(int el_id = 0; el_id < prds.elements.size(); ++el_id) {-@
                 @declare el: prds.elements[el_id]@
-                case @el_id@: return "@c_str_escape(el.expr)@ (@el_id@)";
+                case @el_id@: return "@c_str_escape(el.to_str())@ (@el_id@)";
             @-}-@
         }
         return stringformat("¡unknown element id {}!", id);
