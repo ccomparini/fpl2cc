@@ -1,4 +1,12 @@
 
+#
+# json parsing test
+#
+# This reads json input (using the grammarlib json.fpl)
+# into an internal format, and then dumps the internal
+# data to test output.
+# 
+
 +{
     #include <list>
     #include <map>
@@ -52,35 +60,39 @@
 
         bkv_item()                     : type(bkv_t_null), value(false) { }
         bkv_item(bool v)               : type(bkv_t_bool), value(v)     { }
-        bkv_item(char d)               : type(bkv_t_num),  value(d)     { }
-        bkv_item(int d)                : type(bkv_t_num),  value(d)     { }
-        bkv_item(long d)               : type(bkv_t_num),  value(d)     { }
-        bkv_item(long long d)          : type(bkv_t_num),  value(d)     { }
+        bkv_item(int i)                : type(bkv_t_int),  value(i)     { }
+        bkv_item(long i)               : type(bkv_t_int),  value(i)     { }
+        bkv_item(long long i)          : type(bkv_t_int),  value(i)     { }
         bkv_item(double d)             : type(bkv_t_num),  value(d)     { }
         bkv_item(const std::string &s) : type(bkv_t_str),  value(s)     { }
         bkv_item(const bkv_array &in)  : type(bkv_t_arr),  value(in)    { }
         bkv_item(const bkv_object &in) : type(bkv_t_obj),  value(in)    { }
 
         std::string to_str() const {
-            switch(type) {
-                // everything gets its own line to make diffing easier
-                case bkv_t_null:
-                     return "<null>\n";
-                case bkv_t_bool:
-                     return std::get<bool>(value)?"<true>\n":"<false>\n";
-                case bkv_t_int:
-                      return stringformat("{}\n", std::get<bkv_int>(value));
-                case bkv_t_num:
-                      return stringformat("{}\n", std::get<bkv_num>(value));
-                case bkv_t_str:
-                      return stringformat("'{}'\n", std::get<std::string>(value));
-                case bkv_t_arr:
-                      return stringformat("{}\n", std::get<bkv_array>(value));
-                case bkv_t_obj:
-                      return stringformat("{}\n", std::get<bkv_object>(value));
+            try {
+                switch(type) {
+                    // everything gets its own line to make diffing easier
+                    case bkv_t_null:
+                         return "<null>\n";
+                    case bkv_t_bool:
+                         return std::get<bool>(value)?"<true>\n":"<false>\n";
+                    case bkv_t_int:
+                          return stringformat("{}\n", std::get<bkv_int>(value));
+                    case bkv_t_num:
+                          return stringformat("{}\n", std::get<bkv_num>(value));
+                    case bkv_t_str:
+                          return stringformat("'{}'\n", std::get<std::string>(value));
+                    case bkv_t_arr:
+                          return stringformat("{}\n", std::get<bkv_array>(value));
+                    case bkv_t_obj:
+                          return stringformat("{}\n", std::get<bkv_object>(value));
+                }
+            }
+            catch(const std::bad_variant_access& e) {
+                return stringformat("BUG: bad variant {} in to_str", type);
             }
 
-            return stringformat("Unknown type {} for {} in to_str", type);
+            return stringformat("Unknown type {} in to_str", type);
         }
     };
 
