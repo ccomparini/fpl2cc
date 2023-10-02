@@ -158,8 +158,8 @@ class fpl_reader {
 
     // as inpp(), above, but returns as a const char *
     // for ease in passing to standard library stuff.
-    inline const char *inpp_as_char() {
-        return reinterpret_cast<const char *>(inpp());
+    inline const char *inpp_as_char(size_t offset = 0) const {
+        return reinterpret_cast<const char *>(inpp(offset));
     }
 
     // returns the line number for the position passed,
@@ -316,6 +316,12 @@ public:
 
     inline utf8_byte peek(int offset = 0) const {
         return *inpp(offset);
+    }
+
+    // returns the next utf-8 char (at offset relative to the
+    // read pointer) as a std::string.
+    inline std::string next_char(int offset = 0) const {
+        return std::string(inpp_as_char(offset), char_length(offset));
     }
 
     // formats an error message in the context of this reader.
@@ -770,7 +776,7 @@ public:
         return out;
     }
 
-    // errrf paramse here are differnt from peek()
+    // errrf params here are different from peek()
     inline std::string debug_peek(int num_chars = 12) const {
         return debug_peek(size_t(-1), num_chars);
     }
