@@ -1,0 +1,264 @@
+returncode = 0
+stderr = ""
+stdout = "======
+5 items: [
+22 items: (
+'_id' => '651b3c66e30c58a2d1e64af8'
+'about' => 'Aute esse sint in nisi deserunt officia. Fugiat culpa cillum aute officia duis id cupidatat tempor sit ipsum. Ut do dolore et commodo voluptate id est.\\r\\n'
+'address' => '524 Decatur Street, Glidden, Maine, 9065'
+'age' => 23
+'balance' => '$1,901.03'
+'company' => 'ZIDOX'
+'email' => 'rayhurst@zidox.com'
+'eyeColor' => 'brown'
+'favoriteFruit' => 'banana'
+'friends' => 3 items: [
+2 items: (
+'id' => 0
+'name' => 'Burch Vazquez'
+)
+
+2 items: (
+'id' => 1
+'name' => 'Chavez Hendrix'
+)
+
+2 items: (
+'id' => 2
+'name' => 'Preston Hurley'
+)
+
+]
+
+'gender' => 'male'
+'greeting' => 'Hello, Ray Hurst! You have 7 unread messages.'
+'guid' => '244cb7e7-0a93-4e95-9379-baa29f608aac'
+'index' => 0
+'isActive' => <true>
+'latitude' => -62.543584
+'longitude' => -52.768537
+'name' => 'Ray Hurst'
+'phone' => '+1 (929) 480-2835'
+'picture' => 'http://placehold.it/32x32'
+'registered' => '2018-12-10T02:37:14 +08:00'
+'tags' => 7 items: [
+'consectetur'
+'in'
+'Lorem'
+'excepteur'
+'pariatur'
+'dolor'
+'amet'
+]
+
+)
+
+22 items: (
+'_id' => '651b3c6686d12b47f643df2f'
+'about' => 'Fugiat adipisicing voluptate nulla sit do sunt adipisicing. Dolor non pariatur dolor pariatur deserunt duis irure voluptate ullamco do. Aute quis ut cillum incididunt in mollit. Fugiat culpa sunt exercitation excepteur elit nisi. Amet ex velit laborum nulla.\\r\\n'
+'address' => '677 Downing Street, Wells, Missouri, 7726'
+'age' => 23
+'balance' => '$1,753.19'
+'company' => 'SYNTAC'
+'email' => 'sueconley@syntac.com'
+'eyeColor' => 'blue'
+'favoriteFruit' => 'strawberry'
+'friends' => 3 items: [
+2 items: (
+'id' => 0
+'name' => 'Elsie Church'
+)
+
+2 items: (
+'id' => 1
+'name' => 'Barrera Madden'
+)
+
+2 items: (
+'id' => 2
+'name' => 'Bernice Lancaster'
+)
+
+]
+
+'gender' => <false>
+'greeting' => 'Hello, Sue Conley! You have 4 unread messages.'
+'guid' => 'd673756f-25b0-4fc3-aae4-19c3e4af57aa'
+'index' => 1
+'isActive' => <true>
+'latitude' => 82.017800
+'longitude' => -2.522919
+'name' => 'Sue Conley'
+'phone' => '+1 (890) 542-2355'
+'picture' => 'http://placehold.it/32x32'
+'registered' => '2015-11-05T10:50:01 +08:00'
+'tags' => 7 items: [
+'magna'
+'dolor'
+'irure'
+'magna'
+'duis'
+'minim'
+'aliqua'
+]
+
+)
+
+22 items: (
+'_id' => '651b3c66989fa58b6e536529'
+'about' => 'Consectetur minim dolore pariatur id. Et proident anim laborum ut duis reprehenderit irure occaecat exercitation et Lorem. Ea ex fugiat aliqua ipsum exercitation. Aute nisi anim laboris nostrud qui duis culpa minim.\\r\\n'
+'address' => '514 Elmwood Avenue, Wawona, Iowa, 2243'
+'age' => 20
+'balance' => '$3,362.93'
+'company' => 'WATERBABY'
+'email' => 'talleycline@waterbaby.com'
+'eyeColor' => 'brown'
+'favoriteFruit' => 'apple'
+'friends' => 3 items: [
+2 items: (
+'id' => 0
+'name' => 'Nunez Anderson'
+)
+
+2 items: (
+'id' => 1
+'name' => 'Battle Steele'
+)
+
+2 items: (
+'id' => 2
+'name' => 'Ebony Foster'
+)
+
+]
+
+'gender' => 'male'
+'greeting' => 'Hello, Talley Cline! You have 9 unread messages.'
+'guid' => 'e4949042-c5c1-4f58-8fb5-de04bd012eca'
+'index' => 2
+'isActive' => <false>
+'latitude' => -31.182382
+'longitude' => 179.742076
+'name' => 'Talley Cline'
+'phone' => '+1 (960) 522-2181'
+'picture' => 'http://placehold.it/32x32'
+'registered' => '2016-06-30T08:19:00 +07:00'
+'tags' => 7 items: [
+'sit'
+'sint'
+'excepteur'
+'reprehenderit'
+'ad'
+'labore'
+'occaecat'
+]
+
+)
+
+22 items: (
+'_id' => '651b3c6620ce358f49c07048'
+'about' => 'Et non tempor amet duis amet eu dolore esse esse mollit. Eu ex mollit tempor aliqua do eu ex eu ullamco incididunt id sunt laborum. Ad Lorem ullamco sit deserunt sit cupidatat aliquip fugiat reprehenderit officia laborum aliquip quis. Laboris fugiat labore consequat ipsum consectetur dolore cupidatat excepteur cillum.\\r\\n'
+'address' => '557 Seigel Court, Levant, Palau, 4985'
+'age' => 24
+'balance' => '$3,974.27'
+'company' => 'KONGENE'
+'email' => 'evesantiago@kongene.com'
+'eyeColor' => 'green'
+'favoriteFruit' => 'banana'
+'friends' => 3 items: [
+2 items: (
+'id' => 0
+'name' => 'Dina Beach'
+)
+
+2 items: (
+'id' => 1
+'name' => 'Gracie Hayes'
+)
+
+2 items: (
+'id' => 2
+'name' => 'Wynn Irwin'
+)
+
+]
+
+'gender' => 'female'
+'greeting' => 'Hello, Eve Santiago! You have 7 unread messages.'
+'guid' => '517ab349-7f0f-4607-8086-23fdd258daf8'
+'index' => 3
+'isActive' => <true>
+'latitude' => 19.930584
+'longitude' => -63.750583
+'name' => 'Eve Santiago'
+'phone' => '+1 (903) 585-2997'
+'picture' => 'http://placehold.it/32x32'
+'registered' => '2014-05-30T09:51:16 +07:00'
+'tags' => 7 items: [
+'ea'
+'ea'
+'elit'
+'enim'
+'consectetur'
+'sunt'
+'qui'
+]
+
+)
+
+22 items: (
+'_id' => '651b3c66f629245705c76b40'
+'about' => 'Voluptate nulla quis excepteur voluptate. Eiusmod occaecat veniam enim excepteur sunt deserunt. Aliquip enim magna sunt Lorem do est eu veniam incididunt. Amet quis aliquip adipisicing in quis excepteur ad.\\r\\n'
+'address' => '966 Vista Place, Freeburn, Washington, 6721'
+'age' => 29
+'balance' => '$1,258.23'
+'company' => 'GLUKGLUK'
+'email' => 'lidiahyde@glukgluk.com'
+'eyeColor' => 'green'
+'favoriteFruit' => 'banana'
+'friends' => 3 items: [
+2 items: (
+'id' => 0
+'name' => 'Amalia Sampson'
+)
+
+2 items: (
+'id' => 1
+'name' => 'Garrett Hays'
+)
+
+2 items: (
+'id' => 2
+'name' => 'Aimee Crosby'
+)
+
+]
+
+'gender' => 'female'
+'greeting' => 'Hello, Lidia Hyde! You have 8 unread messages.'
+'guid' => 'fafe1bad-ca77-4cd3-9448-8bee83b9cc8e'
+'index' => 4
+'isActive' => <true>
+'latitude' => 85.714756
+'longitude' => -84.968633
+'name' => 'Lidia Hyde'
+'phone' => '+1 (838) 565-2866'
+'picture' => 'http://placehold.it/32x32'
+'registered' => '2022-09-11T12:58:00 +07:00'
+'tags' => 7 items: [
+'nulla'
+'sit'
+'proident'
+'irure'
+'nostrud'
+'veniam'
+'mollit'
+]
+
+)
+
+]
+
+
+======
+"
