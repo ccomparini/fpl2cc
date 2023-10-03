@@ -441,7 +441,7 @@ public:
         skip_bytes(char_length_abs(read_pos));
     }
 
-    // moves the read pointed past the next character
+    // moves the read pointer past the next character
     // and returns the number of bytes it was advanced
     size_t eat_char() {
         return skip_bytes(char_length());
