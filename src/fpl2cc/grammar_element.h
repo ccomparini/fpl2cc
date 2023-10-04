@@ -49,6 +49,28 @@ struct grammar_element {
         return "invalid grammar_element::Type";
     }
 
+    // like the above, but suitable for error messages:
+    static const char *Type_to_human_str(Type t) {
+        static const char *strs[] = {
+            "<none!>",
+            "nonterminal",
+            "subexpression",
+            "<precedence placeholder>",
+            "custom terminal",
+            "inverted custom terminal",
+            "lack-of-separator assertion",
+            "exact match",
+            "inverted exact match",
+            "regular expression match",
+            "inverted regular expression match",
+            "end of parse"
+        };
+        if(t >= NONE && t < _TYPE_CAP) {
+            return strs[t];
+        }
+        return "<invalid grammar element type!>";
+    }
+
     grammar_element() : expr(""), type(Type::NONE) { }
 
     grammar_element(const std::string &str, Type tp)
@@ -146,18 +168,16 @@ struct grammar_element {
         }
     }
 
-    // ... and this changes the element type to whatever the
-    // appropriate inverse is:
-    void invert_type(src_location caller = CALLER()) {
+    // .. And this tries to change the element type to whatever
+    // the appropriate inverse is.
+    // Returns true on success, false otherwise.
+    bool invert_type() {
         auto new_type = inverse_type(type);
         if(new_type) {
             type = new_type;
-        } else {
-            jerror::warning(stringformat(
-                "can't invert type {} {} at {}",
-                type, *this, caller
-            ));
+            return true;
         }
+        return false;
     }
 
     void resolve_placeholder(

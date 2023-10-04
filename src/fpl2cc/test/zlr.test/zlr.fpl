@@ -28,6 +28,9 @@
     return "empty parens which should never match";
 }+
 
+# this rule should warn, since we can't invert nonterms:
+!something -> nothing;
+
 something* -> done +{
     std::cout << something@join("\n");
     return "done";

@@ -285,12 +285,16 @@ public:
         int stepi = rsteps.size();
 
         // if the step is inverted, change the grammar element
-        // to the appropriate type.
-        // Note: probably better to do this in the constructor
-        // at this point.  Keeping this this way for now so I
-        // don't have the change callers.
-        if(invert)
-            st.gexpr.invert_type();
+        // to the appropriate type:
+        if(invert) {
+            if(!st.gexpr.invert_type()) {
+                jerror::warning(stringformat(
+                    "can't invert {} \"{}\" at {}",
+                    grammar_element::Type_to_human_str(st.gexpr.type),
+                    st, location()
+                ));
+            }
+        }
 
         // to support stuff like:
         //   'foo'*:pre 'foo':penultimate 'foo':final -> bar;
