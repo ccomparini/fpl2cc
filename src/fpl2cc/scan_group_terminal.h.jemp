@@ -1,3 +1,10 @@
+@/*
+  A "group" terminal (specified by [ ] within a terminal definition)
+  is a set of terminal specifications, any of which can match.  If
+  more than one terminal in the group matches, we use the longest
+  match - i.e., this is an "or" operation for terminals.
+*/@
+
 @parameter: std::set<std::string> &exact_matches @
 @parameter: std::set<std::string> &regex_matches @
 

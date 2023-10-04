@@ -1219,8 +1219,8 @@ public:
         } else {
             inp->eat_separator();
             if(inp->peek() == '[') {
-                // this terminal is the set of the terminals
-                // within the [ ]
+                // this terminal matches anything in the set
+                // of the terminals within the [ ]
                 std::set<std::string> exacts;
                 std::set<std::string> regexes;
                 auto start = inp->current_position();
