@@ -3791,7 +3791,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // '@@' 
     bool shift_TERM_EXACT__terminal_4(bool eject) {
         if(auto next_up = lr_next()) {
@@ -3808,32 +3808,34 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-        if(reader->read_exact_match("@@")) {
-            if(
-
-            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
-            false
-            ) {
-                // though we matched the terminal, it's part of a
-                // longer terminal.  so, cancel the match/rewind:
-                reader->go_to(pos);
-            } else {
-                result = Terminal("@@");
+            const SourcePosition pos = position();
+            if(reader->read_exact_match("@@")) {
+                if(
+                false
+                ) {
+                    // though we matched the terminal, it's part of a
+                    // longer terminal.  so, cancel the match/rewind:
+                    reader->go_to(pos);
+                } else {
+                    result = Terminal("@@");
+                }
             }
+
+
         }
 
-        #line 48 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_4, eject, pos, Product(result));
@@ -3878,7 +3880,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // '@/*' 
     bool shift_TERM_EXACT__terminal_5(bool eject) {
         if(auto next_up = lr_next()) {
@@ -3895,32 +3897,34 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-        if(reader->read_exact_match("@/*")) {
-            if(
-
-            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
-            false
-            ) {
-                // though we matched the terminal, it's part of a
-                // longer terminal.  so, cancel the match/rewind:
-                reader->go_to(pos);
-            } else {
-                result = Terminal("@/*");
+            const SourcePosition pos = position();
+            if(reader->read_exact_match("@/*")) {
+                if(
+                false
+                ) {
+                    // though we matched the terminal, it's part of a
+                    // longer terminal.  so, cancel the match/rewind:
+                    reader->go_to(pos);
+                } else {
+                    result = Terminal("@/*");
+                }
             }
+
+
         }
 
-        #line 48 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_5, eject, pos, Product(result));
@@ -3965,7 +3969,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/ 
     bool shift_TERM_REGEX__terminal_6(bool eject) {
         if(auto next_up = lr_next()) {
@@ -3982,28 +3986,31 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-        std::cmatch match = reader->read_re("(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*");
-        if(!match.empty()) {
-            if(match.length() || (lr_top().position() != position())) {
-                result = Terminal(match.begin(), match.end());
+            std::cmatch match = reader->read_re("(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*");
+            if(!match.empty()) {
+                if(match.length() || (lr_top().position() != position())) {
+                    result = Terminal(match.begin(), match.end());
+                }
             }
+
+
+
+
         }
 
-
-
-        #line 54 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_6, eject, pos, Product(result));
@@ -4048,7 +4055,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // '*/@' 
     bool shift_TERM_EXACT__terminal_7(bool eject) {
         if(auto next_up = lr_next()) {
@@ -4065,32 +4072,34 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-        if(reader->read_exact_match("*/@")) {
-            if(
-
-            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
-            false
-            ) {
-                // though we matched the terminal, it's part of a
-                // longer terminal.  so, cancel the match/rewind:
-                reader->go_to(pos);
-            } else {
-                result = Terminal("*/@");
+            const SourcePosition pos = position();
+            if(reader->read_exact_match("*/@")) {
+                if(
+                false
+                ) {
+                    // though we matched the terminal, it's part of a
+                    // longer terminal.  so, cancel the match/rewind:
+                    reader->go_to(pos);
+                } else {
+                    result = Terminal("*/@");
+                }
             }
+
+
         }
 
-        #line 48 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_7, eject, pos, Product(result));
@@ -4135,7 +4144,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // /\\n\?/ 
     bool shift_TERM_REGEX__terminal_8(bool eject) {
         if(auto next_up = lr_next()) {
@@ -4152,28 +4161,31 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-        std::cmatch match = reader->read_re("\\n\?");
-        if(!match.empty()) {
-            if(match.length() || (lr_top().position() != position())) {
-                result = Terminal(match.begin(), match.end());
+            std::cmatch match = reader->read_re("\\n\?");
+            if(!match.empty()) {
+                if(match.length() || (lr_top().position() != position())) {
+                    result = Terminal(match.begin(), match.end());
+                }
             }
+
+
+
+
         }
 
-
-
-        #line 54 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_8, eject, pos, Product(result));
@@ -4218,7 +4230,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // '@parameter:' 
     bool shift_TERM_EXACT__terminal_9(bool eject) {
         if(auto next_up = lr_next()) {
@@ -4235,32 +4247,34 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-        if(reader->read_exact_match("@parameter:")) {
-            if(
-
-            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
-            false
-            ) {
-                // though we matched the terminal, it's part of a
-                // longer terminal.  so, cancel the match/rewind:
-                reader->go_to(pos);
-            } else {
-                result = Terminal("@parameter:");
+            const SourcePosition pos = position();
+            if(reader->read_exact_match("@parameter:")) {
+                if(
+                false
+                ) {
+                    // though we matched the terminal, it's part of a
+                    // longer terminal.  so, cancel the match/rewind:
+                    reader->go_to(pos);
+                } else {
+                    result = Terminal("@parameter:");
+                }
             }
+
+
         }
 
-        #line 48 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_9, eject, pos, Product(result));
@@ -4305,7 +4319,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // /[^@]+/ 
     bool shift_TERM_REGEX__terminal_10(bool eject) {
         if(auto next_up = lr_next()) {
@@ -4322,28 +4336,31 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-        std::cmatch match = reader->read_re("[^@]+");
-        if(!match.empty()) {
-            if(match.length() || (lr_top().position() != position())) {
-                result = Terminal(match.begin(), match.end());
+            std::cmatch match = reader->read_re("[^@]+");
+            if(!match.empty()) {
+                if(match.length() || (lr_top().position() != position())) {
+                    result = Terminal(match.begin(), match.end());
+                }
             }
+
+
+
+
         }
 
-
-
-        #line 54 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_10, eject, pos, Product(result));
@@ -4388,7 +4405,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // '@' 
     bool shift_TERM_EXACT__terminal_11(bool eject) {
         if(auto next_up = lr_next()) {
@@ -4405,44 +4422,38 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-        if(reader->read_exact_match("@")) {
-            if(
-
-            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
-            reader->read_exact_match("@") ||
-
-            #line 39 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
-            reader->read_exact_match("/*") ||
-
-            #line 39 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
-            reader->read_exact_match("parameter:") ||
-
-            #line 39 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
-            reader->read_exact_match("-") ||
-
-            #line 39 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
-            false
-            ) {
-                // though we matched the terminal, it's part of a
-                // longer terminal.  so, cancel the match/rewind:
-                reader->go_to(pos);
-            } else {
-                result = Terminal("@");
+            const SourcePosition pos = position();
+            if(reader->read_exact_match("@")) {
+                if(
+                reader->read_exact_match("@") ||
+                reader->read_exact_match("/*") ||
+                reader->read_exact_match("parameter:") ||
+                reader->read_exact_match("-") ||
+                false
+                ) {
+                    // though we matched the terminal, it's part of a
+                    // longer terminal.  so, cancel the match/rewind:
+                    reader->go_to(pos);
+                } else {
+                    result = Terminal("@");
+                }
             }
+
+
         }
 
-        #line 48 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_11, eject, pos, Product(result));
@@ -4514,7 +4525,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // /@declare\\s+/ 
     bool shift_TERM_REGEX__terminal_13(bool eject) {
         if(auto next_up = lr_next()) {
@@ -4531,28 +4542,31 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-        std::cmatch match = reader->read_re("@declare\\s+");
-        if(!match.empty()) {
-            if(match.length() || (lr_top().position() != position())) {
-                result = Terminal(match.begin(), match.end());
+            std::cmatch match = reader->read_re("@declare\\s+");
+            if(!match.empty()) {
+                if(match.length() || (lr_top().position() != position())) {
+                    result = Terminal(match.begin(), match.end());
+                }
             }
+
+
+
+
         }
 
-
-
-        #line 54 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_13, eject, pos, Product(result));
@@ -4624,7 +4638,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // ':' 
     bool shift_TERM_EXACT__terminal_15(bool eject) {
         if(auto next_up = lr_next()) {
@@ -4641,32 +4655,34 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-        if(reader->read_exact_match(":")) {
-            if(
-
-            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
-            false
-            ) {
-                // though we matched the terminal, it's part of a
-                // longer terminal.  so, cancel the match/rewind:
-                reader->go_to(pos);
-            } else {
-                result = Terminal(":");
+            const SourcePosition pos = position();
+            if(reader->read_exact_match(":")) {
+                if(
+                false
+                ) {
+                    // though we matched the terminal, it's part of a
+                    // longer terminal.  so, cancel the match/rewind:
+                    reader->go_to(pos);
+                } else {
+                    result = Terminal(":");
+                }
             }
+
+
         }
 
-        #line 48 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_15, eject, pos, Product(result));
@@ -4711,7 +4727,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // /(\?:[^@]|(\?:@@))*/ 
     bool shift_TERM_REGEX__terminal_16(bool eject) {
         if(auto next_up = lr_next()) {
@@ -4728,28 +4744,31 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-        std::cmatch match = reader->read_re("(\?:[^@]|(\?:@@))*");
-        if(!match.empty()) {
-            if(match.length() || (lr_top().position() != position())) {
-                result = Terminal(match.begin(), match.end());
+            std::cmatch match = reader->read_re("(\?:[^@]|(\?:@@))*");
+            if(!match.empty()) {
+                if(match.length() || (lr_top().position() != position())) {
+                    result = Terminal(match.begin(), match.end());
+                }
             }
+
+
+
+
         }
 
-
-
-        #line 54 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_16, eject, pos, Product(result));
@@ -4794,7 +4813,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // /@realign:\\s*/ 
     bool shift_TERM_REGEX__terminal_17(bool eject) {
         if(auto next_up = lr_next()) {
@@ -4811,28 +4830,31 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-        std::cmatch match = reader->read_re("@realign:\\s*");
-        if(!match.empty()) {
-            if(match.length() || (lr_top().position() != position())) {
-                result = Terminal(match.begin(), match.end());
+            std::cmatch match = reader->read_re("@realign:\\s*");
+            if(!match.empty()) {
+                if(match.length() || (lr_top().position() != position())) {
+                    result = Terminal(match.begin(), match.end());
+                }
             }
+
+
+
+
         }
 
-
-
-        #line 54 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_17, eject, pos, Product(result));
@@ -4877,7 +4899,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // '#' 
     bool shift_TERM_EXACT__terminal_18(bool eject) {
         if(auto next_up = lr_next()) {
@@ -4894,32 +4916,34 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-        if(reader->read_exact_match("#")) {
-            if(
-
-            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
-            false
-            ) {
-                // though we matched the terminal, it's part of a
-                // longer terminal.  so, cancel the match/rewind:
-                reader->go_to(pos);
-            } else {
-                result = Terminal("#");
+            const SourcePosition pos = position();
+            if(reader->read_exact_match("#")) {
+                if(
+                false
+                ) {
+                    // though we matched the terminal, it's part of a
+                    // longer terminal.  so, cancel the match/rewind:
+                    reader->go_to(pos);
+                } else {
+                    result = Terminal("#");
+                }
             }
+
+
         }
 
-        #line 48 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_18, eject, pos, Product(result));
@@ -4964,7 +4988,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // !'#' 
     bool shift_TERM_EXACT_INV__terminal_19(bool eject) {
         if(auto next_up = lr_next()) {
@@ -4981,22 +5005,25 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-        std::string match = reader->read_to_exact_match("#");
-        if(match.length())
-        result = Terminal(match);
+            std::string match = reader->read_to_exact_match("#");
+            if(match.length())
+            result = Terminal(match);
 
-        #line 52 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+
+        }
+
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_19, eject, pos, Product(result));
@@ -5068,7 +5095,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // '@-' 
     bool shift_TERM_EXACT__terminal_21(bool eject) {
         if(auto next_up = lr_next()) {
@@ -5085,32 +5112,34 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-        if(reader->read_exact_match("@-")) {
-            if(
-
-            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
-            false
-            ) {
-                // though we matched the terminal, it's part of a
-                // longer terminal.  so, cancel the match/rewind:
-                reader->go_to(pos);
-            } else {
-                result = Terminal("@-");
+            const SourcePosition pos = position();
+            if(reader->read_exact_match("@-")) {
+                if(
+                false
+                ) {
+                    // though we matched the terminal, it's part of a
+                    // longer terminal.  so, cancel the match/rewind:
+                    reader->go_to(pos);
+                } else {
+                    result = Terminal("@-");
+                }
             }
+
+
         }
 
-        #line 48 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_21, eject, pos, Product(result));
@@ -5182,7 +5211,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // '-@' 
     bool shift_TERM_EXACT__terminal_23(bool eject) {
         if(auto next_up = lr_next()) {
@@ -5199,32 +5228,34 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-        if(reader->read_exact_match("-@")) {
-            if(
-
-            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
-            false
-            ) {
-                // though we matched the terminal, it's part of a
-                // longer terminal.  so, cancel the match/rewind:
-                reader->go_to(pos);
-            } else {
-                result = Terminal("-@");
+            const SourcePosition pos = position();
+            if(reader->read_exact_match("-@")) {
+                if(
+                false
+                ) {
+                    // though we matched the terminal, it's part of a
+                    // longer terminal.  so, cancel the match/rewind:
+                    reader->go_to(pos);
+                } else {
+                    result = Terminal("-@");
+                }
             }
+
+
         }
 
-        #line 48 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_23, eject, pos, Product(result));
@@ -5323,7 +5354,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // /(\?:[^-@]|-[^@])+/ 
     bool shift_TERM_REGEX__terminal_26(bool eject) {
         if(auto next_up = lr_next()) {
@@ -5340,28 +5371,31 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-        std::cmatch match = reader->read_re("(\?:[^-@]|-[^@])+");
-        if(!match.empty()) {
-            if(match.length() || (lr_top().position() != position())) {
-                result = Terminal(match.begin(), match.end());
+            std::cmatch match = reader->read_re("(\?:[^-@]|-[^@])+");
+            if(!match.empty()) {
+                if(match.length() || (lr_top().position() != position())) {
+                    result = Terminal(match.begin(), match.end());
+                }
             }
+
+
+
+
         }
 
-
-
-        #line 54 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_26, eject, pos, Product(result));
@@ -5433,7 +5467,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // /\\n*[ \\t]+/ 
     bool shift_TERM_REGEX__terminal_28(bool eject) {
         if(auto next_up = lr_next()) {
@@ -5450,28 +5484,31 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-        std::cmatch match = reader->read_re("\\n*[ \\t]+");
-        if(!match.empty()) {
-            if(match.length() || (lr_top().position() != position())) {
-                result = Terminal(match.begin(), match.end());
+            std::cmatch match = reader->read_re("\\n*[ \\t]+");
+            if(!match.empty()) {
+                if(match.length() || (lr_top().position() != position())) {
+                    result = Terminal(match.begin(), match.end());
+                }
             }
+
+
+
+
         }
 
-
-
-        #line 54 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_28, eject, pos, Product(result));
@@ -5516,7 +5553,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // /[ \\t]*\\n+[ \\t]+(\?!@)/ 
     bool shift_TERM_REGEX__terminal_29(bool eject) {
         if(auto next_up = lr_next()) {
@@ -5533,28 +5570,31 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-        std::cmatch match = reader->read_re("[ \\t]*\\n+[ \\t]+(\?!@)");
-        if(!match.empty()) {
-            if(match.length() || (lr_top().position() != position())) {
-                result = Terminal(match.begin(), match.end());
+            std::cmatch match = reader->read_re("[ \\t]*\\n+[ \\t]+(\?!@)");
+            if(!match.empty()) {
+                if(match.length() || (lr_top().position() != position())) {
+                    result = Terminal(match.begin(), match.end());
+                }
             }
+
+
+
+
         }
 
-
-
-        #line 54 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_29, eject, pos, Product(result));
@@ -5599,7 +5639,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // /[ \\t]*\\n/ 
     bool shift_TERM_REGEX__terminal_30(bool eject) {
         if(auto next_up = lr_next()) {
@@ -5616,28 +5656,31 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-        std::cmatch match = reader->read_re("[ \\t]*\\n");
-        if(!match.empty()) {
-            if(match.length() || (lr_top().position() != position())) {
-                result = Terminal(match.begin(), match.end());
+            std::cmatch match = reader->read_re("[ \\t]*\\n");
+            if(!match.empty()) {
+                if(match.length() || (lr_top().position() != position())) {
+                    result = Terminal(match.begin(), match.end());
+                }
             }
+
+
+
+
         }
 
-
-
-        #line 54 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_30, eject, pos, Product(result));
@@ -5682,7 +5725,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // /#\\s*/ 
     bool shift_TERM_REGEX__terminal_31(bool eject) {
         if(auto next_up = lr_next()) {
@@ -5699,28 +5742,31 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-        std::cmatch match = reader->read_re("#\\s*");
-        if(!match.empty()) {
-            if(match.length() || (lr_top().position() != position())) {
-                result = Terminal(match.begin(), match.end());
+            std::cmatch match = reader->read_re("#\\s*");
+            if(!match.empty()) {
+                if(match.length() || (lr_top().position() != position())) {
+                    result = Terminal(match.begin(), match.end());
+                }
             }
+
+
+
+
         }
 
-
-
-        #line 54 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_31, eject, pos, Product(result));
@@ -5765,7 +5811,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // /(\?:[^-{}@]|-[^@]|[{}][^-@])*[{}]/ 
     bool shift_TERM_REGEX__terminal_32(bool eject) {
         if(auto next_up = lr_next()) {
@@ -5782,28 +5828,31 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-        std::cmatch match = reader->read_re("(\?:[^-{}@]|-[^@]|[{}][^-@])*[{}]");
-        if(!match.empty()) {
-            if(match.length() || (lr_top().position() != position())) {
-                result = Terminal(match.begin(), match.end());
+            std::cmatch match = reader->read_re("(\?:[^-{}@]|-[^@]|[{}][^-@])*[{}]");
+            if(!match.empty()) {
+                if(match.length() || (lr_top().position() != position())) {
+                    result = Terminal(match.begin(), match.end());
+                }
             }
+
+
+
+
         }
 
-
-
-        #line 54 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_32, eject, pos, Product(result));
@@ -5848,7 +5897,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // /[^@\\n]+/ 
     bool shift_TERM_REGEX__terminal_33(bool eject) {
         if(auto next_up = lr_next()) {
@@ -5865,28 +5914,31 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-        std::cmatch match = reader->read_re("[^@\\n]+");
-        if(!match.empty()) {
-            if(match.length() || (lr_top().position() != position())) {
-                result = Terminal(match.begin(), match.end());
+            std::cmatch match = reader->read_re("[^@\\n]+");
+            if(!match.empty()) {
+                if(match.length() || (lr_top().position() != position())) {
+                    result = Terminal(match.begin(), match.end());
+                }
             }
+
+
+
+
         }
 
-
-
-        #line 54 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_33, eject, pos, Product(result));
@@ -5931,7 +5983,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // /[a-zA-Z_][a-zA-Z_0-9]+/ 
     bool shift_TERM_REGEX__terminal_34(bool eject) {
         if(auto next_up = lr_next()) {
@@ -5948,28 +6000,31 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-        std::cmatch match = reader->read_re("[a-zA-Z_][a-zA-Z_0-9]+");
-        if(!match.empty()) {
-            if(match.length() || (lr_top().position() != position())) {
-                result = Terminal(match.begin(), match.end());
+            std::cmatch match = reader->read_re("[a-zA-Z_][a-zA-Z_0-9]+");
+            if(!match.empty()) {
+                if(match.length() || (lr_top().position() != position())) {
+                    result = Terminal(match.begin(), match.end());
+                }
             }
+
+
+
+
         }
 
-
-
-        #line 54 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_34, eject, pos, Product(result));
@@ -6014,7 +6069,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // /[ \\t]+/ 
     bool shift_TERM_REGEX__terminal_35(bool eject) {
         if(auto next_up = lr_next()) {
@@ -6031,28 +6086,31 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-        std::cmatch match = reader->read_re("[ \\t]+");
-        if(!match.empty()) {
-            if(match.length() || (lr_top().position() != position())) {
-                result = Terminal(match.begin(), match.end());
+            std::cmatch match = reader->read_re("[ \\t]+");
+            if(!match.empty()) {
+                if(match.length() || (lr_top().position() != position())) {
+                    result = Terminal(match.begin(), match.end());
+                }
             }
+
+
+
+
         }
 
-
-
-        #line 54 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_35, eject, pos, Product(result));
@@ -6124,7 +6182,7 @@ class jemplpl_parser {
     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
-    #line 9 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
     // ␄_fpl_goal 
     bool shift_END_OF_PARSE__terminal_37(bool eject) {
         if(auto next_up = lr_next()) {
@@ -6141,20 +6199,23 @@ class jemplpl_parser {
         }
 
         const SourcePosition pos = position();
+
         Terminal result;
+        {
 
-        #line 34 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-        // end of parse placeholder.  can't get here.
+            // end of parse placeholder.  can't get here.
 
-        #line 69 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+
+        }
+
 
 
         if(result) {
             clear_mismatches();  // (we matched)
 
 
-            #line 76 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
+            #line 37 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
 
             lr_push(_terminal_37, eject, pos, Product(result));
@@ -8235,7 +8296,7 @@ class jemplpl_parser {
             // separator "none" means 0 bytes of separator:
             return 0;
 
-            #line 8238 "src/jemplpl/jemplpl.cc"
+            #line 8299 "src/jemplpl/jemplpl.cc"
 
 
             #line 1371 "src/fpl2cc/fpl_x_parser.h.jemp" 
@@ -18120,7 +18181,7 @@ int main(int argc, const char **argv) {
 
     return total_errors?1:0;
 
-    #line 18123 "src/jemplpl/jemplpl.cc"
+    #line 18184 "src/jemplpl/jemplpl.cc"
 
 }
 
