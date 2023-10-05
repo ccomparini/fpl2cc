@@ -921,6 +921,11 @@ class productions {
         }
     };
 
+
+    size_t eat_separator() {
+        return inp->eat_separator();
+    }
+
 public:
 
     productions(
@@ -1128,7 +1133,7 @@ public:
             return false;
         }
 
-        inp->eat_separator();
+        eat_separator();
         while(!inp->read_exact_match("]")) {
             std::string expr;
             grammar_element::Type type;
@@ -1146,7 +1151,7 @@ public:
                     ));
                 }
             }
-            inp->eat_separator();
+            eat_separator();
         }
 
         return true;
@@ -1217,7 +1222,7 @@ public:
         if(name == "") {
             error("expected name for terminal definition");
         } else {
-            inp->eat_separator();
+            eat_separator();
             if(inp->peek() == '[') {
                 // this terminal matches anything in the set
                 // of the terminals within the [ ]
@@ -1244,7 +1249,7 @@ public:
                     ),
                     code_source::INLINE_OR_REGEX
                 );
-                inp->eat_separator();
+                eat_separator();
                 if(inp->read_exact_match("inverse")) {
                     if(scanners[name].language == code_block::REGEX) {
                         // regex scanner inversion is already covered,
@@ -1258,7 +1263,7 @@ public:
                             name
                         ));
                     }
-                    inp->eat_separator();
+                    eat_separator();
                     scanners[inverse_scanner_name(name)] = code_for_directive(
                         stringformat(
                             "inverse of custom terminal {} at {}",
@@ -1360,7 +1365,7 @@ public:
             import_grammar(arg_for_directive());
         } else if(dir == "import") {
             // import the rules from another fpl:
-            inp->eat_separator();
+            eat_separator();
             parse_import();
         } else if(dir == "internal") {
             // a code block which goes in the "private" part
@@ -1390,9 +1395,9 @@ public:
             // syntax.
             parse_custom_terminal();
         } else if(dir == "type_for") {
-            inp->eat_separator();
+            eat_separator();
             std::string prod = read_production_name(inp);
-            inp->eat_separator();
+            eat_separator();
             std::string type = inp->read_re(".*")[0];
             if(prod.length() && type.length()) {
                 add_type_for(prod, type, "@type_for");
@@ -1979,7 +1984,7 @@ public:
         bool done = false;
         bool invert_next = false;
         do {
-            inp->eat_separator();
+            eat_separator();
 
             std::string expr_str;
             grammar_element::Type type = grammar_element::Type::NONE;
@@ -2098,7 +2103,7 @@ public:
          // within the brackets (presently), so you will derail
          // it if you put +{ or }+ in a comment or string or whatever.
          // sorry.  try not to do that.
-         inp->eat_separator();
+         eat_separator();
 
          size_t start = inp->current_position();
          if(!inp->read_exact_match("+{")) {
@@ -2169,9 +2174,9 @@ public:
 
                 // allow (but do not require) commas between (or after)
                 // production names (by skipping them)
-                inp->eat_separator();
+                eat_separator();
                 inp->read_byte_equalling(',');
-                inp->eat_separator();
+                eat_separator();
 
                 if(inp->peek() == '\0') // more reasons to fpl this..
                     break;
@@ -2215,12 +2220,12 @@ public:
 
     // parses the '->' [production name] in a rule definition
     std::string read_rule_production() {
-        inp->eat_separator();
+        eat_separator();
         if(!inp->read_exact_match("->")) {
             error("expected '->' before production name");
         }
 
-        inp->eat_separator();
+        eat_separator();
 
         std::string pname = read_production_name(inp);
         if(!pname.length()) {
@@ -2238,7 +2243,7 @@ public:
 
         }
 
-        inp->eat_separator();
+        eat_separator();
 
         // next we might have a code block:
         auto code = read_code();
@@ -2267,7 +2272,7 @@ public:
         // doesn't really make sense, but we'll accept it)
         bool done = false;
         while(!done) {
-            inp->eat_separator();
+            eat_separator();
 
             if(inp->read_byte_equalling(']')) {
                 break;
@@ -2283,7 +2288,7 @@ public:
             } else {
                 this_product = read_production_name(inp);
             }
-            inp->eat_separator();
+            eat_separator();
             if(inp->read_byte_equalling(',')) {
                 // this_product is the name of the product; proceed
             } else if(inp->peek() == ']') {
@@ -2362,7 +2367,7 @@ public:
             ), false);
             std::string group_name = group_rule.product();
 
-            inp->eat_separator();
+            eat_separator();
 
 
             // If a comma comes next, we're linking this precedence group
@@ -2399,7 +2404,7 @@ public:
 
     void parse_fpl() {
         do {
-            inp->eat_separator();
+            eat_separator();
             if(inp->peek() == '#') {
                 inp->read_line();
             } else if(inp->peek() == '+') {
