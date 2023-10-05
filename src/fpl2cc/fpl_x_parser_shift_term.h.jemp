@@ -39,15 +39,17 @@ bool shift_@el.type_str()@_@el_id@(bool eject) {
         @}@
 
         lr_push(@el_id@, eject, pos, Product(result));
-        // assertions count as terminals.  therefore, clearing
-        // bytes_eaten is (strictly speaking) correct, here.
-        // but actually I think it's wrong in cases where
-        // there may be more than one consecutive lack-of-separator.
-        // also, we really have no idea if a TERM_CUSTOM moved
-        // the input pointer or what.
-        // possibly a better implementation would be to track
-        // the position of the end of the last non-0-length
-        // separator.
+        @/*
+          assertions count as terminals.  therefore, clearing
+          bytes_eaten is (strictly speaking) correct, here.
+          but actually I think it's wrong in cases where
+          there may be more than one consecutive lack-of-separator.
+          also, we really have no idea if a TERM_CUSTOM moved
+          the input pointer or what.
+          possibly a better implementation would be to track
+          the position of the end of the last non-0-length
+          separator.
+        */@
         bytes_eaten = 0;
 
         if(!lr_read(@el_id@)) {
