@@ -40,6 +40,7 @@
 }+
 
 [
+    # addition/subtraction are lowest precedence:
     . '+'^ > -> add +{ return arg_0 + arg_2; }+
     . '-'^ > -> sub +{ return arg_0 - arg_2; }+
 ] -> aexpr +{
