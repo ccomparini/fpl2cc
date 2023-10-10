@@ -180,6 +180,11 @@ struct grammar_element {
         return false;
     }
 
+    // ... And this returns a grammar element of the inverse type
+    grammar_element inverse() const {
+        return grammar_element(expr, inverse_type(type));
+    }
+
     void resolve_placeholder(
         const std::string prod_name, src_location caller = CALLER()
     ) {
