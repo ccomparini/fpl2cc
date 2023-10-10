@@ -107,10 +107,19 @@ public:
         bool eject;  // if set, don't pass this to reduce code
         int reserve; // number of matches to reserve for following steps
 
-
         step() :
             gexpr("", grammar_element::Type::NONE),
             eject(true),
+            reserve(0) {
+        }
+
+        step(
+            const grammar_element &expr,
+            const std::string vn = ""
+        ) :
+            gexpr(expr),
+            varname(vn),
+            eject(false),
             reserve(0) {
         }
 
