@@ -921,9 +921,35 @@ class productions {
         }
     };
 
+    static size_t separator_length(const utf8_byte *inp) {
+        // sh-style "#" comments:
+        size_t len = 0;
+        if(inp[0] == '#') {
+            len++;
+            while(inp[len] && inp[len] != '\n') {
+                len++;
+            }
+        }
+
+        // regular whitespace:
+        while(inp[len] && (
+            inp[len] == ' '   ||
+            inp[len] == '\t'  ||
+            inp[len] == '\n'  ||
+            inp[len] == '\v'  ||
+            inp[len] == '\f'  ||
+            inp[len] == '\r'
+        )) {
+            len++;
+        }
+
+        // huh... how does this work if we don't loop here?
+
+        return len;
+    }
 
     size_t eat_separator() {
-        return inp->eat_separator();
+        return inp->eat_separator(&separator_length);
     }
 
 public:
@@ -1994,10 +2020,6 @@ public:
                 case '\0':
                     done = true;
                     break; // EOF
-                case '#':
-                    // line comment - just skip
-                    inp->read_line();
-                    break;
                 case '"':
                 case '\'':
                 case '/':
@@ -2276,9 +2298,6 @@ public:
 
             if(inp->read_byte_equalling(']')) {
                 break;
-            } else if(inp->read_byte_equalling('#')) {
-                inp->read_line(); // comment
-                continue;
             }
             
             size_t rew_pos = inp->current_position();
@@ -2405,9 +2424,7 @@ public:
     void parse_fpl() {
         do {
             eat_separator();
-            if(inp->peek() == '#') {
-                inp->read_line();
-            } else if(inp->peek() == '+') {
+            if(inp->peek() == '+') {
                 if(inp->peek(1) == '{') {
                     // inlined/general code - goes at the top of the
                     // generated code.  Use to define types or whatever.
