@@ -629,6 +629,16 @@ public:
                 match_len = 0;
             }
         }
+
+        // If there was a partial match, we need to add it to the result
+        // length.  For example, if the input is "edit"<eof> and pattern
+        // is (eg) "item", "ed" will be the first part of the result, then
+        // the "it" will match, after which it'll hit eof and no more input.
+        // So if the match length is < pattern length, we need to add it
+        // in.
+        if(match_len < str.length())
+            result_len += match_len;
+
         return read_string(result_len);
     }
 

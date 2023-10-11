@@ -35,6 +35,34 @@ void error_or_warning(const std::string &msg, src_location caller) {
     num_errors++;
 }
 
+bool test_read_to_eof() {
+    bool ok = true;
+    const char *str = "edit";
+    utf8_buffer buf((utf8_byte *)str, strlen(str));
+    auto reader = fpl_reader(buf, "reader.short_text");
+
+    auto read = reader.read_to_exact_match("item");
+    if(read != "edit") {
+        jerror::error(stringformat(
+            "attempt to read to 'item' matched '{}' at '{}'\n",
+            read, reader.debug_peek(0, 10)
+        ));
+        ok = false;
+    }
+
+    reader.go_to(0);
+    read = reader.read_to_exact_match("it");
+    if(read != "ed") {
+        jerror::error(stringformat(
+            "attempt to read to 'it' matched '{}' at '{}'\n",
+            read, reader.debug_peek(0, 10)
+        ));
+        ok = false;
+    }
+
+    return ok;
+}
+
 int main(int argc, const char **argv) {
 
     jerror::handler _eh(jerror::error_channel, error_or_warning);
@@ -93,6 +121,8 @@ int main(int argc, const char **argv) {
     if(!reader->read_byte_equalling(0xa3)) {
         jerror::error("failed to read second byte of GBP sign '£'\n");
     }
+
+    test_read_to_eof();
 
     std::cout << stringformat("{} errors/warnings\n", num_errors);
 
