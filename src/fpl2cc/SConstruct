@@ -5,8 +5,7 @@ env = env.Clone()
 jemps = []
 jemps.append(env.Jemp2h('scan_group_terminal.h.jemp'))
 jemps.append(env.Jemp2h('scan_inv_group_terminal.h.jemp'))
-jemps.append(env.Jemp2h('scan_inv_regex_terminal.h.jemp'))
-jemps.append(env.Jemp2h('scan_regex_terminal.h.jemp'))
+jemps.append(env.Jemp2h('regex_custom_scanner.h.jemp'))
 
 jemps.append(env.Jemp2h('fpl_x_parser.h.jemp'))
 

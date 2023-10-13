@@ -5,30 +5,27 @@
   match - i.e., this is an "or" operation for terminals.
 */@
 
-@parameter: std::set<std::string> &exact_matches @
-@parameter: std::set<std::string> &regex_matches @
+@parameter: const productions &prds @
+@parameter: const std::list<grammar_element> &components @
 
 {
     auto start = reader->current_position();
     int longest_match = 0;
 
-    @for(auto match : exact_matches) {@
-        @declare match_str: c_str_escape(match)@
-        if(reader->eat_exact_match("@match_str@")) {
-            if(reader->current_position() - start > longest_match) {
-                longest_match = reader->current_position() - start;
-            }
-        }
-        reader->go_to(start);
-    @}@
-
-    @for(auto match : regex_matches) {@
-        @declare match_ex: c_str_escape(match)@
-        std::cmatch match = reader->eat_re("@match_ex@");
-        if(!match.empty()) {
-            if(reader->current_position() - start > longest_match) {
-                longest_match = reader->current_position() - start;
-            }
+    // we need tmp here because #scan_terminal() needs someplace to
+    // put its result.  BUT actually to handle 0-length matches
+    // corerctly we'll need to keep generated terminals anyway
+    // XXX fixme^^
+    // It bugs me that it makes all these Terminals, because each
+    // copies the matched string to itself.  Maybe terminals
+    // can be made more efficient - just keep 2 SourcePositions
+    // and return the string between them or something?  anyway...
+    Terminal tmp;
+    // @components.size()@ components:
+    @for(auto component : components) {@
+        @#scan_terminal("tmp", prds, component)@
+        if(reader->current_position() - start > longest_match) {
+            longest_match = reader->current_position() - start;
         }
         reader->go_to(start);
     @}@

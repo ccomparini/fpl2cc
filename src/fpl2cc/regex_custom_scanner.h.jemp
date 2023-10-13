@@ -1,0 +1,14 @@
+@parameter: const productions &prds @
+@parameter: const grammar_element &el @
+
+@/*
+  This is how regex based "custom" scanners are actually implemented -
+  basically, the same as a regular terminal scanner.
+*/@
+
+Terminal result;
+
+@#scan_terminal("result", prds, el)@
+
+return result;
+

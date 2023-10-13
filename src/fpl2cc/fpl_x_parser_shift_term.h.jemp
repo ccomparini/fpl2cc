@@ -29,6 +29,7 @@ bool shift_@el.type_str()@_@el_id@(bool eject) {
     }
 
     const SourcePosition pos = position();
+    Terminal result;
     @#scan_terminal("result", prds, el)@
 
     if(result) {

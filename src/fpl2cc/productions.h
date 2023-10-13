@@ -5,10 +5,6 @@
 #include "fpl_options.h"
 #include "production_rule.h"
 #include "reducer.h"
-#include "scan_group_terminal.h"
-#include "scan_inv_group_terminal.h"
-#include "scan_inv_regex_terminal.h"
-#include "scan_regex_terminal.h"
 
 #include "util/c_str_escape.h"
 #include "util/from_hex.h"
@@ -27,8 +23,15 @@
 
 namespace fpl {
 
+// Predeclarations for jemp-generated functions.
+// This is fer da boids.  can we make jemp generate
+// member-ready methods or something?  Or otherwise
+// not have to do this by hand?
 class productions;
 std::string fpl_x_parser(const productions &, const fpl_options &);
+std::string scan_group_terminal(const productions &, const std::list<grammar_element> &);
+std::string scan_inv_group_terminal(const productions &, const std::list<grammar_element> &);
+std::string regex_custom_scanner(const productions &, const grammar_element &);
 
 class productions {
 
@@ -1152,30 +1155,31 @@ public:
     // a compound terminal.
     // Throws parse errors on malformed input.
     bool parse_terminal_list(
-        std::set<std::string> &exact_terminals,
-        std::set<std::string> &regex_terminals
+        std::list<grammar_element> &terms
     ) {
         if(!inp->read_exact_match("[")) {
             return false;
         }
 
         eat_separator();
+        bool invert_next = false;
         while(!inp->read_exact_match("]")) {
-            std::string expr;
-            grammar_element::Type type;
-            if(!parse_terminal(expr, type)) {
+            if(inp->read_exact_match("!")) {
+                invert_next = !invert_next;
+                eat_separator();
+            }
+
+            auto element = parse_terminal();
+            if(!element) {
                 error("expected some kind of terminal in terminal list");
+                break;
             } else {
-                if(type == grammar_element::TERM_EXACT) {
-                    exact_terminals.insert(expr);
-                } else if(type == grammar_element::TERM_REGEX) {
-                    regex_terminals.insert(expr);
-                } else {
-                    error(stringformat(
-                        "{} '{}' not supported in terminal list",
-                        grammar_element::Type_to_str(type), expr
-                    ));
+                if(invert_next) {
+                    if(!element.invert_type())
+                        error(stringformat("can't invert {}"));
+                    invert_next = false;
                 }
+                terms.push_back(element);
             }
             eat_separator();
         }
@@ -1215,12 +1219,16 @@ public:
             if(scanner.language == code_block::REGEX) {
                 auto regex = scanner.code;
                 inverse = code_block(
-                    scan_inv_regex_terminal(regex),
+                    regex_custom_scanner(*this, grammar_element(
+                        regex, grammar_element::TERM_REGEX_INV
+                    )),
                     code_block::DEFAULT,
                     scanner.source_filename(), scanner.line_number()
                 );
                 scanner = code_block(
-                    scan_regex_terminal(regex),
+                    regex_custom_scanner(*this, grammar_element(
+                        regex, grammar_element::TERM_REGEX
+                    )),
                     code_block::DEFAULT,
                     scanner.source_filename(), scanner.line_number()
                 );
@@ -1252,17 +1260,16 @@ public:
             if(inp->peek() == '[') {
                 // this terminal matches anything in the set
                 // of the terminals within the [ ]
-                std::set<std::string> exacts;
-                std::set<std::string> regexes;
+                std::list<grammar_element> sub_terms;
                 auto start = inp->current_position();
-                if(parse_terminal_list(exacts, regexes)) {
+                if(parse_terminal_list(sub_terms)) {
                     scanners[name] = code_block(
-                        scan_group_terminal(exacts, regexes),
+                        scan_group_terminal(*this, sub_terms),
                         code_block::DEFAULT,
                         inp->filename(), inp->line_number(start)
                     );
                     scanners[inverse_scanner_name(name)] = code_block(
-                        scan_inv_group_terminal(exacts, regexes),
+                        scan_inv_group_terminal(*this, sub_terms),
                         code_block::DEFAULT,
                         inp->filename(), inp->line_number(start)
                     );
@@ -1790,6 +1797,15 @@ public:
         return prod_name;
     }
 
+    production_rule::step parse_import_expression() {
+        // parse/import the sub-fpl, and use whatever it produces:
+        std::string name = parse_import();
+        return production_rule::step(
+            name,
+            grammar_element::Type::NONTERM_PRODUCTION
+        );
+    }
+
     std::string make_sub_prod_name() const {
         if(parent) {
             // to avoid name collision madness when there are multiple
@@ -1800,21 +1816,19 @@ public:
         return stringformat("_subex_{}", subex_count++);
     }
 
-    // returns the name of the production representing the subexpression,
-    // or an empty string on failure.
+    // returns a step representing the subexpression, or a
+    // false step if whatever's at the current input
+    // position doesn't appear to be a subexpression.
     // (may also toss errors on failure)
-    std::string parse_subexpression() {
-        std::string subname;
-        if(!inp->read_byte_equalling('(')) {
-            error("expected subexpression");
-        } else {
+    production_rule::step parse_subexpression() {
+        if(inp->read_byte_equalling('(')) {
             // subexpressions are implemented as sub rules,
             // so we need to make a rule:
             production_rule subrule(
                 inp->filename(), inp->line_number(),
                 grammar_element::NONTERM_SUBEXPRESSION
             );
-            subname = make_sub_prod_name();
+            std::string subname = make_sub_prod_name();
             subrule.product(subname);
             parse_expressions(subrule);
             if(!inp->read_byte_equalling(')')) {
@@ -1825,9 +1839,13 @@ public:
             }
 
             add_rule(subrule);
+
+            return production_rule::step(
+                subname, grammar_element::NONTERM_SUBEXPRESSION
+            );
         }
 
-        return subname;
+        return production_rule::step();
     }
 
     //
@@ -1968,10 +1986,9 @@ public:
         rule.add_step(sub, false);
     }
 
-    bool parse_terminal(
-        std::string &expr_str,
-        grammar_element::Type &type
-    ) {
+    grammar_element parse_terminal() {
+        std::string expr_str;
+        grammar_element::Type type;
         switch(inp->peek()) {
             case '"':
                 // within double quotes, c-like escape sequences
@@ -1999,10 +2016,26 @@ public:
                 type     = grammar_element::Type::TERM_CUSTOM;
                 break;
             default:
-                type     = grammar_element::Type::NONE;
-                return false; // not a terminal
+                // not a terminal:
+                return grammar_element();
         }
-        return true;
+
+        return grammar_element(expr_str, type);
+    }
+
+    production_rule::step parse_lack_of_separator_assertion() {
+        if(inp->read_byte() == '~') {
+            production_rule::step expr(
+                "~", grammar_element::Type::LACK_OF_SEPARATOR
+            );
+
+            // lack-of-separator never gets passed to reduce actions - 
+            // it's always a 0-length nothing
+            expr.eject = true;
+
+            return expr;
+        }
+        return production_rule::step();
     }
 
     int parse_expressions(production_rule &rule) {
@@ -2011,9 +2044,7 @@ public:
         bool invert_next = false;
         do {
             eat_separator();
-
-            std::string expr_str;
-            grammar_element::Type type = grammar_element::Type::NONE;
+            production_rule::step expr;
 
             const utf8_byte inch = inp->peek();
             switch(inch) {
@@ -2024,20 +2055,16 @@ public:
                 case '\'':
                 case '/':
                 case '&':
-                    parse_terminal(expr_str, type);
+                    expr = production_rule::step(parse_terminal());
                     break;
                 case '~':
-                    // lack-of-separator assertion:
-                    inp->read_byte();
-                    expr_str = "~";
-                    type     = grammar_element::Type::LACK_OF_SEPARATOR;
+                    expr = parse_lack_of_separator_assertion();
                     break;
                 case '(':
-                    expr_str = parse_subexpression();
-                    type = grammar_element::Type::NONTERM_SUBEXPRESSION;
+                    expr = parse_subexpression();
                     break;
                 case ')':
-                    // end of a subrule, or else a stray ')'
+                    // end of a subexpression, or else a stray ')'
                     done = true;
                     break;
                 case '!':
@@ -2049,9 +2076,7 @@ public:
                     done = true;
                     break;
                 case '`':
-                    // parse/import the sub-fpl, and use whatever it produces:
-                    expr_str = parse_import();
-                    type     = grammar_element::Type::NONTERM_PRODUCTION;
+                    expr = parse_import_expression();
                     break;
                 case /*{*/ '}':
                     // this can happen, especially if there's a '}+'
@@ -2073,46 +2098,40 @@ public:
                     //  '.'  = the product for our precedence group
                     //  '<'  = the product with precedence just lower than us
                     //  '<<' = the lowest precedence product
-                    expr_str = inp->read_re("(:?<<?)|\\.|(:?>>?)")[0];
-                    type = grammar_element::Type::NONTERM_PREC_PLACEHOLDER;
+                    expr = production_rule::step(
+                        inp->read_re("(:?<<?)|\\.|(:?>>?)")[0],
+                        grammar_element::Type::NONTERM_PREC_PLACEHOLDER
+                    );
                     break;
                 default:
                     // should be the name of a production.
-                    expr_str = read_production_name(inp);
-                    if(!expr_str.length()) {
+                    auto pname = read_production_name(inp);
+                    if(!pname.length()) {
                         error(inp, stringformat(
                             "expected production name for rule '{}'\n"
                             " starting at {}",
                             rule.to_str(), rule.location()
                         ));
                     }
-                    type = grammar_element::Type::NONTERM_PRODUCTION;
+                    expr = production_rule::step(
+                        pname, grammar_element::Type::NONTERM_PRODUCTION
+                    );
                     break;
             }
 
-            if(type != grammar_element::Type::NONE) {
+            if(expr) {
+                read_quantifier(inp, expr);
+                read_suffix(inp, expr); // optional :name or ^
+                if(expr.is_single())
+                    read_quantifier(inp, expr);
 
-                if(expr_str.length() >= 1) {
-                    production_rule::step step(expr_str, type);
-                    read_quantifier(inp, step);
-                    read_suffix(inp, step); // optional :name or ^
-                    if(step.is_single()) read_quantifier(inp, step);
-                    if(type == grammar_element::LACK_OF_SEPARATOR)
-                        step.eject = true;
+                if(expr.type() == grammar_element::NONTERM_SUBEXPRESSION)
+                    add_subexpression(rule, expr);
+                else
+                    rule.add_step(expr, invert_next);
 
-                    if(type == grammar_element::NONTERM_SUBEXPRESSION)
-                        add_subexpression(rule, step);
-                    else
-                        rule.add_step(step, invert_next);
-
-                    invert_next = false;
-                    num_read++;
-                } else {
-                    error(inp, stringformat(
-                        "expected type {} = {} but got .. nothing?\n",
-                        grammar_element::Type_to_str(type), type
-                    ));
-                }
+                invert_next = false;
+                num_read++;
             }
         } while(!(done || inp->eof()));
 
@@ -3668,6 +3687,9 @@ public:
 };
 
 #include "fpl_x_parser.h"
+#include "regex_custom_scanner.h"
+#include "scan_group_terminal.h"
+#include "scan_inv_group_terminal.h"
 
 } // namespace fpl
 
