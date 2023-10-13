@@ -125,6 +125,13 @@ public:
             return "";
         }
 
+        // returns the length of the terminal match, in bytes
+        size_t length() const {
+            if(matches.size())
+                return matches[0].size();
+            return 0;
+        }
+
         // returns a string containing the contents of the regex capture
         // group indicated by the index passed.
         // for example, if the regex /(.)y(.*)/ matched the string "dyad",
