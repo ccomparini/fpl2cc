@@ -3478,7 +3478,7 @@ public:
                     );
                 }
             }
-            error(stringformat("can't infer output type: {}\n", conflicts));
+            error(stringformat("conflicting output types: {}\n", conflicts));
         }
     }
 
