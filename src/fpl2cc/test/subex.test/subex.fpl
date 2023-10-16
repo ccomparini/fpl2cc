@@ -1,5 +1,8 @@
 
-@produces double
+# produces std::string so we can more easily
+# control the final output w/ the default main
+@produces std::string
+@type_for expression double
 @goal statements
 @comment_style c
 
@@ -25,8 +28,6 @@ sum -> expression ;
 # variadic), where commas are required before any but the first
 # element:
 '('^ (expression (','^ expression)*)?:args ')'^ -> argument_list ;
-
-#'['^ (number (','^ number)*)? ']'^ -> number_list;
 
 ####### implementations:
 +{
@@ -69,11 +70,6 @@ sum -> expression ;
     return out;
 }+
 
-#+number_list(number) +{
-#    // std::cerr << stringformat("YAY we got a number list:\n{}\n", number@join(", "));
-#    return number@count(); // XXX just to return something.
-#}+
-
 +sum(args) +{
     double sum = 0;
     for(auto el : args) {
@@ -83,12 +79,7 @@ sum -> expression ;
 }+
 
 +statements(statement) +{
-    // (each statement has been reduced to a numeric result,
-    // so we're just printing them at this point)
-    statement@foreach([](double st)->void {
-       std::cout << stringformat("{}\n", st);
-    });
-    return statement@count();
+    return statement@join("\n");
 }+
 
 @default_main

@@ -10,10 +10,6 @@
 @default_main
 @comment_style sh
 
-@post_parse +{
-    std::cout << result;
-}+
-
 statement*:statements -> done +{
     return statements@join("\n");
 }+
@@ -47,5 +43,5 @@ a_to_d a_to_b -> ambiguous_a_b +{
     return "ambiguous a-b";
 }+
 
-/[a-z]+/        -> other +{ return stringformat("other: {}", arg_0); }+
+/[a-z]+/ -> other +{ return stringformat("other: {}", arg_0); }+
 

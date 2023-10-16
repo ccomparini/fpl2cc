@@ -35,10 +35,18 @@
 @default_main
 @comment_style c
 
-@post_parse +{
-    std::cout << stringformat("result: {}\n", result);
-}+
-
+#
+#  This parses, but does't work because @produces wants
+# a double.  We need to be able to separate the @produces
+# type from the default type.
+#  Also, note the awkwardness of needing the "woot" rule.. hmm
+#
+#@type_for result std::string
+#[
+#    > -> woot;
+#] -> result +{
+#    return stringformat("result: {}\n", result);
+#}+,
 [
     # addition/subtraction are lowest precedence:
     . '+'^ > -> add +{ return arg_0 + arg_2; }+

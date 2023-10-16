@@ -1,5 +1,5 @@
 returncode = 255
-stderr = "Error src/fpl2cc/test/subex.test/issue_18.subex:7:1 near «fruitbat(99)»: unexpected element after statements (4) at src/fpl2cc/test/subex.test/issue_18.subex:6: statements (4) (double «1.000000»).
+stderr = "Error src/fpl2cc/test/subex.test/issue_18.subex:7:1 near «fruitbat(99)»: unexpected element after statements (4) at src/fpl2cc/test/subex.test/issue_18.subex:6: statements (4) (std::string «85.397342»).
 so far we have:
     state_0 statements (4) param[0] (src/fpl2cc/test/subex.test/issue_18.subex:6)
 too many errors.  aborting

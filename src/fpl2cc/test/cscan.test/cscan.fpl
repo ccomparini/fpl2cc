@@ -62,8 +62,7 @@
 }+
 
 stuff* the_end -> done +{
-    std::cout << stuff@join("\n") + "\n" + the_end + "\n";
-    return "totally done";
+    return stuff@join("\n") + "\n" + the_end + "\n";
 }+
 
 

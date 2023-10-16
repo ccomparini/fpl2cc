@@ -4,5 +4,4 @@ stdout = "object {
  \"woowoo\" = \"hi\",
 \"loopy\" = WOO: 🌀,
 \"other woo\" = WOO: ୭}
-
 "

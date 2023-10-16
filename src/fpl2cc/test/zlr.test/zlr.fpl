@@ -32,7 +32,6 @@
 !something -> nothing;
 
 something* -> done +{
-    std::cout << something@join("\n");
-    return "done";
+    return something@join("\n");
 }+
 

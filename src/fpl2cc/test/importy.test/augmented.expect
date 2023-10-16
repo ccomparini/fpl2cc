@@ -7,5 +7,4 @@ stdout = "object {
 \"something true\" = true,
 \"something false\" = false,
 \"concatenation\" = \"meow\"\"meow\"\"meow\"}
-
 "

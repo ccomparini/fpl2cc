@@ -3,7 +3,6 @@
 bat+ -> bats +{
     std::string out = "We have bats. Oh yes, we have bats.\n";
     out += bat@join("\n");
-    std::cout << out;
     return out;
 }+
 

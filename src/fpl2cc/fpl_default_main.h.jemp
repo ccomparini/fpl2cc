@@ -1,16 +1,35 @@
 @parameter: const productions &prds @
 
 #include "jerror.h"
+#include "util/stringformat.h"
+
 #include <iostream>
 
-// default main.
-// the main() generated here is pretty much just a test stub.
-// if people want something fancier, they can make their own.
+/*
+ Default main:
+
+   Runs the parser on the either the first file named on the
+   command line, or on stdin if nothing was named, then stringifies
+   the result and writes it to stdout (appending a trailing newline
+   if there wasn't one already), unless the result stringifies to
+   an empty string, in which case it prints nothing.
+   Throws jerror errors on errors.
+
+   This is good enough for use in most fpl tests, and even in some
+   real cases.  if fpl authors need something fancier, they can
+   supply it.
+ */
 int main(int argc, const char **argv) {
 
     fpl_reader_p inp;
     if(argc >= 2) {
         inp = std::make_shared<fpl_reader>(argv[1]);
+        if(argc > 2) {
+            jerror::warning(stringformat(
+                "ignoring extra command line arguments after '{}'",
+                argv[1]
+            ));
+        }
     } else {
         inp = std::make_shared<fpl_reader>(std::cin, "<stdin>");
     }
@@ -18,6 +37,15 @@ int main(int argc, const char **argv) {
     @prds.parser_class_name()@ parser(inp);
 
     auto result = parser.parse();
+
+    // using stringformat on the result, because it has a high
+    // likelihood of being able to stringify whatever the result
+    // is:
+    auto out = stringformat("{}", result);
+    if(out.length()) {
+        std::cout << ensure_nl(out);
+    }
+
     return parser.error_count()?-1:0;
 }
 

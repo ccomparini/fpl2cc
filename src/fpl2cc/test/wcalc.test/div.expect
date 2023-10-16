@@ -3,5 +3,5 @@ stderr = "YAY addition expression = 17.000000
 YAY addition expression = 26.000000
 YAY addition expression = 0.884615
 "
-stdout = "result: 0.884615
+stdout = "0.884615
 "

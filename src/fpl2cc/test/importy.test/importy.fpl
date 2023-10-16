@@ -2,7 +2,6 @@
 @produces std::string
 @goal `json`.json
 @goal other_stuff
-@post_parse +{ std::cout << result << "\n"; }+
 
 # .. and we'll also allow c comments, but just to test
 # pulling in code blocks we'll use the @separator keyword

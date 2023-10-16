@@ -11,9 +11,7 @@
 @comment_style sh
 
 stuff+ -> done +{
-    std::string out = stuff@join("\n");
-    std::cout << out + "\n";
-    return out;
+    return stuff@join("\n");
 }+
 
 'pup' -> stuff +{

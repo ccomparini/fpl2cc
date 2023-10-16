@@ -107,7 +107,6 @@ integer:foo list:foo -> doom;
     list@foreach([&out](const Product &lin)->void {
         out += join(lin, ", ") + "\n";
     });
-    std::cout << out;
     return out;
 }+
 
