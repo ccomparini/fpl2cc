@@ -14,6 +14,15 @@
 
         // default constructor.  everything needs a default constructor.
         @gen_type.name()@() { }
+
+        std::string to_str() const {
+            std::string result = "{\n";
+            @for(auto mem : gen_type.attributes) {-@
+                result += stringformat("    @mem.name@: {}\n", @mem.name@);
+            @}@
+            result += "}\n";
+            return result;
+        }
     };
 @}@
 
