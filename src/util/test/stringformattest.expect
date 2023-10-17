@@ -12,6 +12,7 @@ a      b c
 deeeee
        e eff gee haitch
          eye 
+louder: I SAID\\nHELLO
  null pointer doesn't crash
 and it's for sure a const char *
 and I want to embed a { with stuff after it

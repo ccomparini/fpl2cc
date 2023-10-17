@@ -6,6 +6,7 @@
 #include "to_hex.h"
 
 #include <cstdlib>
+#include <ctype.h>
 #include <list>
 #include <tuple>
 
@@ -218,12 +219,22 @@ class stringformat_post_processor {
         return out;
     }
 
+    // {::U} -> translate characters to upper case
+    static std::string U(const std::string &in) {
+        std::string out;
+        for(auto ch : in) {
+            out += toupper(ch);
+        }
+        return out;
+    }
+
 public:
     static std::string process(char fmt, const std::string &in) {
         switch(fmt) {
             case 'c': return c(in);  // columnate (tab-delimited)
             case 'e': return e(in);  // c-string escape
             case 'n': return n(in);  // translate newlines to '\n'
+            case 'U': return U(in);  // uppercase
         }
         // .. would be nice to warn about missing format here....
         return in;

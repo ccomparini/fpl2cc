@@ -83,6 +83,9 @@ int main() {
         "\t\teye"
     );
 
+    // uppercasing, and converting newlines
+    std::cout << stringformat("louder: {::Un}\n", "I said\nhello");
+
     const char *maybenull = nullptr;
     std::cout << stringformat("{} null pointer doesn't crash\n", maybenull);
     maybenull = "for sure a const char *";
