@@ -144,7 +144,7 @@
 
 # extra whitespace at the end of the next line is deliberate -
 # checking if it breaks the parsing.
-@grammar json 
+@grammar json   
 
 +null_value  +{ return bkv_item(); }+
 +true_value  +{ return true;  }+
