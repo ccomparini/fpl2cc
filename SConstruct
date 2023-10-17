@@ -61,6 +61,17 @@ env = Environment(
     tools = toolset(),
 )
 
+# If we're on the main branch, append profiling data for
+# generated programs to files in the yprof directory.
+# Because we don't do development directly on the main
+# branch, this gives us an easy way to detect if some
+# change (historical or otherwise) had a significant
+# impact on performance (good or bad).
+if git_branch() == 'master':
+    use_yprof = True
+else:
+    use_yprof = False
+
 def read_dependencies(senv):
     for dirpath, dirnames, filenames in os.walk('.'):
         for filename in filenames:
@@ -114,6 +125,8 @@ env.Append(BUILDERS = {
     'RunAndCapture': Builder(
         action = run_and_capture_action(
             "$SOURCE",
+            # default capture file is the target:
+            CAPFILE = "$TARGET",
         ),
     )
 })
@@ -154,7 +167,11 @@ env.Append(
 # jemp -> h builder
 env.Append(BUILDERS = {
     'Jemp2h' : Builder(
-        action = 'bin/jemplpl $SOURCE > $TARGET',
+        action = run_and_capture_action(
+            [ 'bin/jemplpl', '$SOURCE' ],
+            STDOUT = '$TARGET',
+            PROFILE = use_yprof
+        ),
 	suffix = '.h',
 	src_suffix = '.h.jemp'
     )

@@ -24,18 +24,20 @@ def git_branch():
         warnings.warn(ex)
     return branch
 
-# Returns the "variant" filename (including path)
-# for the filename passed.  This basically means
-# returning the same path with the top level directory
-# changed.
-# If the filename passed is any false value, returns
-# that value.  This allows pass-through when a filename
-# is set to None (or similar).
-# Scons also has a facility for doing this, but it
-# only works with generated targets and has some
-# peculiarities.  I want this for putting profiling
-# data in a separate parallel tree, so here it is.
 def variant_dir(fn, variant):
+    """
+        Returns the "variant" filename (including path)
+        for the filename passed.  This basically means
+        returning the same path with the top level directory
+        changed.
+        If the filename passed is any false value, returns
+        that value.  This allows pass-through when a filename
+        is set to None (or similar).
+        Scons also has a facility for doing this, but it
+        only works with generated targets and has some
+        peculiarities.  I want this for putting profiling
+        data in a separate parallel tree, so here it is.
+    """
     if not fn:
         return fn
 
@@ -54,12 +56,13 @@ def variant_dir(fn, variant):
 # in a dictionary.  This seems to be the only (?) way to get
 # the usage info about a child process at its exit (though,
 # splitting hairs, this will also record resource usage on
-# other child state changes.  It's not clear to me how to
+# other child state changes).  It's not clear to me how to
 # check if the child terminated or what from here.
 #
 # I'm not sure what this will do on Windows - hopefully
 # wait4() will cleanly fail to exist, which we can detect,
-# and just call the real_waitpid()
+# and just call the real_waitpid().
+# Otherwise, this should be transparent to normal callers.
 real_waitpid = os.waitpid
 exit_results = { }
 def waitpid_interceptor(pid, options, /):
@@ -74,11 +77,126 @@ def waitpid_interceptor(pid, options, /):
 
 os.waitpid = waitpid_interceptor
 
-def run_and_capture_action(program, varlist=[]):
+async def duplicate_output(from_stream, *outs):
+    """
+        Duplicates whatever it reads from the "from" file-like object
+        into the other file-like objects passed.
+    """
+    done = False
+    while not done:
+        inp = await from_stream.read(1024) # (arbitrary buffer size)
+        if len(inp) <= 0: # eof
+            done = True
+        else:
+            for out in outs:
+                out.write(inp)
+                out.flush()
+
+def run_command(command, env, timeout, quiet=False, profile=None):
+    """
+        Runs the command passed, in the env passed, duplicating
+        stdout and stderr.
+
+        Returns a tuple containing the exit code, and 2 bytes objects
+        containing whatever the subproc wrote to stdout and stderr
+        (respectively).  Raises exceptions on internal errors.
+    """
+    pout = io.BytesIO(b"")
+    perr = io.BytesIO(b"")
+    returncode = -255
+    exception = None
+    os_env = env.get('ENV', None);
+
+    async def runit():
+        nonlocal command, env, pout, perr, returncode
+
+        # print(' '.join(command) + f" {os_env}")
+        proc = await asyncio.create_subprocess_exec(
+            *command,
+            stdin=sys.stdin,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            env=os_env
+        )
+
+        err_outputs = [ perr ]
+        # we use stderr interactively, so unless we're told
+        # otherwise, send it on directly as well as saving it:
+        if not quiet:
+            # stderr seems (on my system, anyway) to be opened in
+            # "text" mode, while the subproc stderr seems to be in
+            # binary mode, resulting in:
+            #  "TypeError : write() argument must be str, not bytes"
+            # So, to avoid that, we open a binary version of stderr
+            # here and use that instead of the default stderr:
+            stderr_b = os.fdopen(sys.stdout.fileno(), "wb", closefd=False)
+            err_outputs.append(stderr_b)
+
+        task = asyncio.gather(
+            duplicate_output(proc.stdout, pout), 
+            duplicate_output(proc.stderr, *err_outputs), 
+            proc.wait()
+        )
+
+        try:
+            await asyncio.wait_for(task, timeout=timeout)
+        except asyncio.TimeoutError:
+            # subproc is taking too long.  kill it:
+            warnings.warn(f"Timeout on {proc.pid} {command}\n")
+            proc.kill()
+
+        returncode = proc.returncode
+
+        # (this is what writes the profile data to a tsv file)
+        if profile:
+            subprof.Profile(*exit_results[proc.pid]).write_tsv(profile)
+
+    asyncio.run(runit())
+
+    if exception is not None:
+        raise exception
+
+    return returncode, pout, perr
+
+def expand_scons_vars(instr, target, source, env):
+    """
+        Returns the string passed, but with scons $TARGET
+        and $SOURCE variables resolved.
+        If the object passed is not a string, it is returned
+        unchanged.  (This allows booleans or None etc
+        to be passed through and handled how the caller wants)
+    """
+    if isinstance(instr, str):
+        return env.subst(instr, target=target, source=source)
+    return instr
+
+def default_kw(arg, env, kwargs, default=None):
+    return env.get(arg, kwargs.get(arg, default))
+
+def expand_overrides(arg, target, source, env, kwargs):
+    return expand_scons_vars(default_kw(arg, env, kwargs), target, source, env)
+
+def command_and_args(program, target, source, env):
+    """
+        Given a program list or string (potentially containing scons
+        $TARGET, $SOURCE, etc, returns a list containing the command
+        to run + arguments with $TARGET etc expanded.
+    """
+    # program should really be program + arguments (as a list),
+    # but support passing a string:
+    if isinstance(program, str):
+        program = program.split()
+
+    # substitute $TARGET etc into the command strings:
+    return [expand_scons_vars(p, target, source, env) for p in program]
+
+def run_and_capture_action(program, varlist=[], **kwargs):
+    
     """
         Returns a scons Builder action which runs the source program
         specified, capturing stderr, stdout, and the exit value, and
         writing them as esml to a file.
+
+        eg:
 
         env.Append(BUILDERS = {
             # compile a foo file to a bar file
@@ -91,9 +209,12 @@ def run_and_capture_action(program, varlist=[]):
 
         env.CompileFoo("xyz.bar", [ "xyz.foo" ], CAPFILE="xyz.out")
 
-        The following environment variables apply:
-            CAPFILE=<filename>  - Tells where to put the captured output and
-                                  exit value .  Default is the (scons) target.
+        Options:
+            CAPFILE=<filename>  - If set, write stderr, stdout, and the
+                                  program return code to the specified
+                                  file (in esml format).  Expands scons
+                                  $TARGET and $SOURCE variables in the
+                                  specified filename.
             ENV=<assoc. array>  - If set, run with this os environment
             IGNORE_EXIT=<val>   - If set, ignore the exit value for purposes
                                   of determining if the action worked.
@@ -101,16 +222,30 @@ def run_and_capture_action(program, varlist=[]):
                                   and written to the capfile.
             INTERACTIVE=<val>   - If true, run interactively, passing stderr
                                   through and reading input from stdin
-            PROFILE=<filename>  - Tells where to append profiling info.
-                                  The file (with path) is created if it doesn't
-                                  already exist.
-                                  Ignored if INTERACTIVE is true.
-            TIMEOUT=<seconds>   - Kill the subproc if it's not done after this
-                                  many seconds.  Ignored if INTERACTIVE is
-                                  true; otherwise, defaults to 5.
+            PROFILE=<filename>  - If set to True, tells this to append
+                                  profiling info to a file in the yprof tree
+                                  corresponding to the target.
+                                  If set to a string value, tells which file
+                                  to append profiling info to.
+                                  In both cases, the file (with path) is
+                                  created if it doesn't already exist.
+                                  Ignored if INTERACTIVE is true.  Defaults
+                                  to None.
+            STDERR=<filename>   - If set, write stderr to the specified file.
+                                  Scons $TARGET and $SOURCE variables are
+                                  expanded.
+            STDOUT=<filename>   - If set, write stdout to the specified file.
+                                  As with CAPFILE and STDERR, scons command
+                                  line variables are expanded.
+            TIMEOUT=<seconds>   - Kill the subproc if it's not done after
+                                  this many seconds.  Ignored if INTERACTIVE
+                                  is true; otherwise, defaults to 5.
             QUIET=<val>         - If true and we're not in INTERACTIVE mode,
                                   write stderr it to the capture file without
                                   echoing it to scons's stderr.
+
+        Options may be passed in the Builder invocation, or to this function,
+        or both.  Options in the invocation override any passed to this function.
 
         The generated esml target files contain objects with the following
         fields:
@@ -120,119 +255,30 @@ def run_and_capture_action(program, varlist=[]):
 
     """
 
-
-    # Duplicates whatever it reads from the "from" file-like object
-    # into the other file-like objects passed.
-    async def duplicate_output(from_stream, *outs):
-        done = False
-        while not done:
-            inp = await from_stream.read(1024) # (arbitrary buffer size)
-            if len(inp) <= 0: # eof
-                done = True
-            else:
-                for out in outs:
-                    out.write(inp)
-                    out.flush()
-
-    # Returns a tuple containing the exit code, and 2 bytes objects containing
-    # whatever the subproc wrote to stdout and stderr (respectively).
-    def run_command(command, env, timeout, quiet=False, profile=None):
-        pout = io.BytesIO(b"")
-        perr = io.BytesIO(b"")
-        returncode = -255
-        exception = None
-        os_env = env.get('ENV', None);
-
-        async def runit():
-            nonlocal command, env, pout, perr, returncode
-
-            # print(' '.join(command) + f" {os_env}")
-            proc = await asyncio.create_subprocess_exec(
-                *command,
-                stdin=sys.stdin,
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                env=os_env
-            )
-
-            err_outputs = [ perr ]
-            # we use stderr interactively, so unless we're told
-            # otherwise, send it on directly as well as saving it:
-            if not quiet:
-                # stderr seems (on my system, anyway) to be opened in
-                # "text" mode, while the subproc stderr seems to be in
-                # binary mode, resulting in:
-                #  "TypeError : write() argument must be str, not bytes"
-                # So, to avoid that, we open a binary version of stderr
-                # here and use that instead of the default stderr:
-                stderr_b = os.fdopen(sys.stdout.fileno(), "wb", closefd=False)
-                err_outputs.append(stderr_b)
-
-            task = asyncio.gather(
-                duplicate_output(proc.stdout, pout), 
-                duplicate_output(proc.stderr, *err_outputs), 
-                proc.wait()
-            )
-
-            try:
-                await asyncio.wait_for(task, timeout=timeout)
-            except asyncio.TimeoutError:
-                # subproc is taking too long.  kill it:
-                warnings.warn(f"Timeout on {proc.pid} {command}\n")
-                proc.kill()
-
-            returncode = proc.returncode
-
-            if profile:
-                subprof.Profile(*exit_results[proc.pid]).write_tsv(profile)
-                #print(f"profile written to {profile}", file=sys.stderr)
-
-        asyncio.run(runit())
-
-        if exception is not None:
-            raise exception
-
-        return returncode, pout, perr
-
-
-    # program should really be program + arguments, but support
-    # just passing the name of the program:
-    if isinstance(program, str):
-        program = program.split()
-
-    # returns the command to run + arguments, as a list, with
-    # $TARGET etc expanded.
-    def command_and_args(target, source, env):
-        nonlocal program
-
-        # substitute $TARGET etc into the command strings:
-        return [env.subst(p, target=target, source=source) for p in program]
-
     def strfunction(target, source, env, executor=None):
-        return ' '.join(command_and_args(target, source, env))
+        return ' '.join(command_and_args(program, target, source, env))
 
-    # This is the scons Builder action we return:
+    # This is the scons Builder action we return (i.e.,
+    # the function scons calls when it wants to run the
+    # action)
     def run_and_cap(target, source, env):
+        nonlocal kwargs
 
-        capfile = env.get('CAPFILE', None)
-
-        # If we haven't been told the name of the file in which
-        # to dump the capture, use the first target.  This is a
-        # common use case in tests, where the main thing we care
-        # about is the capture.
-        if not capfile:
-            capfile = target[0].get_path()
+        capfile = expand_overrides('CAPFILE', target, source, env, kwargs);
+        errfile = expand_overrides('STDERR',  target, source, env, kwargs);
+        outfile = expand_overrides('STDOUT',  target, source, env, kwargs);
 
         # remove the capture file first so that if something blows up
         # prior to generating the new one, we don't have a crufty one
         # lying aroung to confuse us:
-        if os.path.isfile(capfile):
+        if capfile and os.path.isfile(capfile):
             os.remove(capfile)
 
         # substitute $TARGET etc into the command strings:
-        command = command_and_args(target, source, env)
+        command = command_and_args(program, target, source, env)
 
         # (for reporting)
-        strcommand = strfunction(target, source, env)
+        #strcommand = strfunction(target, source, env)
         #print(f"Going to run:\n    {strcommand}\n", file=sys.stderr);
 
         if env.get('INTERACTIVE', None):
@@ -240,10 +286,15 @@ def run_and_capture_action(program, varlist=[]):
             timeout = None
             quiet   = False
         else:
+            profile = expand_overrides('PROFILE',  target, source, env, kwargs);
+            if profile is True:
+                profile = source[0].get_path() + '.tsv'
+
             # (profiling output goes in the yprof dir:)
-            profile = variant_dir(env.get('PROFILE', None), 'yprof')
-            timeout = env.get('TIMEOUT', 5)
-            quiet   = env.get('QUIET', False)
+            profile = variant_dir(profile, 'yprof')
+
+            timeout = default_kw('TIMEOUT', env, kwargs, 5)
+            quiet   = default_kw('QUIET', env, kwargs, False)
 
         returncode, pout, perr = run_command(
             command, env, timeout, quiet, profile
@@ -255,6 +306,7 @@ def run_and_capture_action(program, varlist=[]):
                 signame = signal.Signals(-returncode).name
             except ValueError:
                 signame = "(unknown signal)"
+            strcommand = strfunction(target, source, env)
             msg = f"\n{signame} ({returncode}) failure on command \"{strcommand}\"\n"
             print(msg, file=sys.stderr)
 
@@ -265,12 +317,21 @@ def run_and_capture_action(program, varlist=[]):
         if returncode is not None:
             output['returncode'] = returncode
 
-        with open(capfile, mode='wb') as outf:
-            outf.write(
-                bytes(esml.dumps(output), encoding='utf-8', errors='ignore')
-            )
+        if capfile:
+            with open(capfile, mode='wb') as outf:
+                outf.write(bytes(
+                    esml.dumps(output), encoding='utf-8', errors='ignore'
+                ))
 
-        if env.get('IGNORE_EXIT', False):
+        if errfile:
+            with open(errfile, mode='wb') as outf:
+                outf.write(output['stderr'])
+
+        if outfile:
+            with open(outfile, mode='wb') as outf:
+                outf.write(output['stdout'])
+
+        if default_kw('IGNORE_EXIT', env, kwargs, False):
             # ignore "real" exit codes (which came from the program),
             # but do consider it failed if the program was killed by
             # a signal (by falling through)
@@ -361,7 +422,9 @@ def run_cc_tests(env):
         # file.  We ignore the exit value for purposes of determining
         # test success, but (of course) we do check the return code
         # vs the one in the .expect file, so it's not actually ignored.
-        env.RunAndCapture(output_file, tprog, IGNORE_EXIT=True)
+        env.RunAndCapture(
+            output_file, tprog, IGNORE_EXIT=True
+        )
     
         # compare the output of the test to the expected output;
         # .success file is/becomes up to date if output matched
