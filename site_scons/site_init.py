@@ -351,7 +351,9 @@ def run_and_capture_action(program, varlist=[], **kwargs):
     return Action(
         run_and_cap,
         strfunction=strfunction,
-        varlist=varlist + ['CAPFILE', 'INTERACTIVE']
+        # varlist seems to not be needed?
+        #varlist=varlist + ['CAPFILE', 'INTERACTIVE']
+        #varlist=varlist
     )
 
 # Returns a scons Emitter which causes targets to depend
