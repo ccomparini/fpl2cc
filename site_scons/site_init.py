@@ -5,6 +5,7 @@ import io
 import os
 import pathlib
 import pprint
+import shlex
 import signal
 import subprocess
 import subprof
@@ -184,7 +185,7 @@ def command_and_args(program, target, source, env):
     # program should really be program + arguments (as a list),
     # but support passing a string:
     if isinstance(program, str):
-        program = program.split()
+        program = shlex.split(program)
 
     # substitute $TARGET etc into the command strings:
     return [expand_scons_vars(p, target, source, env) for p in program]
