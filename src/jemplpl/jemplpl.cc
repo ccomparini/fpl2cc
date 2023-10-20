@@ -6887,7 +6887,7 @@ class jemplpl_parser {
             "    text (20:1):\t •/[^@\\\\n]+/:t \t=> state 6\t(src/grammarlib/jemp.fpl:121)\n"
             "    text (21:1):\t •leading_ws \t=> state 29\t(src/grammarlib/jemp.fpl:125)\n"
             "    text (22:1):\t •trailing_ws \t=> state 1\t(src/grammarlib/jemp.fpl:126)\n"
-            "    _fpl_goal (25:1):\t •complete \t=> state 51\t(src/fpl2cc/productions.h:3515)\n"
+            "    _fpl_goal (25:1):\t •complete \t=> state 51\t(src/fpl2cc/productions.h:3507)\n"
             ;
         }
 
@@ -7303,7 +7303,7 @@ class jemplpl_parser {
         #line 1323 "src/fpl2cc/fpl_x_parser.h.jemp" 
         if(&jemplpl_parser::state_51 == st) {
             return "state_51:\n"
-            "    _fpl_goal (25:0):\t complete •\t=> (done)\t(src/fpl2cc/productions.h:3515)\n"
+            "    _fpl_goal (25:0):\t complete •\t=> (done)\t(src/fpl2cc/productions.h:3507)\n"
             ;
         }
 
@@ -8930,32 +8930,32 @@ class jemplpl_parser {
         #line 16 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         #line 1 "src/grammarlib/jemp.fpl:58 (default action for '#'^ !'#':variant_expression '#'^ -> template_variant)"
-        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
+        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:35
         return std::string(
 
-        #line 38 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 37 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 41 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 40 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 49 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 51 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         variant_expression.val().to_str()
+
+        #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         );
 
-        #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     }
 
 
@@ -9032,32 +9032,32 @@ class jemplpl_parser {
         #line 16 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         #line 1 "src/grammarlib/jemp.fpl:60 (default action for leading_ws\?^ '@-':arg_1 -> subst_start)"
-        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
+        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:35
         return std::string(
 
-        #line 38 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 37 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 41 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 40 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 49 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 51 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         arg_1.val().to_str()
+
+        #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         );
 
-        #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     }
 
 
@@ -9134,32 +9134,32 @@ class jemplpl_parser {
         #line 16 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         #line 1 "src/grammarlib/jemp.fpl:61 (default action for '@':arg_0 -> subst_start)"
-        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
+        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:35
         return std::string(
 
-        #line 38 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 37 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 41 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 40 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 49 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 51 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         arg_0.val().to_str()
+
+        #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         );
 
-        #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     }
 
 
@@ -9236,32 +9236,32 @@ class jemplpl_parser {
         #line 16 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         #line 1 "src/grammarlib/jemp.fpl:63 (default action for '-@':arg_0 trailing_ws\?^ -> subst_end)"
-        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
+        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:35
         return std::string(
 
-        #line 38 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 37 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 41 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 40 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 49 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 51 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         arg_0.val().to_str()
+
+        #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         );
 
-        #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     }
 
 
@@ -9338,32 +9338,32 @@ class jemplpl_parser {
         #line 16 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         #line 1 "src/grammarlib/jemp.fpl:64 (default action for '@':arg_0 -> subst_end)"
-        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
+        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:35
         return std::string(
 
-        #line 38 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 37 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 41 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 40 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 49 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 51 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         arg_0.val().to_str()
+
+        #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         );
 
-        #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     }
 
 
@@ -9440,32 +9440,32 @@ class jemplpl_parser {
         #line 16 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         #line 1 "src/grammarlib/jemp.fpl:65 (default action for /(\\\?:[^-@]|-[^@])+/:arg_0 -> rest_of_sub)"
-        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
+        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:35
         return std::string(
 
-        #line 38 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 37 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 41 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 40 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 49 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 51 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         arg_0.val().to_str()
+
+        #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         );
 
-        #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     }
 
 
@@ -9542,32 +9542,32 @@ class jemplpl_parser {
         #line 16 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         #line 1 "src/grammarlib/jemp.fpl:71 (default action for /\\\\n*[ \\\\t]+/:ws -> leading_ws)"
-        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
+        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:35
         return std::string(
 
-        #line 38 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 37 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 41 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 40 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 49 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 51 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         ws.val().to_str()
+
+        #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         );
 
-        #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     }
 
 
@@ -9644,32 +9644,32 @@ class jemplpl_parser {
         #line 16 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         #line 1 "src/grammarlib/jemp.fpl:85 (default action for /[ \\\\t]*\\\\n+[ \\\\t]+(\\\?!@)/:ws -> trailing_ws)"
-        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
+        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:35
         return std::string(
 
-        #line 38 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 37 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 41 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 40 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 49 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 51 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         ws.val().to_str()
+
+        #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         );
 
-        #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     }
 
 
@@ -9746,32 +9746,32 @@ class jemplpl_parser {
         #line 16 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         #line 1 "src/grammarlib/jemp.fpl:89 (default action for /[ \\\\t]*\\\\n/:ws -> trailing_ws)"
-        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
+        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:35
         return std::string(
 
-        #line 38 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 37 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 41 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 40 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 49 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 51 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         ws.val().to_str()
+
+        #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         );
 
-        #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     }
 
 
@@ -10219,32 +10219,32 @@ class jemplpl_parser {
         #line 16 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         #line 1 "src/grammarlib/jemp.fpl:121 (default action for /[^@\\\\n]+/:t -> text)"
-        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
+        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:35
         return std::string(
 
-        #line 38 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 37 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 41 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 40 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 49 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 51 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         t.val().to_str()
+
+        #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         );
 
-        #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     }
 
 
@@ -10321,30 +10321,30 @@ class jemplpl_parser {
         #line 16 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         #line 1 "src/grammarlib/jemp.fpl:125 (default action for leading_ws -> text)"
-        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
+        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:35
         return std::string(
 
-        #line 38 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 37 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 41 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 40 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 49 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         leading_ws.val()
 
-        #line 51 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         );
 
-        #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     }
 
 
@@ -10421,30 +10421,30 @@ class jemplpl_parser {
         #line 16 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         #line 1 "src/grammarlib/jemp.fpl:126 (default action for trailing_ws -> text)"
-        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
+        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:35
         return std::string(
 
-        #line 38 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 37 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 41 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 40 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 49 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         trailing_ws.val()
 
-        #line 51 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         );
 
-        #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     }
 
 
@@ -10521,32 +10521,32 @@ class jemplpl_parser {
         #line 16 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         #line 1 "src/grammarlib/jemp.fpl:129 (default action for /[a-zA-Z_][a-zA-Z_0-9]+/:name -> identifier)"
-        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
+        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:35
         return std::string(
 
-        #line 38 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 37 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 41 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 40 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 49 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 51 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         name.val().to_str()
+
+        #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         );
 
-        #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     }
 
 
@@ -10623,32 +10623,32 @@ class jemplpl_parser {
         #line 16 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         #line 1 "src/grammarlib/jemp.fpl:132 (default action for /[ \\\\t]+/:space -> sp)"
-        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
+        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:35
         return std::string(
 
-        #line 38 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 37 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 41 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 40 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 49 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 51 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         space.val().to_str()
+
+        #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         );
 
-        #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     }
 
 
@@ -10690,13 +10690,13 @@ class jemplpl_parser {
                 return 1;
             }
             static int line_number() {
-                return 3515;
+                return 3507;
             }
             static const char *filename() {
                 return "src/fpl2cc/productions.h";
             }
             static const char *location() {
-                return "src/fpl2cc/productions.h:3515";
+                return "src/fpl2cc/productions.h:3507";
             }
             static const char *to_str() {
                 return "complete -> _fpl_goal";
@@ -10713,7 +10713,7 @@ class jemplpl_parser {
                     return pname[ind];
                 } else {
                     return "param_name index out of bounds at "
-                    "src/fpl2cc/productions.h:3515";
+                    "src/fpl2cc/productions.h:3507";
                 }
             }
         } this_rule;
@@ -10725,30 +10725,30 @@ class jemplpl_parser {
         #line 16 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-        #line 1 "src/fpl2cc/productions.h:3515 (default action for complete -> _fpl_goal)"
-        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
+        #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 1 "src/fpl2cc/productions.h:3507 (default action for complete -> _fpl_goal)"
+        // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:35
         return std::string(
 
-        #line 38 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 37 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 41 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 40 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 49 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         complete.val()
 
-        #line 51 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+        #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
         #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-        #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
         );
 
-        #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+        #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     }
 
 
@@ -10788,7 +10788,7 @@ class jemplpl_parser {
     // text (20:1):         •/[^@\\n]+/:t                                                                                            => state 6  (src/grammarlib/jemp.fpl:121)
     // text (21:1):         •leading_ws                                                                                              => state 29 (src/grammarlib/jemp.fpl:125)
     // text (22:1):         •trailing_ws                                                                                             => state 1  (src/grammarlib/jemp.fpl:126)
-    // _fpl_goal (25:1):    •complete                                                                                                => state 51 (src/fpl2cc/productions.h:3515)
+    // _fpl_goal (25:1):    •complete                                                                                                => state 51 (src/fpl2cc/productions.h:3507)
     //
     void state_0() {
 
@@ -17982,7 +17982,7 @@ class jemplpl_parser {
     #line 5 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     //
-    // _fpl_goal (25:0):  complete • => (done) (src/fpl2cc/productions.h:3515)
+    // _fpl_goal (25:0):  complete • => (done) (src/fpl2cc/productions.h:3507)
     //
     void state_51() {
 

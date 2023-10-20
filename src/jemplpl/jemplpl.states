@@ -249,7 +249,7 @@ state 0:
     text (20:1):         •/[^@\\n]+/:t                                                                                            => state 6  (src/grammarlib/jemp.fpl:121)
     text (21:1):         •leading_ws                                                                                              => state 29 (src/grammarlib/jemp.fpl:125)
     text (22:1):         •trailing_ws                                                                                             => state 1  (src/grammarlib/jemp.fpl:126)
-    _fpl_goal (25:1):    •complete                                                                                                => state 51 (src/fpl2cc/productions.h:3515)
+    _fpl_goal (25:1):    •complete                                                                                                => state 51 (src/fpl2cc/productions.h:3507)
 
 state 1:
     text (22:0):  trailing_ws • => (reduce) (src/grammarlib/jemp.fpl:126)
@@ -461,5 +461,5 @@ state 50:
     fragment (6:0):  /@realign:\\s*/^ text:realign '@'^ /\\n\?/^ • => (reduce) (src/grammarlib/jemp.fpl:54)
 
 state 51:
-    _fpl_goal (25:0):  complete • => (done) (src/fpl2cc/productions.h:3515)
+    _fpl_goal (25:0):  complete • => (done) (src/fpl2cc/productions.h:3507)
 
