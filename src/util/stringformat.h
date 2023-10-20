@@ -103,8 +103,7 @@ std::string _stringformat(T &in, const std::string &opts = "") {
         // second choice is a supplied to_string
         return to_string(in);
     } else if constexpr (_std_to_string_exists_for<T>::value) {
-        // ... or std::to_string.  can't figure out how to make it
-        // find this with just one xxx_exists_for.  moving on:
+        // ... or fall back on std::to_string:
         return std::to_string(in);
     } else if constexpr (is_iterable(T)) {
         // or if it's iterable, recursively compose something
@@ -146,6 +145,12 @@ std::string _stringformat(std::tuple<Args...> &in) {
 
 template <typename T, typename U>
 std::string _stringformat(std::pair<T, U> &x) {;
+    return _stringformat(x.first) + " => " + _stringformat(x.second);
+};
+
+// (as above, but const pair)
+template <typename T, typename U>
+std::string _stringformat(const std::pair<T, U> &x) {;
     return _stringformat(x.first) + " => " + _stringformat(x.second);
 };
 
