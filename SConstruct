@@ -127,6 +127,7 @@ env.Append(BUILDERS = {
             "$SOURCE",
             # default capture file is the target:
             CAPFILE = "$TARGET",
+            PROFILE = use_yprof,
         ),
     )
 })
