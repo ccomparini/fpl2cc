@@ -1,5 +1,7 @@
 
 @produces int
+
+# nothing produces foo;  we expect fpl to complain appropriately:
 foo -> bar;
 
 

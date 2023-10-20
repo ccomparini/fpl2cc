@@ -5,7 +5,7 @@ while(inp[len] &&  last_len != len) {
     last_len = len;
 
     // regular whitespace, incuding various non-ascii spaces:
-    while(size_t splen = space_length(inp + len)) {
+    while(size_t splen = utf8::space_length(inp + len)) {
         len += splen;
     }
 

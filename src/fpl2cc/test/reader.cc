@@ -76,7 +76,7 @@ int main(int argc, const char **argv) {
         size_t cur_pos = reader->current_position();
         char_pos.push_back(cur_pos);
         sizes.insert(reader->char_length());
-        reader->skip_char();
+        reader->eat_char();
     } while(!reader->eof());
 
     for(auto pos : char_pos) {
@@ -95,7 +95,7 @@ int main(int argc, const char **argv) {
             reader->read_byte();
             // now we're in the middle of a single char...
         }
-        reader->skip_char();
+        reader->eat_char();
         if(reader->current_position() != char_pos[pind]) {
              jerror::error(stringformat(
                  "char {}: expected to be at {} but am at {}",

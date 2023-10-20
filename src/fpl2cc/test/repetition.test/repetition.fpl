@@ -2,7 +2,7 @@
 @produces std::string
 
 @separator +{
-    if(size_t len = space_length(inp)) {
+    if(size_t len = utf8::space_length(inp)) {
         return len;
     }
 

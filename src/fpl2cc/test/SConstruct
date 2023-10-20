@@ -27,10 +27,8 @@ env.Append(BUILDERS = {
 })
 
 
-# fpl_reader has its own (fairly straightforward) test:
-env.Program('reader', [ 'reader.cc' ])
-env.RunAndCapture('reader.out', 'reader')
-env.CompareOut('reader.success', [ 'reader.out', 'reader.expect' ])
+# there exist some .cc-based tests of fpl parts:
+run_cc_tests(env);
 
 # The "fpl_iteself" directory contains fpl source files which
 # which we compile and check the output of.  They may deliberately

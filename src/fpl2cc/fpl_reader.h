@@ -18,6 +18,7 @@
 #include "util/src_location.h"
 #include "util/stringformat.h"
 #include "util/to_hex.h"
+#include "util/utf8.h"
 #include "util/utf8_buffer.h"
 
 class fpl_reader;
@@ -29,76 +30,12 @@ using ErrorCallback = std::function<void(const std::string &error)>;
 using LengthCallback = std::function<size_t(const utf8_byte *inp)>;
 
 
-// Returns the length in bytes of the utf-8 character at *at,
-// or 0 if that character isn't a space.
-inline size_t space_length(const utf8_byte *at) {
-    if(at == NULL) return 0;
-
-    switch(*at) {
-        // ascii ones are simple and common:
-        case 0x09:    // character tabulation (aka "tab")
-        case 0x0A:    // line feed
-        case 0x0B:    // line tabulation
-        case 0x0C:    // form feed
-        case 0x0D:    // carriage return
-        case 0x20:    // space
-            return 1;
-        case 0xc2:
-            if(at[1] == 0x85) return 2; // U+0085 = next line
-            if(at[1] == 0xa0) return 2; // U+00A0 = no-break space
-            return 0;
-        case 0xe1:
-            if(at[1] == 0x9a && at[2] == 0x80)
-                return 3; // 0xe1,0x9a,0x80 = U+1680 = ogham space mark
-            return 0;
-        case 0xe2:
-            if(at[1] == 0x80) {
-                if(at[2] >= 0x80 && at[2] <= 0x8a) {
-                    // 0xe2,0x80,0x80 -> U+2000 = en quad
-                    // 0xe2,0x80,0x81 -> U+2001 = em quad
-                    // 0xe2,0x80,0x82 -> U+2002 = en space
-                    // 0xe2,0x80,0x83 -> U+2003 = em space
-                    // 0xe2,0x80,0x84 -> U+2004 = three-per-em space
-                    // 0xe2,0x80,0x85 -> U+2005 = four-per-em space
-                    // 0xe2,0x80,0x86 -> U+2006 = six-per-em space
-                    // 0xe2,0x80,0x87 -> U+2007 = figure space
-                    // 0xe2,0x80,0x88 -> U+2008 = punctuation space
-                    // 0xe2,0x80,0x89 -> U+2009 = thin space
-                    // 0xe2,0x80,0x8a -> U+200A = hair space
-                    return 3;
-                }
-
-                if(at[2] == 0xa8)
-                    return 3; // 0xe2,0x80,0xa8 -> U+2028 = line separator
-
-                if(at[2] == 0xa9)
-                    return 3; // 0xe2,0x80,0xa9 -> U+2029 = paragraph separator
-
-                if(at[2] == 0xaf)
-                    return 3; // 0xe2,0x80,0xaf -> U+202F = narrow no-break sp.
-
-            } else if(at[1] == 0x81 && at[2] == 0x9f) {
-                return 3; // 0xe2,0x81,0x9f -> 205F = medium mathematical space
-            }
-            return 0;
-
-        case 0xe3:
-            if(at[1] == 0x80 && at[2] == 0x80)
-                return 3; // 0xe3,0x80,0x80 = U+3000 ideographic space
-            return 0;
-
-        default:
-            // not space
-            return 0;
-    }
-
-    // can't get here.
-}
-
 class fpl_reader {
 
     std::string input_filename;
     utf8_buffer buffer;
+
+    std::vector<size_t> line_start;
 
     ErrorCallback on_error;
     size_t read_pos;
@@ -166,43 +103,22 @@ class fpl_reader {
     // or 0 if pos is before the start of the buffer
     // or the number of the last line in the file if pos
     // is past the end of the buffer.
+    // if *off is non-null, records the (1-based) byte
+    // offset of the position within the line as well.
     inline int calc_line_number(
         size_t at, int *off, const std::string &caller = CALLER()
     ) const {
 
-        if(at >= buffer.length()) {
-            fprintf(stderr, "%s", stringformat(
-                "warning {}: position {} is outside file '{}' (len {})"
-                " by {} bytes\n",
-                caller, at, filename(), buffer.length(),
-                at - buffer.length()
-            ).c_str());
-            at = buffer.length() - 1;
+        auto line_num = utf8_buffer::line_number(line_start, at);
+
+        if(off) {
+            // store the offset within the line as well,
+            // since we've been asked to.  as with lines,
+            // offsets are 1 based - hence the +1.
+            *off = at - line_start[line_num] + 1;
         }
 
-        // we rescan for line numbers instead of keeping a counter
-        // because (1) it's easier than checking every read, which
-        // may or may not be multi-byte or whatever and (2) since
-        // the source file is (probably) small, and we only sometimes
-        // care about the line number, it's going to be either fast
-        // enough, or (with luck) net faster than keeping a line
-        // counter and updating it on every read.
-        // (if it turns out not to be fast enough, make an index)
-        int line_no = 1;
-        int chars_this_line = 0;
-        size_t pos;
-        for(pos = 0; pos < at; pos += char_length_abs(pos)) {
-            if(newline_length(pos)) {
-                chars_this_line = 0;
-                line_no++;
-            }
-            chars_this_line++;
-        }
-
-        if(off) 
-            *off = chars_this_line;
-
-        return line_no;
+        return line_num;
     }
 
 public:
@@ -222,6 +138,8 @@ public:
         buffer(input),
         on_error(ecb),
         read_pos(0) {
+
+        line_start = buffer.line_starts();
     }
 
     explicit fpl_reader(
@@ -236,6 +154,8 @@ public:
         // for better or worse, we explicitly end the
         // input buffer with a \0:
         buffer.push_back('\0');
+   
+        line_start = buffer.line_starts();
     }
 
     explicit fpl_reader(
@@ -246,6 +166,8 @@ public:
         buffer(infn),
         on_error(ecb),
         read_pos(0) {
+
+        line_start = buffer.line_starts();
     }
 
     inline size_t current_position() const {
@@ -273,8 +195,10 @@ public:
     }
 
     // as above, but returns the current input line number
-    inline int line_number(src_location &caller = CALLER()) const {
-        return line_number(read_pos, nullptr, caller);
+    inline int line_number(
+        int *offset = nullptr, src_location &caller = CALLER()
+    ) const {
+        return line_number(read_pos, offset, caller);
     }
 
     inline const std::string &filename() const {
@@ -348,64 +272,31 @@ public:
     // counts as a newline (which covers unix newlines and some other
     // old fashioned newlines).
     // If at isn't pointing to a newline, returns 0.
-    inline size_t newline_length(size_t at) const {
+    size_t newline_length(size_t at) const {
         if(at >= buffer.length())
             return 0;
 
-        if(buffer[at] == 0x0d) {
-            if(buffer[at + 1] == 0x0a) return 2; // Microsoft newline
-            return 1; // OS-9 style newline (heh)
-        }
-
-        if(buffer[at] == 0x0a) {
-            if(buffer[at + 1] == 0x0d) return 2; // weirdo old British newline
-            return 1; // normal unix newline
-        }
-
-        return 0;
+        return utf8::newline_length(buffer.data() + at);
     }
 
-    inline size_t newline_length(
-        const utf8_byte *at, src_location caller = CALLER()
-    ) const {
-        fprintf(stderr,
-            "call to deprecated newline_length(ptr) at %s\n", caller.c_str()
-        );
-        return newline_length(at - buffer.data());
-    }
 
 private:
-    int char_length_abs(size_t pos) const {
-        if(size_t nll = newline_length(pos))
-            return nll;
-
-        // https://en.wikipedia.org/wiki/UTF-8#Encoding
-        // if the high bit isn't set, it's a single byte:
-        if((buffer[pos] & 0x80) == 0) return 1;
-
-        // otherwise, if we're at the start of the character,
-        // the top 2 bits will be set, and bits following
-        // specify the size.  so if the top 2 bits are set,
-        // we'll assume we're at the start of a char and take
-        // that byte's word for it on the size:
-        if((buffer[pos] & 0xe0) == 0xc0) return 2;  // 0b110x xxxx
-        if((buffer[pos] & 0xf0) == 0xe0) return 3;  // 0b1110 xxxx
-        if((buffer[pos] & 0xf8) == 0xf0) return 4;  // 0b1111 0xxx
-
-        // looks like we're in the middle of a character.
-        // count bytes until the start of a new character,
-        // which we can identify by the top 2 bits being
-        // anything other than 0b10:
-        int len = 0;
-        for( ; pos + len < buffer.length(); ++len) {
-            // 0xc0 = 0b11000000
-            // 0x80 = 0b10000000
-            if((buffer[pos + len] & 0xc0) != 0x80) {
-                break;
-            }
+    // Returns the length in bytes of the the character at the absolute
+    // position passed.  Chracters ar positions outside the read buffer
+    // count as 0-byte chars.  Multi-byte newlines are counted as one
+    // multi-byte character.
+    size_t char_length_abs(size_t pos) const {
+        if(pos >= buffer.length()) {
+            return 0;
         }
 
-        return len;
+        if(size_t nll = newline_length(pos)) {
+            return nll;
+        }
+
+        return utf8::character_length(
+            buffer.data() + pos, buffer.length() - pos
+        );
     }
 
 public:
@@ -417,7 +308,7 @@ public:
     // If the position passed is in the middle of a character, returns
     // the length of the remaining bytes (or tries to - GIGO, at this point).
     // Returns 0 if given a NULL pointer.
-    int char_length(size_t offset = 0) const {
+    size_t char_length(size_t offset = 0) const {
         return char_length_abs(offset += read_pos);
     }
 
@@ -430,15 +321,16 @@ public:
         }
     }
 
+    void go_to_line(unsigned int line) {
+        if(line < line_start.size()) {
+            go_to(line_start[line]);
+        } // else toss an error?
+    }
+
     inline size_t skip_bytes(size_t skip) {
         size_t start = read_pos;
         go_to(read_pos + skip);
         return read_pos - start;
-    }
-
-    // skips the current utf-8 character
-    inline void skip_char() {
-        skip_bytes(char_length_abs(read_pos));
     }
 
     // moves the read pointer past the next character
@@ -447,7 +339,11 @@ public:
         return skip_bytes(char_length());
     }
 
-    size_t separator_length(LengthCallback separator_cb) {
+    static size_t space_length(const utf8_byte *inp) {
+        return utf8::space_length(inp);
+    }
+
+    size_t separator_length(LengthCallback separator_cb = &space_length) {
         size_t len = 0;
         while(size_t adv = separator_cb(inpp(len))) {
             len += adv;
@@ -456,7 +352,7 @@ public:
         return len;
     }
 
-    size_t eat_separator(LengthCallback separator_cb = &space_length) {
+    size_t eat_separator(LengthCallback separator_cb = &utf8::space_length) {
         return skip_bytes(separator_length(separator_cb));
     }
 
@@ -587,7 +483,7 @@ public:
         const utf8_byte *start = inpp();
         const utf8_byte *end   = inpp();
         while(!(nll = newline_length(read_pos))) {
-            skip_char();
+            eat_char();
         }
         end = inpp();
         skip_bytes(nll);
@@ -808,14 +704,14 @@ public:
         : source(src), offset(src->current_position()) {
     }
 
-    inline operator bool() const {
+    operator bool() const {
         return source != nullptr;
     }
 
     // errf.. wat?  this keeps it from magically converting to some
-    // total nonsense size_t, if, for example, we pass one of these
-    // to reader->go_to()
-    inline operator size_t() const {
+    // total nonsense size_t, (probably via bool?) if, for example,
+    // we pass one of these to reader->go_to()
+    operator size_t() const {
         return offset;
     }
 
@@ -854,9 +750,9 @@ public:
         return source->debug_peek(offset, length);
     }
 
-    inline int line_number() const {
+    int line_number(int *pos = nullptr) const {
         if(source)
-            return source->line_number(offset);
+            return source->line_number(offset, pos);
         return 0;
     }
 
@@ -867,7 +763,10 @@ public:
     }
 
     inline std::string to_str() const {
-        return filename() + ":" + std::to_string(line_number());
+        if(source)
+            return source->location_str(offset);
+
+        return "<no source>";
     }
 };
 

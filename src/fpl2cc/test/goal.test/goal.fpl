@@ -33,10 +33,10 @@
 # for this test, single quoted strings can't be multiline
 # (so we can test recovery) and, to keep it simple, don't
 # allow backslash escapes
-single_quote^ /[^'\n]+/:src single_quote^ -> quoted_string +{
+single_quote:start /[^'\n]+/:src single_quote^ -> quoted_string +{
     return stringformat(
-        "«{}» at {}",
-        src, src@position()
+        "«{}» with quote at {} and guts starting at {}",
+        src, start@position(), src@position()
     );
 }+
 
