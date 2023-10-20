@@ -403,7 +403,8 @@ def run_cc_tests(env):
     for scons_expect in Glob('*.expect'):
         # (tprog is a scons Node, not a python thingo)
         tprog, ext = os.path.splitext(scons_expect.name)
-        env.Program(tprog, [ tprog + '.cc' ])
+        main_src = tprog + '.cc'
+        env.Program(tprog, [ main_src ])
     
         output_file = tprog + '.out'
     
@@ -421,6 +422,12 @@ def run_cc_tests(env):
                 for fn in filenames:
                     env.Depends(output_file, f"{root}/{fn}")
     
+        # in some cases tests use themselves as source data, and,
+        # in any case, I'm going to say we want to regenerate test
+        # output if the test source changes, so make that explicit
+        # here:
+        env.Depends(output_file, main_src)
+
         # Run the test, dumping stderr, stdout etc to the output
         # file.  We ignore the exit value for purposes of determining
         # test success, but (of course) we do check the return code
