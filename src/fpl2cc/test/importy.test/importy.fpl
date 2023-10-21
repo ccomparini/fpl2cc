@@ -91,6 +91,11 @@ mission -> value +{
     return key + " = " + value;
 }+
 
++string(guts) +{
+    // add the quotes back on the string:
+    return stringformat("\"{}\"", guts);
+}+
+
 +cat(values) +{
     return values@join("");
 }+

@@ -173,11 +173,6 @@
 }+
 
 @type_for string std::string
-+string(src) +{
-    // without taking the capgroup, it'll include the enclosing
-    // quotes.  we probably want a way to do this automatically..
-    return src.capgroup(0);
-}+
 
 @type_for float_val bkv_num
 +number(float_val) +{

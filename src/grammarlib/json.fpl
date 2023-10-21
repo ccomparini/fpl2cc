@@ -39,7 +39,7 @@ string:key ':'^ value -> member ;
 value -> element ;
 
 # this might be better implemented with !match now
-/"((?:[^"\\]|\\.)*)"/:src -> string ;
+'"'^ /((?:[^"\\]|\\.)*)/:guts '"'^ -> string ;
 
 # json number specification appears to actually be fairly fussy.
 # From the spec, I'm inferring that:
