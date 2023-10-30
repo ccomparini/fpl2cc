@@ -14,8 +14,10 @@ SetOption('num_jobs', cpu_count + 1);
 
 
 # on ubuntu, I had to:
-#   sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/gcc-10 100
+#   sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/gcc-11 100
 # to get a working c++20 compiler
+# .. but now I'm using clang on ubuntu as well.
+# (though I should probably test if it also compiles under g++)
 ccflags = "-std=c++20 -Wno-parentheses"
 ccflags += " -g"
 #if debugger : ccflags += " -g"

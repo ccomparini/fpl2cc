@@ -1,3 +1,16 @@
+Thu Sep 28 16:25:33 UTC 2023
+
+Ubuntu compile note:   c++ was getting oom-killed, so you
+added 4G of swap space.  That's probably more than you need,
+though.  Dial it back to maybe 2?  Peak observed use was
+1G but I may have missed something.
+
+ALTERNATELY dial down the concurrency (in general? or 
+based on memory as well as cpus?)  (dial down based on
+memory might be smart) ... makes you wonder if that couldn't
+be built in to whatever the build tool's notions of concurrency
+are - it could adapt based on available memory.  anyway...
+
 Thu Jan  5 21:30:28 PST 2023
 
 https://en.wikipedia.org/wiki/Modulo_operation

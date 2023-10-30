@@ -123,7 +123,8 @@ def make_language_rules(env, directory):
 test_dirs = Glob('*.test')
 
 if len(test_dirs) > 0:
-    this_dir = os.path.dirname(test_dirs[0].relpath)
+    # this_dir = os.path.dirname(test_dirs[0].relpath) # on linux, complains no relpath
+    this_dir = os.path.dirname(test_dirs[0].get_path())
 
 # sets up:
 #   [lang].test/[t].success: [lang].test/[t].expect [lang].test/[t].result
@@ -158,6 +159,7 @@ for test_dir in test_dirs:
         # so as to not generate too much noise:
         if git_branch() == 'master':
             profile=this_dir + '/' + test_name + '.prof_out'
+            #print(f"profile to '{profile}'\n", file=sys.stderr);
         else:
             profile=False
 
