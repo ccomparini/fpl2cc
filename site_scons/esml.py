@@ -1,21 +1,5 @@
-import unittest
-
-#
-# New NEW plan is to blow off both json and toml, because
-# neither of them is suitable for what I want.
-#
-# Why this?
-#   - stderr, stdout, return codes, and anything else can all go
-#     in one output file per test; hence less clutter.
-#   - Unlike json (which I tried first), toml will let me do multiline
-#     strings, which is much easier to read and diff.
-#   - Unlike toml (which I tried next), common line-based tools
-#     (diff, grep, etc) will work relatively well for analysing
-#     the output.
-#   - As with toml, I'd have to write a dumper anyway, so for this
-#     context it's not any significant reinvention.
-#
-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
   esml - Even Simpler Minimal Language
 
@@ -53,13 +37,30 @@ import unittest
    Disadvantages:
        - output is bulkier than json, toml, and pretty much anything else
        - I made this up so there's no off-the-shelf parser*.
-         however, I expect it would be easy to parse - everything
-         is <nested key> = [value].
+         However, it's very easy to parse - everything is
+           <nested key> = [value]
 
    *per the goal, just about every command line unix tool is a "parser"
    for most of the key purposes.
 
 """
+import unittest
+
+#
+# New NEW plan is to blow off both json and toml, because
+# neither of them is suitable for what I want.
+#
+# Why this?
+#   - stderr, stdout, return codes, and anything else can all go
+#     in one output file per test; hence less clutter.
+#   - Unlike json (which I tried first), toml will let me do multiline
+#     strings, which is much easier to read and diff.
+#   - Unlike toml (which I tried next), common line-based tools
+#     (diff, grep, etc) will work relatively well for analysing
+#     the output.
+#   - As with toml, I'd have to write a dumper anyway, so for this
+#     context it's not any significant reinvention.
+#
 
 def _format_value(val):
     if val is None:
@@ -73,6 +74,7 @@ def _format_value(val):
         # itself.  preserve newlines. upon reading an esml string, we can
         # replace exactly '\"' with '"' and then exactly r'\\' with '\\'.
         # nicht war?  am I having a think-o?
+        # (later note:  no think-o, runs good)
         val = val.replace('\\', r'\\');
         val = val.replace('"',  r'\"');
         return f'"{val}"'
@@ -164,6 +166,7 @@ class Testesml(unittest.TestCase):
         with self.assertRaises(ValueError):
             dumps('oh hai')
 
+        # (check if it dtrt if the top level thing is an array)
         self.assertEqual(
             dumps([ {
                 'mixed_array': [ 23, 'fruitbat' ],
