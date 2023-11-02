@@ -1,6 +1,6 @@
-
-"""
-   Format and write cpu, memory, etc (profiling data) for a given
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+""" Format and write cpu, memory, etc (profiling data) for a given
    (sub)process.
 
 """
@@ -78,8 +78,7 @@ class Profile(collections.namedtuple("Subprof", FIELDS)):
             os             = f"{uname.system} {uname.release}",
         )
 
-    """
-        write_tsv(filename) - append profiling data to a file
+    """ write_tsv(filename) - append profiling data to a file
         as excel-style tab separated values, creating that file
         (including the full directory path) if necessary.
     """
