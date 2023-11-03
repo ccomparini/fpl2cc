@@ -12,7 +12,7 @@
 # to see if it'll continually match without advancing the
 # read pointer.
 #
-# (Please don't write contructs like /x?/+ deliberately.
+# (Please don't write constructs like /x?/+ deliberately.
 # You'd probably want something like /x/* instead.)
 #
 '('^ /x?/:exes+ ')'^ -> something +{
@@ -25,7 +25,7 @@
 # match empty parens before this does, so this should
 # never match:
 '('^ ')'^ -> something +{
-    return "empty parens which should never match";
+    return "empty parens, which should never match";
 }+
 
 # this rule should warn, since we can't invert nonterms:
