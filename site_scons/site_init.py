@@ -2,6 +2,7 @@ import asyncio
 import esml
 import functools
 import io
+import inspect
 import os
 import pathlib
 import pprint
@@ -440,4 +441,54 @@ def run_cc_tests(env):
         # .success file is/becomes up to date if output matched
         env.CompareOut(tprog + '.success', [ tprog + '.out', tprog + '.expect' ])
 
+# split commands on the pipe symbol ('|') and
+# return them as a list-of-lists
+def _pipe_subcommands(cmd_and_args):
+    if isinstance(cmd_and_args, str):
+        cmd_and_args = shlex.split(cmd_and_args)
+
+    cmds = [ [ ] ]
+    for pi in range(len(cmd_and_args)):
+        if cmd_and_args[pi] == '|':
+            cmds.append([ ])
+        else:
+            cmds[-1].append(cmd_and_args[pi])
+
+    return cmds
+
+# Returns the stdout output of the command passed.
+# For portablility, commands are not run through the
+# default shell;  however, command output may be piped
+# to further commands in the list using the '|' symbol.
+# Also, $SHELL_VARIABLES are passed through as they are,
+# which allows them to be evaluated when actual commands
+# are run.
+def conf_command(cmd_and_args, default=None):
+    # We want to be able to support shell-style pipes
+    # so that callers can filter command output.
+    # so, find the pipe symbols:
+    cmds = _pipe_subcommands(cmd_and_args);
+    last_out = None
+    try:
+        for cmd in cmds:
+            #print(f"command {cmd}", file=sys.stderr)
+            if last_out:
+                #print(f"   piping to {cmd}", file=sys.stderr)
+                last_out = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=last_out.stdout)
+            else:
+                #print(f"   ... saving the pipe", file=sys.stderr)
+                last_out = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        # the "decode" here is, of course, making a lot of assumptions,
+        # but is effectively necessary to make the output work in the
+        # larger string-assuming context.  sigh.
+        return last_out.stdout.read().rstrip().decode('utf-8')
+    except FileNotFoundError:
+        # "file not found" is what's tossed on a missing command.
+        # we want this to not be an error, so that callers can
+        # attempt a command like "llvm-config" and just default
+        # if llvm isn't installed or is unavailable
+        caller = inspect.getframeinfo(inspect.currentframe())
+        print(f"defaulting conf for command {cmd_and_args} at {caller.filename}:{caller.lineno}")
+
+    return default
 
