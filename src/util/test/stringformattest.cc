@@ -7,6 +7,7 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include <regex>
 #include <tuple>
 #include <variant>
 
@@ -90,6 +91,18 @@ int main() {
     std::cout << stringformat("{} null pointer doesn't crash\n", maybenull);
     maybenull = "for sure a const char *";
     std::cout << stringformat("and it's {}\n", maybenull);
+
+    // hmm "normal" (non char *) pointers should print in hex...
+    struct wupstruct { int bar; int bat[23]; };
+    wupstruct wup;
+    wupstruct *wupptr = &wup;
+    std::string wupptrstr = stringformat("{}", wupptr);
+    std::cmatch result;
+    if(std::regex_search(wupptrstr, std::regex("^0x[0-9a-f]+$"))) {
+        std::cout << "pointer to struct seems to format as hex\n";
+    } else {
+        std::cout << "FAIL: pointer formatted as " << wupptrstr << "\n";
+    }
 
     std::cout << stringformat("and I want to embed a {{ with stuff after it\n");
     return 0;

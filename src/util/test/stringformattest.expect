@@ -15,5 +15,6 @@ deeeee
 louder: I SAID\\nHELLO
  null pointer doesn't crash
 and it's for sure a const char *
+pointer to struct seems to format as hex
 and I want to embed a { with stuff after it
 "
