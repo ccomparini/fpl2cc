@@ -10,7 +10,7 @@
         @- pind?", ":"" -@ ReductionParameter<@prds.type_for(step.gexpr)@> @step.variable_name()-@
     @-}-@
 ) {
-    @#fpl_x_parser_reduce_action_meta(rule)@
+    @#fpl_x_parser_reduce_action_meta(prds, rule)@
 
     // @rule.to_str()@
     @if(code_block rule_code = rule.reduce_code()) {-@

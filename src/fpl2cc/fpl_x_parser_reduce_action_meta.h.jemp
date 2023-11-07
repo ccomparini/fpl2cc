@@ -1,3 +1,4 @@
+@parameter: const productions &prds@
 @parameter: const production_rule &rule@
 @realign: #line {} "{}" @
 
@@ -12,6 +13,9 @@
         }
         static const char *product() {
             return "@c_str_escape(rule.product())@";
+        }
+        static const char *product_type() {
+            return "@c_str_escape(prds.type_for(rule.product()))@";
         }
         static int num_steps() {
             return @rule.num_steps()@;
