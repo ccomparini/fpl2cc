@@ -22,7 +22,18 @@ struct code_block {
     int line;
     std::string code;
 
-    code_block() : language(UNKNOWN), line(0) { }
+    // If this is set, it indeicates that the code block
+    // is just a stub, and fpl authors are expected to
+    // implement something real.  
+    // An example of where this might be used is if you
+    // @import ansi-c;  in the ansi c fpl there are stubs
+    // for enumeration constant and typedefed type tokens,
+    // but in order for those to be recognized properly,
+    // there needs to be some kind of symbol table lookup.
+    // (this is just how c is)
+    bool is_stub;
+
+    code_block() : language(UNKNOWN), line(0), is_stub(false) { }
 
     code_block(
         const std::string &cd,
@@ -33,7 +44,8 @@ struct code_block {
         language(lang),
         source_file(file),
         line(ln),
-        code(cd) {
+        code(cd),
+        is_stub(false) {
     }
 
     /*
@@ -83,6 +95,15 @@ struct code_block {
         return *this += more_code.format();
     }
 
+    void stub(
+        const std::string &stub_code,
+        source_language lang = DEFAULT
+    ) {
+        is_stub  = true;
+        code     = stub_code;
+        language = lang;
+    }
+
     void append(const std::string &str) {
         code += str;
     }
@@ -104,9 +125,19 @@ struct code_block {
         return out;
     }
 
+    std::string to_str() const {
+        return format(false);
+    }
 
 private:
-    static inline bool maybe_name_start(const std::string &str, size_t pos) {
+    static bool is_production_name_char(const char ch) {
+        return (ch == '_')              ||
+               (ch >= 'A' && ch <= 'Z') ||
+               (ch >= 'a' && ch <= 'z') ||
+               (ch >= '0' && ch <= '9');
+    }
+
+    static bool maybe_name_start(const std::string &str, size_t pos) {
         // start of string definitely could be the start of a name
         if(pos == 0) return true;
         
@@ -129,12 +160,6 @@ private:
         return true;
     }
 
-    static inline bool is_production_name_char(const char ch) {
-        return (ch == '_')              ||
-               (ch >= 'A' && ch <= 'Z') ||
-               (ch >= 'a' && ch <= 'z') ||
-               (ch >= '0' && ch <= '9');
-    }
 public:
 
     //
