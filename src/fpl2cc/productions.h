@@ -1206,10 +1206,12 @@ public:
         if(name != "") {
             if(scanners.count(name)) {
                 const code_block &existing = scanners[name];
-                warn(stringformat(
-                    "scanner {} overwrites existing scanner at {}\n",
-                    name, existing.location()
-                ));
+                if(!existing.is_stub) {
+                    warn(stringformat(
+                        "scanner {} overwrites existing scanner at {}\n",
+                        name, existing.location()
+                    ));
+                }
             }
         }
 
