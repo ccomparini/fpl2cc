@@ -22,6 +22,11 @@
     return reader->eof();
 }+
 
+# declared/stub scanner.  the normal use for this would be
+# in an abstract grammar, where it would be expected to
+# be implemented in an application specific way.
+@scanner unimplemented_stub_scanner
+
 # "scans" and expands a variable
 @terminal variable +{
     auto start = reader->current_position();
@@ -65,6 +70,7 @@ stuff* the_end -> done +{
     return stuff@join("\n") + "\n" + the_end + "\n";
 }+
 
+# &unimplemented_stub_scanner -> foo;
 
 &two_byte_char:start !&two_byte_char:guts? &two_byte_char:end -> stuff +{
     return stringformat(

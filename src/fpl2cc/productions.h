@@ -1053,10 +1053,17 @@ public:
         ANY             = INLINE | LIB | REGEX
     };
     inline code_block code_for_directive(
-        const std::string &dir, code_source allowed_src = INLINE
+        const std::string &dir,
+        code_source allowed_src = INLINE,
+        bool allow_empty = false
     ) {
+        eat_separator();
+
+        auto filename = inp->filename();
+        auto line     = inp->line_number();
 
         code_block code;
+
         if(allowed_src & INLINE) {
             // try "regular" +{ }+ code blocks:
             code = read_code();
@@ -1074,13 +1081,18 @@ public:
             if(fn.length() > 0) {
                 code = code_block::from_file(
                     fn + ".inc", opts.src_path,
-                    inp->filename(), inp->line_number()
+                    filename, line
                 );
             }
         }
 
         if(!code) {
-            if(allowed_src) {
+            if(allow_empty) {
+                // set the location of the empty code block anyway,
+                // so callers can use it for reporting
+                code.source_file = filename;
+                code.line        = line;
+            } else if(allowed_src) {
                 errm = stringformat("expected code for directive {}", dir);
             } else {
                 errm = stringformat(
@@ -1089,8 +1101,10 @@ public:
                     dir
                 );
             }
-            error(errm);
         }
+
+        if(errm != "")
+            error(errm);
 
         return code;
     }
@@ -1209,9 +1223,20 @@ public:
             error("expected name of scanner");
         } else {
             code_block scanner = code_for_directive(
-                "scanner", code_source::INLINE_OR_REGEX
+                "scanner", code_source::INLINE_OR_REGEX, true
             );
             code_block inverse;
+
+            if(!scanner) {
+                // No scanner was specified, so stub one.
+                // Stub scanners never match.  If the stub scanner
+                // never gets overridden, we'll warn so that the
+                // author knows they need to implement something,
+                // but the stub will still "work".
+                // (This allows authors to stub scanners in an abtract
+                // grammar without having to deal with implementation)
+                scanner.stub("return Terminal();");
+            }
 
             // if the scanner is regex-implemented, convert
             // that scanner to target code and make an inverse
@@ -2139,44 +2164,44 @@ public:
     }
 
     code_block read_code() {
-         // code is within "+{" "}+" brackets.
-         // we don't know anything about the grammar of the code
-         // within the brackets (presently), so you will derail
-         // it if you put +{ or }+ in a comment or string or whatever.
-         // sorry.  try not to do that.
-         eat_separator();
+        // code is within "+{" "}+" brackets.
+        // we don't know anything about the grammar of the code
+        // within the brackets (presently), so you will derail
+        // it if you put "}+" in a comment or string or whatever.
+        // sorry.  try not to do that.
+        eat_separator();
 
-         size_t start = inp->current_position();
-         if(!inp->read_exact_match("+{")) {
-             // no code - return a false value
-             return code_block();
-         }
+        size_t start = inp->current_position();
+        if(!inp->read_exact_match("+{")) {
+            // no code - return a false value
+            return code_block();
+        }
 
-         std::string code_str;
-         bool found_terminator = false;
-         char byte_in;
-         while(byte_in = inp->read_byte()) {
-             if(byte_in == '}') {
-                 if(inp->peek() == '+') {
-                     inp->read_byte();
-                     found_terminator = true;
-                     break;
-                 }
-             }
-             code_str += byte_in;
-         }
+        std::string code_str;
+        bool found_terminator = false;
+        char byte_in;
+        while(byte_in = inp->read_byte()) {
+            if(byte_in == '}') {
+                if(inp->peek() == '+') {
+                    inp->read_byte();
+                    found_terminator = true;
+                    break;
+                }
+            }
+            code_str += byte_in;
+        }
 
-         if(!found_terminator) {
-             error(inp, stringformat(
-                 "Expected code block terminator ('}}+') but got byte 0x{}",
-                 to_hex(byte_in)
-             ));
-         }
+        if(!found_terminator) {
+            error(inp, stringformat(
+                "Expected code block terminator ('}}+') but got byte 0x{}",
+                to_hex(byte_in)
+            ));
+        }
 
-         return code_block(
-             code_str, code_block::DEFAULT,
-             inp->filename(), inp->line_number(start)
-         );
+        return code_block(
+            code_str, code_block::DEFAULT,
+            inp->filename(), inp->line_number(start)
+        );
     }
 
     code_block parse_regex_code_block() {
@@ -2558,7 +2583,7 @@ public:
         const int num_steps = rule.num_steps();
         for(int sti = 0; sti < num_steps; sti++) {
             auto scanner = rule.nth_step(sti).custom_scanner_name();
-            if(scanner != "") {
+            if(scanner != "" && from->scanners[scanner]) {
                 if(scanners.count(scanner) == 0) {
                     scanners[scanner] = from->scanners[scanner];
                 }
@@ -3311,9 +3336,14 @@ public:
             // anyway because the code generator shouldn't
             // have to be bothered checking if a given
             // element is actually used.
-            error(stringformat(
-                "use of undefined scanner &{} in rule {} {}",
-                scanner_name, rule, rule.location()
+            warn(stringformat(
+                "{} use of undefined scanner &{} in rule {}",
+                rule.location(), scanner_name, rule
+            ));
+        } else if(found->second.is_stub) {
+            warn(stringformat(
+                "{}: &{} ({}) is unimplemented",
+                rule.location(), scanner_name, found->second.location()
             ));
         }
     }
