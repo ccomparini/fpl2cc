@@ -6,7 +6,6 @@ import sysconfig
 debugger = ''
 #debugger = 'TERM=xterm-256color /usr/bin/lldb --one-line "b debug_hook" -- '
 
-
 cpu_count = os.cpu_count();
 if(cpu_count is None):
     cpu_count = 1  # we are currently running on something, after all..
@@ -20,6 +19,7 @@ SetOption('num_jobs', cpu_count + 1);
 # (though I should probably test if it also compiles under g++)
 ccflags = "-std=c++20 -Wno-parentheses"
 ccflags += " -g"
+
 #if debugger : ccflags += " -g"
 # commenting out optimizations for now because fpl-generated test
 # code takes forever to compile:
@@ -44,24 +44,24 @@ def toolset():
     return [ 'default' ]
 
 
-#    PLATFORM=platform,
-#    BINDIR="#export/foo/bin",
-#    INCDIR=include,
-#    LIBDIR=lib,
-#    CPPPATH=[include],
-#    LIBPATH=[lib],
-#    LIBS='..whatever',
-env = Environment(
-    CCFLAGS = ccflags,
-    CPPPATH = [
+config = {
+    'CCFLAGS' : ccflags,
+    'CPPPATH' : [ # preprocessor path
         '.',
         '#src',
         '#src/util',
     ],
-    LIBPATH=[ '#lib' ],
-    LIBS='jest_util',
-    tools = toolset(),
-)
+    'LIBPATH' : [
+        '#lib',
+    ],
+    'LIBS' : [
+        'jest_util',
+    ],
+    'tools' : toolset(),
+}
+
+env = Environment(**config)
+
 
 # If we're on the main branch, append profiling data for
 # generated programs to files in the yprof directory.
@@ -100,8 +100,8 @@ def sources_are_same(target, source, env):
         last_fn = fn
 
     # success, so "touch" all targets (i.e. make them exist
-    # and  set the utime to the current time).
-    # (typically there's only one target file, called xxx.success...)
+    # and set the utime to the current time).
+    # (typically there's only one target file, called xxx.success)
     for fn in target :
         with open(fn.abspath, 'a'):
             os.utime(fn.abspath, None)
@@ -109,7 +109,7 @@ def sources_are_same(target, source, env):
 
 # CompareOut is a "builder" which compares the source files (actually
 # 2 test output files - one with whatever was generated and one with
-# what we expected it to generate) and creates the target file (.success)
+# what we expected it to generate), creates the target file (.success),
 # and returns success if they match, or reports failure otherwise.
 env.Append(BUILDERS = {
     'CompareOut' : Builder(
@@ -181,7 +181,7 @@ env.Append(BUILDERS = {
 })
 
 src_subdirs = [
-    # these are specified roughly in compile/dependency order:
+    # these are specified roughly in compile/dependency order.
     # coincidentally, it looks like they are reverse alphabetical.
     # interesting.
     'util/',
@@ -194,8 +194,11 @@ src_subdirs = [
     'compiler/',
 ]
 
+# output directory:
+output_subdir = 'build/'
+
 for sdir in src_subdirs:
-    SConscript('src/' + sdir + 'SConstruct', exports='env', variant_dir='build/'+sdir, duplicate=False)
+    SConscript('src/' + sdir + 'SConstruct', exports='env', variant_dir=output_subdir+sdir, duplicate=False)
 
 # Stolen from:
 #  https://scons.org/doc/production/HTML/scons-user.html#idp105548894836432
