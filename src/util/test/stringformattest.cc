@@ -104,6 +104,14 @@ int main() {
         std::cout << "FAIL: pointer formatted as " << wupptrstr << "\n";
     }
 
+    for(int ind = 23; ind >= 0; --ind) {
+        std::cout << stringformat("{::i}indented {} levels\n", ind, ind);
+    }
+    std::cout << stringformat(
+        "{::i}indented {} levels, which should be no indent\n",
+        "fruitbat", "fruitbat"
+    );
+
     std::cout << stringformat("and I want to embed a {{ with stuff after it\n");
     return 0;
 }

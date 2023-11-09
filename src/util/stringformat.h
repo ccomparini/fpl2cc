@@ -209,6 +209,30 @@ class stringformat_post_processor {
         return c_str_escape(in);
     }
 
+    // {::i} -> indent by the level indicated in the string
+    // (which needs to be numeric, but, annoyingly, will
+    // already have been stringformatted)
+    static std::string i(const std::string &in) {
+        int indent = 0;
+        int exponent = 1;
+        for(int ch = in.length() - 1; ch >= 0; --ch) {
+            if((in[ch] < '0') || (in[ch] > '9')) {
+                // non-numeric "digit" - just pop out of the loop.
+                // in theory we -could- reasonably do something
+                // with negatives, but let's not for now.
+                break;
+            } else {
+                indent += (in[ch] - '0') * exponent;
+                exponent *= 10;
+            }
+        }
+        std::string out;
+        for(int len = 0; len < indent; len++) {
+            out += "  ";
+        }
+        return out;
+    }
+
     // {::n} -> translate newlines to "\n"
     static std::string n(const std::string &in) {
         std::string out;
@@ -238,6 +262,7 @@ public:
         switch(fmt) {
             case 'c': return c(in);  // columnate (tab-delimited)
             case 'e': return e(in);  // c-string escape
+            case 'i': return i(in);  // indent this level
             case 'n': return n(in);  // translate newlines to '\n'
             case 'U': return U(in);  // uppercase
         }

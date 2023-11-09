@@ -16,5 +16,30 @@ louder: I SAID\\nHELLO
  null pointer doesn't crash
 and it's for sure a const char *
 pointer to struct seems to format as hex
+                                              indented 23 levels
+                                            indented 22 levels
+                                          indented 21 levels
+                                        indented 20 levels
+                                      indented 19 levels
+                                    indented 18 levels
+                                  indented 17 levels
+                                indented 16 levels
+                              indented 15 levels
+                            indented 14 levels
+                          indented 13 levels
+                        indented 12 levels
+                      indented 11 levels
+                    indented 10 levels
+                  indented 9 levels
+                indented 8 levels
+              indented 7 levels
+            indented 6 levels
+          indented 5 levels
+        indented 4 levels
+      indented 3 levels
+    indented 2 levels
+  indented 1 levels
+indented 0 levels
+indented fruitbat levels, which should be no indent
 and I want to embed a { with stuff after it
 "
