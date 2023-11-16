@@ -798,7 +798,7 @@ public:
         std::string to_str() const {
             std::string out;
             for(int ind = 0; ind < size; ++ind) {
-                out += stringformat("    {}\n", owner.lr_stack[ind]);
+                out += stringformat("    {}\n", (*this)[ind]);
             }
             return out;
         }
