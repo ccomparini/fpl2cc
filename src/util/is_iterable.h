@@ -27,8 +27,8 @@ struct _is_iterable
 // or actually apparently... gah I hate c++.
 // just try to make something work at all.  std::begin.
 // whatevs.  shipit.
+// checking std::begin allows this to work with arrays.
 template <typename T>
-//struct _is_iterable <T, decltype(&T::begin, 0)> // apparently begin doesn't count as a member?
 struct _is_iterable <T, decltype(std::begin(std::declval<T&>()), 0)>
     : std::true_type
 {};
