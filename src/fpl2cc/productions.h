@@ -3493,22 +3493,22 @@ public:
                 // (the type is the ->first element of the only item)
                 add_type_for(goal, types_goals.begin()->first, "goal type");
             }
+        } else if(types_goals.size() == 0 ) {
+            if(goals.size() == 0) {
+                internal_error("no goals found!");
+            } else {
+                error(stringformat(
+                    "can't infer type for goal. "
+                    "try setting @produces or @type_for {}", 
+                    *goals.begin()
+                ));
+            }
         } else {
             std::string conflicts;
             for(auto gft : types_goals) {
                 conflicts += stringformat(
                     "\n    goal '{}' produces {}", gft.second, gft.first
                 );
-            }
-            if(conflicts.length() == 0) {
-                if(goals.size() == 0) {
-                    conflicts = "(no goals found)";
-                } else {
-                    conflicts = stringformat(
-                        "try setting @produces or @type_for {}?", 
-                        *goals.begin()
-                    );
-                }
             }
             error(stringformat("conflicting output types: {}\n", conflicts));
         }
