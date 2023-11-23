@@ -918,18 +918,23 @@ public:
             }
         }
 
-        std::string join(const std::string &jv) const {
+        std::string join(const std::string &fmt, const std::string &jv) const {
             std::string out;
             for(int ind = 0; ind < count(); ind++) {
+                auto vfmt = stringformat(fmt, val(ind));
                 if(ind < count() - 1)
-                    out += stringformat("{}{}", val(ind), jv);
+                    out += stringformat("{}{}", vfmt, jv);
                 else // last element
-                    out += stringformat("{}", val(ind));
+                    out += stringformat("{}", vfmt);
             }
             return out;
         }
 
-        inline std::string to_str() const {
+        std::string join(const std::string &jv) const {
+            return join("{}", jv);
+        }
+
+        std::string to_str() const {
             // XXX do something smarter here
             return lr_slice.to_str();
         }
