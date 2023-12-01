@@ -17,8 +17,7 @@ if 'FPL_TEST_DEBUG' in os.environ:
 env.Append(BUILDERS = {
     'CaptureFplCompile': Builder(
         action = run_and_capture_action(
-            #fpl_compile_command(), varlist=["FPLOPTS"]
-            fpl_compile_command()
+            fpl_compile_command(), varlist=["FPLOPTS"]
         ),
         emitter = depend_on_fpl2cc(),
 	src_suffix = '.fpl',

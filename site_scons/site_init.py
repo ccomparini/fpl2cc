@@ -352,9 +352,10 @@ def run_and_capture_action(program, varlist=[], **kwargs):
     return Action(
         run_and_cap,
         strfunction=strfunction,
-        # varlist seems to not be needed?
-        #varlist=varlist + ['CAPFILE', 'INTERACTIVE']
-        #varlist=varlist
+        # varlist is needed, because otherwise scons
+        # doesn't understand when something needs to
+        # change due to changes in the environment:
+        varlist=varlist + ['CAPFILE', 'INTERACTIVE']
     )
 
 # Returns a scons Emitter which causes targets to depend
