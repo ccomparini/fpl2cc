@@ -57,6 +57,13 @@ public:
         struct @gtype.name()@;
     @-}-@
 
+    @/* do parser states early, as well, so we can ask about
+        their type:
+    */@
+    @for(int stn = 0; stn < prds.num_states(); stn++) {@
+        @#fpl_x_parser_state(prds, prds.states.at(stn), prds.opts)@
+    @}@
+
 private:
 
     // If some poor hapless fpl author should happen to try
@@ -82,8 +89,7 @@ private:
     }
 
 public:
-    void state(); // this just facilitates the "using State"
-    using State = decltype(&@class_name@::state);
+    using State = decltype(&@class_name@::state_0);
 
     class Terminal {
         // the first string in "matches" is the entire terminal match
@@ -1400,10 +1406,6 @@ public:
         @}@
     @}@
 
-    // parser states:
-    @for(int stn = 0; stn < prds.num_states(); stn++) {@
-        @#fpl_x_parser_state(prds, prds.states.at(stn), prds.opts)@
-    @}@
 
 };
 
