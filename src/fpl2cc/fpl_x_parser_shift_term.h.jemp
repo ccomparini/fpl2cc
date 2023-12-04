@@ -35,9 +35,7 @@ bool shift_@el.type_str()@_@el_id@(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        @if(opts.debug) {@
-            std::cerr << "shifting @el_str@\n";
-        @}@
+        debug_print("shifting @el_str@\n");
 
         lr_push(@el_id@, eject, pos, Product(result));
         @/*

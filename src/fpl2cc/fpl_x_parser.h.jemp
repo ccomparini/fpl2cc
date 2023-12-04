@@ -445,6 +445,15 @@ public:
             single_step = false;
     }
 
+    template<typename... Args>
+    void debug_print(const std::string_view &fmt, Args&&... args) {
+        @if(opts.debug) {@
+            std::cerr << stringformat(fmt, args...);
+        @} else {@
+            // --debug option is off
+        @}@
+    }
+
     void set_max_errors(int newmax) { max_errors = newmax; }
 
     void error(size_t pos, const std::string &msg) {
@@ -1091,9 +1100,8 @@ public:
     // does _not_ reset the input position, so as to allow
     // mixed-parser parses.
     void reset() {
-        @if(opts.debug) {@
-            std::cerr << "resetting @class_name@!!!\n";
-        @}@
+        debug_print("resetting @class_name@\n");
+
         lr_stack.clear();
         lr_read_pos      = 0;
         param_stack.clear();

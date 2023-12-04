@@ -6,17 +6,12 @@
 // @el.to_str()@
 bool shift_@el.type_str()@_@el_id@(bool eject) {
     if(lr_next().mismatch && lr_next().element_id == @el_id@) {
-        @if(opts.debug) {@
-            std::cerr << "not matching mismatched terminal @el_id@";
-        @}@
+        debug_print("not matching mismatched terminal @el_id@");
         return false;
     }
 
     if(lr_read(@el_id@)) {
-        @if(opts.debug) {@
-            std::cerr << "shifting nonterm @el_id@";
-        @}@
-
+        debug_print("shifting nonterm @el_id@");
         return true;
     }
 
