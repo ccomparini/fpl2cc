@@ -1,0 +1,33 @@
+#
+#  Test multiple-match cases involving reserves
+#
+
+@comment_style sh
+@default_main
+@produces std::string
+
+(thing ';'^)* -> things +{
+    return "\n" + thing@catmap("{}\n");
+}+
+
+# opt_2 needs a reserve of 2; opt_1 needs a reserve of 1:
+/[xyz]/:req  /[xyz]/:opt_1? /[xyz]/:opt_2? -> thing +{
+    return stringformat(
+        "({}) ({}) ({})",
+        req@join(", "), opt_1@join(", "), opt_2@join(", ")
+    );
+}+
+
+# This one's a weird one.
+# The onep must match, because it's not optional, but
+# it can only ever get one letter, because zp1 will have
+# eaten 0 or more of the others.  zp2 can never get a
+# match.  Therefore, this rule itself needs to generate
+# a warning when the fpl compiles.
+/[abc]/:zp1* /[abc]/:onep+ /[abc]/:zp2* -> thing +{
+    return stringformat(
+        "({}) ({}) ({})",
+        zp1@join(", "), onep@join(", "), zp2@join(", ")
+    );
+}+
+

@@ -72,6 +72,7 @@
             try {
                 switch(type) {
                     // everything gets its own line to make diffing easier
+// XXX except that makes debugging harder...
                     case bkv_t_null:
                          return "<null>\n";
                     case bkv_t_bool:
@@ -108,6 +109,10 @@
             key(k),
             val(v) {
         }
+
+        std::string to_str() const {
+            return stringformat("'{}' : {}", key, val);
+        }
     };
 
     std::string to_string(const bkv_array &in, int indent = 0) {
@@ -121,6 +126,7 @@
     std::string to_string(const bkv_object &in, int indent = 0) {
         std::string out = stringformat("{} items: (\n", in.size());
         for (auto const &kv : in) {
+// errff use the member to_str().  and put a newline here.
             out += stringformat("'{}' => {}", kv.first, kv.second);
         }
         return out + ")\n";

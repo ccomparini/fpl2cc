@@ -6,12 +6,15 @@
 // @el.to_str()@
 bool shift_@el.type_str()@_@el_id@(bool eject) {
     if(lr_next().mismatch && lr_next().element_id == @el_id@) {
-        debug_print("not matching mismatched terminal @el_id@");
+        debug_print(
+            "not matching mismatched nonterm ('{}' is not @el_id@)\n",
+            lr_next()
+        );
         return false;
     }
 
     if(lr_read(@el_id@)) {
-        debug_print("shifting nonterm @el_id@");
+        debug_print("shifting nonterm @el_id@\n");
         return true;
     }
 

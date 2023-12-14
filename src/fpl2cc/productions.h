@@ -5,6 +5,7 @@
 #include "fpl_options.h"
 #include "production_rule.h"
 #include "reducer.h"
+#include "stack_distance.h"
 
 #include "util/c_str_escape.h"
 #include "util/from_hex.h"
@@ -58,7 +59,6 @@ class productions {
     std::list<std::string> imports; // filenames
     code_block default_action;
     code_block post_parse;
-    code_block post_reduce;
     std::list<code_block> separator_code;
     bool default_main;
     code_block main_guts;
@@ -87,8 +87,379 @@ class productions {
     bool generate_types;
 
     class lr_set;
-    std::map<int32_t, lr_set> states;  // keyed by state number
+    std::map<int, lr_set> states;  // keyed by state number
     std::map<std::string, int32_t> state_index; // set id -> state number
+
+    // A "rulestep" is basically a way to get at a "real" step
+    // from the point of view of a parentmost rule.  (The "real"
+    // step may be part of a subrule)
+    struct rulestep {
+        const productions *owner;
+        unsigned rulenum;   // index of the rule containing the step
+        unsigned stepnum;   // index of the step within the rule
+
+        rulestep() :
+            owner(nullptr), rulenum(-1), stepnum(-1) {
+        }
+
+        rulestep(const productions *o, int rn, int sn) :
+            owner(const_cast<productions *>(o)),
+            rulenum(rn),
+            stepnum(sn) {
+
+        }
+
+        rulestep parent_rulestep() const {
+            int prln = rule().parent_rule_number();
+            if(prln >= 0) {
+                int cdp = rule().parent_countdown_pos();
+                auto parent_rs = rulestep(owner, prln, -1);
+                parent_rs.stepnum = parent_rs.rule().num_steps() - cdp;
+                return parent_rs;
+            }
+            return rulestep(owner, -1, -1);
+        }
+
+        rulestep parentmost_rulestep() const {
+            rulestep parentmost = *this;
+            while(auto up = parentmost.parent_rulestep()) {
+                parentmost = up;
+            }
+            return parentmost;
+        }
+
+        // .... to my surpsise, I seem to have to explicitly
+        // write this?  what am I missing?
+        bool operator==(const rulestep &other) const {
+            return   (owner == other.owner)
+                && (rulenum == other.rulenum)
+                && (stepnum == other.stepnum)
+            ;
+        }
+
+        // convenience:
+        bool is_ejected()       const { return step().is_ejected(); }
+        bool is_subexpression() const { return step().is_subexpression(); }
+        bool is_multiple()      const { return step().is_multiple();      }
+        bool is_optional()      const { return step().is_optional();      }
+
+        bool is_in_subexpression() const {
+            return rule().parent_rule_number() >= 0;
+        }
+
+        // eg:
+        //   (x y)* -> foo;
+        // x and y are in a subexpression whose step is "multiple",
+        // so this would return true.
+        bool is_in_multiple_subexpression() const {
+            auto prs = parent_rulestep();
+            if(prs) {
+                return prs.is_multiple();
+            }
+
+            return false;
+        }
+
+
+        void go_to_real_step() {
+            while(step().is_subexpression()) {
+                rulenum = owner->subrulenum_for_step(step());
+                stepnum = 0;
+            }
+        }
+
+        // Returns the "flat" next rulestep, which is the rulestep
+        // after the current rulestep, ignoring multiples/optionals
+        // etc. (but traversing parent/child relationships)
+        rulestep flat_next(bool no_descend = false) const {
+            rulestep result = *this;
+            if(result) {
+                auto st = result.step();
+                if(!st.is_subexpression() || no_descend) {
+                    result.stepnum++;
+                } else {
+                    // descend into the subexpression:
+                    result.stepnum = 0;
+                    result.rulenum = owner->subrulenum_for_step(st);
+                }
+
+                while(!result.step()) {
+                    // we hit the end of the current rule.
+                    // if it has a parent, go to the step after
+                    // the step in that rule.
+                    int parent_rulenum = result.rule().parent_rule_number();
+                    if(parent_rulenum < 0) {
+                        // we're at the end of a top level rule
+                        break;
+                    } else {
+                        int cdp = result.rule().parent_countdown_pos();
+                        result.rulenum = parent_rulenum;
+                        result.stepnum = result.rule().num_steps() - cdp + 1;
+                    }
+                }
+            }
+            return result;
+        }
+
+        // returns the set of rulesteps which could legitimately
+        // encountered as the start of the rule passed.
+        // (there can be more than one due to optionals)
+        static std::list<rulestep> rule_starts(
+            const productions *owner, unsigned rulenum
+        ) {
+            std::list<rulestep> result;
+            if(owner && (rulenum < owner->rules.size())) {
+                rulestep st(owner, rulenum, 0);
+                while(st) {
+                    result.push_back(st);
+                    if(!st.is_optional())
+                        break;
+                    st = st.flat_next();
+                }
+            }
+            return result;
+        }
+
+        // There are 0 or more possible rulesteps which can follow any
+        // given rulestep.
+        // The first is always the "flat" next (unless we're at the end
+        // of a rule).
+        // If the current step is multiple, or at the end of a multiple
+        // substep, another other possible next step is either itself or
+        // the start of the substep.
+        // If the "flat" next step is optional, the real next step may
+        // also be the step after that step.
+        void nexts(std::list<rulestep> &result, bool no_repeat = false) const {
+            if(!bool(*this))
+                return;
+
+            auto normal_next = flat_next();
+
+            if(normal_next) result.push_back(normal_next);
+
+            auto opt_next = normal_next;
+            while(opt_next && opt_next.step().is_optional()) {
+                opt_next = opt_next.flat_next(true);
+                if(opt_next) {
+                    result.push_back(opt_next);
+                } else if(!no_repeat && is_in_multiple_subexpression()) {
+                    // we "wrapped" past the end of the subrule,
+                    // and it's a repeated subrule. so, the next
+                    // step is any of the starts of that subrule:
+                    result.splice(
+                        result.end(), rule_starts(owner, rulenum)
+                    );
+                }
+            }
+
+            if(!no_repeat) {
+                auto this_step = step();
+                if(this_step.is_multiple() && !this_step.is_subexpression()) {
+                    // simple multiple, so possible nexts include ourself:
+                    result.push_back(*this);
+                }
+
+                int prln = rule().parent_rule_number();
+                if(prln >= 0) {
+                    if(stepnum + 1 >= rule().num_steps()) {
+                        // next is at (or past) the end of a substep.
+                        // let's see what that substep looks like:
+                        int cdp = rule().parent_countdown_pos();
+                        auto parent_rs = rulestep(owner, prln, -1);
+                        parent_rs.stepnum = parent_rs.rule().num_steps() - cdp;
+                        if(parent_rs.step().is_multiple()) {
+                            // .. it's multiple, so we'll need to wrap
+                            // back to the start:
+                            parent_rs.nexts(result, true);
+                        }
+                    }
+                }
+            }
+        }
+
+        std::list<std::list<rulestep>> paths(
+            bool include_this = true,
+            std::list<rulestep> in = {},
+            bool no_repeat = false
+        ) const {
+            std::list<rulestep> path_so_far = in;
+
+// .... grreeee if 'tis optional we -also- need the path
+// w/out *this.  test XXX
+            if(include_this)
+                path_so_far.push_back(*this);
+
+            std::list<std::list<rulestep>> result;
+
+            std::list<rulestep> next_steps;
+            nexts(next_steps, no_repeat);
+            if(next_steps.size() == 0) {
+                result.push_back(path_so_far);
+                return result;
+            }
+            for(auto next : next_steps) {
+                if(next.rulenum == rulenum) {
+                    if(next.stepnum <= stepnum) {
+                        // we're looking at an earlier step in the
+                        // same rule, so we've recursed once on it.
+                        // don't do it again:
+                        no_repeat = true;
+                    }
+                }
+                result.splice(
+                    result.end(), next.paths(true, path_so_far, no_repeat)
+                );
+            }
+
+            return result;
+        }
+
+        // returns a string containing all the "paths" forward 
+        // through various rules from this rulestep.
+        std::string paths_string(const std::string &prefix = "") {
+            std::string result;
+            for(auto path : paths()) {
+                result += prefix;
+                for(auto rs : path) {
+                    result += rs.to_str() + " ";
+                }
+                result += "\n";
+            }
+            return result;
+        }
+
+        const production_rule &rule() const {
+            if(owner && (rulenum < owner->rules.size()))
+                return owner->rules[rulenum];
+
+            return no_rule();
+        }
+
+        // const production_rule::step &step() const {
+        const production_rule::step step() const {
+            auto rl = rule();
+            if(rl) {
+                return rl.nth_step(stepnum);
+            }
+            return production_rule::step::false_step();
+        }
+
+        operator bool() const {
+            return rule() && step();
+        }
+
+        // If this rulestep is the canonical step for a
+        // parameter, this returns the distance in param
+        // stack entries to the next value in that parameter.
+        // If it's not the canonical step, all bets are off.
+        // Throws an error if the meld is invalid.
+        // 
+        // This is what code generators should use to find
+        // the meld skip.
+        int final_meld() const {
+            stack_distance meld = step().meld_distance;
+
+            if(meld.is_indeterminate()) {
+                jerror::error(stringformat(
+                    "{} bad meld ({}) for step {} in {}!", 
+                    rule().location(), meld, step(), rule()
+                ));
+            }
+
+            return meld.to_int();
+        }
+
+        // Returns the index of the final step within the top-level
+        // rule which would be involved in the meld for this step,
+        // if it's the canonical step for the variable.
+        // If it's not the canonical step, then the result is probably
+        // meaningless (but will to be the last step with the same parameter
+        // name as this step, so maybe fine).
+        int last_meld_step() const {
+// SOME TESTS TO ADD:
+// say we have (foo bar)* foo -> bat;
+// foo's last meld step is 1, but bar's is 0.
+// say we have (foo bar foo bat)* foo -> moo;
+// foo has a different meld from bar and bat.. what's the canonical step?
+// test the above.
+            auto pname = step().variable_name();
+            auto lastest = *this;
+            for(auto nx = flat_next(); nx; nx = nx.flat_next()) {
+                if(nx.step().variable_name() == pname) {
+                    lastest = nx;
+                }
+            }
+            return lastest.parentmost_rulestep().stepnum;
+        }
+
+        // If this is the canonical step for a parameter,
+        // returns the number of param stack entries from
+        // the base step in the top level rule.
+        //
+        // In all, the nth param stack entry for a given
+        // reduce parameter is at offset:
+        //     final_offset + n*final_meld
+        // .. from the entry for the top level step.
+        int final_offset() const {
+            auto pname = step().variable_name();
+            int dist = 0;
+            auto rstep = this->parentmost_rulestep();
+
+            for( ; rstep ; rstep = rstep.flat_next()) {
+
+                if(rstep == *this) {
+                    return dist;
+                }
+
+                if(rstep.is_ejected()) {
+                    continue; // skip because no param stack entry
+                }
+
+                if(rstep.is_subexpression()) {
+                    if(rstep.is_multiple() || rstep.is_optional()) {
+                        auto subr = owner->sub_rule(rstep.step());
+                        // if this step contains the parameter we're
+                        // looking for, it's ok for it to be optional/
+                        // multiple, but if not, the optional/mutiple-ness
+                        // makes the distance indeterminate, so:
+                        if(!subr.parameter_step(pname)) {
+                            break;
+                        }
+                    }
+
+                    continue; // .. i.e. iterate into the sub
+                }
+
+                if(rstep.is_multiple() || rstep.is_optional()) {
+                    break;
+                }
+                ++dist;
+
+            }
+
+            if(rstep.is_multiple() || rstep.is_optional()) {
+                jerror::error(stringformat(
+                    "{} indeterminate offset for step {} due to {}", 
+                    rule().location(),
+                    owner->stepstring(step()),
+                    owner->stepstring(rstep.step())
+                ));
+            }
+
+            return dist; // I guess?  it's an error if we got here
+        }
+
+        // returns the type for this argument in the target language
+        std::string type_in_target() const {
+            return owner->type_for(step().gexpr);
+        }
+
+        std::string to_str(bool plain = false) const {
+            return stringformat(
+                "<{}.{} = {}>", rulenum, stepnum, owner->stepstring(step())
+            );
+        }
+    };
 
     static void warn(const std::string &msg) { jerror::warning(msg); };
 
@@ -226,7 +597,8 @@ class productions {
 
         // returns the rule step which this item refers to,
         // which will be false in the case that it's the end
-        // of (or past the end of) the rule.
+        // of (or past the end of) the rule. (i.e. the reduce
+        // step is a "false" one)
         production_rule::step step(const productions &prds) const {
             return prds.rules[rule].nth_from_end(countdown);
         }
@@ -268,6 +640,8 @@ class productions {
                     auto &context = prds->parentmost_rule(prl);
                     out = stringformat("{} {}:\t", context.product(), out);
 
+                    // stepi >= 0 so we get the dots past the end on
+                    // final steps
                     for(int stepi = prl.num_steps(); stepi >= 0; --stepi) {
                         if(stepi == countdown) out += " •";
                         else                   out += " ";
@@ -1137,7 +1511,6 @@ public:
     }
 
     void set_post_parse(const code_block &cb)  { post_parse = cb; }
-    void set_post_reduce(const code_block &cb) { post_reduce = cb; }
     void set_default_main(bool def)            { default_main = def; }
     void add_internal(const code_block &cb)    { parser_members.push_back(cb); }
 
@@ -1439,8 +1812,6 @@ public:
             main_guts = code_for_directive(dir, code_source::INLINE_OR_LIB);
         } else if(dir == "post_parse") {
             post_parse = code_for_directive(dir);
-        } else if(dir == "post_reduce") {
-            post_reduce = code_for_directive(dir);
         } else if(dir == "produces") {
             set_output_type(arg_for_directive());
         } else if(dir == "scanner") {
@@ -1493,6 +1864,13 @@ public:
         return found;
     }
 
+    // If the step passed is a subexpression,
+    // returns the index of the rule for the subexpression.
+    // Otherwise, returns -1.
+    int subrulenum_for_step(const production_rule::step &st) const {
+        return subrulenum_for_el(st.gexpr);
+    }
+
     const production_rule &rule(int rnum, src_location cl = CALLER()) const {
         if(rnum < rules.size()) {
             return rules[rnum];
@@ -1514,6 +1892,7 @@ public:
         }
         return no_rule;
     }
+
 
     // Traverses the set of parent rules until it comes to a
     // rule with no parents, and returns a ref to that rule.
@@ -1603,6 +1982,7 @@ public:
             // the name to give the argument corresponding
             // this this step follows:
             expr.varname = src->read_re("[A-Za-z][A-Za-z0-9_]*")[0];
+            expr.explicitly_named = true;
         }
     }
 
@@ -1670,7 +2050,6 @@ public:
         // copy all these strings over and over.. :/
         std::set<std::string> out;
         out.insert(imports.begin(), imports.end());
-        // for(auto it = sub_productions.begin(); it != sub_productions.end(); it++) {
         for(auto const &sub : sub_productions) {
             auto subimps = sub.second->imported_files();
             out.insert(subimps.begin(), subimps.end());
@@ -1995,7 +2374,7 @@ public:
     // If there's a single, obvious name for the variable to use
     // for the subexpression passed, this returns it.  Otherwise,
     // returns an empty string.
-    std::string subex_varname(const std::string subex) const {
+    std::string subex_varname(const std::string &subex) const {
         if(auto rule = single_rule_for_product(subex)) {
             if(auto step = rule.single_param()) {
                 return step.variable_name();
@@ -2005,12 +2384,113 @@ public:
         return "";
     }
 
-    // subexpressions also add stuff to the containing rule...
-    void add_subexpression(production_rule &rule, production_rule::step sub) {
-        if(sub.varname == "")
-            sub.varname = subex_varname(sub.gexpr.expr);
+private:
+    production_rule &sub_rule(const production_rule::step &step) {
+        static production_rule no_rule;
+        if(step.is_subexpression()) {
+            auto sname = step.gexpr.expr;
+            if(rules_for_product.count(sname) == 1) {
+                return rules[rules_for_product.lower_bound(sname)->second];
+            }
+        }
+        if(no_rule) {
+            // no_rule somehow became a true value.
+            std::cerr << stringformat(
+                "dummy rule {} returned by subrule() has been modified",
+                no_rule
+            );
+            // reset it:
+            no_rule = production_rule();
+        }
+        return no_rule;
+    }
+public:
 
-        rule.add_step(sub, false);
+    const production_rule &sub_rule(const production_rule::step &step) const {
+        // sigh on the const_cast, but I don't think there's a better
+        // way to do this in c++...
+        return const_cast<productions *>(this)->sub_rule(step);
+    }
+
+    void set_subex_names(
+        const production_rule::step &for_step,
+        const std::string &name
+    ) {
+        if(!name.length()) return;
+
+        production_rule &subrule = sub_rule(for_step);
+        if(!subrule) {
+            internal_error(stringformat(
+                "{} is not a subrule", for_step
+            ));
+            return;
+        }
+
+        for(int stepi = 0; stepi < subrule.num_steps(); ++stepi) {
+            //auto substep = subrule.nth_step(stepi);
+            production_rule::step &substep = subrule.nth_step_ref(stepi);
+            if(!substep) {
+                internal_error(stringformat(
+                    "no substep for {}?\n", for_step
+                ));
+                return;
+            }
+
+            if(!substep.is_explicitly_named()) {
+                if(!substep.is_ejected()) {
+                    subrule.rename_parameter(stepi, substep.variable_name(), name);
+                    substep.varname = name; // should this count as explicit?
+                }
+
+                if(substep.is_subexpression()) {
+                    set_subex_names(substep, name);
+                }
+            }
+        }
+    }
+
+    // subexpressions also add stuff to the containing rule...
+    void add_subexpression(production_rule &rule, production_rule::step &sub) {
+        if(sub.is_explicitly_named()) {
+            // Propegate the explicit name down to the subs.
+            // This is for stuff like (classic case):
+            //   '('^ (item (','^ item)*)?:items ')'^ -> list;
+            // In this case, +list will expect the "item"s in
+            // the subexpression to be passed as one parameter
+            // called "items".
+            set_subex_names(sub, sub.varname);
+        }
+        
+        if(sub.varname == "") {
+            // this makes it so that if you have:
+            //   (foo:bar)* -> bat;
+            // ... the top level rule knows to look in
+            // the subrule for "bar"
+            // (this might be redundant with the subrules thing below, now)
+            sub.varname = subex_varname(sub.gexpr.expr);
+        }
+
+        auto stepi = rule.add_step(sub, false);
+
+        // if the subex hasn't been explicitly named,
+        // we want to "bubble up" it's parameters:
+        if(!sub.is_explicitly_named()) {
+            auto subrule = single_rule_for_product(sub.gexpr.expr);
+
+            if(!subrule) {
+                // at present, subrules are always added before the parent
+                // rule, so this shouldn't be able to happen.  but, future:
+                internal_error(stringformat(
+                    "No subrule found for {} in {}\n",
+                    sub, rule
+                ));
+                return;
+            }
+
+            for(auto pname : subrule.parameter_names()) {
+                rule.add_parameter(stepi, pname);
+            }
+        }
     }
 
     grammar_element parse_terminal() {
@@ -3052,10 +3532,6 @@ public:
                         rule.resolve_placeholder(
                             stepi, precedence_group_names[pg_ind]
                         );
-// defer?  oh, can't, because of the imports thing.
-// So maybe this needs a restructure wherein we split the resolve
-// such that we resolve everything needed for an import separately
-// from code generation.
                         record_element(rule.nth_step(stepi).gexpr);
                     }
                 } // else it's not something we need to resolve
@@ -3372,6 +3848,225 @@ public:
         }
     }
 
+    /*
+        Returns the number of parameter stack entries to the
+        next parameter stack entry melded into the named parameter.
+        Note:  parameter stack entries, -not- lr_stack entries.
+     */
+    stack_distance meld_distance(
+        const rulestep &from_step,
+        const std::string &pname
+    ) {
+        stack_distance dist(0);
+      
+        // false = don't include the starting step; that start step is
+        // the one from which we're setting distance.
+        //auto all_paths = from_step.paths(false);
+        auto all_paths = from_step.paths();
+
+        dprint_melds(stringformat(
+            "getting meld distance for '{}' from {}."
+            "There are {} paths:\n    {}\n",
+            pname, from_step, all_paths.size(), join(all_paths, "\n    ")
+        ));
+
+        for(auto path : all_paths) {
+            dprint_melds(stringformat("   walking path {}\n", path));
+            stack_distance this_dist(0);
+            for(auto rstep : path) {
+                if(rstep.step().is_ejected())
+                    continue; // because ejected = not on param stack
+
+                if(rstep.step().is_subexpression())
+                    continue;  // because we'll count the steps -within- it
+
+                dprint_melds(stringformat("     looking at {}?\n", rstep));
+
+                if(rstep.step().variable_name() == pname) {
+                    dist = this_dist;
+                    dprint_melds(stringformat(
+                        "       bing! on {} distance {} gives dist {}\n",
+                        rstep, this_dist, dist
+                    ));
+                    this_dist.reset();
+                }
+
+                if(dist.is_indeterminate())
+                    break;
+
+                // (everything here is one ls stack entry, since we
+                // iterate into subexes)
+                ++this_dist;
+            }
+            if(dist.is_indeterminate())
+                break;
+        }
+        dprint_melds(stringformat(
+            "   final distance for {}: {}\n", pname, dist
+        ));
+        return dist;
+    }
+
+    static production_rule &no_rule() {
+        static production_rule nr;
+        if(nr) {
+            warn("something modified the rule from no_rule()");
+            nr = production_rule();
+        }
+        return nr;
+    }
+
+    rulestep canonical_step_for_param(
+        int rulenum, const std::string &pname
+    ) const {
+        if((unsigned)rulenum >= rules.size()) {
+            warn(stringformat(
+                "rule {} is out of bounds in canonical_step_for_param",
+                rulenum
+            ));
+            return rulestep();
+        }
+        auto rule = rules[rulenum];
+        int canonical_stepi = rule.parameter_step_number(pname);
+        auto step = rule.nth_step(canonical_stepi);
+        if(!step && rule.is_subexpression()) {
+            // There's no explicitly named step for pname in this
+            // rule, but we're a subexpression, so our parent rule
+            // must think we have this parameter - otherwise we
+            // wouldn't be here.
+            // Some examples of where this would happen:
+            //   ('x'):foo bar -> bat;
+            //   '{'^ (member (','^ member)*)?:members '}'^ -> object ;
+            // So how do we know which step is the canonical?
+            // It must be:
+            //    - not ejected
+            //    - the only not-ejected item
+            // What happens if the second case is written:
+            //   '{'^ string:key ':'^ value (','^ string:key ':'^ value)*)?:members '}'^ -> object ;
+            // .. then it's ok.  the subs have parameter count > 1.
+            // Do we care about the names or types of subs?
+            // Say it's:
+            //   '{'^ (member (','^ other)*)?:members '}'^ -> object ;
+            // ... I think we don't care _in this context_. In this context,
+            // we'll act as if that was written:
+            //   '{'^ (member:members (','^ other:members)*)? '}'^ -> object ;
+            // .. and let other stuff decide if member and other have
+            // different types or whatever.
+            if(rule.parameter_count() == 1) {
+                canonical_stepi = rule.parameter_step(0);
+                step = rule.nth_step(canonical_stepi);
+            }
+        }
+ 
+        if(step.is_subexpression()) {
+            return canonical_step_for_param(subrulenum_for_step(step), pname);
+        }
+
+        return rulestep(this, rulenum, canonical_stepi);
+    }
+
+    // Sets the meld value for the (assumed canonical) rulestep
+    // passed.  Throws errors (or warnings) if melds are inconsistent,
+    // or if there appear to be other problems.
+    void set_meld(rulestep rstep, const std::string &pname, stack_distance meld, src_location ca = CALLER()) {
+        dprint_melds(stringformat(
+            "{} SETTING MELD TO {} for {} in {}\n",
+            ca, meld, pname, rstep.rule()
+        ));
+
+        production_rule::step &step = rules[rstep.rulenum].nth_step_ref(
+            rstep.stepnum
+        );
+
+        if(step.variable_name() != pname) {
+            internal_error(stringformat(
+                "{} {} setting '{}' meld {} for wrong step {}",
+                ca, rstep.rule(), pname, meld, step
+            ));
+            return;
+        }
+
+        if(step.is_subexpression()) {
+            // this is probably an internal error as well, but it's
+            // not a total disaster, so warn and try anyway:
+            warn(stringformat(
+                "setting meld {} on a subexression? {} in {}\n",
+                meld, pname, rstep.rule()
+            ));
+        }
+
+        auto old_meld = step.meld_distance; // (error messages/debug)
+        step.meld_distance = meld;
+        dprint_melds(stringformat(
+            "  .. now that it's set that step is {}\n", step
+        ));
+
+        if(step.meld_distance.is_indeterminate()) {
+            // if we can't meld, we do have to toss an actual error - 
+            // generated code isn't going to work right.
+            error(rstep.rule().location(), stringformat(
+                "inconsistent meld for {} ({} vs {}) in {}\n",
+                pname, old_meld, meld, rstep.rule()
+            ));
+        }
+    }
+
+    void resolve_melds_for_rule(
+        unsigned rulenum,
+        bool multiple_subex = false,
+        int rec_depth = 0
+    ) {
+        if(rulenum >= rules.size()) {
+            internal_error(stringformat(
+                "rule {} is out of bounds in resolve_melds_for_rule",
+                rulenum
+            ));
+            return;
+        }
+
+        production_rule &rule = rules[rulenum];
+        for(auto name : rule.parameter_names()) {
+            auto canonical_step = canonical_step_for_param(rulenum, name);
+           
+            if(!canonical_step) {
+                internal_error(stringformat(
+                    "No canonical step for {} in {} when trying to set meld",
+                    name, rule
+                ));
+            } else {
+                set_meld(
+                    canonical_step, name,
+                    meld_distance(canonical_step, name)
+                );
+            }
+        }
+    }
+
+    // Rules can have more than one step corresponding to a
+    // particular parameter.  For example, the reducer for:
+    //    arg (','^ arg)* -> arg_list;
+    // .. should get one argument "arg", which should contain
+    // all the (comma separated) arguments.  But, this requires
+    // some precalculation, and not all combinations are valid,
+    // so we need to detect invalid ones.
+    void resolve_melds() {
+        for(int rulei = 0; rulei < rules.size(); ++rulei) {
+            production_rule &rule = rules[rulei];
+            // only do this for top level rules - top level rules
+            // will recursively resolve subexpressions.
+            // this is (in part) because the final meld distances
+            // are all in the "frame of reference" of the top
+            // level rule, and may span subexpressions.
+            if(!rule.is_subexpression()) {
+                dprint_melds(stringformat(
+                    "MELDS FOR TOP RULE {} «{}» {}\n",
+                    rulei, rule, rule.location()
+                ));
+                resolve_melds_for_rule(rulei);
+            }
+        }
+    }
+
     // 
     // It's possible (easy, even) for madness and confusion to arise
     // if you have terminals which are prefixes of other terminals
@@ -3549,7 +4244,7 @@ public:
     }
 
     // determines goal(s), generates states, matches up reducers, 
-    // reports errors, etc.
+    // checks for/reports structural errors, etc.
     // call this before generating code.
     void resolve(src_location caller = CALLER()) {
         if(rules.size() <= 0) {
@@ -3558,6 +4253,7 @@ public:
 
         resolve_terminal_masking();
         resolve_steps();
+        resolve_melds();
         resolve_goals();
 
         resolve_types();
@@ -3609,7 +4305,46 @@ public:
         return reformat_code(fpl_x_parser(*this, opts), opts.output_fn);
     }
 
-    // debugging:
+
+    // debugging/messaging:
+
+    std::string stepstring(const production_rule::step &st) const {
+        if(auto subr = sub_rule(st)) {
+            return "(" + rulestring(subr) + ")" + st.qty.to_str();
+        }
+        return st.to_str();
+    }
+
+    std::string rulestring(const production_rule &rl) const {
+        std::string out;
+        for(int stepi = 0; stepi < rl.num_steps(); ++stepi) {
+            out += stepstring(rl.nth_step(stepi));
+            if(stepi < rl.num_steps() - 1) {
+                out += " ";
+            }
+        }
+
+        if(!rl.is_subexpression()) {
+           out += " -> ";
+           out += rl.product();
+        }
+
+        return out;
+    }
+
+    void dprint_melds(const std::string &msg) {
+        if(opts.debug_melds) {
+            std::cerr << msg;
+        }
+    }
+
+    void dpprint_melds(const std::string &msg) {
+        if(opts.debug_melds) {
+            dprint_melds(msg);
+            getchar();
+        }
+    }
+
     std::string states_to_string() const {
         std::string out;
 
@@ -3639,7 +4374,7 @@ public:
             std::ofstream out(opts.statedump, std::ios::binary);
             if(!out.is_open()) {
                 internal_error(stringformat(
-                    // wow... errno.. why am I even using c++?
+                    // errno... sigh
                     "can't open '{}' for dumping states: {}\n",
                     opts.statedump, strerror(errno)
                 ));

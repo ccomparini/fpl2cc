@@ -1,0 +1,5 @@
+
+# these are "curly_list" from imp.fpl:
+#  '{'^ (arg (','^ arg)*)? '}'^ -> curly_list;
+{ 23 }
+{ 99, 77, 2323 }

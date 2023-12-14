@@ -14,7 +14,7 @@ namespace fpl {
 struct code_block {
     enum source_language {
         UNKNOWN = 0,
-        DEFAULT, // effectively c++ at the moment, but treated as plain text
+        DEFAULT, // effectively c++ at the moment
         REGEX,
     } language;
 

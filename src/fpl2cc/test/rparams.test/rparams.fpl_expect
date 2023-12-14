@@ -1,6 +1,6 @@
 returncode = 0
-stderr = "    warning: type conflict at src/fpl2cc/test/rparams.test/rparams.fpl:48 on foo in rule integer:foo list:foo -> doom: std::string vs std::list<std::string>
-    warning: Rule 24 producing doom at src/fpl2cc/test/rparams.test/rparams.fpl:48 is unused
+stderr = "    warning: type conflict at src/fpl2cc/test/rparams.test/rparams.fpl:50 on foo in rule integer:foo list:foo -> doom: std::string vs std::list<std::string>
+    warning: Rule 22 producing doom at src/fpl2cc/test/rparams.test/rparams.fpl:50 is unused
 src/fpl2cc/test/rparams.test/rparams.fpl: 2 warnings
 "
 stdout = ""

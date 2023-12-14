@@ -1,0 +1,7 @@
+returncode = 0
+stderr = "    warning: src/fpl2cc/test/reserve.test/reserve.fpl:27 step /[abc]/+:onep is overshadowed by /[abc]/*:zp1 such that it can only ever match 1 item
+    warning: src/fpl2cc/test/reserve.test/reserve.fpl:27 step /[abc]/*:zp2 is overshadowed by /[abc]/+:onep such that it can only match 0 items
+    warning: src/fpl2cc/test/reserve.test/reserve.fpl:27 step /[abc]/*:zp2 is overshadowed by /[abc]/*:zp1 such that it can only match 0 items
+src/fpl2cc/test/reserve.test/reserve.fpl: 3 warnings
+"
+stdout = ""

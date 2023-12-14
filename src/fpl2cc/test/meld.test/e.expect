@@ -1,0 +1,6 @@
+returncode = 0
+stderr = ""
+stdout = "
+1 items total.  they are:
+    rho boats: 🚤⛵⛵🛶
+"

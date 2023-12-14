@@ -1,0 +1,20 @@
+
+@default_main
+@produces std::string
+
+# This one's also invalid because the first step is optional/
+# multiple, thus causing the offset for "foo" to be indeterminate.
+# The difference here is that g is in a subexpression.
+(('g')*:opt 'y':foo) -> failular +{
+    if(foo == "y") {
+        if(opt@count != 1) {
+            return stringformat(
+                "surprise!  it works??? how can it? opt has {} matches\n",
+                opt@count()
+            );
+        }
+        return "foo was in fact 'y', with 1 opt 'g'.\n";
+    }
+    return stringformat("unsurprisingly, foo is {} and not 'y'\n", foo);
+}+
+

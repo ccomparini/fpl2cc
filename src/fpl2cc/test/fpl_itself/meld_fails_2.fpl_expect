@@ -1,0 +1,4 @@
+returncode = 1
+stderr = "src/fpl2cc/test/fpl_itself/meld_fails_2.fpl:8 indeterminate offset for step 'y':foo due to ('g':opt)*
+"
+stdout = ""

@@ -91,6 +91,7 @@ struct _std_to_string_exists_for<T,
 {};
 
 template<typename T>
+//std::string _stringformat(const T &in, const std::string &opts = "") {
 std::string _stringformat(T &in, const std::string &opts = "") {
     if constexpr (std::is_convertible_v<T, std::string> or
                   std::is_convertible_v<T, std::string_view>) {

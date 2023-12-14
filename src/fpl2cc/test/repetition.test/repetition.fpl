@@ -94,8 +94,19 @@ block -> statement;
     return "just the last tilde";
 }+
 
-# .. and now let's see if it works with repetition on both sides:
+# .. this checks to make sure the optional really is optional
 '$':beginning '$'*:middle '$':end -> statement +{
+    if((beginning@count() != 1) || (end@count() != 1)) {
+        return stringformat(
+            "FAIL on dollar test:\n"
+            "  beginning has {} entries: {}\n"
+            "     middle has {} entries: {}\n"
+            "        end has {} entries: {}\n",
+            beginning@count(), beginning@concatenate(),
+               middle@count(),    middle@concatenate(),
+                  end@count(),       end@concatenate()
+        );
+    }
     return stringformat("{} dollars between", middle@count());
 }+
 

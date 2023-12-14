@@ -38,6 +38,7 @@ bool shift_@el.type_str()@_@el_id@(bool eject) {
         debug_print("shifting @el_str@\n");
 
         lr_push(@el_id@, eject, pos, Product(result));
+
         @/*
           assertions count as terminals.  therefore, clearing
           bytes_eaten is (strictly speaking) correct, here.

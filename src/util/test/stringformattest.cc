@@ -12,7 +12,7 @@
 #include <variant>
 
 struct i_has_to_str {
-    std::string to_str() { return "called to_str()!"; }
+    std::string to_str() const { return "called to_str()!"; }
 };
 
 struct just_data {
@@ -61,6 +61,7 @@ int main() {
     std::tuple<bool, std::string> tuppy = { true, "foo" };
     std::cout << stringformat("tuple: {}\n", tuppy);
 
+    //const std::map<std::string, int> some_map = {
     std::map<std::string, int> some_map = {
         { "foo", 1 },
         { "bar", 2 },

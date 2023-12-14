@@ -385,7 +385,6 @@ public:
         lr_stack.push_back(StackEntry(
             cur_state, element_id, pos, param_stack.size(), eject
         ));
-
         if(!eject) {
             param_stack.push_back(pr);
         }
@@ -548,8 +547,17 @@ public:
         }
 
         if(lr_read_pos > lr_top_index()) {
-            lr_read_pos -= num_cleared;
+            lr_read_pos = lr_top_index() + 1;
         }
+
+        @if(opts.debug) {-@
+            if(num_cleared) {
+                std::cerr << stringformat(
+                    "cleared {} mismatches.  read position is now {}\n",
+                    num_cleared, lr_read_pos
+                );
+            }
+        @}@
     }
 
     StackEntry lr_stack_entry(int pos) const {
@@ -602,7 +610,7 @@ public:
     // first position before pos in the lr stack which does not
     // match the element ID in question. If pos is past the top
     // of the stack, starts at the top of the stack.
-    // Recurses on subexpressions.  Always skips mismatches.
+    // Pseudo-recurses on subexpressions.
     //
     // These are used to put together the arguments for reduce
     // actions.
@@ -629,8 +637,8 @@ public:
                 //   @subrule.to_str()@
                 int subp = pos;
                 int lastp;
-                bool matched_whole = true;
                 while(subp >= 0) {
+                    const int startp = pos;
                     @for(int sti = subrule.num_steps() - 1; sti >= 0; --sti) {@
                         @declare substep: subrule.nth_step(sti)@
                         @declare sename: prds.element_id_name(substep.gexpr)@
@@ -638,14 +646,18 @@ public:
                         @declare required: !substep.qty.optional@
                         lastp = subp;
                         subp = lr_position_before_@sename@(subp, @-mult-@);
-                        if(lastp == subp) {
-                            // (didn't match)
-                            if(@required@) matched_whole = false;
-                        } else {
-                            pos = subp;
-                        }
+                        @if(!required) {@
+                            // (@sename@ is optional)
+                        @} else {@
+                            if(lastp == subp) {
+                                // did not match @sename@ - no match
+                                return startp;
+                            }
+                        @}@
+                        pos = subp;
                     @}@
-                    if(!multiple || !matched_whole)
+
+                    if(!multiple)
                         break;
                 }
             @}@
@@ -654,15 +666,18 @@ public:
         }
     @}@
 
-    // lr_count_of_X(pos, multiple):  returns the number of
+    // lr_stack_size_of_X(pos, multiple):  returns the number of
     // stack entries matching X going forward through the lr stack,
     // starting at the position passed.   If argument "multiple"
-    // is false, only counts up to one entry.
+    // is false, only counts up to one X.
+    // Note that while simple elements will be one stack entry
+    // each, subexpressions can (and normally do) take up multiple
+    // stack entries per X.
     @for(int el_id = 0; el_id < prds.elements.size(); ++el_id) {-@
         @declare element: prds.elements.at(el_id)@
         @declare elname: prds.element_id_name(el_id)@
         @declare subrule_num:  prds.subrulenum_for_el(element)@
-        int lr_count_of_@elname@(int pos, bool multiple) const {
+        int lr_stack_size_of_@elname@(int pos, bool multiple) const {
             int size = 0;
             @if(subrule_num < 0) {@
                 // normal case - not a subexpression
@@ -684,7 +699,7 @@ public:
                         @declare sename: prds.element_id_name(substep.gexpr)@
                         @declare mult: substep.qty.multiple@
 
-                        ssize = lr_count_of_@sename@(subp, @mult@);
+                        ssize = lr_stack_size_of_@sename@(subp, @mult@);
 
                         if(@!substep.qty.optional@ && ssize == 0)
                             matched_whole = false;
@@ -726,10 +741,13 @@ public:
         // Returns the number of lr_stack entries in this slice:
         int count() const { return size; }
 
+        int start() const { return base_index; }
+
         // Returns the number of parameter stack entries for this
-        // entire slice.  This can be different from the number of
-        // lr_stack entries due to ejectedness (in which case
-        // there are 0 parameters) as well stuff like repetition.
+        // entire slice.  This can be different from the number
+        // of lr_stack entries due to ejectedness (in which case
+        // there are 0 parameters) as well stuff like melding
+        // (which is handled in ReductionParameter)
         int param_count() const {
             StackEntry sel = owner.lr_stack_entry(base_index);
 
@@ -737,7 +755,6 @@ public:
             // without this check, we can end up returning a
             // negative size, and no one wants that.
             if(count() == 0) return 0;
-
 
             // this slice "contains" all arguments starting
             // at the position in the argument stack starting
@@ -789,18 +806,33 @@ public:
             }
         }
 
-        // Returns the nth "product" (from the argument stack)
+        // Returns the nth "product" (from the param stack)
         // corresponding to this slice.
         // If the index passed is out of bounds, returns a 
         // default product.
         // Note that there may be 0 products for any slice,
         // so the 0th is not guaranteed to be anything real,
         // though if it's not it will still return a valid
-        // (though false) Product,
-        Product product(int ind = 0, src_location caller = CALLER()) const {
+        // (though false) Product.
+        Product product(int ind, src_location caller = CALLER()) const {
             const int pbase = param_base();
+
+            if(pbase < 0) {
+                // this is probably an internal error:
+                jerror::error(stringformat(
+                    "{} product({}) called on stack slice with no param base",
+                    caller, ind
+                ));
+                return Product();
+            }
+
             const int num_args = param_count();
-            if(ind < 0) ind += num_args; // negative = relative to end + 1 
+            if(ind < 0) {
+                jerror::warning(stringformat(
+                    "{} wrapping is no longer supported on product({})",
+                    caller, ind
+                ));
+            }
 
             if((ind >= 0) && (ind < num_args)) {
                 unsigned int sind = pbase + ind;
@@ -811,7 +843,10 @@ public:
         }
 
         std::string to_str() const {
-            std::string out;
+            std::string out = stringformat(
+                "slice of {} entries at {}\n",
+                size, base_index
+            );
             for(int ind = 0; ind < size; ++ind) {
                 out += stringformat("    {}\n", (*this)[ind]);
             }
@@ -822,10 +857,6 @@ public:
     // Call this within a reduce function to get a stack slice containing
     // all the steps (StackEntries) for the matched rule.
     // Don't call from outside a reduce function.
-    //  hey..... uhh... is this misnamed?  I think it doesn't include
-    //  -actually- ejected steps.  errf.  but it's not all params either
-    //  because if there's an eject/keep conflict we'll keep the param
-    //  here, whether or not this action considers it a parameter.
     StackSlice all_matched_steps() {
         return StackSlice(*this, lr_read_pos);
     }
@@ -843,22 +874,53 @@ public:
         if(std::type_index(typeid(Product)) == std::type_index(tinf)) {
             return "Product";
         }
-        return "unknown type in prod_type_name";
+
+        // if you can get here it's massive fail
+        return stringformat("<unknown type {} in prod_type_name>", tinf);
     }
 
-    // This represents the argument for a given step, which should be one
-    // lr stack entry plus a (possibly 0-sized) slice of the param stack
+    // This represents the argument for a given step.  One "argument",
+    // in this context, can contain 0 or more elements (for example,
+    // in foo+ -> bar;, foo can have 1 or more elements).
     template<typename ReduceType>
     class ReductionParameter {
         // all access to param and lr stacks go through this:
         StackSlice lr_slice;
 
-    public:
-        ReductionParameter(@class_name@ &o, int lr_base, int lr_count) :
-            lr_slice(o, lr_base, lr_count) { }
+        // Number of param stack entries to go forward in the
+        // param stack get to the next item in this parameter.
+        int next_incr;
 
-        // returns the number of param_stack entries in this:
-        int count() const { return lr_slice.param_count(); }
+    public:
+        ReductionParameter(
+            @class_name@ &o, int lr_base, int lr_count, int lr_incr=1
+        ) : lr_slice(o, lr_base, lr_count), next_incr(lr_incr) {
+            // avoid divide by zero in count().  (perhaps we should
+            // support an incr of 0 for single vars?)
+            if(next_incr == 0) next_incr = 1;
+        }
+
+        // Returns the "span" size of this parameter in the
+        // param stack.  This is the total number of entry
+        // slots that the elements of this fpl-author-facing
+        // parameter uses, and is potentially different from
+        // the count() due to melding.
+        int params_span_size() const {
+            return lr_slice.param_count();
+        }
+
+        // Returns the position in the param stack for the start
+        // of our params.
+        int params_start() const {
+            return lr_slice.param_base();
+        }
+
+        // returns the fpl-author-facing number of items
+        // in this parameter:
+        int count() const {
+            int spsize = params_span_size();
+            return spsize / next_incr + ((spsize % next_incr)?1:0);
+        }
 
         // (syntactic sugar for optionals)
         bool exists() const { return count() !=  0; }
@@ -879,27 +941,32 @@ public:
         // just the name of the variable itself.
         const ReduceType val(int ind = 0, src_location ca = CALLER()) const {
             const int num_args = count();
-
             if(ind < 0) ind += num_args; // negative = relative to end + 1 
 
             if((ind < 0) || (ind >= num_args)) {
                 jerror::warning(stringformat(
-                    "Index {} out of range ({} items) at {}",
-                    ind, num_args, ca
+                    "Index {} out of range ({} items at {} span {}) at {}",
+                    ind, num_args, params_start(), params_span_size(), ca
                 ));
 
-                // try to return a default item of the ReduceType.
-                // this may or may not be possible, depending on the
-                // type, but it's better than crashing.
-                // ACTUALLY let's just say it's a requirement that
-                // the reduce type must be default constructible. shipit.
-                // move on.
+                // return a default item of the ReduceType so we can move on:
                 return ReduceType();
             }
 
-            return std::get<ReduceType>(
-                lr_slice.product(ind, ca).var()
-            );
+            try {
+                return std::get<ReduceType>(
+                    lr_slice.product(ind * next_incr, ca).var()
+                );
+            }
+            catch (const std::bad_variant_access& e) {
+                // this is an internal error and needs to be taken seriously:
+                jerror::error(stringformat(
+                    "{} bad variant access (expected {}) on val({}) in {}\n",
+                    ca, prod_type_name(typeid(ReduceType)), ind, lr_slice
+                ));
+            }
+            // try to return a default anyway:
+            return ReduceType();
         }
 
         static std::string type_name() {
@@ -949,9 +1016,17 @@ public:
             return join("{}", jv);
         }
 
+        // formats each according to the format passed and
+        // then returns the concatenation of the results
+        std::string catmap(const std::string &fmt) const {
+            return join(fmt, "");
+        }
+
         std::string to_str() const {
-            // XXX do something smarter here
-            return lr_slice.to_str();
+            return stringformat(
+                "{} ({} items at {})",
+                join("'{}'", ", "), count(), params_start()
+            );
         }
     };
 
@@ -977,6 +1052,17 @@ public:
     }
 
     // this is more or less debugging
+    std::string param_stack_string() const {
+        std::string out;
+        out += stringformat("param stack ({} items):\n", param_stack.size());
+        for(int sind = param_stack.size() - 1; sind >= 0; --sind) {
+            out += stringformat(
+                "    [{}] {::n}\n", sind, param_stack_entry(sind)
+            );
+        }
+        return out;
+    }
+
     std::string to_str() const {
         std::string out;
 
@@ -993,12 +1079,7 @@ public:
                 sind == lr_read_pos?"->":"  ", sind, lr_stack_entry(sind)
             );
         }
-        out += stringformat("param stack ({} items):\n", param_stack.size());
-        for(int sind = param_stack.size() - 1; sind >= 0; --sind) {
-            out += stringformat(
-                "    [{}] {::n}\n", sind, param_stack_entry(sind)
-            );
-        }
+        out += param_stack_string();
         return out;
     }
 
@@ -1346,6 +1427,8 @@ public:
     // Returns true if elements matching the element id passed
     // are ejected in the context of the given state, or false
     // otherwise.
+// XXX actually this can all be determined when compiling the fpl.
+// needs no runtime check.  nicht war?
     static bool state_ejects(State st, int element_id) {
         @-for(int sti = 0; sti < prds.num_states(); sti++) {-@
             @declare state: prds.states.at(sti)@
@@ -1409,7 +1492,9 @@ public:
 
     // reduction rules:
     @for(auto rule : prds.rules) {@
-        @if(!rule.is_subexpression()) {@
+        @if(rule.is_subexpression()) {@
+            // (@rule@ is a subexpression)
+        @} else {@
             @#fpl_x_parser_reduce_action(prds, rule)@
         @}@
     @}@

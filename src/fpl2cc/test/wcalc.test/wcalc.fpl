@@ -49,20 +49,20 @@
 #}+,
 [
     # addition/subtraction are lowest precedence:
-    . '+'^ > -> add +{ return arg_0 + arg_2; }+
-    . '-'^ > -> sub +{ return arg_0 - arg_2; }+
+    .:lhs '+'^ >:rhs -> add +{ return lhs + rhs; }+
+    .:lhs '-'^ >:rhs -> sub +{ return lhs - rhs; }+
 ] -> aexpr +{
     std::cerr << stringformat("YAY addition expression = {}\n", aexpr);
     return aexpr;
 }+,
 [
-    . '*'^ >  -> mul +{ return arg_0 * arg_2; }+
-    . '/'^ >  -> div +{ return arg_0 / arg_2; }+
-    . '%'^ >  -> mod +{ return long(arg_0) % long(arg_2); }+
+    .:lhs '*'^ >:rhs   -> mul +{ return lhs * rhs; }+
+    .:num '/'^ >:denom -> div +{ return num / denom; }+
+    .:num '%'^ >:denom -> mod +{ return long(num) % long(denom); }+
 ] -> mexpr,
 [
-    '-'^ .:term  -> neg +{ return -term; }+
-    '('^ << ')'^ -> par ;
+    '-'^ .:term  -> negation +{ return -term; }+
+    '('^ << ')'^ -> parenthetical;
 
     /[0-9]*\.[0-9]+/:decimal_digits -> real +{
         return std::stod(decimal_digits);

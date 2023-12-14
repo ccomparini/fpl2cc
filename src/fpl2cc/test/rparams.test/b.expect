@@ -1,5 +1,5 @@
 returncode = 0
 stderr = ""
-stdout = "std::list<std::string> «{ foo, bar, bat }»
-std::list<std::string> «{ fip, splat }»
+stdout = "std::list<std::string> «{ 77, 88, 888 }»
+std::list<std::string> «{ 23, 24 }»
 "

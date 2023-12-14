@@ -71,10 +71,12 @@ struct grammar_element {
         return "<invalid grammar element type!>";
     }
 
-    grammar_element() : expr(""), type(Type::NONE) { }
+    grammar_element() : expr(""), type(Type::NONE) {
+    }
 
-    grammar_element(const std::string &str, Type tp)
-        : expr(str), type(tp) { }
+    grammar_element(const std::string &str, Type tp, src_location ca = CALLER())
+        : expr(str), type(tp) {
+    }
 
     // returns a negative, 0, or positive value depending on
     // if this element can be considered <, ==, or > than the

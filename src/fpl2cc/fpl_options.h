@@ -21,6 +21,7 @@ struct fpl_options {
     bool check_only;
     bool debug;
     bool debug_types;
+    bool debug_melds;
     std::list<std::string> entry_points;
     bool generate_code;
     bool generate_main;
@@ -109,6 +110,7 @@ struct fpl_options {
         check_only(false),
         debug(false),
         debug_types(false),
+        debug_melds(false),
         generate_code(true),
         generate_main(false),
         help(false),
@@ -150,6 +152,8 @@ struct fpl_options {
                         debug = true;
                     } else if(opt == "debug-types") {
                         debug_types = true;
+                    } else if(opt == "debug-melds") {
+                        debug_melds = true;
                     } else if(opt == "debug-single-step") {
                         debug = true;
                         single_step = true;
@@ -265,6 +269,7 @@ struct fpl_options {
             "Options:\n"
             "\t--debug - emebed debug blather in target code\n"
             "\t--debug-types - tell why fpl chose each type\n"
+            "\t--debug-melds - dump info about melds and stack offsets\n"
             "\t--debug-single-step - as above plus pauses\n"
             "\t--depfile=<fn> - generate ninja/make depend file\n"
             "\t--dump-dependencies - print import dependencies\n"
@@ -291,6 +296,7 @@ struct fpl_options {
             "    check_only: "          + stringformat("{}", check_only) + "\n"
             "    debug: "               + stringformat("{}", debug) + "\n"
             "    debug_types: "         + stringformat("{}", debug_types) + "\n"
+            "    debug_melds: "         + stringformat("{}", debug_melds) + "\n"
             "    entry_points: "        + stringformat("{}", entry_points) + "\n"
             "    generate_code: "       + stringformat("{}", generate_code) + "\n"
             "    generate_main: "       + stringformat("{}", generate_main) + "\n"

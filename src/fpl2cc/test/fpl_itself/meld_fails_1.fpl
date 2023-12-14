@@ -1,0 +1,25 @@
+
+@default_main
+@produces std::string
+
+# this one should be invalid, because the first element
+# is optional so foo's offset is indeterminate.
+# (unfortunately, it's now going to occur to me that one
+# could generate different reduce calls for the different
+# cases of opt existing and not existing.  but actaully
+# I'm not going to go down that rabbit hole, because if
+# you just write the below without the parens it should
+# work fine..)
+('g'?:opt 'y':foo) -> failular +{
+    if(foo == "y") {
+        if(opt@count != 1) {
+            return stringformat(
+                "surprise!  it works??? how can it? opt has {} matches\n",
+                opt@count()
+            );
+        }
+        return "foo was in fact 'y', with 1 opt 'g'.\n";
+    }
+    return stringformat("unsurprisingly, foo is {} and not 'y'\n", foo);
+}+
+

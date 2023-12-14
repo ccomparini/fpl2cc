@@ -1,0 +1,5 @@
+# constructs which we expect to work without any weirdness:
+a b b b 
+a a b b
+
+

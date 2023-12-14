@@ -1,6 +1,6 @@
 returncode = 0
 stderr = ""
 stdout = "We have bats. Oh yes, we have bats.
-3 steps, 2 params:  foo: 1 steps, 0 params bar:b
+fooless: 3 steps, 1 params:  foo: 1 steps, 0 params bar:b.
 foo: 1 steps, 0 params + bar:b
 "

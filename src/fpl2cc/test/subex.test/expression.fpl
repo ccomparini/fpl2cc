@@ -13,7 +13,8 @@
 .:lhs '+'^ >:rhs -> add;
 .:lhs '-'^ >:rhs -> sub;
 
-# you can multiply with or without the "*":
+# Note the '*' is optional - adjacent terms
+# multiply as well
 (. ('*'?^ >)+):terms -> mult;
 .:numerator '/'^ >:denominator -> div;
 

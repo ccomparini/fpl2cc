@@ -70,7 +70,7 @@ stuff* the_end -> done +{
     return stuff@join("\n") + "\n" + the_end + "\n";
 }+
 
-# &unimplemented_stub_scanner -> foo;
+&unimplemented_stub_scanner -> stuff;
 
 &two_byte_char:start !&two_byte_char:guts? &two_byte_char:end -> stuff +{
     return stringformat(
@@ -113,9 +113,7 @@ block -> stuff;
 "\b"   -> stuff +{ return "I take that last byte back"; }+
 "\e\b" -> stuff +{ return "no escape!"; }+ # 2 bytes: ESC and backspace
 
-"\U3068":to   -> stuff +{ return "don't stub your " + to.to_str(); }+
-#"\U1F408":cat -> stuff +{ return cat + " says meow"; }+  # XXX this should work! gar..
-#"\U0001F408":cat -> stuff +{ return cat + " says meow"; }+ # XXX this should work too! w/out to_str()
+"\U3068":to      -> stuff +{ return "don't stub your " + to.to_str(); }+
 "\u0001F408":cat -> stuff +{ return cat.to_str() + " says meow"; }+
 
 

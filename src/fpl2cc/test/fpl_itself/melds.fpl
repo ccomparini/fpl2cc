@@ -1,0 +1,17 @@
+#
+#  Tests some meld cases, valid and invalid.
+#
+
+# simplest possible meld - this should be meld 1
+arg+ -> meld_one_on_repetition;
+
+arg arg arg -> meld_one_on_three_explicit;
+
+#  arg has meld 2, offset 0
+'('^ (arg (','^ arg)*)? ')'^ -> argument_list;
+
+
+# this one should have invalid meld, because the distances are
+# inconsistent:
+'x':a 'b' 'x':a 'b' 'b' 'x':a -> invalid;
+

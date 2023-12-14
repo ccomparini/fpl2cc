@@ -4,6 +4,7 @@
 #include "code_block.h"
 #include "grammar_element.h"
 #include "reducer.h"
+#include "stack_distance.h"
 
 #include "util/c_str_escape.h"
 #include "util/jerror.h"
@@ -93,23 +94,38 @@ public:
         grammar_element gexpr;
         std::string varname; // if set, name of this expression in reduce code
 
-        static step &false_step() {
-            static step fs;
-            return fs;
-        }
-
         struct quantifier {
             bool optional;
             bool multiple;
             quantifier() : optional(false), multiple(false) { }
+            std::string to_str() const {
+                if(optional && multiple) {
+                    return "*";
+                } else if(optional) {
+                    return "?";
+                } else if(multiple) {
+                    return "+";
+                }
+                return "";
+            }
         } qty;
 
-        bool eject;  // if set, don't pass this to reduce code
-        int reserve; // number of matches to reserve for following steps
+        bool eject;    // if set, don't pass this to reduce code
+        bool explicitly_named;
+        int  reserve; // number of matches to reserve for following steps
+
+        // "meld distance" is the distance to the next parameter
+        // stack entry for a given parameter.
+        // For example, if you have
+        //    (key ':'^ val)+ -> kvs;
+        // to find the next "key" you'd go forward 2 steps in the
+        // param stack, so it has meld_distance = 2 (as does "val")
+        stack_distance meld_distance;
 
         step() :
             gexpr("", grammar_element::Type::NONE),
             eject(true),
+            explicitly_named(false),
             reserve(0) {
         }
 
@@ -120,6 +136,7 @@ public:
             gexpr(expr),
             varname(vn),
             eject(false),
+            explicitly_named(false),
             reserve(0) {
         }
 
@@ -131,7 +148,13 @@ public:
             gexpr(expr_str,tp),
             varname(vn),
             eject(false),
+            explicitly_named(false),
             reserve(0) {
+        }
+
+        static const step &false_step() {
+            static const step fs;
+            return fs;
         }
 
         operator bool() const {
@@ -158,8 +181,17 @@ public:
             return gexpr.compare(other) == 0;
         }
 
-        bool is_named() const {
-            return variable_name().length() > 0;
+        bool is_explicitly_named() const {
+            return explicitly_named && varname.length();
+        }
+
+        void set_meld(int new_meld, std::string caller = CALLER()) {
+            std::cerr << stringformat("set_meld called from {}\n", caller);
+            meld_distance = new_meld;
+        }
+
+        bool meld_is_set() const {
+            return meld_distance.to_int() != 0;
         }
 
         // This determines the precedence with which steps
@@ -193,18 +225,31 @@ public:
         // p's.  But the b parameter has priority, so it will get
         // one of the matching p's (if there are any).
         // 
-        bool lower_priority_than(const step &other) const {
+        int compare_priority(const step &other) const {
+            // Existing is higher priority than not existing:
+            if(!other)
+                return *this?1:0;
+            else if(!*this)
+                return -1;
+
             // Optional is lower than non-optional:
             if(is_optional() != other.is_optional())
-                return is_optional();
+                return is_optional()?-1:1;
 
             // Either both or neither is optional.
             // If one of them is multiple, it has lower priority:
             if(is_multiple() != other.is_multiple())
-                return is_multiple();
+                return is_multiple()?-1:1;
 
-            // .. otherwise, apparently, they're the same:
-            return false;
+            return 0;
+        }
+
+        bool lower_or_equal_priority_than(const step &other) const {
+            return compare_priority(other) <= 0;
+        }
+
+        bool higher_priority_than(const step &other) const {
+            return compare_priority(other) > 0;
         }
 
         std::string variable_name() const {
@@ -242,8 +287,13 @@ public:
             return gexpr.is_nonterminal();
         }
 
-        bool skip_on_reduce() const {
+        bool is_ejected() const {
             return eject;
+        }
+
+        bool skip_on_reduce() const {
+            // deprecate me
+            return is_ejected();
         }
 
         std::string production_name() const {
@@ -257,20 +307,8 @@ public:
         std::string to_str() const {
             std::string out;
 
-
             out += gexpr.to_str();
-
-            if(qty.optional && qty.multiple) {
-                out += "*";
-            } else if(qty.optional) {
-                out += "?";
-            } else if(qty.multiple) {
-                out += "+";
-            }
-
-            if(reserve)
-                out += stringformat("(r:{})", reserve);
-
+            out += qty.to_str();
             if(varname.length())
                 out += ":" + varname;
 
@@ -281,16 +319,8 @@ public:
         }
     };
 
-    void check_duplicate_varname(const std::string name, int step_num) const {
-        if(step_vars.contains(name)) {
-            jerror::warning(stringformat(
-                "duplicate name '{}' in step {} {}",
-                name, step_num, location()
-            ));
-        }
-    }
-
-    void add_step(step st, bool invert) {
+    // adds the step and returns the step index
+    int add_step(step st, bool invert) {
         int stepi = rsteps.size();
 
         // if the step is inverted, change the grammar element
@@ -307,17 +337,42 @@ public:
 
         // to support stuff like:
         //   'foo'*:pre 'foo':penultimate 'foo':final -> bar;
-        // .. the "pre" step needs to know to not pop the 
+        // the "pre" step needs to know to not eat the 
         // "penultimate" and "final" steps.  to that end:
         for(int prior = stepi - 1; prior >= 0; --prior) {
             if(rsteps[prior].gexpr != st.gexpr) {
-                // (different grammar expressions, so they
-                // it won't pop/steal the parameter anyway)
+                // Different grammar expressions, so they
+                // it won't pop/steal the parameter anyway:
                 break;
-            } else if(rsteps[prior].lower_priority_than(st)) {
-                // the earlier step is lower priority, so tell
+            } else if(rsteps[prior].compare_priority(st) < 0) {
+                // The earlier step is lower priority, so tell
                 // it to reserve another for us:
                 rsteps[prior].reserve++;
+            }
+
+            if(rsteps[prior].is_multiple() && st.is_multiple()) {
+                // If we're optional, and the immediately prior
+                // step is multiple, then we'll never match
+                // multiple symbols, because the prior step will
+                // have taken them all.
+                // Simple example: x*:a x*:b ; b never gets set.
+                // But, also (eg) x* x x*:i_dont_get_set.
+                if(st.is_optional()) {
+                    jerror::warning(stringformat(
+                        "{} step {} is overshadowed by {}"
+                        " such that it can only match 0 items",
+                        location(), st, rsteps[prior]
+                    ));
+                } else if(st.is_multiple()) {
+                    // In this case, the new step is not optional,
+                    // so it can still get an item, but never more
+                    // than one:
+                    jerror::warning(stringformat(
+                        "{} step {} is overshadowed by {}"
+                        " such that it can only ever match 1 item",
+                        location(), st, rsteps[prior]
+                    ));
+                }
             }
         }
 
@@ -328,35 +383,17 @@ public:
             // .. then step will need a variable name.  If no name is
             // assigned, assign it a name based on its index within
             // the set of steps for this rule:
-            if(!name.length()) {
+            if(!st.is_subexpression() && !name.length()) {
                 name       = stringformat("arg_{}", stepi);
                 st.varname = name;
             }
 
-            const int existing_si = parameter_step_number(name);
-            if(existing_si < 0) {
-                // no existing step with this name, so we can do a simple add:
-                step_vars[name] = stepi;
-            } else {
-                // Check if we can "meld" with the existing step parameter.
-                // At the moment, we can "meld" if there are no non-ejected
-                // steps between them (though I intend to change this).
-                const int new_step_num = rsteps.size();
-                for(int sti = existing_si + 1; sti < new_step_num; ++sti) {
-                    if(!rsteps[sti].skip_on_reduce()) {
-                        if(rsteps[sti].variable_name() != name) {
-                            // Can't meld (for the moment) - warn:
-                            jerror::warning(stringformat(
-                                "duplicate name '{}' in step {} {}",
-                                name, rsteps.size(), location()
-                            ));
-                        }
-                    }
-                }
-            }
+            add_parameter(stepi, name);
         }
 
         rsteps.push_back(st);
+
+        return stepi;
     }
 
     void resolve_placeholder(
@@ -375,16 +412,29 @@ public:
 
     // The number of reduce parameters is not necessarily the same
     // as the number of steps - steps may be "ejected", in which
-    // case they're not passed at all, "melded", in which case
-    // 2 steps with the same name are combined into one parameter,
-    // or, if a given step is a subexpression, it may have multiple
-    // reduce parameters.
+    // case they're not passed at all, or "melded", in which case
+    // 2 steps with the same name are combined into one parameter.
     int parameter_count() const {
         return step_vars.size();
     }
 
-    // Returns a std::set containing the names of the reduce parameters
-    // (in order).
+    // Returns the name of the nth parameter in argument
+    // passing order (which is different from stack order!)
+    std::string parameter_name(int index) const {
+        // errf, I think we have to just iterate.
+        // I'm considering this acceptable because I expect
+        // at most single digit numbers of parameters.
+        auto pstep = step_vars.begin();
+        while(index > 0) {
+            ++pstep;
+            --index;
+        }
+        return pstep->first;
+    }
+
+    // Returns a std::set containing the names of the reduce
+    // parameters in the order they will be passed to the reduce
+    // action.
     const std::set<std::string> parameter_names() const {
         // .. this is maybe not the most efficient.  shipit.
         std::set<std::string> names;
@@ -395,7 +445,7 @@ public:
     }
 
     // Returns the index in the rsteps array of the nth parameter
-    // to the reduce action.
+    // to the reduce action, or -1 if there's no such parameter.
     // Reduce action parameters are ordered by name, so, eg:
     //   key '=>' val -> kv_pair;
     //   val '<=' key -> kv_pair;
@@ -424,7 +474,7 @@ public:
     // the given name, or -1 if there's no such parameter.
     int parameter_step_number(
         const std::string &pname, src_location ca = CALLER()
-    ) {
+    ) const {
         auto found = step_vars.find(pname);
         if(found == step_vars.end())
             return -1;
@@ -445,8 +495,7 @@ public:
         return step::false_step();
     }
 
-    // ... or by name (as above), though this will warn if given
-    // an invalid name.  (should it?)
+    // ... or by name (as above)
     const step &parameter_step(
         const std::string &pname, src_location ca = CALLER()
     ) const {
@@ -454,23 +503,58 @@ public:
         if(stepi != step_vars.end())
             return rsteps[stepi->second];
 
-        jerror::warning(stringformat(
-            "no reduce param called '{}' in rule {}. caller: {}\n",
-            pname, *this, ca
-        ));
-
         return step::false_step();
+    }
+
+
+    void add_parameter(unsigned stepi, const std::string &name) {
+        if(!name.length()) {
+            return;
+        }
+
+        // the step corresponding to a paramter is the earliest
+        // step with that name.  this allows it to be the
+        // base ("canonical") step for "melding" with later
+        // steps.
+        const int existing_si = parameter_step_number(name);
+        if((existing_si < 0) || (existing_si > stepi)) {
+            step_vars[name] = stepi;
+            // the actual step may or may not be explicitly labelled,
+            // so we don't worry about that here.  we just record the
+            // name and number.
+        }
+    }
+
+    void rename_parameter(unsigned stepi, const std::string &oldname, const std::string &name) {
+        step_vars.erase(oldname);
+        add_parameter(stepi, name);
     }
 
     int num_steps() const { return rsteps.size(); }
 
     // Returns the nth (in match order) step for this rule,
     // or a false step if index is out of bounds.
-    step nth_step(unsigned int index) const {
+    const step &nth_step(unsigned index) const {
         if(index < rsteps.size()) {
             return rsteps[index];
         }
-        return step();
+        return step::false_step();
+    }
+
+    step &nth_step_ref(unsigned index) {
+        if(index < rsteps.size()) {
+            return rsteps[index];
+        }
+        static step no_step;
+        return no_step;
+    }
+
+    bool set_nth_step(unsigned int index, const step &newval) {
+        if(index < rsteps.size()) {
+            rsteps[index] = newval;
+            return true;
+        }
+        return false;
     }
 
     // As above, but the offset is from the end of the rule
@@ -482,7 +566,6 @@ public:
     // if this rule has exactly one reduce parameter,
     // return a reference to the step for that parameter.
     // otherwise, return a false step.
-// XXX rename this or figure it out:
     const step &single_param() const {
         if(parameter_count() == 1) {
             return parameter_step(0);

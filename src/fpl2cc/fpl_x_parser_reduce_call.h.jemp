@@ -12,11 +12,6 @@
     // from the top of the stack:
     clear_mismatches();
 
-    // INTERESTING... now that we're tracking per-step reserves, we
-    // -could- come up with the params in one (backward) pass, as
-    // long as we change the reserve counts to go backward instead
-    // of forward through the rule...
-
     @/* Figure out the stack slices for each argument.
         We have to do this outside the call because parameter evaluation
         order is not defined in c++ and we're (pseudo-)popping the stack.
@@ -29,7 +24,7 @@
             // If there's no such step, it's a bug in fpl
             #error Bug: no expression for step @stind@ @rule.to_str()@ @rule.location()@
         @-} else {-@
-            @declare el_id: prds.element_id(step.gexpr)@
+            @declare el_id:  prds.element_id(step.gexpr)@
             @declare elname: prds.element_id_name(el_id)@
 
             lr_read_pos = lr_position_before_@elname@(
@@ -55,8 +50,12 @@
     // need to do this back-and-forth thing to get the arguments correct
     // for rules like: 
     //    foo:first foo*:rest -> bar ;
-    int arg_start = lr_read_pos;
-    int slice_size;
+    int argument_start = lr_read_pos;
+
+    // the step size is in lr_stack units, and may be different from the
+    // argument size because some (melded) arguments span multiple steps:
+    int step_size;
+
     @for(int stind = 0; stind < rule.num_steps(); ++stind) {-@
         @declare step: rule.nth_step(stind)@
         @if(!step) {-@
@@ -66,46 +65,65 @@
             @declare el_id: prds.element_index.at(step.gexpr)@
             @declare elname: prds.element_id_name(el_id)@
 
-            slice_size = lr_count_of_@elname@(arg_start, @step.qty.multiple || step.reserve@);
+            step_size = lr_stack_size_of_@elname@(
+                argument_start, @step.qty.multiple || step.reserve@
+            );
 
             @if(step.reserve) {@
                 // this step is followed by other steps with the same
                 // expression but higher priority w/respect to parameters,
                 // so we need to reserve @step.reserve@ matches for those
-                // params. (example case: foo:a* foo:b -> bar;  need to
+                // params. (example case: foo:a* foo:b -> bar; a needs to
                 // reserve 1 slot for the b)
-                slice_size -= @step.reserve@;
-                if(slice_size < 0)
-                    slice_size = 0;
+                step_size -= @step.reserve@;
+                if(step_size < 0)
+                    step_size = 0;
             @}@
 
-            @if(!step.skip_on_reduce()) {@
-                @/* here's where we declare the argument to pass */@
-                ReductionParameter<@prds.type_for(step.gexpr)@>
-                    arg_@stind@(*this, arg_start, slice_size);
-                @if(opts.debug) {@
-                    std::cerr << stringformat(
-                        "arg @stind@ is {} @prds.type_for(step.gexpr)@\n",
-                        arg_@stind@.count()
-                    );
-                @}@
-            @}@
-            arg_start += slice_size;
+            int step_@stind@_start = argument_start;
+
+            argument_start += step_size;
         @}-@
     @}-@
 
-    @/* this is the call to the reduce code.  Note that here we just label
-        all the parameters "arg_xxx" and don't worry about their "real" names.
-    */@
+    // and this just makes it easier to find the end of the last step:
+    int step_@rule.num_steps()@_start = argument_start;
+
+    @for(auto pname : rule.parameter_names()) {@
+        @declare psnum: rule.parameter_step_number(pname)@
+        @declare pstep: prds.canonical_step_for_param(rule.rule_number(), pname)@
+        // @pname@ has base step num @psnum@; canonical step is @pstep@
+        ReductionParameter<@pstep.type_in_target()@> arg_@pname@(
+            *this, step_@psnum@_start + @pstep.final_offset()@,
+            step_@pstep.last_meld_step() + 1@_start - step_@psnum@_start,
+            @pstep.final_meld()@
+        );
+
+        @if(opts.debug) {-@
+            std::cerr << stringformat(
+                "    Parameter @pname@:@pstep.type_in_target()@ is {}\n"
+                "     ... from step @psnum@ = {} to step @pstep.last_meld_step() + 1@ = {}\n",
+                arg_@pname@, step_@psnum@_start, step_@pstep.last_meld_step() + 1@_start
+            );
+        @}@
+    @}@
+
+    @if(opts.debug) {@
+        std::cerr << stringformat(
+            "ready to reduce. {}\n"
+            "reducing by @c_str_escape(rule.to_str())@"
+            " (@rule.num_steps()@ steps, @rule.parameter_count()@ params)\n"
+            "all_matched_steps: {}\n",
+            param_stack_string(),  all_matched_steps()
+        );
+    @}@
+
+    @/* this is the call to the reduce code */@
     @-prds.type_for(rule.product())@ result = @prds.rule_fn(rule) -@ (
         @-for(int pind = 0; pind < num_params; pind++) {-@
-            @- pind?",":"" -@ arg_@-rule.parameter_step_number(pind)-@
+            @- pind?",":"" -@ arg_@-rule.parameter_name(pind)-@
         @-}-@
     );
-
-    @if(prds.post_reduce) {@ {
-        @prds.post_reduce.format()@
-    } @}@
 
     @declare result_el_id: prds.element_id_name(rule.product_element()) @
     Product prod(result);

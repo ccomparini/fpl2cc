@@ -26,7 +26,8 @@ apple     -> fruit;
 
 # Common subexpression w/ melding and bubble-up:
 # The reduce action should expect one "fruit" parameter
-# with multiple items:
+# with multiple items.  The first such item will
+# be at stack pos 1, and the meld incr will be 2.
 '('^ (fruit (','^ fruit)*)? ')'^ -> fruit_list;
 fruit_list -> list;
 
@@ -34,9 +35,10 @@ fruit_list -> list;
 
 # these should both parse, and reducers need to see all
 # the args:
-'['^ (integer:el ','^ integer:el                ) ']'^ -> two_tuple;
-# '['^ integer:el ','^ integer:el ','^ integer:el ']'^ -> three_tuple;
-'['^ (integer:el ','^ integer:el ','^ integer:el) ']'^ -> three_tuple;
+'['^ integer:el ','^ integer:el ']'^ -> two_tuple;
+#'['^ (integer:el ','^ integer:el                ) ']'^ -> two_tuple; # XXX USE THIS ONE
+'['^ integer:el ','^ integer:el ','^ integer:el ']'^ -> three_tuple;
+#'['^ (integer:el ','^ integer:el ','^ integer:el) ']'^ -> three_tuple;
 
 # expect all these to inherit list's type:
 two_tuple   -> tuple;
@@ -62,8 +64,7 @@ integer:foo list:foo -> doom;
         ));
         return {0, 0};
     }
-    return { "fip" , "splat" };
-    //return { el[0], el[1] };
+    return { el[0], el[1] };
 }+
 
 +three_tuple(el) +{
@@ -73,8 +74,7 @@ integer:foo list:foo -> doom;
         ));
         return {0, 0, 0};
     }
-    //return { el[0], el[1], el[2] };
-    return { "foo" , "bar", "bat" };
+    return { el[0], el[1], el[2] };
 }+
 
 +fruit_list(fruit) +{
