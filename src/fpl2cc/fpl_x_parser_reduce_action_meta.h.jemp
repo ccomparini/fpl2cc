@@ -48,5 +48,20 @@
                        "@c_str_escape(rule.location())@";
             }
         }
+        static const char *param_type(unsigned int ind) {
+            static const char *ptype[] = {
+                @for(int rpi = 0; rpi < rule.parameter_count(); ++rpi) {-@
+                    "@prds.type_for(rule.parameter_step(rpi).production_name())@"
+                @}-@
+            };
+            if(ind < @rule.parameter_count()@) {
+                return ptype[ind];
+            } else {
+                return (
+                    "param_type index out of bounds at "
+                    "@c_str_escape(rule.location())@"
+                );
+            }
+        }
     } this_rule;
 
