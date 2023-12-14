@@ -3,6 +3,13 @@ import os
 import sys
 import sysconfig
 
+# feature detection comes first:
+llvm_version = conf_command("llvm-config --version")
+if llvm_version == None:
+    print(f"no llvm-config --version - compiling without llvm support")
+else:
+    print(f"detected llvm {llvm_version}")
+
 debugger = ''
 #debugger = 'TERM=xterm-256color /usr/bin/lldb --one-line "b debug_hook" -- '
 
@@ -58,6 +65,7 @@ config = {
         'jest_util',
     ],
     'tools' : toolset(),
+    'LLVM_VERSION' : llvm_version,
 }
 
 env = Environment(**config)
