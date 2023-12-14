@@ -1213,8 +1213,9 @@ class productions {
 
                 if(types.size() != 1) {
                     jerror::error(stringformat(
-                        "can't determine type for {}.  Could be any of: {}",
-                        *this, join(types, ", ")
+                        "can't determine type for {}.  "
+                        "Could be any of these {} types: {}",
+                        *this, types.size(), join(types, ", ")
                     ));
                 }
                 type = *(types.begin());
