@@ -78,8 +78,12 @@ class productions {
 
     std::vector<grammar_element>    elements;
     std::map<grammar_element, int>  element_index; // element -> element ID
-    std::multimap<grammar_element, grammar_element> masks_elements; // key el "masks" value els
-    std::map<grammar_element, std::string> element_source; // element -> source location
+
+    // key el "masks" value els:
+    std::multimap<grammar_element, grammar_element> masks_elements;
+
+    // element -> source location:
+    std::map<grammar_element, std::string> source_of_element;
 
     std::list<reducer> reducers;
 
@@ -540,8 +544,18 @@ class productions {
             element_index[nge] = elements.size();
             elements.push_back(nge);
 
-            element_source.insert(std::make_pair(nge, definition_location));
+            source_of_element.insert(std::make_pair(nge, definition_location));
         }
+    }
+
+    // returns the file:line (or other indication) of where we think
+    // this element was defined.
+    std::string element_source(const grammar_element &el) const {
+        auto found = source_of_element.find(el);
+        if(found != source_of_element.end())
+            return found->second;
+
+        return "<no source>";
     }
 
     struct lr_item {
@@ -1209,7 +1223,7 @@ class productions {
                     if(!type.length()) {
                         jerror::warning(stringformat(
                             "no type known for {} defined at {}\n",
-                            el, prds.element_source.at(el) // XXX check bounds etc sigh c++
+                            el, prds.element_source(el)
                         ));
                     } else {
                         types.insert(type);
