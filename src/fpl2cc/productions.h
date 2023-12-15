@@ -79,6 +79,7 @@ class productions {
     std::vector<grammar_element>    elements;
     std::map<grammar_element, int>  element_index; // element -> element ID
     std::multimap<grammar_element, grammar_element> masks_elements; // key el "masks" value els
+    std::map<grammar_element, std::string> element_source; // element -> source location
 
     std::list<reducer> reducers;
 
@@ -520,13 +521,13 @@ class productions {
     // records the fact that the given grammar element exists
     void record_element(
         const grammar_element &nge,
-        src_location caller = CALLER()
+        src_location definition_location = CALLER()
     ) {
 
         if(!nge) {
             jerror::warning(stringformat(
                 "attempt to record invalid element '{}'", nge
-            ), caller);
+            ), definition_location);
         }
 
         // (recording placeholder elements is not useful,
@@ -538,6 +539,8 @@ class productions {
         if(element_index.find(nge) == element_index.end()) {
             element_index[nge] = elements.size();
             elements.push_back(nge);
+
+            element_source.insert(std::make_pair(nge, definition_location));
         }
     }
 
@@ -1189,7 +1192,8 @@ class productions {
             std::string to_str() const {
                 return stringformat(
                     "{}: {}{} (from {})",
-                    name, multiple?"mulitple ":"", type, elements
+                    name, type.length()?type:"<no type>",
+                    multiple?"*":"", elements
                 );
             }
 
@@ -1204,7 +1208,8 @@ class productions {
                     std::string type = prds.type_for(el);
                     if(!type.length()) {
                         jerror::warning(stringformat(
-                            "no type known for {}\n", el
+                            "no type known for {} defined at {}\n",
+                            el, prds.element_source.at(el) // XXX check bounds etc sigh c++
                         ));
                     } else {
                         types.insert(type);
@@ -1922,12 +1927,7 @@ public:
         for(int stp = 0; stp < rule.num_steps(); stp++) {
             grammar_element ge = rule.nth_step(stp).gexpr;
 
-// defer?  if possible.
-// a better structure might be to resolve() prior to generating
-// states... OR actualllllyl make imports be a grammar element
-// and expand/import it later.  or a combination.  there's some
-// simplification to be had.
-            record_element(ge);
+            record_element(ge, rule.location());
 
             if(ge.type == grammar_element::Type::NONTERM_SUBEXPRESSION) {
                 int srnum = subrulenum_for_el(ge);
@@ -1940,7 +1940,7 @@ public:
                 }
             }
         }
-        record_element(rule.product_element(), caller);
+        record_element(rule.product_element(), rule.location());
 
         std::string prd = rule.product();
         if(prd == "") {
@@ -3533,7 +3533,10 @@ public:
                         rule.resolve_placeholder(
                             stepi, precedence_group_names[pg_ind]
                         );
-                        record_element(rule.nth_step(stepi).gexpr);
+                        record_element(
+                            rule.nth_step(stepi).gexpr,
+                            rule.location()
+                        );
                     }
                 } // else it's not something we need to resolve
             }
@@ -3771,6 +3774,13 @@ public:
     // it means that the existence of the element would potentially
     // preclude the ability of the generated parser to match the other
     // element.
+    // Masking is not inherently bad.  An example of where it's used:
+    //   x '+'  y -> addition;
+    //   x '+=' y -> add_assign; # or whatever
+    // In this case, if the input has 'foo += 23', we don't want the
+    // addition expression eating the '+'.  We want it to match the
+    // longer '+=' so we record the fact that '+' might mask '+='
+    // and use that fact to disambiguate later.
     void record_masking_element(
         const grammar_element &masker, const grammar_element &maskee
     ) {
@@ -3844,7 +3854,7 @@ public:
             // due to TERM_CUSTOM or match-inversion or whatever
             // else:
             for(int stepi = 0; stepi < rule.num_steps(); stepi++) {
-                record_element(rule.nth_step(stepi).gexpr);
+                record_element(rule.nth_step(stepi).gexpr, rule.location());
             }
         }
     }
