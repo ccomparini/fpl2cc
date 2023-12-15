@@ -321,7 +321,7 @@ public:
 
     // adds the step and returns the step index
     int add_step(step st, bool invert) {
-        int stepi = rsteps.size();
+        int stepi = step_count();
 
         // if the step is inverted, change the grammar element
         // to the appropriate type:
@@ -399,7 +399,7 @@ public:
     void resolve_placeholder(
         int stepi, const std::string prod, src_location caller = CALLER()
     ) {
-        if(stepi < 0 || stepi >= rsteps.size()) {
+        if(stepi < 0 || stepi >= step_count()) {
             jerror::warning(stringformat(
                 "step {} is out of range at {}",
                 stepi, caller
@@ -490,7 +490,7 @@ public:
         unsigned int index, src_location ca = CALLER()
     ) const {
         unsigned stepi = parameter_step_number(index, ca);
-        if(stepi < rsteps.size())
+        if(stepi < step_count())
             return rsteps[parameter_step_number(index, ca)];
         return step::false_step();
     }
@@ -530,19 +530,20 @@ public:
         add_parameter(stepi, name);
     }
 
-    int num_steps() const { return rsteps.size(); }
+    int step_count() const { return rsteps.size(); }
+    int num_steps() const { return step_count(); } // deprecated
 
     // Returns the nth (in match order) step for this rule,
     // or a false step if index is out of bounds.
     const step &nth_step(unsigned index) const {
-        if(index < rsteps.size()) {
+        if(index < step_count()) {
             return rsteps[index];
         }
         return step::false_step();
     }
 
     step &nth_step_ref(unsigned index) {
-        if(index < rsteps.size()) {
+        if(index < step_count()) {
             return rsteps[index];
         }
         static step no_step;
@@ -550,7 +551,7 @@ public:
     }
 
     bool set_nth_step(unsigned int index, const step &newval) {
-        if(index < rsteps.size()) {
+        if(index < step_count()) {
             rsteps[index] = newval;
             return true;
         }
@@ -560,7 +561,7 @@ public:
     // As above, but the offset is from the end of the rule
     // instead of the start.
     step nth_from_end(unsigned int index) const {
-        return nth_step(rsteps.size() - index);
+        return nth_step(step_count() - index);
     }
 
     // if this rule has exactly one reduce parameter,
