@@ -4,6 +4,7 @@
 #include "c_str_escape.h"
 #include "is_iterable.h"
 #include "to_hex.h"
+//#include "utf8.h" // causes link problems?
 
 #include <cstdlib>
 #include <ctype.h>
@@ -14,7 +15,16 @@
 // let the reinvention commence.
 // Oh, interesting. this is a nightmare in c++.
 
-inline std::string _stringformat(const char * s) {
+//inline std::string _stringformat(const utf8_byte *s) {
+inline std::string _stringformat(const uint8_t *s) {
+    if(!s) {
+        return "";
+    } else {
+        return std::string((const char *)s);
+    }
+}
+
+inline std::string _stringformat(const char *s) {
     if(!s) {
         return "";
     } else {
