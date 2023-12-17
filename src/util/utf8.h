@@ -116,13 +116,13 @@ inline size_t newline_length(const utf8_byte *at) {
     // 0x0d or 0x0a alone counts as a newline (which covers unix
     // newlines and some other old fashioned newlines).
 
-// XXX yeah do this.
     // Do we want to count other unicode newlines?
     //  https://www.unicode.org/standard/reports/tr13/tr13-5.html
     // this^^ implies yes;  on the other hand, is it more confusing
     // if people put weird newlines in their source code?
     // Probably.  But, for consistency, we probably should - we
     // do already count them as spaces.
+    // (Perhaps pass a flag so the caller can say what they want?)
 
     if(at == NULL)  return 0;
 
@@ -146,7 +146,6 @@ inline size_t newline_length(const utf8_byte *at) {
 inline size_t space_length(const utf8_byte *at) {
     if(at == NULL) return 0;
 
-// XXX check newline_length as well
     switch(*at) {
         // ascii ones are simple and common:
         case 0x09:    // character tabulation (aka "tab")

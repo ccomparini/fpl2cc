@@ -62,18 +62,8 @@ int main() {
     // what happens if there are no newlines at all?
     dump_line_data(utf8_buffer((const utf8_byte *)"hi there"));
 
-    // huh.. starting with a newline breaks it:
+    // does starting with a newline break it?  it did at one point.
     dump_line_data(utf8_buffer((const utf8_byte *)"\nline 2\nline 3\n"));
 
-/*
-    // wait, wat? what do lower_bound and upper_bound actually do?
-    for(size_t pos = 0; pos < buf.size(); ++pos) {
-        auto ub = std::upper_bound(lines.begin(), lines.end(), pos);
-        std::cout << stringformat(
-            "byte {} is upper-bounded by {} at {}. rest of line: '{}'\n",
-            pos, *ub, ub - lines.begin(), read_line(buf.data() + pos)
-        );
-    }
- */
 }
 
