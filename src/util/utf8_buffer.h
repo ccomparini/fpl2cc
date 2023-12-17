@@ -29,22 +29,24 @@ struct utf8_buffer : public std::basic_string<utf8_byte> {
         assign(src, num_bytes);
     }
 
-    explicit utf8_buffer(const std::string &fn) {
-        slurp_file(fn);
+    explicit utf8_buffer(
+        const std::string &fn, src_location caller = CALLER()
+    ) {
+        slurp_file(fn, caller);
     }
 
     utf8_buffer(std::istream &in, src_location caller = CALLER()) {
         slurp_stream(in, caller);
     }
 
-    void slurp_file(const std::string &fn) {
+    void slurp_file(const std::string &fn, src_location caller = CALLER()) {
         source = fn;
 
         std::ifstream in(fn);
         if(!in.is_open()) {
             jerror::error(stringformat(
                 "can't open '{}': {}\n", fn, std::string(strerror(errno))
-            ));
+            ), caller);
         }
 
         in.seekg(0, std::ios::end);
