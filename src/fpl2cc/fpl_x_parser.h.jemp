@@ -49,6 +49,12 @@
     @}@
 @}@
 
+@for(auto emb : prds.embeds) {@
+    // embedded from @emb.source@:
+    @emb.data()@
+    // end embedded from @emb.source@
+@}@
+
 class @class_name@ {
 
 public:

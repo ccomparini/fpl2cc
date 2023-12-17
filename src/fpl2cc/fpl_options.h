@@ -15,6 +15,7 @@ struct fpl_options {
 
     std::string src_fpl;
     Searchpath src_path;
+    Searchpath embed_include_path;
     std::string out;
     mutable std::string output_fn; // derived from "out"
 
@@ -120,6 +121,11 @@ struct fpl_options {
         param_stack_reserve(1000),
         new_parser(false)
     {
+
+        embed_include_path.append_from_env("CPLUS_INCLUDE_PATH");
+        embed_include_path.append_from_env("C_INCLUDE_PATH");
+        embed_include_path.append_from_env("CPATH");
+
         for(int argi = 1; argi < argc; argi++) {
             // c++ -- :P
             #define SCAN_VALUE() \
@@ -196,6 +202,9 @@ struct fpl_options {
                     } else if(opt == "src-path") {
                         SCAN_VALUE();
                         src_path.append(val);
+                    } else if(opt == "embed-include-path") {
+                        SCAN_VALUE();
+                        embed_include_path.append(val);
                     } else if(opt == "statedump") {
                         SCAN_VALUE();
                         if(val.empty())
@@ -274,6 +283,7 @@ struct fpl_options {
             "\t--depfile=<fn> - generate ninja/make depend file\n"
             "\t--dump-dependencies - print import dependencies\n"
             "\t--goal=<product> - specify a target production\n"
+            "\t--embed-include-path=<path> - search <path> on @embed\n"
             "\t--generate-main - generate main() function\n"
             "\t--help - show this page\n"
             "\t--no-generate-code - parse (and other options) only\n"
@@ -298,6 +308,7 @@ struct fpl_options {
             "    debug_types: "         + stringformat("{}", debug_types) + "\n"
             "    debug_melds: "         + stringformat("{}", debug_melds) + "\n"
             "    entry_points: "        + stringformat("{}", entry_points) + "\n"
+            "    embed_include_path: "  + stringformat("{}", embed_include_path) + "\n"
             "    generate_code: "       + stringformat("{}", generate_code) + "\n"
             "    generate_main: "       + stringformat("{}", generate_main) + "\n"
             "    help: "                + stringformat("{}", help) + "\n"

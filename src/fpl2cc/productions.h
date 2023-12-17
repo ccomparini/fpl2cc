@@ -16,6 +16,7 @@
 #include "util/stringformat.h"
 #include "util/to_hex.h"
 #include "util/to_utf8ish.h"
+#include "util/utf8_buffer.h"
 
 #include <list>
 #include <map>
@@ -57,6 +58,7 @@ class productions {
     std::set<std::string> all_types; // for deduplication
 
     std::list<std::string> imports; // filenames
+    std::list<utf8_buffer> embeds;
     code_block default_action;
     code_block post_parse;
     std::list<code_block> separator_code;
@@ -71,11 +73,7 @@ class productions {
     std::vector<std::string>   precedence_group_names;
     std::map<std::string, int> product_precedence;
 
-    // rules/reduce actions/products:
-    std::vector<production_rule>    rules;
-    std::multimap<std::string, int> rules_for_product; // product -> rule ind
-    mutable int subex_count; // to generate product names for subexpressions
-
+    // grammar elements:
     std::vector<grammar_element>    elements;
     std::map<grammar_element, int>  element_index; // element -> element ID
 
@@ -85,6 +83,10 @@ class productions {
     // element -> source location:
     std::map<grammar_element, std::string> source_of_element;
 
+    // rules/reduce actions/products:
+    std::vector<production_rule>    rules;
+    std::multimap<std::string, int> rules_for_product; // product -> rule ind
+    mutable int subex_count; // to generate product names for subexpressions
     std::list<reducer> reducers;
 
     struct generated_type;
@@ -1805,6 +1807,10 @@ public:
             // TODO kill this in favor of having a default
             // main in grammarlib and importing.
             default_main = true;
+        } else if(dir == "embed") {
+            // embed the contents of a .h (or similar) file in the output:
+            auto emfile = opts.embed_include_path.find(arg_for_directive());
+            embeds.emplace(embeds.end(), utf8_buffer(emfile));
         } else if(dir == "generate_types") {
             // tell this to generate a type for anything whose
             // type it otherwise can't infer:
@@ -3165,7 +3171,6 @@ public:
 
         return found.size();
     }
-
 
     // Imports the grammar from the productions specified.
     // This will include rules and whatever's deemed necessary
