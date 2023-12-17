@@ -2,6 +2,7 @@
 #define UTF8_BUFFER_H
 
 #include "jerror.h"
+#include "src_location.h"
 #include "utf8.h"
 
 #include <cstring>
@@ -10,9 +11,18 @@
 #include <vector>
 
 struct utf8_buffer : public std::basic_string<utf8_byte> {
-    utf8_buffer() { }
+    std::string source;
 
-    explicit utf8_buffer(const utf8_byte *src, size_t num_bytes = -1) {
+    utf8_buffer(int dummy = 0, src_location caller = CALLER()) :
+        source(caller) { }
+
+    explicit utf8_buffer( 
+        const utf8_byte *src,
+        size_t num_bytes = -1,
+        src_location caller = CALLER()
+    ) :
+        source(caller)
+    {
         if(num_bytes == -1)
             num_bytes = std::strlen((const char *)src);
 
@@ -23,11 +33,13 @@ struct utf8_buffer : public std::basic_string<utf8_byte> {
         slurp_file(fn);
     }
 
-    utf8_buffer(std::istream &in) {
-        slurp_stream(in);
+    utf8_buffer(std::istream &in, src_location caller = CALLER()) {
+        slurp_stream(in, caller);
     }
 
     void slurp_file(const std::string &fn) {
+        source = fn;
+
         std::ifstream in(fn);
         if(!in.is_open()) {
             jerror::error(stringformat(
@@ -45,7 +57,13 @@ struct utf8_buffer : public std::basic_string<utf8_byte> {
         assign(buf, filesize + 1);
     }
 
-    void slurp_stream(std::istream &in) {
+    void slurp_stream(std::istream &in, src_location caller = CALLER()) {
+        // This one's annoying, because it may be coming from a
+        // file, but afaik there's no way to get the filename (or
+        // file descriptor or anything else useful about where the
+        // stream is from).  should never have used c++ streams.. sigh.
+        source = caller;
+
         const size_t bufsize = 2<<16;
         utf8_byte buf[bufsize];
         while(!in.eof()) {
@@ -64,7 +82,7 @@ struct utf8_buffer : public std::basic_string<utf8_byte> {
         To match normal line number conventions, the vector
         is 1-based - i.e., line_starts()[1] is the start of
         the first line in the file.  line_starts()[0] happens
-        to be the same as line 1, but thatn may change in
+        to be the same as line 1, but that may change in
         the future.
 
      */
