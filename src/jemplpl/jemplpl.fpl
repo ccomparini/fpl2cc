@@ -94,20 +94,6 @@
         "out += std::string((const char *)utf8_buffer({}).data());\n",
         include_file
     );
-/*
-// is this what we want?  I think we want to insert the include
-// at the time the jemp is compiled.
-    auto contents = utf8_buffer(jempl.import_path.find(include_file));
-    if(contents.size() > 0) {
-        return stringformat(
-            "\n// included from {}\n{}\n// end included from {}\n",
-            contents.source, contents.data(), contents.source
-        );
-    }
-    auto warning = stringformat("no data found for {}\n", include_file);
-    jerror::warning(warning);
-    return stringformat("// {}\n", warning);
- */
 }+
 
 +fragment(name_decl value) +{

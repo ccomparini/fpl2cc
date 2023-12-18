@@ -11771,7 +11771,7 @@ class jemplpl_parser {
     #line 1342 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
-    #line 168 "src/jemplpl/jemplpl.fpl"
+    #line 154 "src/jemplpl/jemplpl.fpl"
 
 
     static inline std::string quote(const std::string &str) {
@@ -17299,20 +17299,6 @@ class jemplpl_parser {
         "out += std::string((const char *)utf8_buffer({}).data());\n",
         include_file.val()
         );
-        /*
-        // is this what we want?  I think we want to insert the include
-        // at the time the jemp is compiled.
-            auto contents = utf8_buffer(jempl.import_path.find(include_file.val()));
-            if(contents.size() > 0) {
-                return stringformat(
-                    "\n// included from {}\n{}\n// end included from {}\n",
-                    contents.source, contents.data(), contents.source
-                );
-            }
-            auto warning = stringformat("no data found for {}\n", include_file.val());
-            jerror::warning(warning);
-            return stringformat("// {}\n", warning);
-         */
 
 
         #line 20 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -17433,7 +17419,7 @@ class jemplpl_parser {
 
         #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 113 "src/jemplpl/jemplpl.fpl"
+        #line 99 "src/jemplpl/jemplpl.fpl"
 
         return line_num(value.self())
         + stringformat("const auto {} = {};\n", name_decl.val(), value.val());
@@ -17539,7 +17525,7 @@ class jemplpl_parser {
 
         #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 118 "src/jemplpl/jemplpl.fpl"
+        #line 104 "src/jemplpl/jemplpl.fpl"
 
         jempl.realign_fragment = 
         "\nout += stringformat(" +
@@ -18783,7 +18769,7 @@ class jemplpl_parser {
 
         #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 132 "src/jemplpl/jemplpl.fpl"
+        #line 118 "src/jemplpl/jemplpl.fpl"
 
         std::list<std::string> cases;
         std::string search_re = stringformat("{}.*\\.h\\.jemp$", jempl_name.val());
@@ -18917,7 +18903,7 @@ class jemplpl_parser {
 
         #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 127 "src/jemplpl/jemplpl.fpl"
+        #line 113 "src/jemplpl/jemplpl.fpl"
 
         add_import(jempl.import_path.find(jempl_name.val() + ".h.jemp"));
         return stringformat("\nout += {}{};\n", jempl_name.val(), jempl_args.val());
@@ -19023,7 +19009,7 @@ class jemplpl_parser {
 
         #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 156 "src/jemplpl/jemplpl.fpl"
+        #line 142 "src/jemplpl/jemplpl.fpl"
 
         return line_num(control_statement.self())
         + jempl.realign_frag()
@@ -19130,7 +19116,7 @@ class jemplpl_parser {
 
         #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-        #line 163 "src/jemplpl/jemplpl.fpl"
+        #line 149 "src/jemplpl/jemplpl.fpl"
 
         return line_num(variable.self())
         + "out += stringformat(\"{}\"," + variable.val().to_str() + ");\n";
@@ -19895,7 +19881,7 @@ class jemplpl_parser {
 
 int main(int argc, const char **argv) {
 
-    #line 258 "src/jemplpl/jemplpl.fpl"
+    #line 244 "src/jemplpl/jemplpl.fpl"
 
     if(argc < 2) {
         jerror::error("Please provide a source file name.\n");
@@ -19950,7 +19936,7 @@ int main(int argc, const char **argv) {
 
     return total_errors?1:0;
 
-    #line 19953 "src/jemplpl/jemplpl.cc"
+    #line 19939 "src/jemplpl/jemplpl.cc"
 
 }
 
