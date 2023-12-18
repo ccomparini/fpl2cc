@@ -21,9 +21,10 @@
 #include "util/join.h"
 #include "util/searchpath.h"
 #include "util/stringformat.h"
+#include "util/utf8_buffer.h"
 
 #define VERSION_MAJ 0
-#define VERSION_MIN 8
+#define VERSION_MIN 9
 
 }+
 
@@ -47,7 +48,8 @@
         "#define {}_H\n"
         "#line " _CLUDGE_STR(__LINE__) " \"" __FILE__ "\"\n\n"
         "#include <string>\n"
-        "#include \"util/stringformat.h\"\n"
+        "#include \"util/stringformat.h\"\n"  // XXX hey these should be embedded, maybe? inception
+        "#include \"util/utf8_buffer.h\"\n"
         "inline std::string {}({}) {{\n"
         "    struct _jemp_srcinfo {{\n"
         "        int ln;\n"
@@ -85,6 +87,27 @@
 +fragment(param_decl) +{
     jempl.params.push_back(param_decl);
     return "";
+}+
+
++fragment(include_file) +{
+    return stringformat(
+        "out += std::string((const char *)utf8_buffer({}).data());\n",
+        include_file
+    );
+/*
+// is this what we want?  I think we want to insert the include
+// at the time the jemp is compiled.
+    auto contents = utf8_buffer(jempl.import_path.find(include_file));
+    if(contents.size() > 0) {
+        return stringformat(
+            "\n// included from {}\n{}\n// end included from {}\n",
+            contents.source, contents.data(), contents.source
+        );
+    }
+    auto warning = stringformat("no data found for {}\n", include_file);
+    jerror::warning(warning);
+    return stringformat("// {}\n", warning);
+ */
 }+
 
 +fragment(name_decl value) +{
@@ -167,7 +190,6 @@ public:
 
     struct _jempl {
         // for the function we'll create:
-        //std::string            function_name;
         std::list<std::string> params;
 
         std::string realign_fragment;
@@ -193,7 +215,6 @@ public:
         jempl.import_path.append_from_env("C_INCLUDE_PATH");
         jempl.import_path.append_from_env("CPATH");
     }
-
 
     void add_import(const std::filesystem::path &imp) {
         jempl.import_files.insert(imp);
@@ -229,10 +250,8 @@ public:
         return function_name(source_filename());
     }
 
-    // XXX wtb way to hav this called from constructor or similar
     void init(const std::filesystem::path &src) {
         init_import_path(src);
-        //jempl.function_name = output_function_name(); // XXX just kill function_name
     }
 }+
 
@@ -263,7 +282,7 @@ public:
             total_errors++;
         } else {
             jemplpl_parser parser(inp);
-            parser.init(template_fn); // XXX clunky.  figure out better way OHHH duh inp has template_fn
+            parser.init(template_fn);
             std::string output = parser.parse();
             if(!output.length()) {
                 jerror::warning(stringformat(

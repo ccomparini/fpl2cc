@@ -34,6 +34,8 @@ text+:chunks -> fragment ;
 # a function or whatever we're generating.
 '@parameter:'^ /[^@]+/:param_decl '@'^ /\n?/^ -> fragment ;
 
+'@include:'^ /[^@]+/:include_file '@'^ /\n?/^ -> fragment ;
+
 # declares a constant which can be used in later expansions
 # or expressions. For example, to set "fruitbat" to 10 more
 # than the current value of x, you might do:

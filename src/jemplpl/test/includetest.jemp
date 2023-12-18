@@ -1,0 +1,6 @@
+@parameter: const std::string &file_to_include@
+
+// Start of include
+@include: file_to_include@
+// End of include
+
