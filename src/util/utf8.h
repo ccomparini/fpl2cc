@@ -32,7 +32,7 @@ used to encode other character sets.  I've never seen that, though.
 
   Returns false is given a NULL pointer.
  */
-bool is_within_character(const utf8_byte *at) {
+inline bool is_within_character(const utf8_byte *at) {
     if(!at) return false;
 
     // If the top 2 bits of the byte are 0b10, then
@@ -72,7 +72,7 @@ bool is_within_character(const utf8_byte *at) {
   at the end of a string.
 
  */
-size_t character_length(const utf8_byte *at, size_t maxlen) {
+inline size_t character_length(const utf8_byte *at, size_t maxlen) {
 
     if(!at) return 0;
 
