@@ -45,7 +45,8 @@ struct utf8_buffer : public std::basic_string<utf8_byte> {
         std::ifstream in(fn);
         if(!in.is_open()) {
             jerror::error(stringformat(
-                "can't open '{}': {}\n", fn, std::string(strerror(errno))
+                "{} can't open '{}': {}",
+                caller, fn, std::string(strerror(errno))
             ), caller);
         }
 
