@@ -1804,8 +1804,6 @@ public:
             }
             default_action = new_code;
         } else if(dir == "default_main") {
-            // TODO kill this in favor of having a default
-            // main in grammarlib and importing.
             default_main = true;
         } else if(dir == "embed") {
             // embed the contents of a .h (or similar) file in the output:

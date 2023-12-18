@@ -6,6 +6,21 @@
 
 #include <iostream>
 
+bool default_main_parse_one(fpl_reader_p src) {
+    @prds.parser_class_name()@ parser(src);
+    auto result = parser.parse();
+
+    // using stringformat on the result, because it has a high
+    // likelihood of being able to stringify whatever the result
+    // is:
+    auto out = stringformat("{}", result);
+    if(out.length()) {
+        std::cout << ensure_nl(out);
+    }
+
+    return parser.error_count() == 0;
+}
+
 /*
  Default main:
 
@@ -22,32 +37,20 @@
  */
 int main(int argc, const char **argv) {
 
-    fpl_reader_p inp;
+    bool success = true;
     if(argc >= 2) {
-        inp = std::make_shared<fpl_reader>(argv[1]);
-        if(argc > 2) {
-            jerror::warning(stringformat(
-                "{}: ignoring extra command line arguments after '{}'",
-                argv[0], argv[1]
-            ));
+        for(int arg = 1; arg < argc; ++arg) {
+            fpl_reader_p inp = std::make_shared<fpl_reader>(argv[arg]);
+            if(!default_main_parse_one(inp))
+                success = false;
         }
     } else {
-        inp = std::make_shared<fpl_reader>(std::cin, "<stdin>");
+        success = default_main_parse_one(
+            std::make_shared<fpl_reader>(std::cin, "<stdin>")
+        );
     }
 
-    @prds.parser_class_name()@ parser(inp);
-
-    auto result = parser.parse();
-
-    // using stringformat on the result, because it has a high
-    // likelihood of being able to stringify whatever the result
-    // is:
-    auto out = stringformat("{}", result);
-    if(out.length()) {
-        std::cout << ensure_nl(out);
-    }
-
-    return parser.error_count()?-1:0;
+    return success?0:-1;
 }
 
 
