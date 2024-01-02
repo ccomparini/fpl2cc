@@ -1267,25 +1267,6 @@ class productions {
             return left.type_name < right.type_name;
         }
 
-        // and this comparison function allows them to be put in a set
-        // for purposes of deduplicating types:
-        static bool fold_compare(const generated_type &left, const generated_type &right) {
-            auto lattr =  left.attributes.begin();
-            auto lend  =  left.attributes.end();
-            auto rattr = right.attributes.begin();
-            auto rend  = right.attributes.end();
-            while((lattr != lend) && (rattr != rend)) {
-                if(lattr->name != rend->name) {
-                    return *lattr < *rend;
-                }
-                // names are the same - compare types.
-                if(lattr->type != rend->type) {
-                    return lattr->type < rend->type;
-                }
-            }
-            return false;
-        }
-
         void init_attributes(
             const std::string &for_product, const productions &prds
         ) {
