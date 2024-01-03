@@ -52,6 +52,7 @@ def toolset():
 
 
 config = {
+    'CPPFLAGS' : ccflags,
     'CCFLAGS' : ccflags,
     'CPPPATH' : [ # preprocessor path
         '.',
