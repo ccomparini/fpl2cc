@@ -320,7 +320,7 @@ std::string stringformat(std::string_view fmt, Args&&... args) {
                 // parse the contents of the {}:
                 // Within {}, let's say the _future_ format is:
                 //  [ variable name ] [':' [ to-string function ] [':' [ post processing ] ] ]
-                // But, NOTE: presently, because we can't see the names
+                // But, we can't, presently, because we can't see the names
                 // of the parameters and we've already converted everything
                 // to string.  So let's allow numeric parameter index instead
                 // of the variable name.
