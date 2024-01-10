@@ -1348,6 +1348,8 @@ public:
             grammar_element("_fpl_null", grammar_element::NONTERM_PRODUCTION)
         );
 
+        // terminals are always a thing:
+        all_types.insert("Terminal");
     }
 
     std::string input_filename() const {

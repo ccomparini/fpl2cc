@@ -204,10 +204,7 @@ public:
         // types, so we use a std::variant:
         using Var = std::variant<
             false_product,
-            @-for(auto type : prds.all_types) {-@
-                @type@,
-            @-}-@
-            Terminal
+            @join(prds.all_types, ",\n")@
         >;
 
         Var red;
@@ -215,8 +212,6 @@ public:
     public:
         // creates a false-valued Product:
         Product() : red(false_product()) { }
-
-        Product(Terminal tm) : red(tm) { }
 
         // type-specific constructors:
         @-for(auto type : prds.all_types) {-@
