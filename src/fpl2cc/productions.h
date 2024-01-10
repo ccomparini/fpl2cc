@@ -1180,14 +1180,16 @@ class productions {
     // Provides the information needed (by the code generator) to generate
     // that type.
     struct generated_type {
-        struct attribute {
-            std::string name; // name of the product
+        class attribute {
+            std::string attr_name;
             std::set<grammar_element> elements; // set of elements possibly generating this
             std::string type;
             bool multiple;    // if true, store in a way allowing 0 or more
 
+        public:
+
             attribute(const production_rule::step &step, src_location caller = CALLER()) :
-                name(step.variable_name()),
+                attr_name(step.variable_name()),
                 elements({step.gexpr}),
                 multiple(!step.is_single()) {
             }
@@ -1205,43 +1207,66 @@ class productions {
                 }
             }
 
+            std::string name() const {
+                return attr_name;
+            } 
+
             std::string to_str() const {
                 return stringformat(
-                    "{}: {}{} (from {})",
-                    name, type.length()?type:"<no type>",
-                    multiple?"*":"", elements
+                    // if there's more than one element, show them
+                    // joined with '|' (i.e. "or")
+                    "    {}:{}{}\n", join(elements, "|"), name(), multiple?"*":""
                 );
             }
 
             // so we can make a std::set
             friend bool operator<(const attribute &lhs, const attribute &rhs) {
-                return lhs.name < rhs.name;
+                return lhs.name() < rhs.name();
             }
 
-            void resolve_type(const productions &prds) {
-                std::set<std::string> types;
+            std::string type_in_target(
+                const productions &prds, src_location caller = CALLER()
+            ) const {
+                bool type_conflict = false;
+                std::string type;
                 for(auto el : elements) {
-                    std::string type = prds.type_for(el);
-                    if(!type.length()) {
+                    auto candidate = prds.type_for(el);
+                    if(!candidate.length()) {
                         jerror::warning(stringformat(
-                            "no type known for {} defined at {}\n",
+                            "No type known for {} defined at {}\n",
                             el, prds.element_source(el)
                         ));
                     } else {
-                        types.insert(type);
+                        if(type.length())
+                            type_conflict = true;
+                        else
+                            type = candidate;
                     }
                 }
 
-                if(types.size() != 1) {
-                    jerror::error(stringformat(
-                        "can't determine type for {}.  "
-                        "Could be any of these {} types: {}",
-                        *this, types.size(), join(types, ", ")
+                if(type_conflict) {
+                    jerror::warning(stringformat(
+                        "Conflicting types for '{}' in generated type:\n{}\n",
+                        name(),
+                        join(elements, "\n", [&prds] (auto el) -> std::string {
+                            auto type_name = prds.type_for(*el);
+                            if(!type_name.length()) type_name = "<no type>";
+                            return stringformat(
+                                "        {}\t{} at {}",
+                                type_name, *el, prds.element_source(*el)
+                            );
+                        })
                     ));
                 }
-                type = *(types.begin());
+
+                return type;
+            }
+
+            void resolve_type(const productions &prds) {
+                type = type_in_target(prds);
             }
         };
+
         using attribute_set = std::set<attribute>;
         attribute_set attributes;
         std::string type_name;
@@ -1258,7 +1283,9 @@ class productions {
             return stringformat("{}: {}", type_name, attributes);
         }
 
-        std::string name() const { return type_name; }
+        std::string name() const {
+            return type_name;
+        }
 
         // generated types can be looked up by name in a std::set or similar:
         friend bool operator<(
