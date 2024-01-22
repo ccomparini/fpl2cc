@@ -880,7 +880,7 @@ public:
         return stringformat("<unknown type {} in prod_type_name>", tinf);
     }
 
-    @#fpl_x_parser_reduce_param(class_name)@
+    @#fpl_x_parser_reduction_parameter(class_name)@
     void set_state(State st) {
         cur_state = st;
     }
