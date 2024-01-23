@@ -29,24 +29,16 @@
 # bed based on the classic desk calculator case.
 #
 
-@produces double
+@produces std::string
 @type_for integer int
-@type_for real double
+@type_for result std::string
+@default_type double
 @default_main
 @comment_style c
+@goal result
 
-#
-#  This parses, but does't work because @produces wants
-# a double.  We need to be able to separate the @produces
-# type from the default type.
-#  Also, note the awkwardness of needing the "woot" rule.. hmm
-#
-#@type_for result std::string
-#[
-#    > -> woot;
-#] -> result +{
-#    return stringformat("result: {}\n", result);
-#}+,
+aexpr -> result +{ return stringformat("{}", aexpr); }+
+
 [
     # addition/subtraction are lowest precedence:
     .:lhs '+'^ >:rhs -> add +{ return lhs + rhs; }+

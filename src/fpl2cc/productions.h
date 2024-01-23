@@ -54,6 +54,7 @@ class productions {
     std::set<std::string> exported_products; // exported to that of which this is a sub
 
     std::string final_type; // this is what the parser returns. set by @produces or inferred
+    std::string def_type; // if not "", fill in unknown types with this
     std::map<std::string, std::string> type_for_product; // (c++ reduce type for particular product)
     std::set<std::string> all_types; // for deduplication
 
@@ -1542,6 +1543,19 @@ public:
         return final_type;
     }
 
+    void set_default_type(const std::string &tp) {
+        all_types.insert(tp);
+        def_type = tp;
+    }
+
+    bool has_default_type() const {
+        return def_type.length() > 0;
+    }
+
+    std::string default_type() const {
+        return def_type;
+    }
+
     void set_post_parse(const code_block &cb)  { post_parse = cb; }
     void set_default_main(bool def)            { default_main = def; }
     void add_internal(const code_block &cb)    { parser_members.push_back(cb); }
@@ -1815,6 +1829,8 @@ public:
             default_action = new_code;
         } else if(dir == "default_main") {
             default_main = true;
+        } else if(dir == "default_type") {
+            set_default_type(read_cpp_type(inp));
         } else if(dir == "embed") {
             // embed the contents of a .h (or similar) file in the output:
             auto emfile = opts.embed_include_path.find(arg_for_directive());
@@ -1863,7 +1879,7 @@ public:
             eat_separator();
             std::string prod = read_production_name(inp);
             eat_separator();
-            std::string type = inp->read_re(".*")[0];
+            std::string type = read_cpp_type(inp);
             if(prod.length() && type.length()) {
                 add_type_for(prod, type, "@type_for");
             } else {
@@ -2026,6 +2042,10 @@ public:
 
     static inline std::string read_production_name(fpl_reader_p &src) {
         return read_identifier(src);
+    }
+
+    static inline std::string read_cpp_type(fpl_reader_p &src) {
+        return src->read_re(".*")[0]; // good enough for now. shipit.
     }
 
     static inline std::string read_directive(fpl_reader_p &src) {
@@ -3779,9 +3799,16 @@ public:
                 candidate.resolve_attribute_types(*this);
                 generated_types.insert(candidate);
             }
+        } else if(has_default_type()) {
+            for(auto prr : rules_for_product) {
+                const std::string &prodn = prr.first;
+                if(type_for(prodn) == "") {
+                    add_type_for(prodn, default_type(), "default type");
+                }
+            }
+        } else {
+            resolve_inherited_types();
         }
-
-        resolve_inherited_types();
 
         resolve_output_and_goal_types();
 
@@ -4277,6 +4304,9 @@ public:
                     goal, grammar_element::Type::NONTERM_PRODUCTION
                 ), false);
                 add_rule(goal_rule);
+                if(output_type() != "") {
+                    add_type_for("_fpl_goal", output_type());
+                }
             }
         }
     }

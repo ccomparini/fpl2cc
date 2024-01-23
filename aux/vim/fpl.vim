@@ -17,6 +17,7 @@ syn region	fplComment	start="#" skip="\\$" end="$" keepend contains=fplTodo
 " @directives:
 syn match	fplAtDirective	"@comment_style.*"
 syn match	fplAtDirective	"@default_action "
+syn match	fplAtDirective	"@default_type.* "
 syn match	fplAtDirective	"@default_main"
 syn match	fplAtDirective	"@generate_types"
 syn match	fplAtDirective	"@goal.*"
