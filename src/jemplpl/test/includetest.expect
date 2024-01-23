@@ -1,6 +1,7 @@
 returncode = 0
 stderr = ""
 stdout = "
+OH HAI I IS AT LINE 2 IN \"src/jemplpl/test/includetest.jemp\" 
 // Start of include
 #include <cstdlib>
 #include <iostream>
@@ -27,6 +28,8 @@ int main() {
     return 0;
 }
 
+
+OH HAI I IS AT LINE 4 IN \"src/jemplpl/test/includetest.jemp\" 
 // End of include
 
 "

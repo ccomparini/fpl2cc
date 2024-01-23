@@ -213,7 +213,7 @@ class jemplpl_parser {
     // text (21:1):         •/[^@\\n]+/:t                                                                                            => state 6  (src/grammarlib/jemp.fpl:127)
     // text (22:1):         •leading_ws                                                                                              => state 29 (src/grammarlib/jemp.fpl:131)
     // text (23:1):         •trailing_ws                                                                                             => state 1  (src/grammarlib/jemp.fpl:132)
-    // _fpl_goal (26:1):    •complete                                                                                                => state 55 (src/fpl2cc/productions.h:4245)
+    // _fpl_goal (26:1):    •complete                                                                                                => state 55 (src/fpl2cc/productions.h:4299)
     //
     void state_0() {
 
@@ -8157,7 +8157,7 @@ class jemplpl_parser {
     #line 5 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     //
-    // _fpl_goal (26:0):  complete • => (done) (src/fpl2cc/productions.h:4245)
+    // _fpl_goal (26:0):  complete • => (done) (src/fpl2cc/productions.h:4299)
     //
     void state_55() {
 
@@ -15219,7 +15219,7 @@ class jemplpl_parser {
             "    text (21:1):\t •/[^@\\\\n]+/:t \t=> state 6\t(src/grammarlib/jemp.fpl:127)\n"
             "    text (22:1):\t •leading_ws \t=> state 29\t(src/grammarlib/jemp.fpl:131)\n"
             "    text (23:1):\t •trailing_ws \t=> state 1\t(src/grammarlib/jemp.fpl:132)\n"
-            "    _fpl_goal (26:1):\t •complete \t=> state 55\t(src/fpl2cc/productions.h:4245)\n"
+            "    _fpl_goal (26:1):\t •complete \t=> state 55\t(src/fpl2cc/productions.h:4299)\n"
             ;
         }
 
@@ -15664,7 +15664,7 @@ class jemplpl_parser {
         #line 1274 "src/fpl2cc/fpl_x_parser.h.jemp" 
         if(&jemplpl_parser::state_55 == st) {
             return "state_55:\n"
-            "    _fpl_goal (26:0):\t complete •\t=> (done)\t(src/fpl2cc/productions.h:4245)\n"
+            "    _fpl_goal (26:0):\t complete •\t=> (done)\t(src/fpl2cc/productions.h:4299)\n"
             ;
         }
 
@@ -17320,7 +17320,7 @@ class jemplpl_parser {
         return stringformat(
         "out += std::string((const char *)utf8_buffer({}).data());\n",
         include_file.val()
-        );
+        ) + line_num(include_file.self()) + jempl.realign_frag();
 
 
         #line 20 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -19807,13 +19807,13 @@ class jemplpl_parser {
                 return 1;
             }
             static int line_number() {
-                return 4245;
+                return 4299;
             }
             static const char *filename() {
                 return "src/fpl2cc/productions.h";
             }
             static const char *location() {
-                return "src/fpl2cc/productions.h:4245";
+                return "src/fpl2cc/productions.h:4299";
             }
             static const char *to_str() {
                 return "complete -> _fpl_goal";
@@ -19830,7 +19830,7 @@ class jemplpl_parser {
                     return pname[ind];
                 } else {
                     return "param_name index out of bounds at "
-                    "src/fpl2cc/productions.h:4245";
+                    "src/fpl2cc/productions.h:4299";
                 }
             }
             static const char *param_type(unsigned int ind) {
@@ -19846,7 +19846,7 @@ class jemplpl_parser {
                 } else {
                     return (
                     "param_type index out of bounds at "
-                    "src/fpl2cc/productions.h:4245"
+                    "src/fpl2cc/productions.h:4299"
                     );
                 }
             }
@@ -19860,7 +19860,7 @@ class jemplpl_parser {
 
 
         #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-        #line 1 "src/fpl2cc/productions.h:4245 (default action for complete -> _fpl_goal)"
+        #line 1 "src/fpl2cc/productions.h:4299 (default action for complete -> _fpl_goal)"
         // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
         return std::string(
 

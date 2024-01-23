@@ -93,7 +93,7 @@
     return stringformat(
         "out += std::string((const char *)utf8_buffer({}).data());\n",
         include_file
-    );
+    ) + line_num(include_file@self()) + jempl.realign_frag();
 }+
 
 +fragment(name_decl value) +{
