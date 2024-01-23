@@ -3765,8 +3765,6 @@ public:
 
     // generates/fills in any missing types
     void resolve_types() {
-        resolve_inherited_types();
-
         if(generate_types) {
             std::set<generated_type> gt_candidates;
             for(auto prr : rules_for_product) {
@@ -3782,6 +3780,8 @@ public:
                 generated_types.insert(candidate);
             }
         }
+
+        resolve_inherited_types();
 
         resolve_output_and_goal_types();
 
