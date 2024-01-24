@@ -60,7 +60,6 @@ config = {
         '#src/util',
     ],
     'LIBPATH' : [
-        '#lib',
     ],
     'LIBS' : [
     ],
