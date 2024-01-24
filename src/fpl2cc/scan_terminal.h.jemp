@@ -1,0 +1,76 @@
+@parameter: const std::string &result_var @
+@parameter: const productions &prds @
+@parameter: const grammar_element &el @
+
+{
+    // "scan" a terminal by advancing the read pointer to just beyond
+    // the terminal if the current input matches the element passed.
+    // leaves the read pointer where it is if the current inout doesn't
+    // match the element passed
+
+    @declare match_str: c_str_escape(el.expr)@
+    // scan terminal @el@ (@match_str@)
+    @if(el.type == grammar_element::TERM_EXACT) {@
+        const SourcePosition pos = position();
+        if(reader->read_exact_match("@match_str@")) {
+            if(
+                @-for(auto suffix : prds.bad_suffixes_for_element(el)) {-@
+                    reader->read_exact_match("@c_str_escape(suffix)@") ||
+                @-}-@ false
+            ) {
+                // though we matched the terminal, it's part of a
+                // longer terminal.  so, cancel the match/rewind:
+                reader->go_to(pos);
+            } else {
+                @result_var@ = Terminal("@match_str@");
+            }
+        }
+    @} else if(el.type == grammar_element::TERM_EXACT_INV) {@
+        std::string match = reader->read_to_exact_match("@match_str@");
+        if(match.length())
+            @result_var@ = Terminal(match);
+    @} else if(el.type == grammar_element::TERM_REGEX) {@
+        std::cmatch match = reader->read_re("@match_str@");
+        if(!match.empty()) {
+            @/*
+               We matched something at all, but we may have matched
+               0 bytes.
+               To avoid looping infinitely in cases like:
+                   '('^ /x?/+ ')'^ -> y;
+               where the /x?/ can match an empty string, and
+               the step says match multiple times, don't allow
+               it to do more than one empty match, because
+               otherwise it'll loop indefinitely matching and
+               pushing empty strings to the stack.
+               This does mean that if you have multiple consecutive
+               regexes which might match empty strings, only the
+               first will match as an empty string.  These are
+               all pathological cases which probably have no real
+               application, but we need to handle them somehow
+               other than stack overflows. So, here we are:
+             */@
+            if(match.length() || (lr_top().position() != position())) {
+                @result_var@ = Terminal(match.begin(), match.end());
+            }
+        }
+    @} else if(el.type == grammar_element::TERM_REGEX_INV) {@
+        std::string match = reader->read_to_re("@match_str@");
+        if(match.length())
+            @result_var@ = Terminal(match);
+    @} else if(el.type == grammar_element::TERM_CUSTOM) {@
+        @result_var@ = custom_scanner_@match_str@(*reader);
+    @} else if(el.type == grammar_element::TERM_CUSTOM_INV) {@
+        @declare inv_name: prds.inverse_scanner_name(match_str)@
+        @result_var@ = custom_scanner_@inv_name@(*reader);
+    @} else if(el.type == grammar_element::LACK_OF_SEPARATOR) {@
+        if(!bytes_eaten) {
+            @result_var@ = Terminal("⦑lack-of-separator⦒");
+        }
+    @} else if(el.type == grammar_element::END_OF_PARSE) {@
+        // end of parse placeholder
+    @} else {@
+        #error Unimplemented terminal type: @el.type@
+    @}@
+
+}
+

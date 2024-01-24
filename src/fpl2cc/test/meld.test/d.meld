@@ -1,0 +1,15 @@
+
+# here's the real meld test, since the keys and values
+# will be intermingled on the stack, and thus we need
+# the meld and offsets to disentangle them:
+#   '⟅'^ /[a-z]+/:key '=>'^ arg:val (','^ /[a-z]+/:key '=>'^ arg:val)* '⟆'^ 
+#
+# "key" and "val" will both need meld 2;  val should have
+# offset of 1.
+#
+⟅ foo => barbat ⟆
+⟅ cat => meow, dog => woof, frog => yay ⟆
+
+⁅ ⁆
+
+⁅ floof => poof, rock => roll note_no_comma => but_trailing_comma_yay, ⁆

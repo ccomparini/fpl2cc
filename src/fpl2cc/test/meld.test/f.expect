@@ -1,0 +1,8 @@
+returncode = 0
+stderr = ""
+stdout = "
+3 items total.  they are:
+    by sea: [ ⛵, 🛶 ] by land: [ 🚚 ]
+    by sea: [ ⛵, 🚤, 🛶, 🛶 ] by land: [ 🏍️, 🚚 ]
+    by sea: [ ⛵, 🚤, 🛶, 🛶, ⛵, 🚤, 🚢, 🛶 ] by land: [ 🏍️, 🚚, 🏍️, 🏎️ ]
+"

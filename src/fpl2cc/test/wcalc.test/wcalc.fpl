@@ -1,0 +1,76 @@
+#
+# This started with:
+#  https://en.wikipedia.org/wiki/Recursive_ascent_parser
+# .. actually we've now blown off recursive ascent in favor
+# of a state-function lalr approach, mainly because getting
+# the generated products to the generated code was too
+# weird in recursive ascent.  or, at least I couldn't figure
+# out a reasonable way to do it.  maybe there is a way.
+# moving on.
+#
+# Bison:
+#
+#   expr : expr '+' term   { $$ = $1 + $3; }
+#        | expr '-' term   { $$ = $1 - $3; }
+#        | term            { $$ = $1; }
+#        ;
+#
+#   term : '(' expr ')'    { $$ = $2; }
+#        | num             { $$ = $1; }
+#        ;
+#
+#   num : '0'              { $$ = 0; }
+#       | '1'              { $$ = 1; }
+#       ;
+#
+# .. except the above was too simple for me to care
+# so I added unary minus, proper numbers, comments,
+# etc.  This has become a sort of general fpl test
+# bed based on the classic desk calculator case.
+#
+
+@produces std::string
+@type_for integer int
+@type_for result std::string
+@default_type double
+@default_main
+@comment_style c
+@goal result
+
+aexpr -> result +{ return stringformat("{}", aexpr); }+
+
+[
+    # addition/subtraction are lowest precedence:
+    .:lhs '+'^ >:rhs -> add +{ return lhs + rhs; }+
+    .:lhs '-'^ >:rhs -> sub +{ return lhs - rhs; }+
+] -> aexpr +{
+    std::cerr << stringformat("YAY addition expression = {}\n", aexpr);
+    return aexpr;
+}+,
+[
+    .:lhs '*'^ >:rhs   -> mul +{ return lhs * rhs; }+
+    .:num '/'^ >:denom -> div +{ return num / denom; }+
+    .:num '%'^ >:denom -> mod +{ return long(num) % long(denom); }+
+] -> mexpr,
+[
+    '-'^ .:term  -> negation +{ return -term; }+
+    '('^ << ')'^ -> parenthetical;
+
+    /[0-9]*\.[0-9]+/:decimal_digits -> real +{
+        return std::stod(decimal_digits);
+    }+
+
+    /[0-9]+/:digits -> integer +{
+        // we matched an integer, so return one (at the c++ level).
+        // this is less exciting than it looks, because basically
+        // that integer is going to get reduced to a term before
+        // anything else happens at the wcalc level,  which will
+        // mean it gets converted to a double (like everything else
+        // here), but it does place the integer on the stack before
+        // that, so we are testing handling multiple types to that
+        // degree.
+        return std::stoi(digits);
+    }+
+] -> term;
+
+# you cant end a file with a comment

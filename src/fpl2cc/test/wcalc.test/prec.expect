@@ -1,0 +1,7 @@
+returncode = 0
+stderr = "YAY addition expression = 15.000000
+YAY addition expression = 65.000000
+YAY addition expression = 60.000000
+"
+stdout = "60.000000
+"

@@ -1,0 +1,11 @@
+
+
+@default_main
+@produces std::string
+
+(thing ';'^)* -> things +{
+    return "\n" + thing@join("\n");
+}+;
+
+'a'^+ 'b'^ -> thing +{ return "a+ b ghost"; }+
+

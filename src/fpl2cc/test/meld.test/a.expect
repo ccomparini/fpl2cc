@@ -1,0 +1,8 @@
+returncode = 0
+stderr = ""
+stdout = "
+3 items total.  they are:
+    3 args: 'one', 'two', 'three'
+    0 args: 
+    5 args: 'things', 'stuff', 'stuff', 'morestuff', 'yay'
+"

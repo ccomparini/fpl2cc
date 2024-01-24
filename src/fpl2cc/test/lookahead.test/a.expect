@@ -1,0 +1,10 @@
+returncode = 0
+stderr = ""
+stdout = "other: ok
+ambiguous a-b
+other: ce
+a-b: winning
+other: c
+a-b: winning
+other: afg
+"

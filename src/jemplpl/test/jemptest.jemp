@@ -1,0 +1,64 @@
+@if(x & 1) {-@
+    @- x + 1@
+@}-@
+@parameter: int x @
+@parameter: const std::string &str @
+@declare x_plus_2: x + 2 @
+@declare declared: "declared seems to parse correctly" @
+@declare realign: "cool, we can declare realign" @
+
+@/*
+ This is a comment - it will be elided in the output.
+
+ It can contain an @ or misc things which look
+like @expansions@ or @if(xyz) {@ stuff @}@, but
+none of those get applied because they are within
+a comment.
+
+*/@
+
+This is a template with some arbitrary @/* yo */@ text, including an @@ sign.
+
+This line comes from @source.filename()@ line @source.line_number()@.
+
+The sub str is "@str@" and maybe we'll do it @x@ times.
+
+@for(int ind = 0; ind < x; ind++) {-@
+    @declare nth: ind@
+    @-""-@For the @nth@th time, we're substituting in this string: "@str@".
+@}-@
+
+I hope we did it @x@ times.  @x@ + 2 = @x_plus_2@.
+
+does if/else work?
+@if(x < 10) {-@
+    well, if() works anyway, and @x@ < 10
+@} else {-@
+    I think yes, because this is else.
+@}-@
+
+some even numbers, for your enjoyment:
+@while(x-- > 0){-@
+    @-if(x & 1) {-@
+        @- x + 1 -@ @ "" @
+    @-}-@
+@}-@
+
+and now the source line is @source.line_number()-@
+
+@for(int y = 1; y <= 5; y++) {@
+    @for(int x = 0; x < 5; x++) {-@
+        @- " " -@ @- x*y -@
+    @-}-@
+@}-@
+
+@#jemptest_import("regular imports seem to work")@
+
+@for(int x = 0; x <= 5; x++) {-@
+    @#jemptest_sub_#x&1#(stringformat("importing sub {} for {}", x&1, x))@
+@-}-@
+
+@declared@
+@realign@
+
+the line at the end is @source.line_number()@

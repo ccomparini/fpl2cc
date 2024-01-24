@@ -1,0 +1,61 @@
+#
+# "pure" fpl json spec.
+#
+# https://www.ecma-international.org/publications-and-standards/standards/ecma-404/
+#  or, better:
+# https://www.crockford.com/mckeeman.html
+#
+
+#
+# from crockford, whitespace is:
+#    '0020' ws
+#    '000A' ws
+#    '000D' ws
+#    '0009' ws
+#
+@separator /[\x20\x0a\x0d\x09]+/
+
+element -> json ;
+
+object   -> value ;
+array    -> value ;
+string   -> value ;
+number   -> value ;
+
+'null'^ -> null_value;
+null_value -> value;
+
+'true'      -> true_value;
+'false'     -> false_value;
+true_value  -> boolean;
+false_value -> boolean;
+boolean     -> value ;
+
+'{'^ (member (','^ member)*)?:members '}'^ -> object ;
+string:key ':'^ value -> member ;
+
+'['^ (value (','^ value)*)?:elements ']'^ -> array ;
+
+value -> element ;
+
+# this might be better implemented with !match now
+'"'^ /((?:[^"\\]|\\.)*)/:guts '"'^ -> string ;
+
+# json number specification appears to actually be fairly fussy.
+# From the spec, I'm inferring that:
+#  - leading 0 is disallowed unless followed by a decimal point
+#    or the number is 0
+#  - you can't have a leading '+' except when specifying exponent
+#
+# instead of being fussy like that, let's make this more accepting,
+# and maybe add warnings if we need to.
+
+# (2 expressions for floats is a way to make it so that just a
+# decimal point doesn't match as a float)
+/(-)?[0-9]+\.[0-9]*([eE][+-]?[0-9]+)?/:float_val -> number ;
+/(-)?\.[0-9]+([eE][+-]?[0-9]+)?/:float_val       -> number ;
+
+# this will match something like "02", which is not strictly
+# legal json, but whatever:
+/(-)?([0-9]+)/:integer                           -> number ;
+

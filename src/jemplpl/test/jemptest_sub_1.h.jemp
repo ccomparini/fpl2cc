@@ -1,0 +1,8 @@
+@/*
+  This file and its sibling (jemptest_sub_0.h.jemp) are for testing importing
+  templates from templates.  
+*/@
+@parameter: std::string message @
+
+@-source.filename()@ line @source.line_number()@: @message-@
+

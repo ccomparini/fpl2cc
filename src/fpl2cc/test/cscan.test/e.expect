@@ -1,0 +1,7 @@
+returncode = 0
+stderr = ""
+stdout = "fancy string: «string with quote (\") in it»
+fancy string: «... and here's a fancy string starting with \"low quotes\"»
+fancy string: «finally»
+ding!
+"

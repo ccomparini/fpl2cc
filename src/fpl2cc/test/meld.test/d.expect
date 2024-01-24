@@ -1,0 +1,9 @@
+returncode = 0
+stderr = ""
+stdout = "
+4 items total.  they are:
+    1 (span 2) keys at 0: foo; 1 (span 1) values at 1: barbat
+    3 (span 6) keys at 1: cat, dog, frog; 3 (span 5) values at 2: meow, woof, yay
+    0 (span 0) keys at 2: ; 0 (span 0) values at -1: 
+    3 (span 6) keys at 3: floof, rock, note_no_comma; 3 (span 5) values at 4: poof, roll, but_trailing_comma_yay
+"

@@ -1,0 +1,5 @@
+
+abcd abcd abcd foo    # statement x 3 and an other
+abcd abcd abcd abcd   # 4ad
+abcd ab               # ambiguous b-b
+

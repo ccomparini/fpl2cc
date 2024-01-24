@@ -1,0 +1,7 @@
+returncode = 0
+stderr = ""
+stdout = "a followed by 3 b: b, b, b
+just a
+a followed by b and 0 trailing bs
+b
+"

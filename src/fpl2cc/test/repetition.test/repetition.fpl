@@ -1,0 +1,184 @@
+
+@produces std::string
+
+@separator +{
+    if(size_t len = utf8::space_length(inp)) {
+        return len;
+    }
+
+    // c++ style comments:
+    if(inp[0] == '/' && inp[1] == '*') {
+        size_t len = 2;
+        while(inp[len]) {
+            if(inp[len] == '*' && inp[len + 1] == '/')
+                return len + 2;
+            len++;
+        }
+        // error - no end of comment (XXX)?
+        return 0;
+    }
+
+    if(inp[0] == '/' && inp[1] == '/') {
+        size_t len = 2;
+        while(inp[len] && inp[len] != '\n') {
+            len++;
+        }
+        return len;
+    }
+
+    return 0;
+}+
+
+@scanner default +{
+    // default always matches, and matches exactly nothing.
+    // so return one such nothing:
+    return std::array{""};
+}+
+
++{
+#include"join.h"
+}+
+statements -> done +{
+    return join(statements, "\n");
+}+
+
+# in order to test subexpression repetition, let's say
+# statements can be followed by an optional comma
+@type_for statements std::list<std::string>
+(statement ','?^)* -> statements +{
+    // hmmm.. instead of type_for all the time, what if
+    // default reduce was a no-op and just left the stack
+    // slices intact?  then we don't have to jump through
+    // these hoops (and would be way more efficient).
+    std::list<std::string> out;
+    statement@foreach([&out](const std::string &st)->void {
+        out.push_back(st);
+    });
+    return out;
+}+
+
+block -> statement;
+
+@type_for block std::string
+"{"^ statements "}"^ -> block +{
+    if(statements.size() == 0)
+        return "empty block";
+
+    return "block with " + join(statements, ", ");
+}+
+
+# this checks that params are sliced correctly when
+# there's a repetition adjacent to something else
+# same element (token) type:
+'%':pct '%'*:more_pct-> statement +{
+    if(more_pct@count() == 0)
+        return "one percent";
+
+    return stringformat("{} percent", more_pct@count() + 1);
+}+
+
+# .. and this checks if they are sliced correctly with
+# leading repetition:
+'~'*:leading '~':last_tilde -> statement +{
+    if(leading@count() > 0) {
+        return leading@join(" tilde 'nother time ");
+    }
+
+    if(last_tilde@count() != 1) {
+        jerror::error(stringformat(
+            "lead/last repetition error: {} and {}\n",
+            leading@count(), last_tilde@count()
+        ));
+    }
+
+    return "just the last tilde";
+}+
+
+# .. this checks to make sure the optional really is optional
+'$':beginning '$'*:middle '$':end -> statement +{
+    if((beginning@count() != 1) || (end@count() != 1)) {
+        return stringformat(
+            "FAIL on dollar test:\n"
+            "  beginning has {} entries: {}\n"
+            "     middle has {} entries: {}\n"
+            "        end has {} entries: {}\n",
+            beginning@count(), beginning@concatenate(),
+               middle@count(),    middle@concatenate(),
+                  end@count(),       end@concatenate()
+        );
+    }
+    return stringformat("{} dollars between", middle@count());
+}+
+
+# .. and even more complicated:
+# In this case, we expect "last" to always exist,
+# "penultimate" to exist if there's more than one
+# digit, and "leading" to get all the leading digits
+# if there are more than 2 digits.
+/[0-9]/ -> digit;
+digit*:leading digit?:penultimate digit:last -> statement +{
+    return stringformat(
+        "{}, {}, {} = {} + {} + {} digits",
+        leading@join(""), penultimate@join(""), last,
+        leading@count(), penultimate@count(), last@count()
+    );
+}+
+
+# there appears to have been a bug where we were treating
+# inverted steps as the same as non-inverted for purposes
+# of calculating reserves.  oh dear. this tests that.
+# BTW, !'"':contents* is a bad construct anyway - match
+# 0 or-more of everything-up-to '"' is really a 0 or 1
+# match.  So, don't use this as an example of how to
+# actually do this.
+'"'^ !'"':contents* '"'^ -> statement +{
+    //return stringformat("quoted string: \"{}\"", contents@concatenate());
+    return stringformat("quoted string: \"{}\"", contents);
+}+
+
+# heh... bug:  foo becomes foo.var() within the string.
+#/f[aeiou]o/:foo -> statement +{
+/f[aeiou]o/ -> statement +{
+    return "close enough to foo";
+}+
+
+'!'^ xxx_or_def aaa_or_def '!'^ -> statement +{
+    return xxx_or_def + aaa_or_def;
+}+
+
+'aaa'     -> aaa_or_def ;
+&default^ -> aaa_or_def +{ return "bbb"; }+
+
+'xxx'     -> xxx_or_def ;
+&default^ -> xxx_or_def +{ return "yyy"; }+
+
+# realistically, you wouldn't do /[a-zA-Z_]/+ (you'd do /[a-zA-Z_]+/),
+# but we're testing repetition:
+/[a-zA-Z_]/+:letters ";"^ -> statement +{
+    return letters@concatenate();
+}+
+
+/[a-zA-Z_]/+:letters -> statement +{
+    return letters@concatenate(); // maybe this could be the default for unejected mutliples
+}+
+
+# this will have an eject conflict with the above:
+#/[a-zA-Z_]/+^ ">"^ -> statement +{
+#    return "yo nothing";
+#}+
+
+'#':pounds+ ";"^ -> statement +{
+    return pounds@join("x");
+}+
+
++{
+#include<iostream>
+}+
+
+@default_main
+@post_parse +{
+    std::cout << stringformat("======\n{}\n======\n", result);
+    exit(0);
+}+
+
+

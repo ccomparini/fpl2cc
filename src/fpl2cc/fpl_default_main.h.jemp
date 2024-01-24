@@ -1,0 +1,56 @@
+@parameter: const productions &prds @
+@realign: #line {} "{}" @
+
+#include "jerror.h"
+#include "util/stringformat.h"
+
+#include <iostream>
+
+bool default_main_parse_one(fpl_reader_p src) {
+    @prds.parser_class_name()@ parser(src);
+    auto result = parser.parse();
+
+    // using stringformat on the result, because it has a high
+    // likelihood of being able to stringify whatever the result
+    // is:
+    auto out = stringformat("{}", result);
+    if(out.length()) {
+        std::cout << ensure_nl(out);
+    }
+
+    return parser.error_count() == 0;
+}
+
+/*
+ Default main:
+
+   Runs the parser on the either the first file named on the
+   command line, or on stdin if nothing was named, then stringifies
+   the result and writes it to stdout (appending a trailing newline
+   if there wasn't one already), unless the result stringifies to
+   an empty string, in which case it prints nothing.
+   Throws jerror errors on errors.
+
+   This is good enough for use in most fpl tests, and even in some
+   real cases.  if fpl authors need something fancier, they can
+   supply it.
+ */
+int main(int argc, const char **argv) {
+
+    bool success = true;
+    if(argc >= 2) {
+        for(int arg = 1; arg < argc; ++arg) {
+            fpl_reader_p inp = std::make_shared<fpl_reader>(argv[arg]);
+            if(!default_main_parse_one(inp))
+                success = false;
+        }
+    } else {
+        success = default_main_parse_one(
+            std::make_shared<fpl_reader>(std::cin, "<stdin>")
+        );
+    }
+
+    return success?0:-1;
+}
+
+

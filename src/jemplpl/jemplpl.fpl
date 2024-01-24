@@ -1,0 +1,298 @@
++{
+/*
+
+ jemplpl - .jemp to c++ converter.
+
+ Given one or more template files, creates corresponding c++ functions
+ white return strings containing filled-in copies of said templates,
+ and writes them to stdout.
+
+ */
+
+#include <filesystem>
+#include <iostream>
+#include <list>
+#include <set>
+#include <string>
+
+#include "fpl2cc/fpl_reader.h"
+#include "util/c_str_escape.h"
+#include "util/jerror.h"
+#include "util/join.h"
+#include "util/searchpath.h"
+#include "util/stringformat.h"
+#include "util/utf8_buffer.h"
+
+#define VERSION_MAJ 0
+#define VERSION_MIN 9
+
+}+
+
+@produces std::string
+@grammar jemp
+
++complete(fragments) +{
+    std::string guts;
+
+    fragments@foreach(
+        [&guts] (const std::string &frag) { guts += frag; }
+    );
+
+
+    std::string function_name = output_function_name();
+
+    #define _CLUDGE_TO_STR(x) #x
+    #define _CLUDGE_STR(x) _CLUDGE_TO_STR(x)
+    return stringformat(
+        "#ifndef {}_H\n"
+        "#define {}_H\n"
+        "#line " _CLUDGE_STR(__LINE__) " \"" __FILE__ "\"\n\n"
+        "#include <string>\n"
+        "#include \"util/stringformat.h\"\n"  // XXX hey these should be embedded, maybe? inception
+        "#include \"util/utf8_buffer.h\"\n"
+        "inline std::string {}({}) {{\n"
+        "    struct _jemp_srcinfo {{\n"
+        "        int ln;\n"
+        "        std::string filename() const {{ return \"{}\"; }};\n"
+        "        int line_number() const {{ return ln; }}\n"
+        "    }} source;\n"
+        "    source.ln = 1;\n"
+        "    std::string out;\n"
+        "    {}\n"
+        "    return out;\n"
+        "}\n"
+        "#endif // {}_H\n",
+        function_name,  // #ifndef .. 
+        function_name,  // #define ..
+        function_name, jempl.fmt_params(), // func decl
+        filename(),           // source info
+        guts,                 // the real stuff
+        function_name   // #endif
+    );
+}+
+
++fragment(chunks) +{
+    std::string frag = "out += ";
+    chunks@foreach(
+        [&frag] (const std::string &chunk) { frag += quote(chunk) + "\n"; }
+    );
+    return frag + ";\n";
+}+
+
+
++fragment(comment) +{
+    return line_num(comment@self()) + jempl.realign_frag();
+}+
+
++fragment(param_decl) +{
+    jempl.params.push_back(param_decl);
+    return "";
+}+
+
++fragment(include_file) +{
+    return stringformat(
+        "out += std::string((const char *)utf8_buffer({}).data());\n",
+        include_file
+    ) + line_num(include_file@self()) + jempl.realign_frag();
+}+
+
++fragment(name_decl value) +{
+    return line_num(value@self())
+         + stringformat("const auto {} = {};\n", name_decl, value);
+}+
+
++fragment(realign) +{
+    jempl.realign_fragment = 
+        "\nout += stringformat(" +
+        quote("\n" + realign + "\n") +
+        ", source.line_number(), source.filename());\n";
+
+    return line_num(realign@self()) + jempl.realign_frag();
+}+
+
++fragment(jempl_name jempl_args) +{
+    add_import(jempl.import_path.find(jempl_name + ".h.jemp"));
+    return stringformat("\nout += {}{};\n", jempl_name, jempl_args);
+}+
+
++fragment(jempl_name variant jempl_args) +{
+    std::list<std::string> cases;
+    std::string search_re = stringformat("{}.*\\.h\\.jemp$", jempl_name);
+    for(auto templ : jempl.import_path.find_re(search_re)) {
+        add_import(templ);
+
+        cases.push_back(stringformat(
+            "if(fruitbat == \"{}\") {{\n    out += {}{};\n}",
+            function_name(templ), function_name(templ), jempl_args
+        ));
+    }
+
+    return stringformat(
+        "{{\n"
+        "    std::string fruitbat = stringformat(\"{}{}\", {});\n"
+        "    {}\n"
+        "}\n",
+        jempl_name,
+        "{}",    // format for the variant when expanding template
+        variant, // code for the variant
+        join(cases, " else ")
+    );
+}+
+
++fragment(control_statement) +{
+    return line_num(control_statement@self())
+         + jempl.realign_frag()
+         + control_statement.to_str();
+}+
+
+# variable substitution (@some_variable@)
++fragment(variable) +{
+    return line_num(variable@self())
+         + "out += stringformat(\"{}\"," + variable.to_str() + ");\n";
+}+
+
+@internal +{
+
+    static inline std::string quote(const std::string &str) {
+        return "\"" + c_str_escape(str) + "\"";
+    }
+
+    // returns a string containing a c style "#line"
+    // line and the code to update the current line number,
+    // using the stack slice associated with the fpl
+    // reduction code argument passed.
+    template<typename SliceType>
+    static inline std::string line_num(const SliceType &tokens) {
+        auto end_pos = tokens.end_position();
+        return stringformat(
+            "\n#line {} \"{}\"\n"
+            "source.ln = {};\n",
+            end_pos.line_number(), end_pos.filename(),
+            end_pos.line_number()
+        );
+    }
+
+public:
+
+    struct _jempl {
+        // for the function we'll create:
+        std::list<std::string> params;
+
+        std::string realign_fragment;
+
+        Searchpath import_path;
+        std::set<std::string> imports;
+        std::set<std::filesystem::path> import_files;
+
+        std::string fmt_params() {
+            return join(params, ",");
+        }
+
+        std::string realign_frag() const {
+            return realign_fragment;
+        }
+
+    } jempl;
+
+    void init_import_path(const std::filesystem::path &src) {
+        jempl.import_path.append(src.parent_path());
+        jempl.import_path.append_from_env("JEMP_INCLUDE_PATH");
+        jempl.import_path.append_from_env("CPLUS_INCLUDE_PATH");
+        jempl.import_path.append_from_env("C_INCLUDE_PATH");
+        jempl.import_path.append_from_env("CPATH");
+    }
+
+    void add_import(const std::filesystem::path &imp) {
+        jempl.import_files.insert(imp);
+    }
+
+    std::filesystem::path source_filename() const {
+        return reader->filename();
+    }
+
+    std::string output_header(
+        const std::string prog_name, const std::string src_name
+    ) {
+        return stringformat(
+            "// generated by {} v{}.{}\n"
+            "//  source: {}\n",
+            prog_name, VERSION_MAJ, VERSION_MIN, src_name
+        );
+    }
+
+    static std::string function_name(std::filesystem::path src) {
+        // remove directories above:
+        src = src.filename();
+
+        // remove _all_ extensions from the src path passed.
+        // this means foo.h.jemp -> just foo
+        while(src.has_extension())
+            src = src.stem();
+
+        return src;
+    }
+
+    std::string output_function_name() const {
+        return function_name(source_filename());
+    }
+
+    void init(const std::filesystem::path &src) {
+        init_import_path(src);
+    }
+}+
+
+@main +{
+    if(argc < 2) {
+        jerror::error("Please provide a source file name.\n");
+    }
+
+    std::list<std::filesystem::path> templates_to_expand;
+    for(int argi = 1; argi < argc; argi++) {
+        templates_to_expand.push_back(argv[1]);
+    }
+
+    std::list<std::string> generated_code;
+    std::set<std::filesystem::path> already_expanded;
+    int total_errors = 0;
+    for(auto template_fn : templates_to_expand) {
+        if(already_expanded.count(template_fn)) {
+            continue;
+        }
+        already_expanded.insert(template_fn);
+        fpl_reader_p inp = std::make_shared<fpl_reader>(template_fn);
+        if(!inp) {
+            jerror::warning(stringformat(
+                "failed to create reader for {}",
+                std::filesystem::absolute(template_fn).string()
+            ));
+            total_errors++;
+        } else {
+            jemplpl_parser parser(inp);
+            parser.init(template_fn);
+            std::string output = parser.parse();
+            if(!output.length()) {
+                jerror::warning(stringformat(
+                    "no output generated for '{}'\n", template_fn
+                ));
+                total_errors++;
+            } else {
+                // prepend the generated code so that function definitions
+                // from imported jemps come before where they are used:
+                generated_code.push_front(output);
+                std::cout << parser.output_header(argv[0], template_fn);
+
+                // now, if that imported anything, we'll want to try
+                // to pull in the import...
+                for(auto imp: parser.jempl.import_files) {
+                    templates_to_expand.push_back(imp);
+                }
+            }
+            total_errors += parser.error_count();
+        }
+    }
+
+    std::cout << join(generated_code, "\n\n");
+
+    return total_errors?1:0;
+}+
+

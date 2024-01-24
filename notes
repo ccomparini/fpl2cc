@@ -1,0 +1,130 @@
+Thu Sep 28 16:25:33 UTC 2023
+
+Ubuntu compile note:   c++ was getting oom-killed, so you
+added 4G of swap space.  That's probably more than you need,
+though.  Dial it back to maybe 2?  Peak observed use was
+1G but I may have missed something.
+
+ALTERNATELY dial down the concurrency (in general? or 
+based on memory as well as cpus?)  (dial down based on
+memory might be smart) ... makes you wonder if that couldn't
+be built in to whatever the build tool's notions of concurrency
+are - it could adapt based on available memory.  anyway...
+
+Thu Jan  5 21:30:28 PST 2023
+
+https://en.wikipedia.org/wiki/Modulo_operation
+^^ probably should specify knuth convention
+
+Fri Jan 28 10:15:14 PST 2022
+
+Yammering about ways to do string formatting:
+
+// what do we want?  I think the jest way is going to be like:
+//  "Hello {adjective} {noun}!".format()
+//    or
+//  "Hello {adjective} {noun}!".format(adjective = "cruel", noun = "world")
+//
+// (and we need some way to escape '{', should we wish to write one)
+// (maybe use % instead of {}.  then %% can be the escape. maybe formatting
+// params can be like printf as well?  only kinda)
+//
+// OK so in jest, ideally I'd actually like string interoplation to be an
+// operator and not a library function (maybe '~~' or '<-'? perhaps better
+// to just have it be "foo %bar%".format(bar = 23)).  If it's an operator,
+// we don't variadic function support for string interpolation.  That said,
+// we probably want it for other things.  One possible jest-ish variadic
+// function solution would be to basically generate a different function
+// for each variadic invocation.  The main problem there is that you can't
+// have a pointer to such a function...
+//
+// actually, how's this syntax?
+//    "foo %bar%"(bar = 23)?
+// .. which potentially could be done in c++ as well with a ()
+// overload.  might be an abuse of overloading.  On the other hand,
+// if you look at a format string as a program to generate a string
+// (which it essentially is), then that's not really wrong.  And
+// it goes well with the jest implied-accessor-method thing. 
+// ^^ YES this ^^ though actually don't you want to imitate
+// perl/sh and have soething like double quote strings format,
+// and single quote not?  in which case the parens would even
+// be optional or maybe only used to override or add a param..
+//
+// ... in jest, can closures be used for vararg situtaions? 
+// 
+// possibly better syntax:
+//  '%%' -> '%'
+//  '.' fmt_function -> fmt ;  // actually can't use '.' since that's a selector char
+//  [:selector chars:]* -> variable ;
+//  variable fmt? -> varfmt ;
+//  '{' variable fmt? '}'-> varfmt ; // for grouping (allow expressions here?)
+//  '%' varfmt? -> subst; // empty varfmt means nth variable default fmt
+// so eg "the price of %sym changed by %%%"
+//       "%num is 0x%num.x in hex"
+//       "this is the %{num}th entry"
+// or even "this is the %{num.th}" if you have a "th" formatter, which
+// could handle 1st, 2nd, 3rd (etc) as well
+// you positively need a roman numerals numeric formatter.
+// OK one problem with this is that variable should be really a jest
+// selector, and selectors can include a '.'... use something else. ~?
+// also how to specify field width?  need that.  but let's try this anyway.
+
+CONCLUSION:  make string formatting an operator; get variables from
+context (as in perl, actually) BUT do have formatting options (eg hex).
+At least minimal time formatting should be built in.  Probably go with "%"
+syntax.  Possibly fpl the string formatting.
+
+Sat Aug  7 17:26:46 PDT 2021
+
+OK so here's how it has to work.  in order:
+
+ - shift pushes to the stack and changes state.  in a pure
+   recursive ascent parser, this would mean basically calling
+   another function and using the "normal" stack as the stack
+ - reduce:  After a reduce, we have a goto.  goto basically
+   has to be done by the caller.  so that means not going to
+   another function until AFTER reducing to whatever.
+   like:
+    - pop the appropriate number of symbols off the stack.
+      (how many?  has to be based on the rule.  how to support
+      if the rule has multiple lengths of arguments?  like a list.)
+    - push(whatever was produced, whatever state 
+    - grrr...
+   .. you know, pure recursive ascent probably does make sense for this.
+   except it's a pita to get the arguments to your code generation code.
+   .. the caller (however far down the stack) has to do the code generation
+   too.  or slapping in the rule thingo.  makes me wonder if ascent
+   is really the way.
+
+So one _could_ have functions for the states and each entry on the the
+stack can be (result, *function).  A possible nice side effect of this
+is that on error, the function can potentially be state_error or something
+like that.  Makes returning an error easyish. (error in generaly can be a
+reduce/goto - perhaps that can even help debugging)
+
+... weird note:  the way I'm thinking of this, "accept" is basically
+a particular reduce case.  I think.  I think it _should_ be, anyway.
+IF NOT, do we need an eof token?  should probably have used empty
+string for such, anyway... sigh.
+
+
+Revision:
+
+    // stack is actually a member.  is product the thing to have on it?
+    product stack[] = ((&initial_state, nothing))
+    while(stack.length()) {
+      stack[-1].state_function->(this);
+    }
+
+    state functions: {
+      if(shift....) {
+        push (our shifty thing, new state)
+      } else if(reduce...) {
+        
+      } else {
+        // error.  possibly treat as a reduce.
+      }
+    }
+
+
+

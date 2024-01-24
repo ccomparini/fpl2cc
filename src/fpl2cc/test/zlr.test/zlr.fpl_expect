@@ -1,0 +1,6 @@
+returncode = 0
+stderr = "    warning: can't invert nonterminal \"something\" at src/fpl2cc/test/zlr.test/zlr.fpl:32
+    warning: Rule 2 producing nothing at src/fpl2cc/test/zlr.test/zlr.fpl:32 is unused
+src/fpl2cc/test/zlr.test/zlr.fpl: 2 warnings
+"
+stdout = ""

@@ -1,0 +1,35 @@
+
+Import('env')
+env = env.Clone()
+
+jemps = []
+jemps.append(env.Jemp2h('scan_group_terminal.h.jemp'))
+jemps.append(env.Jemp2h('scan_inv_group_terminal.h.jemp'))
+jemps.append(env.Jemp2h('regex_custom_scanner.h.jemp'))
+
+jemps.append(env.Jemp2h('fpl_x_parser.h.jemp'))
+
+# Scons doesn't know about .jemp dependencies.
+# This needs to be fixed in jemplpl (by adding
+# some kind of --dump-dependencies, such as
+# fpl2cc has), but for the moment I'm going
+# to tell scons to be liberal w/ respect to
+# rebuilding them:
+for jemp in jemps:
+    env.AlwaysBuild(jemp)
+
+
+
+env.Program('#bin/fpl2cc', [ 'fpl2cc.cc', ])
+
+# fpl2cc is precious so that if we break fpl_parser.h
+# we can still recreate it (with fpl2cc):
+env.Precious('#bin/fpl2cc')
+
+env.Fpl2h('fpl.fpl')
+# env.Program('#bin/fpl', [ 'fpl.cc', ])
+
+# test subdir:
+#SConscript('test/SConstruct', 'env');
+
+

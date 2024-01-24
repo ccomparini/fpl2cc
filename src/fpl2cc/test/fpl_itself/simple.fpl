@@ -1,0 +1,12 @@
+
+@produces int
+
+# nothing produces foo;  we expect fpl to complain appropriately:
+foo -> bar;
+
+
++{
+// this is a comment
+}+
+
+

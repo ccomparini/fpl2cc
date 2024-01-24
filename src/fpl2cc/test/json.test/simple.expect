@@ -1,0 +1,20 @@
+returncode = 0
+stderr = ""
+stdout = "======
+5 items: (
+'nothing is' => <true>
+'or else' => <false>
+'this is a key' => 'I think a string is considered legit JSON'
+'this is another key' => 4 items: [
+'this string has a '\\\"' in it'
+'and here's the second thing in the list'
+'third yes.'
+<null>
+]
+
+'this is nothing' => <null>
+)
+
+
+======
+"

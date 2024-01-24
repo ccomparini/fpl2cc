@@ -1,0 +1,6 @@
+@parameter: const std::string &file_to_include@
+@realign: OH HAI I IS AT LINE {} IN "{}" @
+// Start of include
+@include: file_to_include@
+// End of include
+

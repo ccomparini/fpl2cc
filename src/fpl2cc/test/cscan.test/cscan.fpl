@@ -1,0 +1,181 @@
+#
+# Test all kinds of scanner/terminal match and inverted match.
+#
+# (Formerly, this tested "custom" scanners.)
+#
+
++{
+#include<iostream>
+#include<list>
+#include<map>
+#include<set>
+}+
+
+@produces std::string
+
+@internal +{
+    std::map<std::string, std::string> symtab;
+}+
+
+# end-of-file (or input) assertion:
+@scanner eof +{
+    return reader->eof();
+}+
+
+# declared/stub scanner.  the normal use for this would be
+# in an abstract grammar, where it would be expected to
+# be implemented in an application specific way.
+@scanner unimplemented_stub_scanner
+
+# "scans" and expands a variable
+@terminal variable +{
+    auto start = reader->current_position();
+    auto match = reader->read_re("[a-zA-Z0-9_-]+");
+    if(!match.empty()) {
+        // ... we read something which might be a variable..
+        auto found = symtab.find(match.str());
+        if(found != symtab.end()) {
+            // ... viola, it is one.  Return its value:
+            return Terminal(found->second);
+        }
+    }
+    reader->go_to(start); // no match; put the scan back
+    return Terminal();
+    
+}+
+
+# matches any unicode-encoded 2 byte character
+# (i.e. any codepoint between \u00a0 and \u00ff)
+@terminal two_byte_char +{
+    if(reader->char_length() == 2) {
+        return Terminal(reader->read_string(2));
+    }
+    return Terminal(); // not 2 byte utf-8 char
+}+ inverse +{
+    // inverse is to read until finding a two byte utf8 char
+    // or hitting end of input (i.e. we're reading a single
+    // terminal consisting of no two_byte characters)
+    size_t len = 0;
+    while(reader->char_length(len) != 2) {
+        len += reader->char_length(len);
+    }
+
+    if(len)
+        return Terminal(reader->read_string(len));
+    else
+        return Terminal(); // (no match)
+}+
+
+stuff* the_end -> done +{
+    return stuff@join("\n") + "\n" + the_end + "\n";
+}+
+
+&unimplemented_stub_scanner -> stuff;
+
+&two_byte_char:start !&two_byte_char:guts? &two_byte_char:end -> stuff +{
+    return stringformat(
+        "'{}' bracketed by 2 byte chars '{}' and '{}'",
+        guts@join(""), start, end
+    );
+}+
+
+# we're allowing mix-and-match on these quotes in order to test
+# inverse match on grouped terminals
+@terminal fancy_string_start [ "\u275d" "\u301f" "\u2e42" "\u201f"  ]
+@terminal fancy_string_end   [ "\u275E" "\u301d" "\u301e" "\u201d"  ]
+
+&fancy_string_start^ !&fancy_string_end:contents? &fancy_string_end^ -> stuff +{
+    if(contents@count() == 0) {
+        return stringformat("empty fancy string.");
+    }
+    return stringformat("fancy string: «{}»", contents);
+    
+}+ 
+
+@terminal flag [ '🇺🇸' '🇯🇵' '🇰🇷' '🇩🇪'  '🇪🇸' '🇮🇹' '🇬🇧' ]
+&flag+:flags -> stuff +{
+    return stringformat("{} flags: {}\n", flags@count(), flags);
+}+
+
+block -> stuff;
+
+&eof -> the_end +{
+    return "ding!";
+}+
+
+"\xF0\x9F\x98\x81" -> stuff +{ return "yay 😁"; }+
+
+"\x23" -> stuff +{ return "hash"; }+ # one byte '#'
+'\x23' -> stuff;                     # 4 chars: literal \x23
+
+'\b'   -> stuff +{ return "backslash b"; }+ # 2 chars: backslash and 'b'
+'b'    -> stuff +{ return "regular b"; }+ # 1 char: 'b'
+"\b"   -> stuff +{ return "I take that last byte back"; }+
+"\e\b" -> stuff +{ return "no escape!"; }+ # 2 bytes: ESC and backspace
+
+"\U3068":to      -> stuff +{ return "don't stub your " + to.to_str(); }+
+"\u0001F408":cat -> stuff +{ return cat.to_str() + " says meow"; }+
+
+
+"\"" -> literal_double_quote +{ return "double quote"; }+ #"
+literal_double_quote -> stuff;
+# yay, this correctly causes conflict warning. (integrate with tests?)
+#'"'  -> also_double_quote +{ return "also double quote; cant get here"; }+
+#also_double_quote -> stuff;
+
+'\'':sq -> stuff +{ return stringformat("single quote: {}", sq); }+
+'\\':sb -> stuff +{ return stringformat("single backslash: {}", sb); }+
+
+# this is identical to 'U'
+"\U" -> stuff +{ return "you? no, U!"; }+
+
+# Let's say (for test purposes) that blocks are enclosed
+# in U+27E6 and U+27E7 Mathemetical Square Brackets
+# ("⟦" and "⟧"). (
+# There's a little bit of weird interplay with how spaces
+# are handled here.  the default separator code will eat
+# any space after the start_of_block, but then the guts
+# ends up including the space all the way up to the
+# end of block.  it's... correct?  yes. counterintuitive
+# though.
+"⟦" !"⟧":guts "⟧" -> block +{
+    return stringformat("block: [{}]", guts);
+}+
+
+# also for test purposes, other blocks can be specified,
+# let's say, like this:
+@scanner block_2_start /([+-])\{/
+@scanner block_2_end   /\}([+-])/
+&block_2_start !&block_2_end:guts &block_2_end -> block +{
+    auto start = block_2_start.capgroup(0);
+    auto end   = block_2_end.capgroup(0);
+    std::string description = "confusing";
+    if(start != end) {
+        description = "mixed";
+    } else if(start == "-") {
+        description = "minus";
+    } else if(start == "+") {
+        description = "plus";
+    }
+    return stringformat("{} block: [{}]\n", description, guts);
+}+
+
+# assign a variable for later expansion:
+/[a-zA-Z0-9_-]+/:name '='^ string -> assignment +{
+    symtab[name] = string;
+    return "";
+}+
+assignment -> stuff;
+
+
+# strings are double quoted; quotes can be escaped with
+# a backslash.  really, this is to test inverting regex match.
+'"'^ !/"|(:?\")/:guts '"'^ -> string;
+
+&variable -> stuff;
+
+/.+/:anything_else -> stuff +{
+    return stringformat("other stuff: '{}'\n", anything_else);
+}+
+
+@default_main

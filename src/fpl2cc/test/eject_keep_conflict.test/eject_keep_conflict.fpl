@@ -1,0 +1,50 @@
+@produces std::string
+
+bat+ -> bats +{
+    std::string out = "We have bats. Oh yes, we have bats.\n";
+    out += bat@join("\n");
+    return out;
+}+
+
+'a'^ -> foo +{
+    StackSlice steps = all_matched_steps();
+    return stringformat(
+        "foo: {} steps, {} params", steps.count(), steps.param_count()
+    );
+}+
+
+'b'  -> bar +{
+    return "bar:b";
+}+
+
+foo^ bar '.'^ -> bat +{ // note foo is ejected here
+    std::string out;
+    StackSlice steps = all_matched_steps();
+    out += stringformat(
+        // OK SO steps.param_count() will actually count the foo,
+        // since it does need to be on the stack due to it potentially
+        // needing to be there for the rule in which it's not ejected.
+        // so, uhh.. just ask the rule how many params it has.
+        "fooless: {} steps, {} params: ",
+        steps.count(), this_rule.num_params()
+    );
+    for(int sti = 0; sti < steps.count(); sti++) {
+        // foo is ejected, so we don't expect it to show up here
+        Product prd = steps.product(sti);
+        if(prd) out += ' ' + prd.var_str();
+    }
+    out += ".";
+    return out;
+}+
+
+foo  bar ';'^ -> bat +{ // and not ejected here
+    if(foo@count()) {
+        // if we dtrt and didn't eject the foo, we'll hit this one.
+        // we check count 
+        return foo + " + " + bar;
+    }
+
+    return "fail - got no foo\n";
+}+
+
+@default_main

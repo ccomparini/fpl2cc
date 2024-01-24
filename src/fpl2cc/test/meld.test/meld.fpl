@@ -1,0 +1,93 @@
+#
+#  Test melding steps, which is where more than one step
+# for a rule has the same parameter name (and type). In
+# such cases, the parameter passed to the reduce function
+# should encompass the multiple steps with the same
+# parameter name (treated as a multiple variable).
+#
+
+@produces std::string
+@default_main
+@comment_style sh
+
+# items should have meld 1...
+item* -> done +{
+    return stringformat(
+        "\n{} items total.  they are:\n    {}\n",
+        item@count(), item@join("\n    ")
+    );
+    
+}+
+
+argument_list     -> item;
+`imp`.curly_list  -> item;
+array             -> item;
+associative_array -> item;
+#`json`.array     -> item;
+
+# we expect:
+#  arg has meld 2, offset 0
+'('^ (arg (','^ arg)*)? ')'^ -> argument_list +{
+    return stringformat(
+        "{} args: {}",
+        arg@count(), arg@join("'{}'", ", ")
+    );
+}+
+
++curly_list(arg) +{
+    return stringformat(
+        "{} curly args: {}",
+        arg@count(), arg@join("'{}'", ", ")
+    );
+}+
+
+# this one is like the json one which is giving me
+# trouble - the sub arguments are renamed
+'['^ (arg (','^ arg)*)?:elements ']'^ -> array;
+
++array(elements) +{
+    return stringformat(
+        "{} array els: {}",
+        elements@count(), elements@join("'{}'", ", ")
+    );
+}+
+
+# here we expect:
+#   keys has offset 0 meld 2
+#   vals has offset 1 meld 2
+'⁅'^ (/[a-z_]+/:key '=>'^ arg:val ','?^)* '⁆'^ -> associative_array;
+'⟅'^ /[a-z_]+/:key '=>'^ arg:val (','^ /[a-z_]+/:key '=>'^ arg:val)* '⟆'^ -> associative_array;
++associative_array +{
+    return stringformat(
+        "{} (span {}) keys at {}: {}; {} (span {}) values at {}: {}",
+        key@count(), key@params_span_size(), key@params_start(), key@join(", "),
+        val@count(), val@params_span_size(), val@params_start(), val@join(", ")
+    );
+}+
+
+# different (but determinate) meld offsets for different params;
+# also melding across a subexpression.
+# boat should get meld dist 2; land_vehicle gets meld dist 4
+@terminal boat [ '⛵' '🚢' '🚤' '🛶' ]
+@terminal land_vehicle [ '🏎️' '🏍️' '🚚' ]
+
+# (boat is in its own subex to test melding across subexes)
+'♜'^ ((&boat ',' &boat) &land_vehicle)* '♜'^ -> item +{
+    return stringformat(
+        "by sea: [ {} ] by land: [ {} ]",
+        boat@join(", "), land_vehicle@join(", ")
+    );
+}+
+
+# .. and this one is because at one point I thought I needed
+# a test where the first parameter is not at the start of the
+# subex. I realize now that's not an issue, but anyway:
+('ρ'^ &boat)+ -> item +{
+    return "rho boats: " + boat@concatenate();
+}+
+
+/[a-z0-9_]*/ -> arg;
+
+
+
+

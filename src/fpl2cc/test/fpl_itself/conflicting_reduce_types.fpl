@@ -1,0 +1,15 @@
+
+@produces std::string
+
+@type_for foo int
+@type_for bar double
+
+(foo:p bar:p) -> conflict;
+
+'a' -> foo +{ return  1;    }+
+'b' -> bar +{ return 23.26; }+
+
++conflict(p) +{
+    // is p int or double?  can't be both, so this should fail.
+    return "how did we get here?";
+}+

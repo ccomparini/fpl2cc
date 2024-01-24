@@ -1,0 +1,15 @@
+@/* generates fpl separator code for the regex passed */@
+@parameter: const std::string &re@
+@realign: #line {} "{}" @
+
+size_t len = 0;
+std::cmatch match;
+auto re_opts = std::regex_constants::match_continuous;
+while(std::regex_search(
+    (const char *)(inp + len), match, std::regex("@c_str_escape(re)@"), re_opts
+)) {
+    len += match.length();
+}
+
+if(len) return len;
+

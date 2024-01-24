@@ -1,0 +1,10 @@
+
+" The only way I've gotten this to work has been
+" to copy the following into my ~/.vimrc
+
+au BufRead,BufNewFile *.fpl set filetype=fpl
+au BufRead,BufNewFile *.fplb set filetype=fpl
+
+au BufRead,BufNewFile *.h.jemp set filetype=cpp
+au BufRead,BufNewFile *.cc.jemp set filetype=cpp
+

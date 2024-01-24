@@ -1,0 +1,10 @@
+returncode = 0
+stderr = ""
+stdout = "object {
+ \"c-identifier\" = c-value:this_is_a_c_identifier,
+\"some numbers\" = array { 23.4, 66, 0.9}
+,
+\"something true\" = true,
+\"something false\" = false,
+\"concatenation\" = \"meow\"\"meow\"\"meow\"}
+"

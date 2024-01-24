@@ -1,0 +1,11 @@
+a_variable = "hi there"
+⟦ foo bar bat, I can put anything in here other than a terminator ⟧
+⟦
+here's another block
+⟧
++{ should be a plus block }+
+-{ should be a minus block }-
++{ should be a mixed block }-
+
+a_variable
+not_a_variable

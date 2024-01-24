@@ -1,0 +1,32 @@
+#
+#  Test for terminal masking.
+#
+#  Terminal masking is when one terminal prevents the matching of another
+#  terminal due to being a substring of that terminal.  This checks that
+#  that doesn't happen.
+#
+
+@default_main
+@produces std::string
+@comment_style sh
+
+stuff+ -> done +{
+    return stuff@join("\n");
+}+
+
+'pup' -> stuff +{
+    return "masker of puppet";
+}+
+
+'puppet' -> stuff +{
+    return "just puppet";
+}+
+
+'puppy' -> stuff +{
+    return "woof";
+}+
+
+/.+/:whatevs -> stuff +{
+    return stringformat("anything else ({})", whatevs);
+}+
+

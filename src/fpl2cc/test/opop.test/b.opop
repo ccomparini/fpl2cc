@@ -1,0 +1,5 @@
+
+# this one, we expect a partial match on the "a" followed
+# by potentially repeated 3 "b" rule.
+a b
+a b, b, b

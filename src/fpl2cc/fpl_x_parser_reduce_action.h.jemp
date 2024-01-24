@@ -1,0 +1,60 @@
+@parameter: const productions &prds@
+@parameter: const production_rule &rule@
+@declare return_type: prds.type_for(rule.product())@
+@declare num_params: rule.parameter_count()@
+@realign: #line {} "{}" @
+
+@return_type@ @rule.rule_fn()@(
+    @-for(auto pname : rule.parameter_names()) {-@
+        @declare pstep: prds.canonical_step_for_param(rule.rule_number(), pname)@
+        ReductionParameter<@pstep.type_in_target()@> @pname@,
+    @-}-@
+    bool dummy = true // hack for comma
+) {
+    @#fpl_x_parser_reduce_action_meta(prds, rule)@
+
+    // @rule.to_str()@
+    @if(code_block rule_code = rule.reduce_code()) {-@
+        @/* fpl-author-supplied rule code: */@
+        @rule_code.format(false)@
+    @} else if(prds.has_generated_type(rule.product())) {@
+        @/* auto generated type - initialize from parameters */@
+        @return_type@ result;
+        @-for(int pind = 0; pind < num_params; pind++) {-@
+            @declare param: rule.parameter_step(pind)@
+            @declare pname: param.variable_name()@
+            @declare elname: prds.element_id_name(param.gexpr)@
+            result.@pname@.reserve(@pname@.count());
+            @pname@.foreach([&result](const Product &item)->void {
+                result.@pname@.push_back(item.@elname@_val());
+            });
+        @-}-@
+        return result;
+    @} else {@
+        @/*default is to construct/cast from all non-ejected steps. */@
+        #line 1 "@rule.location()@ (default action for @c_str_escape(rule.to_str())@)"
+        // @source.filename()@:@source.line_number()@
+        return @return_type@(
+            @-for(int parmi = 0; parmi < rule.parameter_count(); parmi++) {-@
+                @declare param: rule.parameter_step(parmi)@
+                @declare vname: param.variable_name()@
+                @-if(param.is_optional()){-@
+                    #line @rule.line_number()@ "@rule.filename()@"
+                    #error "no default for optional '@vname@' in rule @rule.to_str()@"
+                @-} else if(!param.is_single()){-@
+                    #line @rule.line_number()@ "@rule.filename()@"
+                    #error "no default for multiple '@vname@' in rule @rule.to_str()@"
+                @-} else {-@
+                    @-if(parmi > 0){@,@}-@ @/* argument separator */@
+                    @-if(param.is_nonterminal()) {-@
+                        @-vname@.val()
+                    @-} else {-@
+                        @/* by default, pass terminals a strings: */@
+                        @-vname@.val().to_str()
+                    @-}-@
+                @-}-@
+            @-}-@
+        );
+    @}-@
+}
+

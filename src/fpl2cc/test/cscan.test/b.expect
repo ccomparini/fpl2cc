@@ -1,0 +1,20 @@
+returncode = 0
+stderr = ""
+stdout = "mixed block: [x ]
+
+I take that last byte back
+backslash b
+regular b
+no escape!
+\\x23
+yay 😁
+hash
+hash
+hash
+double quote
+double quote
+🐈 says meow
+don't stub your と
+you? no, U!
+ding!
+"

@@ -1,0 +1,7 @@
+returncode = 0
+stderr = ""
+stdout = "
+(x) () ()
+(x) (y) ()
+(x) (y) (z)
+"

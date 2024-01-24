@@ -1,0 +1,149 @@
+#
+#  fpl for fpl2cc and hopefully at some point fpl2jest
+#
+
+@comment_style sh
+@grammar fpl
+
++{
+#include <climits>
+#include <variant>
+#include "stringformat.h"
+
+class CodeBlock;
+class ProductionRule;
+class Productions;
+
+struct quantifier {
+    int min;
+    int max;
+    quantifier(int mn, int mx) : min(mn), max(mx) { }
+};
+
+// probably want some kind of smart pointer if we're actually going
+// to use this:
+using productions_ptr = Productions *;
+}+
+
+@produces productions_ptr
+
+
+@internal +{
+public:  // XXX this is a terible hack - make a reasonable way
+    productions_ptr productions;
+}+
+
+@type_for grammar_element GrammarElement
++grammar_element(production_name) +{
+    return GrammarElement(
+        production_name, GrammarElement::Type::NONTERM_PRODUCTION
+    );
+}+
+
++grammar_element(regex) +{
+    return GrammarElement(regex, GrammarElement::Type::TERM_REGEX);
+}+
+
++grammar_element(exact_match) +{
+    return GrammarElement(exact_match, GrammarElement::Type::TERM_EXACT);
+}+
+
+# quantifiers:
+@type_for quantifier quantifier
++zero_or_more() +{ return quantifier(0, INT_MAX); }+
++one_or_more()  +{ return quantifier(1, INT_MAX); }+
++zero_or_one()  +{ return quantifier(0, 1      ); }+
+
+@type_for step ProdExpr
++step(grammar_element quantifier) +{
+    return ProdExpr(grammar_element, quantifier.min, quantifier.max);
+}+
+
+@type_for rule ProductionRule
++rule(steps production_name code_block) +{
+    // step base_parser
+    ProductionRule rule(start_pos.filename(), start_pos.line_number());
+
+    // for(auto st : steps) { // grr support iterators somehow
+    for(int sti = 0; sti < steps.count(); ++sti) {
+        rule.add_step(steps[sti]);
+    }
+
+    rule.code(code_block);
+
+    return rule;
+}+
+
+@type_for code_block CodeBlock
++code_block(code) +{
+    return CodeBlock(code, start_pos.filename(), start_pos.line_number());
+}+
+
++code_block(no_code) +{
+    return CodeBlock::none;
+}+
+
++import(filename) +{
+    #warning "import not implemented"
+    fprintf(stderr, "import (`file`) not implemented XXX\n");
+    return stringformat("@import {} fail - unimplemented\n");
+}+
+
++directive(comment_style) +{
+    productions->add_comment_style(comment_style,
+        start_pos.filename(), start_pos.line_number()
+    );
+    return "@comment_style";
+}+
+
++directive(default_action) +{
+    productions->set_default_action(default_action);
+    return "@default_action";
+}+
+
++directive(default_main) +{
+    bool dm = false;
+    if(default_main.exists()) {
+        dm = default_main[0].term_str();
+    }
+    productions->set_default_main(dm);
+    return "@default_main";
+}+
+
++directive(grammar_name) +{
+    #warning "@grammar not implemented"
+    // XXX what we need here:
+    //   - not to need options.  only for path, anyway?
+    //   - (as with import, actually) recursively invoke the
+    //     parser on a new source/productions?
+    // productions->import_grammar(opts, filename + ".fpl");
+    return "@grammar";
+}+
+
++directive(internal_code) +{
+    productions->add_internal(internal_code);
+    return "@internal";
+}+
+
++directive(post_parse) +{
+    productions->set_post_parse(post_parse);
+    return "@post_parse";
+}+
+
++directive(produces) +{
+    productions->set_output_type(produces);
+    return "@produces";
+}+
+
++directive(separator_code) +{
+    productions->set_separator_code(separator_code);
+    return "@separator";
+}+
+
+@type_for items productions_ptr
++items(items) +{
+    // everything will already have been addded to the productions
+    // passed, so just return (a pointer to) it:
+    return productions;
+}+
+

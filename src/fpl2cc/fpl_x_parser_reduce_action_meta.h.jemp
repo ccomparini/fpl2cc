@@ -1,0 +1,67 @@
+@parameter: const productions &prds@
+@parameter: const production_rule &rule@
+@realign: #line {} "{}" @
+
+@/*
+  Rule metadata: we make this available to fpl authors for use
+  in reduce code.
+*/@
+
+    struct {
+        static const char *name() {
+            return "@rule.rule_fn()@";
+        }
+        static const char *product() {
+            return "@c_str_escape(rule.product())@";
+        }
+        static const char *product_type() {
+            return "@c_str_escape(prds.type_for(rule.product()))@";
+        }
+        static int num_steps() {
+            return @rule.num_steps()@;
+        }
+        static int num_params() {
+            return @rule.parameter_count()@;
+        }
+        static int line_number() {
+            return @rule.line_number()@;
+        }
+        static const char *filename() {
+            return "@c_str_escape(rule.filename())@";
+        }
+        static const char *location() {
+            return "@c_str_escape(rule.location())@";
+        }
+        static const char *to_str() {
+            return "@c_str_escape(rule.to_str())@";
+        }
+        static const char *param_name(unsigned int ind) {
+            static const char *pname[] = {
+                @for(int rpi = 0; rpi < rule.parameter_count(); ++rpi) {-@
+                    "@rule.parameter_step(rpi).variable_name()@"
+                @}-@
+            };
+            if(ind < @rule.parameter_count()@) {
+                return pname[ind];
+            } else {
+                return "param_name index out of bounds at "
+                       "@c_str_escape(rule.location())@";
+            }
+        }
+        static const char *param_type(unsigned int ind) {
+            static const char *ptype[] = {
+                @for(int rpi = 0; rpi < rule.parameter_count(); ++rpi) {-@
+                    "@prds.type_for(rule.parameter_step(rpi).production_name())@"
+                @}-@
+            };
+            if(ind < @rule.parameter_count()@) {
+                return ptype[ind];
+            } else {
+                return (
+                    "param_type index out of bounds at "
+                    "@c_str_escape(rule.location())@"
+                );
+            }
+        }
+    } this_rule;
+

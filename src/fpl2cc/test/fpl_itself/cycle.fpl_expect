@@ -1,0 +1,7 @@
+returncode = 0
+stderr = "    warning: Rule 1 producing cycle_1 at src/fpl2cc/test/fpl_itself/cycle.fpl:8 is unused
+    warning: Rule 2 producing cycle at src/fpl2cc/test/fpl_itself/cycle.fpl:9 is unused
+    warning: Rule 3 producing cycle_0 at src/fpl2cc/test/fpl_itself/cycle.fpl:10 is unused
+src/fpl2cc/test/fpl_itself/cycle.fpl: 3 warnings
+"
+stdout = ""

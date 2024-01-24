@@ -1,0 +1,69 @@
+#
+# Test partial parse in a file with other stuff.
+#
+# It's not a realistic case, but the parts we "parse" are single
+# and double quoted strings.  Everything else is outside the grammar.
+# The test harness calls parse_goal() and then examines the result.
+# If it parsed a goal (in this case, a quoted string), it writes
+# that string to standard out.  Otherwise, it pretend-parses by
+# reading until it hits whitespace.
+# 
+# Realistic use cases of partial parses/parse_goal would be parsing
+# embedded languages (for example, code in +{ }+ in fpl itself), or
+# input which may or may not yet be complete (say, for example, data
+# coming in over a network).
+#
+
+@goal quoted_string
+@produces std::string
+
+# we're looking for single or double quoted strings
+# (and allowing \" to escape, because I copypasta'd this)
+/"((?:[^"\\]|\\.)*)"/:src -> quoted_string +{
+    return stringformat(
+        "«{}» at {}",
+        src.capgroup(0), src@position()
+    );
+}+
+
+"'" -> single_quote +{
+    return "'";
+}+
+
+# for this test, single quoted strings can't be multiline
+# (so we can test recovery) and, to keep it simple, don't
+# allow backslash escapes
+single_quote:start /[^'\n]+/:src single_quote^ -> quoted_string +{
+    return stringformat(
+        "«{}» with quote at {} and guts starting at {}",
+        src, start@position(), src@position()
+    );
+}+
+
+@main +{
+    fpl_reader_p reader;
+    if(argc >= 2) {
+        reader = std::make_shared<fpl_reader>(argv[1]);
+    } else {
+        reader = std::make_shared<fpl_reader>(std::cin, "<stdin>");
+    }
+
+    goal_parser parser(reader);
+
+    while(!reader->eof()) {
+        
+        const goal_parser::Product &parsed = parser.parse_goal();
+        if(parsed) {
+            std::cout << stringformat("found a string: {}\n", parsed.val());
+        } else {
+            // one possible use case here is we're using the goal parser
+            // to parse something out of a larger parsing context.  so
+            // for the non-goal parser, we just pretend to parse using
+            // a regex (which eats non-space):
+            reader->read_re("[^\\s]+");
+        }
+    }
+
+    return 0;
+}+
+

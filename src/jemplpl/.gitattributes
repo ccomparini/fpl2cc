@@ -1,0 +1,7 @@
+
+# These files are generated from .fpl source, but are checked in
+# for bootstrapping purposes (because you need jemplpl to compile
+# the fpl).  As such, we don't want to hear about merge conflicts.
+# The files need to be regenerated after any real changes anyway.
+jemplpl.cc  merge=ours
+jemplpl.states  merge=ours

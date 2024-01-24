@@ -1,0 +1,11 @@
+returncode = 0
+stderr = ""
+stdout = "======
+a
+x
+xxxbbb
+yyybbb
+yyyaaa
+xxxaaa
+======
+"

@@ -1,0 +1,36 @@
+
+// oh hai this is a line comment
+{ }
+{
+    bar/**/;
+    bat;
+    bell;
+}
+
+/*
+   Also hi there this is a block comment
+ */
+
+a_statement;
+
+fuofoo
+
+%,
+%%%,
+
+#####;
+##;
+
+~~~~,
+~,
+
+$$$$$,
+$$$,
+$$,
+
+123,
+999999,
+1,
+22,
+
+// this is a comment at the end

@@ -1,0 +1,7 @@
+returncode = 0
+stderr = ""
+stdout = "
+2 items total.  they are:
+    1 curly args: '23'
+    3 curly args: '99', '77', '2323'
+"

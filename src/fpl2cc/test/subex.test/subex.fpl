@@ -1,0 +1,86 @@
+
+# produces std::string so we can more easily
+# control the final output w/ the default main
+@produces std::string
+@type_for expression double
+@goal statements
+@comment_style c
+
+# An expression followed by a ';' is a statement.
+# We do this in a subexpression to make sure the "statement"
+# name within the subexpression "bubbles up".
+# Writing:
+#   (expression ';'^):statement* -> statements;
+# is probably clearer, but this tests name bubble-up.
+(expression:statement ';'^)* -> statements;
+
+# Primary expressions are in their own fpl not because it's
+# good structure (it's not), but to test if subexpressions in
+# imported fpl dtrt.  (At one point, there was a bug involving
+# name collisions among imported subexpressions)
+`expression` -> expression ;
+
+# functions:
+'sum' argument_list:args -> sum ;
+sum -> expression ;
+
+# this is an argument list in the c style (though it's inherently
+# variadic), where commas are required before any but the first
+# element:
+'('^ (expression (','^ expression)*)?:args ')'^ -> argument_list ;
+
+####### implementations:
++{
+#include<math.h>
+}+
+
++number(digits) +{ return std::stod(digits); }+
+
++natural_log_base +{ return M_E; }+
++pi               +{ return M_PI; }+
+
+
++add(lhs, rhs) +{
+    return lhs + rhs;
+}+
+
++sub(lhs, rhs) +{
+    return lhs - rhs;
+}+
+
++mult(terms) +{
+    double result = terms[0];
+    for(int ind = 1; ind < terms@count(); ind++) {
+        result *= terms[ind];
+    }
+    return result;
+}+
+
++div(numerator, denominator) +{
+    return numerator/denominator;
+}+
+
+@type_for argument_list std::vector<double>
++argument_list(args) +{
+    std::vector<double> out;
+    out.reserve(args@count());
+    args@foreach([&out](double el)->void {
+        out.push_back(el);
+    });
+    return out;
+}+
+
++sum(args) +{
+    double sum = 0;
+    for(auto el : args) {
+        sum += el;
+    }
+    return sum;
+}+
+
++statements(statement) +{
+    return statement@join("\n");
+}+
+
+@default_main
+

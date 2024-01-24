@@ -1,0 +1,29 @@
+@parameter: const productions &prds@
+@realign: #line {} "{}"@
+
+@for(auto gen_type: prds.generated_types) {-@
+    struct @gen_type.name()@ {
+        @for(auto mem : gen_type.attributes) {-@
+            @/* to KISS, everything is std::vector (even if there
+                is only ever exactly one match) so that we don't
+                have to worry about declaration order, multiplicity,
+                or optionalness.
+            */@
+            // @mem@
+            std::vector<@mem.type_in_target(prds)@> @mem.name()@;
+        @}-@
+
+        // default constructor.  everything needs a default constructor.
+        @gen_type.name()@() { }
+
+        std::string to_str() const {
+            std::string result = "{\n";
+            @for(auto mem : gen_type.attributes) {-@
+                result += stringformat("    @mem.name()@: {}\n", @mem.name()@);
+            @}@
+            result += "}\n";
+            return result;
+        }
+    };
+@}@
+

@@ -1,0 +1,10 @@
+returncode = 64
+stderr = "src/util/test/jerror.cc:23 sez 'gonna shout in a bucket' on channel 1
+src/util/test/jerror.cc:24 sez 'shouting in a bucket' on channel 0
+src/util/test/jerror.cc:28 is deeper! inner pease
+src/util/test/jerror.cc:29 sez 'inner peace' on channel 1
+src/util/test/jerror.cc:32 sez 'outer peace' on channel 0
+I'm going to say goodbye now at src/util/test/jerror.cc:39
+Fatal error: goodbye!	at src/util/test/jerror.cc:40
+"
+stdout = ""

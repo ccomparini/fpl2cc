@@ -1,0 +1,47 @@
+
+#
+# "lookahead" test - check if we can parse expressions
+# which "require" arbitrary lookahead, even though I
+# ended up implementing the this with arbitrary rewind
+# and not lookahead per se.
+#
+
+@produces std::string
+@default_main
+@comment_style sh
+
+statement*:statements -> done +{
+    return statements@join("\n");
+}+
+
+a_to_d          -> statement;
+a_to_b          -> statement;
+abc_ef          -> statement;
+other           -> statement;
+four_a_b        -> statement;
+four_a_d        -> statement;
+ambiguous_a_b_x -> statement;
+ambiguous_a_b   -> statement;
+
+a_to_b:w a_to_b:x a_to_b:y a_to_b:z -> four_a_b +{
+    return stringformat("4 x {}", w);
+}+
+
+a_to_d:w a_to_d:x a_to_d:y a_to_d:z -> four_a_d +{
+    return "Bauhaus logo";
+}+
+
+a_to_d 'a' 'b' 'x'^ -> ambiguous_a_b_x +{
+    return "ambiguous a-b with x";
+}+
+
+a_to_d a_to_b -> ambiguous_a_b +{
+    return "ambiguous a-b";
+}+
+
+'a' 'b' 'c' 'd'     -> a_to_d  +{ return "a-d"; }+
+'a' 'b' 'c' 'e' 'f' -> abc_ef  +{ return "abc_ef"; }+
+'a' 'b'             -> a_to_b  +{ return "a-b: winning"; }+
+
+/[a-z]+/ -> other +{ return stringformat("other: {}", arg_0); }+
+

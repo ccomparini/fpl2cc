@@ -1,0 +1,69 @@
+@parameter: const productions &prds @
+@parameter: const grammar_element &el @
+@parameter: const fpl_options &opts @
+@realign: #line {} "{}" @
+@declare el_id: prds.element_id_name(el)@
+@declare el_str: c_str_escape(el.to_str())@
+
+@/*
+ this creates a function named like:
+   shift_TERM_EXACT__terminal_X()
+   shift_TERM_REGEX__terminal_X()
+   shift_TERM_CUSTOM__terminal_X()
+   (etc - anything which is not a nonterminal)
+ .. where X is the element ID number.
+ */@
+// @el.to_str()@ 
+bool shift_@el.type_str()@_@el_id@(bool eject) {
+    if(auto next_up = lr_next()) {
+        if(next_up.mismatch && next_up.element_id == @el_id@) {
+            // parser has already determined that this element isn't
+            // leading to any legitimate production in this context
+            // (it's a "mismatch"), so "read" it and return false so
+            // that other states/shifts can try to match something
+            // else:
+            lr_read(@el_id@);
+        }
+        // Would this ever be a match?  
+        return false;
+    }
+
+    const SourcePosition pos = position();
+    Terminal result;
+    @#scan_terminal("result", prds, el)@
+
+    if(result) {
+        clear_mismatches();  // (we matched)
+
+        debug_print("shifting @el_str@\n");
+
+        lr_push(@el_id@, eject, pos, Product(result));
+
+        @/*
+          assertions count as terminals.  therefore, clearing
+          bytes_eaten is (strictly speaking) correct, here.
+          but actually I think it's wrong in cases where
+          there may be more than one consecutive lack-of-separator.
+          also, we really have no idea if a TERM_CUSTOM moved
+          the input pointer or what.
+          possibly a better implementation would be to track
+          the position of the end of the last non-0-length
+          separator.
+        */@
+        bytes_eaten = 0;
+
+        if(!lr_read(@el_id@)) {
+            internal_error(stringformat(
+                "expected item with id @el_id@ but this was next up (at lr {}): {}\n"
+                "stack:\n{}\n",
+                lr_read_pos, lr_next(),
+                lr_stack
+            ));
+        }
+
+        return true;
+    }
+
+    return false;
+}
+

@@ -1,0 +1,9 @@
+returncode = 0
+stderr = ""
+stdout = "a-d
+a-d
+a-d
+other: foo
+Bauhaus logo
+ambiguous a-b
+"

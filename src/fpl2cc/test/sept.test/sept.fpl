@@ -1,0 +1,33 @@
+#
+# separator test language
+# purely for testing the '~' lack-of-separator pseudo-terminal
+#
+@default_main
+@produces std::string
+
+
+thing -> done +{ std::cout << thing << "\n"; return ""; }+
+
+# thing, separator, then another thing:
+thing  thing:next_thing -> thing +{ return thing + "," + next_thing; }+
+
+# thing, no separator, then another thing:
+thing~ thing:suffix     -> thing +{ return thing + "+" + suffix; }+
+
+# leading lack of separator seems to break the parser.
+# I'm not sure if it's introducing an undetected conflict, or
+# (closer to symptoms) messing up stack popping.
+# in any case, it's a weird construct and I can't think
+# of why anyone would want it, so therefore I'm punting
+# for now and not worrying about it.
+# ~ '1' -> thing ;
+'1' ~   -> thing; # (this doesn't break the parser)
+/[a-z]/ -> thing;
+
+# TODO:
+#  - test leading lack-of-space
+#  - lack of space just prior to eof
+# consider:
+#  - interplay of lack-of-space ~ and setting the separator
+#    to "no-space" or such
+

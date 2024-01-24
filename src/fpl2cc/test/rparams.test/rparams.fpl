@@ -1,0 +1,112 @@
+@goal lists
+
+@produces std::string
+@comment_style sh
+
+list+ -> lists;
+
+#
+# test parameters for:
+#   o parameter melding (multiple same-name parameters)
+#   - common/deep subexpressions
+#   - complex subexpressions 
+
+'🍇' -> grapes;
+'🍊' -> tangerine;
+'🍋' -> lemon;
+'🍌' -> banana;
+'🍎' -> apple;
+
+grapes    -> fruit;
+tangerine -> fruit;
+lemon     -> fruit;
+banana    -> fruit;
+apple     -> fruit;
+'tomato'  -> fruit;
+
+# Common subexpression w/ melding and bubble-up:
+# The reduce action should expect one "fruit" parameter
+# with multiple items.  The first such item will
+# be at stack pos 1, and the meld incr will be 2.
+'('^ (fruit (','^ fruit)*)? ')'^ -> fruit_list;
+fruit_list -> list;
+
+/[0-9]+/:digits -> integer;
+
+# these should both parse, and reducers need to see all
+# the args:
+'['^ integer:el ','^ integer:el ']'^ -> two_tuple;
+#'['^ (integer:el ','^ integer:el                ) ']'^ -> two_tuple; # XXX USE THIS ONE
+'['^ integer:el ','^ integer:el ','^ integer:el ']'^ -> three_tuple;
+#'['^ (integer:el ','^ integer:el ','^ integer:el) ']'^ -> three_tuple;
+
+# expect all these to inherit list's type:
+two_tuple   -> tuple;
+three_tuple -> tuple;
+tuple       -> list;
+
+# this one should toss a warning, and all bets are off
+# as to what it does.
+integer:foo list:foo -> doom;
+
+######### reduce actions/implementations
+
+@type_for integer std::string
+@type_for fruit std::string
+@type_for list std::list<std::string>
+
+@default_main
+
++two_tuple(el) +{
+    if(el@count() != 2) {
+        jerror::error(stringformat(
+            "element count is {} for a 2-tuple!\n", el@count()
+        ));
+        return {0, 0};
+    }
+    return { el[0], el[1] };
+}+
+
++three_tuple(el) +{
+    if(el@count() != 3) {
+        jerror::error(stringformat(
+            "element count is {} for a 3-tuple!\n", el@count()
+        ));
+        return {0, 0, 0};
+    }
+    return { el[0], el[1], el[2] };
+}+
+
++fruit_list(fruit) +{
+    std::list<std::string> list;
+    fruit@foreach([&list](const std::string &fr)->void {
+        list.push_back(fr);
+    });
+    std::cout << stringformat(
+        "fruit list input has {} elements ({}) and output has {} elements\n",
+        fruit@count(), fruit@join(", "), list.size()
+    );
+    return list;
+}+
+
++doom(foo) +{
+    // first parameter to this is integer (= string, in this case),
+    // but the second is a list, so this shouldn't be able to work.
+    // or can it?
+    return stringformat(
+        "{} params to doom: {}",
+        foo@count(), foo@join(", ")
+    );
+}+
+
++{
+#include"util/join.h"
+}+
++lists(list) +{
+    std::string out;
+    list@foreach([&out](const Product &lin)->void {
+        out += join(lin, ", ") + "\n";
+    });
+    return out;
+}+
+

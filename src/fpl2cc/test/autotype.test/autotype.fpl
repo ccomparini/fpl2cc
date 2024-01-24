@@ -1,0 +1,39 @@
+
+#
+#  test if fpl-generated types are even vaguely sane
+#
+
+
+@comment_style c
+@default_main
+@generate_types
+
+# what to test here?
+#  - optional/multiple (maybe want a '?'?)
+#  - terminals
+#  x subexpressions
+#    - complex subexpression?  i.e. more than one non-ejected thing?
+#  x ejectedness
+#  x unnamed things
+#  - multiple ways to get to the same thing
+
+#thing '.'^ -> done;
+
+thing+ '.'^ -> thing;
+zeta -> thing;
+
+list+    -> thing;
+analogy+ -> thing;
+
+@type_for word std::string
+/[A-Za-z]/ -> word;
+word (','^ word)* -> list;
+
+word:a ':' word:b -> relation;
+relation:ab '::'^ relation:cd -> analogy;
+
+'zzzzzzzzzz' -> zeta;
+
+
+
+

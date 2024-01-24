@@ -1,0 +1,157 @@
+@parameter: const productions &prds @
+@parameter: const production_rule &rule @
+@parameter: const fpl_options &opts @
+@declare num_params: rule.parameter_count()@
+@realign: #line {} "{}" @
+
+@/*
+ generates the call to the reduce function for the given rule.
+*/@
+    // we've matched something, and we're going to generate and
+    // push a result, so first we need to clear any mismatches
+    // from the top of the stack:
+    clear_mismatches();
+
+    @/* Figure out the stack slices for each argument.
+        We have to do this outside the call because parameter evaluation
+        order is not defined in c++ and we're (pseudo-)popping the stack.
+        At the moment, we create a stack slice even for things we're
+        not going to pass to the reduce function.
+    */@
+    @for(int stind = rule.num_steps() - 1; stind >= 0; --stind) {-@
+        @declare step: rule.nth_step(stind)@
+        @if(!step) {-@
+            // If there's no such step, it's a bug in fpl
+            #error Bug: no expression for step @stind@ @rule.to_str()@ @rule.location()@
+        @-} else {-@
+            @declare el_id:  prds.element_id(step.gexpr)@
+            @declare elname: prds.element_id_name(el_id)@
+
+            lr_read_pos = lr_position_before_@elname@(
+                lr_read_pos, @step.qty.multiple@
+            );
+        @}@
+    @}@
+    lr_read_pos++;  // (we went until just before the real frame start)
+
+    @if(opts.debug) {-@
+        std::cerr << stringformat(
+            "reducing by {}  ({} steps, {} params)\n",
+            "@c_str_escape(rule.to_str())@", // (rule might have {} in it)
+            @rule.num_steps()@, @rule.parameter_count()@
+        );
+        std::cerr << stringformat(
+            "all_matched_steps: {}\n", all_matched_steps()
+        );
+    @}@
+
+    // Now that we know where the frame starts, we can go forward through
+    // the stack to find the appropriate slices for our arguments.  We do
+    // need to do this back-and-forth thing to get the arguments correct
+    // for rules like: 
+    //    foo:first foo*:rest -> bar ;
+    int argument_start = lr_read_pos;
+
+    // the step size is in lr_stack units, and may be different from the
+    // argument size because some (melded) arguments span multiple steps:
+    int step_size;
+
+    @for(int stind = 0; stind < rule.num_steps(); ++stind) {-@
+        @declare step: rule.nth_step(stind)@
+        @if(!step) {-@
+            // no step means there's a bug..
+            #error no expression for step @stind@ @rule.to_str()@ @rule.location()@
+        @-} else {-@
+            @declare el_id: prds.element_index.at(step.gexpr)@
+            @declare elname: prds.element_id_name(el_id)@
+
+            step_size = lr_stack_size_of_@elname@(
+                argument_start, @step.qty.multiple || step.reserve@
+            );
+
+            @if(step.reserve) {@
+                // this step is followed by other steps with the same
+                // expression but higher priority w/respect to parameters,
+                // so we need to reserve @step.reserve@ matches for those
+                // params. (example case: foo:a* foo:b -> bar; a needs to
+                // reserve 1 slot for the b)
+                step_size -= @step.reserve@;
+                if(step_size < 0)
+                    step_size = 0;
+            @}@
+
+            int step_@stind@_start = argument_start;
+
+            argument_start += step_size;
+        @}-@
+    @}-@
+
+    // and this just makes it easier to find the end of the last step:
+    int step_@rule.num_steps()@_start = argument_start;
+
+    @for(auto pname : rule.parameter_names()) {@
+        @declare psnum: rule.parameter_step_number(pname)@
+        @declare pstep: prds.canonical_step_for_param(rule.rule_number(), pname)@
+        // @pname@ has base step num @psnum@; canonical step is @pstep@
+        ReductionParameter<@pstep.type_in_target()@> arg_@pname@(
+            *this, step_@psnum@_start + @pstep.final_offset()@,
+            step_@pstep.last_meld_step() + 1@_start - step_@psnum@_start,
+            @pstep.final_meld()@
+        );
+
+        @if(opts.debug) {-@
+            std::cerr << stringformat(
+                "    Parameter @pname@:@pstep.type_in_target()@ is {}\n"
+                "     ... from step @psnum@ = {} to step @pstep.last_meld_step() + 1@ = {}\n",
+                arg_@pname@, step_@psnum@_start, step_@pstep.last_meld_step() + 1@_start
+            );
+        @}@
+    @}@
+
+    @if(opts.debug) {@
+        std::cerr << stringformat(
+            "ready to reduce. {}\n"
+            "reducing by @c_str_escape(rule.to_str())@"
+            " (@rule.num_steps()@ steps, @rule.parameter_count()@ params)\n"
+            "all_matched_steps: {}\n",
+            param_stack_string(),  all_matched_steps()
+        );
+    @}@
+
+    @/* this is the call to the reduce code */@
+    @-prds.type_for(rule.product())@ result = @prds.rule_fn(rule) -@ (
+        @-for(int pind = 0; pind < num_params; pind++) {-@
+            @- pind?",":"" -@ arg_@-rule.parameter_name(pind)-@
+        @-}-@
+    );
+
+    @declare result_el_id: prds.element_id_name(rule.product_element()) @
+    Product prod(result);
+    @if(opts.debug) {-@
+        std::cerr << stringformat(
+            "reduced to  @result_el_id@ = {}\n", prod
+        );
+    @}@
+
+    @/* (must come before the pop or the position gets lost) */@
+    auto src_pos = lr_stack_entry(lr_read_pos).position();
+
+    @/*
+        This is what actually pops the stack. Note we pop after
+        the reduce - reduce functions refer to items in the param
+        stack itself, and not copies. This also keeps the stack
+        intact for dealing with errors/debug.
+    */@
+    lr_pop_to(lr_read_pos - 1);
+
+    @/* ya know, if it weren't for potential side effects, it's
+        possible we could get away with not even calling the
+        reduce function in the eject case...
+    */@
+    bool eject = state_ejects(cur_state, @result_el_id@);
+    lr_push(@result_el_id@, eject, src_pos, prod);
+
+    @if(opts.debug) {-@
+        std::cerr << stringformat("popped to {}\n", lr_top_index());
+    @-}-@
+

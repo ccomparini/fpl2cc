@@ -1,0 +1,23 @@
+returncode = 0
+stderr = ""
+stdout = "======
+empty block
+block with bar, bat, bell
+a_statement
+close enough to foo
+close enough to foo
+one percent
+3 percent
+#x#x#x#x#
+#x#
+~ tilde 'nother time ~ tilde 'nother time ~
+just the last tilde
+3 dollars between
+1 dollars between
+0 dollars between
+1, 2, 3 = 1 + 1 + 1 digits
+9999, 9, 9 = 4 + 1 + 1 digits
+, , 1 = 0 + 0 + 1 digits
+, 2, 2 = 0 + 1 + 1 digits
+======
+"

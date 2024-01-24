@@ -1,0 +1,9 @@
+import os
+import sys
+
+Import('env')
+env = env.Clone()
+
+run_cc_tests(env);
+
+

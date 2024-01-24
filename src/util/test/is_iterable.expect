@@ -1,0 +1,15 @@
+returncode = 0
+stderr = "
+"
+stdout = "testing is_iterable template...
+OK src/util/test/is_iterable.cc:46
+OK src/util/test/is_iterable.cc:47
+OK src/util/test/is_iterable.cc:49
+OK src/util/test/is_iterable.cc:50
+OK src/util/test/is_iterable.cc:52
+OK src/util/test/is_iterable.cc:53
+OK src/util/test/is_iterable.cc:56
+OK src/util/test/is_iterable.cc:59
+
+is_iterable test is done
+"

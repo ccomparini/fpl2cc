@@ -1,0 +1,11 @@
+
+# from json:
+#'{'^ (member (','^ member)*)?:members '}'^ -> object;
+#string:key ':'^ value -> member;
+
+# this is identical to argument list but with 
+# curly braces:
+'{'^ (arg (','^ arg)*)? '}'^ -> curly_list;
+
+# ... uhh, and let's say args here are numbers
+/[0-9]+/ -> arg;

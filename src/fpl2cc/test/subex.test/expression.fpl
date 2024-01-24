@@ -1,0 +1,27 @@
+
+# precedence:
+[  add, sub ] -> addition_expression,
+[ mult, div ] -> multiplication_expression,
+[
+    number,
+    natural_log_base,
+    pi,
+    '('^ << ')'^ -> paren_expression ;
+] -> primary_expression;
+
+
+.:lhs '+'^ >:rhs -> add;
+.:lhs '-'^ >:rhs -> sub;
+
+# Note the '*' is optional - adjacent terms
+# multiply as well
+(. ('*'?^ >)+):terms -> mult;
+.:numerator '/'^ >:denominator -> div;
+
+/[0-9]*\.[0-9]+/:digits -> number ;
+/[0-9]+/:digits         -> number ;
+
+'e'  -> natural_log_base ;
+'pi' -> pi ;
+'π'  -> pi ;
+

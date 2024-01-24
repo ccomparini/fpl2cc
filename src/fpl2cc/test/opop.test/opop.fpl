@@ -1,0 +1,48 @@
+#
+# Test to make sure subexpressions don't pop more than they
+# should off the stack (particularly on mismatches, when
+# they should pop nothing).
+# 
+
+@default_main
+@produces std::string
+@comment_style sh
+# @generate_types this causes all kinds of fail on generated code
+
+stuff* -> goal +{
+    std::cout << stuff@join("{}\n", "");
+    return "";
+}+
+
+a_with_trailing_bs  -> stuff;
+abbb                -> stuff;
+just_a              -> stuff;
+bb                  -> stuff;
+b                   -> stuff;
+
+a^ b:first (', '^ b)*:tr -> a_with_trailing_bs +{
+    return stringformat(
+        "a followed by {} and {} trailing bs",
+        first@join(""), tr@count()
+    );
+}+
+
+a^ (b b b)+:bees -> abbb +{
+    return stringformat(
+        "a followed by {} b: {}", bees@count(), bees@join(", ")
+    );
+}+
+
+a^ -> just_a +{
+    return "just a";
+}+
+
+b b -> bb +{
+    return "2b";
+}+
+
+# XXX we shouldn't need these, but we do.
+# (issue #45 https://github.com/ccomparini/jest2/issues/45 )
+'a' -> a;
+'b' -> b;
+

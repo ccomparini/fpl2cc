@@ -1,0 +1,45 @@
+@/*
+  A "group" terminal (specified by [ ] within a terminal definition)
+  is a set of terminal specifications, any of which can match.  If
+  more than one terminal in the group matches, we use the longest
+  match - i.e., this is an "or" operation for terminals.
+*/@
+
+@parameter: const productions &prds @
+@parameter: const std::list<grammar_element> &components @
+
+{
+    auto start = reader->current_position();
+    int longest_match = 0;
+
+    // we need tmp here because #scan_terminal() needs someplace to
+    // put its result.  BUT actually to handle 0-length matches
+    // corerctly we'll need to keep generated terminals anyway
+    // XXX fixme^^
+    // It bugs me that it makes all these Terminals, because each
+    // copies the matched string to itself.  Maybe terminals
+    // can be made more efficient - just keep 2 SourcePositions
+    // and return the string between them or something?  anyway...
+    Terminal tmp;
+    // @components.size()@ components:
+    @for(auto component : components) {@
+        @#scan_terminal("tmp", prds, component)@
+        if(reader->current_position() - start > longest_match) {
+            longest_match = reader->current_position() - start;
+        }
+        reader->go_to(start);
+    @}@
+
+    if(longest_match > 0) {
+        return Terminal(reader->read_string(longest_match));
+    } else if(longest_match < 0) {
+        // if we get here, it's a bug
+        std::cerr << stringformat(
+            // .... errf.. need more info
+            "\nNEGATIVE MATCH LENGTH {}\n",
+            longest_match
+        );
+    }
+
+    return Terminal(); // no match
+}
