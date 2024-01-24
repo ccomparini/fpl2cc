@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-""" Format and write cpu, memory, etc (profiling data) for a given
+""" Gather cpu, memory, etc usage (profiling data) for a given
    (sub)process.
 
 """
@@ -18,21 +18,19 @@ import unittest
 import warnings
 
 FIELDS = [
-    # order here is based on how we want the columns to show up in the output,
-    # which, in turn, I'm basing on how I think we might want to sort them
-    # by default.
-    'timestamp',       # unix epoch time at which this was created
-                       #   (typically at the end of the process)
-    'cpu_total',       # sys + user cpu seconds
-    'cpu_user',        # user space cpu seconds
-    'cpu_system',      # system cpu seconds
-    'max_rss',         # max resident size (rss) in memory
-    'exit_code',       # whatever was passed to exit()
-    'signal',          # name of signal which killed this (or blank)
-    'git_commit_id',   # so that if performance changes we can see when/why
-    'hostname',        # uname perversely calls this "node"
-    'arch',            # eg "x86_64" (uname calls this "machine")
-    'os',              # eg "Darwin 20.4.0",
+    # order here is based on how I want the columns to show up in the output.
+    'git_id',     # git commit ID so you can find relevsant changes
+    'cpu_total',  # sys + user cpu seconds
+    'cpu_user',   # user space cpu seconds
+    'cpu_system', # system cpu seconds
+    'max_rss',    # max resident size (rss) in memory
+    'timestamp',  # unix epoch time at which this was created
+                  #   (typically at the end of the process)
+    'hostname',   # uname perversely calls this "node"
+    'arch',       # eg "x86_64" (uname calls this "machine")
+    'os',         # eg "Darwin 20.4.0",
+    'exit_code',  # whatever was passed to exit()
+    'signal',     # name of signal which killed this (or blank)
 ]
 
 def signal_str(waitstatus):
@@ -64,18 +62,18 @@ class Profile(collections.namedtuple("Subprof", FIELDS)):
     def __new__(cls, pid, waitstatus, rusage):
         uname = platform.uname()
         return super().__new__(
-            _cls           = cls,
-            timestamp      = int(time.time()),
-            cpu_total      = fmt_secs(rusage.ru_utime + rusage.ru_stime),
-            cpu_user       = fmt_secs(rusage.ru_utime),
-            cpu_system     = fmt_secs(rusage.ru_stime),
-            max_rss        = rusage.ru_maxrss,
-            exit_code      = exit_code_str(waitstatus),
-            signal         = signal_str(waitstatus),
-            git_commit_id  = _git_commit_id(),
-            hostname       = uname.node,
-            arch           = uname.machine,
-            os             = f"{uname.system} {uname.release}",
+            _cls       = cls,
+            timestamp  = int(time.time()),
+            cpu_total  = fmt_secs(rusage.ru_utime + rusage.ru_stime),
+            cpu_user   = fmt_secs(rusage.ru_utime),
+            cpu_system = fmt_secs(rusage.ru_stime),
+            max_rss    = rusage.ru_maxrss,
+            exit_code  = exit_code_str(waitstatus),
+            signal     = signal_str(waitstatus),
+            git_id     = _git_commit_id(),
+            hostname   = uname.node,
+            arch       = uname.machine,
+            os         = f"{uname.system} {uname.release}",
         )
 
     """ write_tsv(filename) - append profiling data to a file

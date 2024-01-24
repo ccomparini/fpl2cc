@@ -76,7 +76,7 @@ env = Environment(**config)
 # branch, this gives us an easy way to detect if some
 # change (historical or otherwise) had a significant
 # impact on performance (good or bad).
-if git_branch() == 'master':
+if git_branch() == 'main':
     use_yprof = True
 else:
     use_yprof = False

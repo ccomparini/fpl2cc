@@ -1,0 +1,3 @@
+git_id	cpu_total	cpu_user	cpu_system	max_rss	timestamp	hostname	arch	os	exit_code	signal
+43bf275	0.002969	0.001280	0.001689	688128	1706132821	spidey2	x86_64	Darwin 23.3.0	0	-
+43bf275	0.002775	0.001216	0.001559	688128	1706132948	spidey2	x86_64	Darwin 23.3.0	0	-
