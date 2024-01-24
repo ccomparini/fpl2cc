@@ -63,7 +63,6 @@ config = {
         '#lib',
     ],
     'LIBS' : [
-        'jest_util',
     ],
     'tools' : toolset(),
     'LLVM_VERSION' : llvm_version,
@@ -193,14 +192,11 @@ src_subdirs = [
     # these are specified roughly in compile/dependency order.
     # coincidentally, it looks like they are reverse alphabetical.
     # interesting.
-    'util/',
     'util/test/',
     'jemplpl/',
     'jemplpl/test/',
     'fpl2cc/',
     'fpl2cc/test/',
-    'grammarlib/test/',
-    'compiler/',
 ]
 
 # output directory:
