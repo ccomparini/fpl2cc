@@ -1,8 +1,6 @@
 #ifndef TO_UTF8ISH_H
 #define TO_UTF8ISH_H
 
-#include "to_hex.h" // debugging
-#include <fstream>  // debugging
 
 /*
   "utf8-ish" is utf-8 style encoding, wherein a 31-bit value into 

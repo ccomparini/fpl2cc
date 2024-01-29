@@ -7,8 +7,6 @@
 #include<string>
 
 #include"fs.h"
-#include"stringformat.h" // debugging - remove me
-#include<iostream>       // debugging - remove me
 
 class Searchpath {
 
