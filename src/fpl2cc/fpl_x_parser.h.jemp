@@ -3,6 +3,8 @@
 @declare class_name: prds.parser_class_name()@
 @realign: #line {} "{}" @
 
+#define GENERATED_FPL 1
+
 #ifndef @class_name@_H
 #define @class_name@_H
 
@@ -38,10 +40,16 @@
 #include <variant>
 #include <vector>
 
-#include "fpl2cc/fpl_reader.h"
-#include "util/jerror.h"
-#include "util/src_location.h"
-#include "util/stringformat.h"
+@include: "src/util/fs.h"@
+@include: "src/util/src_location.h"@
+@include: "src/util/to_hex.h"@
+@include: "src/util/utf8.h"@
+@include: "src/util/c_str_escape.h"@
+@include: "src/util/is_iterable.h"@
+@include: "src/util/stringformat.h"@
+@include: "src/util/jerror.h"@
+@include: "src/util/utf8_buffer.h"@
+@include: "src/fpl2cc/fpl_reader.h"@
 
 @if(prds.preamble.size()) {@
     @for(auto pre : prds.preamble) {@

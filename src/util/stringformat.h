@@ -1,10 +1,11 @@
 #ifndef STRINGFORMAT_H
 #define STRINGFORMAT_H
 
-#include "c_str_escape.h"
-#include "is_iterable.h"
-#include "to_hex.h"
-//#include "utf8.h" // causes link problems?
+#ifndef GENERATED_FPL
+  #include "c_str_escape.h"
+  #include "is_iterable.h"
+  #include "to_hex.h"
+#endif
 
 #include <cstdlib>
 #include <ctype.h>

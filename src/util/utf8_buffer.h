@@ -1,9 +1,11 @@
 #ifndef UTF8_BUFFER_H
 #define UTF8_BUFFER_H
 
-#include "jerror.h"
-#include "src_location.h"
-#include "utf8.h"
+#ifndef GENERATED_FPL
+  #include "jerror.h"
+  #include "src_location.h"
+  #include "utf8.h"
+#endif // GENERATED_FPL
 
 #include <cstring>
 #include <fstream>

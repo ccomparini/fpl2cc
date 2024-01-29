@@ -1,10 +1,12 @@
 #ifndef JOIN_H
 #define JOIN_H
 
-#include "is_iterable.h"
-#include "jerror.h"
-#include "src_location.h"
-#include "stringformat.h"
+#ifndef GENERATED_FPL
+  #include "is_iterable.h"
+  #include "jerror.h"
+  #include "src_location.h"
+  #include "stringformat.h"
+#endif // GENERATED_FPL
 
 #include <functional>
 #include <string>

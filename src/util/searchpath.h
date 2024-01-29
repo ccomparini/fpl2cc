@@ -6,7 +6,9 @@
 #include<regex>
 #include<string>
 
-#include"fs.h"
+#ifndef GENERATED_FPL
+  #include"fs.h"
+#endif // GENERATED_FPL
 
 class Searchpath {
 

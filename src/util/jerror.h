@@ -5,8 +5,11 @@
 #include <list>
 #include <iostream>
 #include <string>
-#include "util/src_location.h"
-#include "util/stringformat.h"
+
+#ifndef GENERATED_FPL
+  #include "util/src_location.h"
+  #include "util/stringformat.h"
+#endif // GENERATED_FPL
 
 /* 
  "jest" error system ... or to-be.  I had to call it something.

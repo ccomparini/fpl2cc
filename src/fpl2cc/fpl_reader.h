@@ -13,13 +13,15 @@
 #include <regex>
 #include <string>
 
-#include "util/fs.h"
-#include "util/jerror.h"
-#include "util/src_location.h"
-#include "util/stringformat.h"
-#include "util/to_hex.h"
-#include "util/utf8.h"
-#include "util/utf8_buffer.h"
+#ifndef GENERATED_FPL
+  #include "util/fs.h"
+  #include "util/jerror.h"
+  #include "util/src_location.h"
+  #include "util/stringformat.h"
+  #include "util/to_hex.h"
+  #include "util/utf8.h"
+  #include "util/utf8_buffer.h"
+#endif // GENERATED_FPL
 
 class fpl_reader;
 using fpl_reader_p = std::shared_ptr<fpl_reader>;
