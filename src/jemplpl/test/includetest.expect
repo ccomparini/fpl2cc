@@ -3,6 +3,8 @@ stderr = ""
 stdout = "
 OH HAI I IS AT LINE 2 IN \"src/jemplpl/test/includetest.jemp\" 
 // Start of include
+
+OH HAI I IS AT LINE 1 IN \"/Users/chris/projects/fpl2cc/src/jemplpl/test/includetest.cc\" 
 #include <cstdlib>
 #include <iostream>
 #include <string>

@@ -90,7 +90,7 @@
 }+
 
 +fragment(include_file) +{
-    return stringformat(
+    return jempl.realign_frag(include_file, "1") + stringformat(
         "out += std::string((const char *)utf8_buffer({}).data());\n",
         include_file
     ) + line_num(include_file@self()) + jempl.realign_frag();
@@ -102,10 +102,7 @@
 }+
 
 +fragment(realign) +{
-    jempl.realign_fragment = 
-        "\nout += stringformat(" +
-        quote("\n" + realign + "\n") +
-        ", source.line_number(), source.filename());\n";
+    jempl.realign_fragment = realign;
 
     return line_num(realign@self()) + jempl.realign_frag();
 }+
@@ -188,8 +185,16 @@ public:
             return join(params, ",");
         }
 
-        std::string realign_frag() const {
-            return realign_fragment;
+        std::string realign_frag(
+            const std::string &filename = "source.filename()",
+            const std::string &linenum  = "source.line_number()"
+        ) const {
+            if(realign_fragment.length()) {
+                return "\nout += stringformat(" +
+                    quote("\n" + realign_fragment + "\n") +
+                    stringformat(", {}, {});\n", linenum, filename);
+            }
+            return "";
         }
 
     } jempl;
