@@ -6,6 +6,7 @@ TARGET_CC="$SOURCE_DIR/jemplpl.cc"
 echo rebuilding $TARGET_CC
 
 # recreate jemplpl.cc from jemplpl.fpl:
+#bin/fpl2cc --src-path=src/grammarlib $SOURCE_DIR/jemplpl.fpl --statedump .states --out $TARGET_CC --debug-single-step
 bin/fpl2cc --src-path=src/grammarlib $SOURCE_DIR/jemplpl.fpl --statedump .states --out $TARGET_CC
 
 # .. and make it and run any necessary tests:

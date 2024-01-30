@@ -4,3 +4,7 @@
 @include: file_to_include@
 // End of include
 
+// Embedded file follows:
+@embed: embedtest.txt@
+// End of embedded file
+

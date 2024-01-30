@@ -49,7 +49,7 @@
         "#line " _CLUDGE_STR(__LINE__) " \"" __FILE__ "\"\n\n"
         "#include <string>\n"
         "#include \"util/stringformat.h\"\n"  // XXX hey these should be embedded, maybe? inception
-        "#include \"util/utf8_buffer.h\"\n"
+        "#include \"util/utf8_buffer.h\"\n" // XXX kill
         "inline std::string {}({}) {{\n"
         "    struct _jemp_srcinfo {{\n"
         "        int ln;\n"
@@ -89,11 +89,34 @@
     return "";
 }+
 
+# @include: filename @
 +fragment(include_file) +{
     return jempl.realign_frag(include_file, "1") + stringformat(
         "out += std::string((const char *)utf8_buffer({}).data());\n",
         include_file
     ) + line_num(include_file@self()) + jempl.realign_frag();
+}+
+
+# Like @include: @, except the contents of the file are embedded
+# in the output code, as opposed to being read and included at
+# runtime.
+# Unlike @include: @, this searches the import path.
+# (doing so doesn't make sense for includes, because includes are
+# dynamic and the import path isn't likely to have anything
+# to do with the context of the import)
++fragment(embed_file) +{
+    auto full_path = jempl.import_path.find(embed_file);
+
+    utf8_buffer contents;
+    contents.slurp_file(full_path, embed_file@position().to_str());
+
+    return stringformat(
+        "{} out += \"{::e}\";\n{}{}",
+        jempl.realign_frag(quote(full_path), "1"),
+        (const char *)contents.data(),
+        line_num(embed_file@self()),
+        jempl.realign_frag()
+    );
 }+
 
 +fragment(name_decl value) +{

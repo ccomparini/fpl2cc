@@ -34,4 +34,22 @@ int main() {
 OH HAI I IS AT LINE 4 IN \"src/jemplpl/test/includetest.jemp\" 
 // End of include
 
+// Embedded file follows:
+
+OH HAI I IS AT LINE 1 IN \"src/jemplpl/test/embedtest.txt\" 
+This is line 1 of some embedded content.
+
+More \"content\", as you earthlings call it.
+
+This is line 5.
+
+aliens and stuff  👽 👻 🥸 🤑 🧠 🫠
+The last one is how I feel after trying to figure out what happens
+at jemp compile time vs dynamically when called from fpl2cc vs cc.
+
+This is the last line of embedded content.
+
+OH HAI I IS AT LINE 8 IN \"src/jemplpl/test/includetest.jemp\" 
+// End of embedded file
+
 "

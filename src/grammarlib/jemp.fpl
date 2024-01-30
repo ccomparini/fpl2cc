@@ -35,9 +35,15 @@ text+:chunks -> fragment ;
 '@parameter:'^ /[^@]+/:param_decl '@'^ /\n?/^ -> fragment ;
 
 # Copies the contents of include_file into the output, verbatim.
-# See also @#template@ (other_template) and template_variant
+# See also @embed: @, @#template@ (other_template) and template_variant
 # inclusion, below.
-'@include:'^ /[^@]+/:include_file '@'^ /\n?/^ -> fragment ;
+'@include:'^ /\s*/^ /[^@]+/:include_file '@'^ /\n?/^ -> fragment ;
+
+# Embeds the contents of the file into the output at the time
+# jemp is run (as opposed to when the code generated from the
+# jemp is run).  It's a fragment (and not -> text) so that
+# realign hooks can work.
+'@embed:'^ /\s*/^ /[^@]+/:embed_file '@'^ /\n?/^ -> fragment ;
 
 # Declares a constant which can be used in later expansions
 # or expressions. For example, to set "fruitbat" to 10 more
