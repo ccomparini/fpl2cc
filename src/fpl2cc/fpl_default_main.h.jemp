@@ -1,12 +1,12 @@
 @parameter: const productions &prds @
 @realign: #line {} "{}" @
 
-@include: "src/util/c_str_escape.h"@
-@include: "src/util/is_iterable.h"@
-@include: "src/util/to_hex.h"@
-@include: "src/util/src_location.h"@
-@include: "src/util/stringformat.h"@
-@include: "src/util/jerror.h"@
+@embed: src/util/c_str_escape.h@
+@embed: src/util/is_iterable.h@
+@embed: src/util/to_hex.h@
+@embed: src/util/src_location.h@
+@embed: src/util/stringformat.h@
+@embed: src/util/jerror.h@
 
 #include <iostream>
 
