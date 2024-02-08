@@ -722,6 +722,10 @@ public:
             && (source == other.source);
     }
 
+    bool operator!=(const SourcePosition &other) const {
+        return !(*this == other);
+    }
+
     const fpl_reader &reader()   const { return *source; }
     size_t            position() const { return offset; }
 
