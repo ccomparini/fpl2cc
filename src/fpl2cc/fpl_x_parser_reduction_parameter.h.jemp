@@ -90,6 +90,24 @@
             return ReduceType();
         }
 
+        // Returns the value of the parameter,
+        // or the default value passed if the index is out of range.
+        // This is a convenience method for defaulting things like
+        // values of optional parameters.
+        const ReduceType val_or(
+            ReduceType def, int ind = 0, src_location caller = CALLER()
+        ) const {
+            // this is as in val(), above:
+            const int num_args = count();
+            if(ind < 0) ind += num_args; // negative = relative to end + 1 
+
+            if((ind < 0) || (ind >= num_args)) {
+                return def;
+            }
+
+            return val(ind, caller);
+        }
+
         static std::string type_name() {
             return prod_type_name(typeid(ReduceType));
         }
