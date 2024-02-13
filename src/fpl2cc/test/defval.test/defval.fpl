@@ -5,7 +5,7 @@ type* -> done +{
     return type@join("\n");
 }+
 
-'u'?:not_signed 'int':type size_bits? -> type +{
+'u'?:not_signed 'int':type (~ size_bits)? -> type +{
     // signed 23-bit ints are in all the new architectures, nowadays:
     return not_signed@val_or("s") + type + size_bits@val_or("23");
 }+
