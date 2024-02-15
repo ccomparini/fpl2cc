@@ -3,7 +3,11 @@
 @declare class_name: prds.parser_class_name()@
 @realign: #line {} "{}" @
 
-#define GENERATED_FPL 1
+#ifdef GENERATED_FPL
+  #define GENERATED_FPL (GENERATED_FPL + 1)
+#else
+  #define GENERATED_FPL 1
+#endif
 
 #ifndef @class_name@_H
 #define @class_name@_H
@@ -1370,4 +1374,12 @@ public:
         @prds.main_guts.format()@
     }
 @}@
+
+
+#if GENERATED_FPL > 1
+  #define GENERATED_FPL (GENERATED_FPL - 1)
+#else
+  #undef GENERATED_FPL
+#endif
+
 
