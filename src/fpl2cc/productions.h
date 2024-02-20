@@ -178,13 +178,6 @@ class productions {
         }
 
 
-        void go_to_real_step() {
-            while(step().is_subexpression()) {
-                rulenum = owner->subrulenum_for_step(step());
-                stepnum = 0;
-            }
-        }
-
         // Returns the "flat" next rulestep, which is the rulestep
         // after the current rulestep, ignoring multiples/optionals
         // etc. (but traversing parent/child relationships)
@@ -295,16 +288,12 @@ class productions {
         }
 
         std::list<std::list<rulestep>> paths(
-            bool include_this = true,
             std::list<rulestep> in = {},
             bool no_repeat = false
         ) const {
             std::list<rulestep> path_so_far = in;
 
-// .... grreeee if 'tis optional we -also- need the path
-// w/out *this.  test XXX
-            if(include_this)
-                path_so_far.push_back(*this);
+            path_so_far.push_back(*this);
 
             std::list<std::list<rulestep>> result;
 
@@ -324,7 +313,7 @@ class productions {
                     }
                 }
                 result.splice(
-                    result.end(), next.paths(true, path_so_far, no_repeat)
+                    result.end(), next.paths(path_so_far, no_repeat)
                 );
             }
 
