@@ -117,6 +117,9 @@ class productions {
 
         }
 
+        // If this step is in a subexpression, returns the step in
+        // the parent rule which represents that subexpression.
+        // otherwise, returns a false step.
         rulestep parent_rulestep() const {
             int prln = rule().parent_rule_number();
             if(prln >= 0) {
@@ -128,6 +131,12 @@ class productions {
             return rulestep(owner, -1, -1);
         }
 
+        // If this step is a subexpression, this returns the step
+        // in the non-subexpression rule which contains represents
+        // the tree of subexpressions in which this step exists.
+        // Otherwise, returns a false step.
+        // The result differs from parent_rulestep() only if there
+        // are multiple levels of nested subexpressions.
         rulestep parentmost_rulestep() const {
             rulestep parentmost = *this;
             while(auto up = parentmost.parent_rulestep()) {
