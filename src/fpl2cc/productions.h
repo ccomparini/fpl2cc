@@ -111,7 +111,7 @@ class productions {
         }
 
         rulestep(const productions *o, int rn, int sn) :
-            owner(const_cast<productions *>(o)),
+            owner(o),
             rulenum(rn),
             stepnum(sn) {
 
