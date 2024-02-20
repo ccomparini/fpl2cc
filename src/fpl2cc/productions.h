@@ -169,18 +169,20 @@ class productions {
         bool is_multiple()      const { return step().is_multiple();      }
         bool is_optional()      const { return step().is_optional();      }
 
+        bool is_last_in_rule() const {
+            return stepnum >= rule().step_count() - 1;
+        }
+
         bool is_in_subexpression() const {
             return rule().parent_rule_number() >= 0;
         }
 
-        // eg:
-        //   (x y)* -> foo;
-        // x and y are in a subexpression whose step is "multiple",
-        // so this would return true.
-        bool is_in_multiple_subexpression() const {
-            auto prs = parent_rulestep();
-            if(prs) {
-                return prs.is_multiple();
+        bool is_last_in_multiple_subexpression() const {
+            if(is_last_in_rule()) {
+                auto prs = parent_rulestep();
+                if(prs) {
+                    return prs.is_multiple();
+                }
             }
 
             return false;
@@ -220,11 +222,9 @@ class productions {
         }
 
         // returns the set of rulesteps which could legitimately
-        // encountered as the start of the rule passed.
+        // encountered as the start of the rule containing this.
         // (there can be more than one due to optionals)
-        static std::list<rulestep> rule_starts(
-            const productions *owner, unsigned rulenum
-        ) {
+        std::list<rulestep> rule_starts() const {
             std::list<rulestep> result;
             if(owner && (rulenum < owner->rules.size())) {
                 rulestep st(owner, rulenum, 0);
@@ -248,25 +248,37 @@ class productions {
         // If the "flat" next step is optional, the real next step may
         // also be the step after that step.
         void nexts(std::list<rulestep> &result, bool no_repeat = false) const {
+// XXX OK INSTEAD:
+//   - forget no_repeat.  it doesn't make sense as is.
+//   - DON'T descend subexpressions.  just do the multiples/optionals
+//   - DO change this to return a std::set (including making a < operator)
+//   - in paths(), first get the nexts() here, then recursively expand
+//     subexpressions.
             if(!bool(*this))
                 return;
 
-            auto normal_next = flat_next();
+            if(!no_repeat && is_last_in_multiple_subexpression()) {
+                // eg:
+                //  (a b)* c -> d
+                // c is the "normal next", but the start of the
+                // subexpression (a) might also come after b:
+                result.splice(result.end(), rule_starts());
+            }
 
+            auto normal_next = flat_next();
             if(normal_next) result.push_back(normal_next);
 
             auto opt_next = normal_next;
+//std::cerr << stringformat("doing nexts after {}\n", opt_next);
             while(opt_next && opt_next.step().is_optional()) {
+                if(is_last_in_multiple_subexpression()) {
+                    result.splice(result.end(), opt_next.rule_starts());
+                }
+
                 opt_next = opt_next.flat_next(true);
+//std::cerr << stringformat("opt next is {}\n", opt_next);
                 if(opt_next) {
                     result.push_back(opt_next);
-                } else if(!no_repeat && is_in_multiple_subexpression()) {
-                    // we "wrapped" past the end of the subrule,
-                    // and it's a repeated subrule. so, the next
-                    // step is any of the starts of that subrule:
-                    result.splice(
-                        result.end(), rule_starts(owner, rulenum)
-                    );
                 }
             }
 
