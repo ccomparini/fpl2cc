@@ -1,0 +1,42 @@
+
+# https://github.com/ccomparini/fpl2cc/issues/3
+
+@produces std::string
+
+# after x, possibilities should be:
+#  a - flat next
+#  b - because a is optional
+#  c - because the whole subex is optional
+# after a, possibilities should be:
+#  b - flat next
+#  c - because b is optional
+#  a - because b is optional and the subex is repeated
+# after b, possibilities should be:
+#  c - flat next
+#  a - because the subex is repeated
+#  b - because a is optional
+# Possible algorithm:
+#   - add flat_next(true) so that subexes are added as a single thing
+#   - while that next step is optional, add the thing after it.
+# SO THEN:
+# after x:  sab c
+#'x' ('a':a? 'b':b*):sab* 'c':c -> stuff;
+
+# on this one, after a, the possibilities are b, a, and hmm I guess nothing.
+#'x' ('a':a? 'b':b*)* -> stuff;
+
+# this should fail, because the comma is optional but
+# not ejected, so the meld distance will be indeterminate
+# (either 0 or 1, not knowable at fpl compile time).
+#'('^ (arg ','?)* ')'^ -> argument_list +{ 
+'('^ (arg ','?:this_arg_breaks_it)* ')'^ -> argument_list +{
+    arg@foreach([](mem) {
+        std::cout << stringformat("OH HI arg is {}\n",
+    });
+
+    return stringformat("args joined:\n{}\n", arg.join("\n"));
+}+
+
+
+/[a-zA-Z_]+/:arg -> arg;
+
