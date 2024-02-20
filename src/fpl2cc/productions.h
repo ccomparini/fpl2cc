@@ -145,6 +145,15 @@ class productions {
             return parentmost;
         }
 
+        // .. so we can put these in std::set:
+        bool operator<(const rulestep &other) const {
+            return   (owner < other.owner)
+                || (rulenum < other.rulenum)
+                || (stepnum < other.stepnum)
+                || false
+            ;
+        }
+
         // .... to my surpsise, I seem to have to explicitly
         // write this?  what am I missing?
         bool operator==(const rulestep &other) const {
@@ -176,7 +185,6 @@ class productions {
 
             return false;
         }
-
 
         // Returns the "flat" next rulestep, which is the rulestep
         // after the current rulestep, ignoring multiples/optionals
