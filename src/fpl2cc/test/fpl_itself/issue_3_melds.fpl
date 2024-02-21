@@ -28,8 +28,8 @@
 # this should fail, because the comma is optional but
 # not ejected, so the meld distance will be indeterminate
 # (either 0 or 1, not knowable at fpl compile time).
-#'('^ (arg ','?)* ')'^ -> argument_list +{ 
-'('^ (arg ','?:this_arg_breaks_it)* ')'^ -> argument_list +{
+#'('^ (arg ','?:this_arg_breaks_it)* ')'^ -> argument_list +{
+'('^ (arg ','?)* ')'^ -> argument_list +{ 
     arg@foreach([](mem) {
         std::cout << stringformat("OH HI arg is {}\n",
     });

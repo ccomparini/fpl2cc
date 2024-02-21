@@ -14,6 +14,8 @@ if 'FPL_TEST_DEBUG' in os.environ:
     interactive=True
     fpl_options="--debug-single-step"
 
+#fpl_options+="--debug-melds"
+
 env.Append(BUILDERS = {
     'CaptureFplCompile': Builder(
         action = run_and_capture_action(

@@ -247,6 +247,7 @@ class productions {
         // the start of the substep.
         // If the "flat" next step is optional, the real next step may
         // also be the step after that step.
+// XXX replace in favor of simple_nexts (and maybe rename that)
         void nexts(std::list<rulestep> &result, bool no_repeat = false) const {
 // XXX OK INSTEAD:
 //   - forget no_repeat.  it doesn't make sense as is.
@@ -307,34 +308,88 @@ class productions {
             }
         }
 
+        // returns the number of times this step occurs in the given path
+// XXX chage to a bool looking for loops
+        int times_in_path(const std::list<rulestep> &path_so_far) {
+            int count = 0;
+            for(auto rs : path_so_far) {
+                if(rs == *this) {
+                    ++count;
+                }
+            }
+
+            return count;
+        }
+
+        // returns the set of rulesteps following this,
+        // handling the effects of multiples and optionals
+        // but not descending into subexpressions.
+        std::set<rulestep> simple_nexts() const {
+            std::set<rulestep> result;
+
+            auto next = flat_next(true);
+            do {
+                if(next) result.insert(next);
+                next = next.flat_next(true);
+            } while(next && next.is_optional());
+
+            if(*this && is_multiple()) {
+                result.insert(*this);
+            }
+
+            return result;
+        }
+
+        std::list<std::list<rulestep>> expand_subexpressions() const {
+            std::list<std::list<rulestep>> result;
+
+            if(!is_subexpression()) {
+                std::list<rulestep> tmp = { *this };
+                result.push_back(tmp);
+            } else {
+                // recursively expand the paths through the subrule, starting
+                // at the step before the first one in this step's subrule:
+                rulestep substart(owner, rulenum, -1);
+                for(auto subp : substart.paths()) {
+                    result.push_back(subp);
+                }
+            }
+
+std::cerr << stringformat("  EXPANDED subexes on {} and got:  {}\n", *this, result);
+            return result;
+        }
+
         std::list<std::list<rulestep>> paths(
-            std::list<rulestep> in = {},
-            bool no_repeat = false
+            std::list<rulestep> in = {}
         ) const {
             std::list<rulestep> path_so_far = in;
 
-            path_so_far.push_back(*this);
+            if(*this)
+                path_so_far.push_back(*this);
+
+std::cerr << stringformat("looking for paths at {} in {}\n", *this, path_so_far);
 
             std::list<std::list<rulestep>> result;
 
-            std::list<rulestep> next_steps;
-            nexts(next_steps, no_repeat);
+            std::set<rulestep> next_steps = simple_nexts();
             if(next_steps.size() == 0) {
-                result.push_back(path_so_far);
+std::cerr << stringformat("   .. nothing next, so expanding {}\n", *this);
+                for(auto expath : expand_subexpressions()) {
+                    auto tmp = path_so_far;
+                    tmp.splice(tmp.end(), expath);
+                    result.push_back(tmp);
+                }
                 return result;
             }
+
             for(auto next : next_steps) {
-                if(next.rulenum == rulenum) {
-                    if(next.stepnum <= stepnum) {
-                        // we're looking at an earlier step in the
-                        // same rule, so we've recursed once on it.
-                        // don't do it again:
-                        no_repeat = true;
-                    }
+                // < 2 because if it's (say) foo* or foo+, the foo
+                // step can follow itself once, so it can exist 2
+                // times max.
+                if(next && next.times_in_path(path_so_far) < 2) {
+std::cerr << stringformat("{} occurs only {} times in {}, so recursing\n", next, next.times_in_path(path_so_far), path_so_far);
+                    result.splice(result.end(), next.paths(path_so_far));
                 }
-                result.splice(
-                    result.end(), next.paths(path_so_far, no_repeat)
-                );
             }
 
             return result;
@@ -3942,13 +3997,10 @@ public:
     ) {
         stack_distance dist(0);
       
-        // false = don't include the starting step; that start step is
-        // the one from which we're setting distance.
-        //auto all_paths = from_step.paths(false);
         auto all_paths = from_step.paths();
 
         dprint_melds(stringformat(
-            "getting meld distance for '{}' from {}."
+            "getting meld distance for '{}' from {}.  "
             "There are {} paths:\n    {}\n",
             pname, from_step, all_paths.size(), join(all_paths, "\n    ")
         ));
@@ -3960,6 +4012,7 @@ public:
                 if(rstep.step().is_ejected())
                     continue; // because ejected = not on param stack
 
+// XXX hey actually in the path, subexes should already be expanded.
                 if(rstep.step().is_subexpression())
                     continue;  // because we'll count the steps -within- it
 
@@ -3977,7 +4030,7 @@ public:
                 if(dist.is_indeterminate())
                     break;
 
-                // (everything here is one ls stack entry, since we
+                // (everything here is one lr stack entry, since we
                 // iterate into subexes)
                 ++this_dist;
             }
