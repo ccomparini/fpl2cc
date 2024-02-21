@@ -1,0 +1,4 @@
+returncode = 1
+stderr = "Error src/fpl2cc/test/fpl_itself/meld_fails_issue_3.fpl:32: inconsistent meld for arg (0 vs ␀) in arg ','?:arg_1 -> _subex_0
+"
+stdout = ""

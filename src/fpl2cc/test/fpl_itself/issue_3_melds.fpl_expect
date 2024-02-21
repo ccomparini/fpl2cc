@@ -1,4 +1,0 @@
-returncode = 1
-stderr = "Error src/fpl2cc/test/fpl_itself/issue_3_melds.fpl:32: inconsistent meld for arg (0 vs ␀) in arg ','?:this_arg_breaks_it 'bar':arg_2 -> _subex_0
-"
-stdout = ""

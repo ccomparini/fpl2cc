@@ -224,12 +224,12 @@ class productions {
         // returns the set of rulesteps which could legitimately
         // encountered as the start of the rule containing this.
         // (there can be more than one due to optionals)
-        std::list<rulestep> rule_starts() const {
-            std::list<rulestep> result;
+        std::set<rulestep> rule_starts() const {
+            std::set<rulestep> result;
             if(owner && (rulenum < owner->rules.size())) {
                 rulestep st(owner, rulenum, 0);
                 while(st) {
-                    result.push_back(st);
+                    result.insert(st);
                     if(!st.is_optional())
                         break;
                     st = st.flat_next();
@@ -240,72 +240,47 @@ class productions {
 
         // There are 0 or more possible rulesteps which can follow any
         // given rulestep.
-        // The first is always the "flat" next (unless we're at the end
-        // of a rule).
-        // If the current step is multiple, or at the end of a multiple
-        // substep, another other possible next step is either itself or
-        // the start of the substep.
-        // If the "flat" next step is optional, the real next step may
-        // also be the step after that step.
-// XXX replace in favor of simple_nexts (and maybe rename that)
-        void nexts(std::list<rulestep> &result, bool no_repeat = false) const {
-// XXX OK INSTEAD:
-//   - forget no_repeat.  it doesn't make sense as is.
-//   - DON'T descend subexpressions.  just do the multiples/optionals
-//   - DO change this to return a std::set (including making a < operator)
-//   - in paths(), first get the nexts() here, then recursively expand
-//     subexpressions.
-            if(!bool(*this))
-                return;
+        //  - If the rulestep is "multiple match" (i.e. followed by
+        //    "*" or "+", it can follow itself.
+        //  - If the rulestep is the last in a multiple-match subrule,
+        //    then any of the starts of that subrule might be next
+        //  - All "flat" next steps up to the next non-optional step
+        //    can follow it
+        std::set<rulestep> nexts() const {
+            std::set<rulestep> result;
 
-            if(!no_repeat && is_last_in_multiple_subexpression()) {
+            if(!bool(*this))
+                return {};  // XXX needed?
+
+            if(is_multiple()) {
+                // simple multiple, so possible nexts include ourself:
+                result.insert(*this);
+            }
+
+            if(is_last_in_multiple_subexpression()) {
                 // eg:
                 //  (a b)* c -> d
                 // c is the "normal next", but the start of the
                 // subexpression (a) might also come after b:
-                result.splice(result.end(), rule_starts());
+                result.merge(rule_starts());
             }
 
             auto normal_next = flat_next();
-            if(normal_next) result.push_back(normal_next);
+            if(normal_next) result.insert(normal_next);
 
             auto opt_next = normal_next;
-//std::cerr << stringformat("doing nexts after {}\n", opt_next);
             while(opt_next && opt_next.step().is_optional()) {
-                if(is_last_in_multiple_subexpression()) {
-                    result.splice(result.end(), opt_next.rule_starts());
+                if(opt_next.is_last_in_multiple_subexpression()) {
+                    result.merge(opt_next.rule_starts());
                 }
 
-                opt_next = opt_next.flat_next(true);
-//std::cerr << stringformat("opt next is {}\n", opt_next);
+                opt_next = opt_next.flat_next();
                 if(opt_next) {
-                    result.push_back(opt_next);
+                    result.insert(opt_next);
                 }
             }
 
-            if(!no_repeat) {
-                auto this_step = step();
-                if(this_step.is_multiple() && !this_step.is_subexpression()) {
-                    // simple multiple, so possible nexts include ourself:
-                    result.push_back(*this);
-                }
-
-                int prln = rule().parent_rule_number();
-                if(prln >= 0) {
-                    if(stepnum + 1 >= rule().num_steps()) {
-                        // next is at (or past) the end of a substep.
-                        // let's see what that substep looks like:
-                        int cdp = rule().parent_countdown_pos();
-                        auto parent_rs = rulestep(owner, prln, -1);
-                        parent_rs.stepnum = parent_rs.rule().num_steps() - cdp;
-                        if(parent_rs.step().is_multiple()) {
-                            // .. it's multiple, so we'll need to wrap
-                            // back to the start:
-                            parent_rs.nexts(result, true);
-                        }
-                    }
-                }
-            }
+            return result;
         }
 
         // returns the number of times this step occurs in the given path
@@ -355,7 +330,7 @@ class productions {
                 }
             }
 
-std::cerr << stringformat("  EXPANDED subexes on {} and got:  {}\n", *this, result);
+//std::cerr << stringformat("  EXPANDED subexes on {} and got:  {}\n", *this, result);
             return result;
         }
 
@@ -367,13 +342,15 @@ std::cerr << stringformat("  EXPANDED subexes on {} and got:  {}\n", *this, resu
             if(*this)
                 path_so_far.push_back(*this);
 
-std::cerr << stringformat("looking for paths at {} in {}\n", *this, path_so_far);
+//std::cerr << stringformat("looking for paths at {} in {}\n", *this, path_so_far);
 
             std::list<std::list<rulestep>> result;
 
-            std::set<rulestep> next_steps = simple_nexts();
+            //std::set<rulestep> next_steps = simple_nexts();
+            std::set<rulestep> next_steps = nexts();
             if(next_steps.size() == 0) {
-std::cerr << stringformat("   .. nothing next, so expanding {}\n", *this);
+//std::cerr << stringformat("   .. nothing next, so expanding {}\n", *this);
+// XXX if we use nexts() instead of simple_nexts(), none of these will be subexpressions, so no need to expand
                 for(auto expath : expand_subexpressions()) {
                     auto tmp = path_so_far;
                     tmp.splice(tmp.end(), expath);
@@ -387,7 +364,7 @@ std::cerr << stringformat("   .. nothing next, so expanding {}\n", *this);
                 // step can follow itself once, so it can exist 2
                 // times max.
                 if(next && next.times_in_path(path_so_far) < 2) {
-std::cerr << stringformat("{} occurs only {} times in {}, so recursing\n", next, next.times_in_path(path_so_far), path_so_far);
+//std::cerr << stringformat("{} occurs only {} times in {}, so recursing\n", next, next.times_in_path(path_so_far), path_so_far);
                     result.splice(result.end(), next.paths(path_so_far));
                 }
             }
