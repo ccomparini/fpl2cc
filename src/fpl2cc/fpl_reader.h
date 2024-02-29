@@ -145,7 +145,7 @@ public:
     }
 
     explicit fpl_reader(
-        utf8_buffer &input,
+        const utf8_buffer &input,
         const std::string &infn,
         ErrorCallback ecb = &default_fail
     ) :
