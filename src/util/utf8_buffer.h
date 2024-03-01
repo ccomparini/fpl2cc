@@ -146,6 +146,9 @@ struct utf8_buffer : public std::basic_string<utf8_byte> {
         return ub - lines.begin();
     }
 
+    std::string to_str() const {
+        return std::string((const char *)c_str());
+    }
 };
 
 
