@@ -15,12 +15,12 @@
 #
 @separator /[\x20\x0a\x0d\x09]+/
 
-element -> json ;
+element -> json;
 
-object   -> value ;
-array    -> value ;
-string   -> value ;
-number   -> value ;
+object   -> value;
+array    -> value;
+string   -> value;
+number   -> value;
 
 'null'^ -> null_value;
 null_value -> value;
@@ -29,17 +29,17 @@ null_value -> value;
 'false'     -> false_value;
 true_value  -> boolean;
 false_value -> boolean;
-boolean     -> value ;
+boolean     -> value;
 
-'{'^ (member (','^ member)*)?:members '}'^ -> object ;
-string:key ':'^ value -> member ;
+'{'^ (member (','^ member)*)?:members '}'^ -> object;
+string:key ':'^ value -> member;
 
-'['^ (value (','^ value)*)?:elements ']'^ -> array ;
+'['^ (value (','^ value)*)?:elements ']'^ -> array;
 
-value -> element ;
+value -> element;
 
 # this might be better implemented with !match now
-'"'^ /((?:[^"\\]|\\.)*)/:guts '"'^ -> string ;
+'"'^ /((?:[^"\\]|\\.)*)/:guts '"'^ -> string;
 
 # json number specification appears to actually be fairly fussy.
 # From the spec, I'm inferring that:
@@ -52,10 +52,10 @@ value -> element ;
 
 # (2 expressions for floats is a way to make it so that just a
 # decimal point doesn't match as a float)
-/(-)?[0-9]+\.[0-9]*([eE][+-]?[0-9]+)?/:float_val -> number ;
-/(-)?\.[0-9]+([eE][+-]?[0-9]+)?/:float_val       -> number ;
+/(-)?[0-9]+\.[0-9]*([eE][+-]?[0-9]+)?/:float_val -> number;
+/(-)?\.[0-9]+([eE][+-]?[0-9]+)?/:float_val       -> number;
 
 # this will match something like "02", which is not strictly
 # legal json, but whatever:
-/(-)?([0-9]+)/:integer                           -> number ;
+/(-)?([0-9]+)/:integer                           -> number;
 
