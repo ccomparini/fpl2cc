@@ -4075,11 +4075,7 @@ public:
         }
     }
 
-    void resolve_melds_for_rule(
-        unsigned rulenum,
-        bool multiple_subex = false,
-        int rec_depth = 0
-    ) {
+    void resolve_melds_for_rule(unsigned rulenum) {
         if(rulenum >= rules.size()) {
             internal_error(stringformat(
                 "rule {} is out of bounds in resolve_melds_for_rule",
