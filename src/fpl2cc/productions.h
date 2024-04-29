@@ -323,7 +323,7 @@ class productions {
 
         // returns a string containing all the "paths" forward 
         // through various rules from this rulestep.
-        std::string paths_string(const std::string &prefix = "") {
+        std::string paths_string(const std::string &prefix = "") const {
             std::string result;
             for(auto path : paths()) {
                 result += prefix;
