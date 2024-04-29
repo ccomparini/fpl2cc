@@ -3,6 +3,7 @@
 
 #include "code_block.h"
 #include "fpl_options.h"
+#include "fpl_reader.h"
 #include "production_rule.h"
 #include "reducer.h"
 #include "stack_distance.h"
