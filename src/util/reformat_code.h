@@ -14,7 +14,6 @@ static std::string reformat_code(
 ) {
     int indent_lev = 0;
     int line_no = 1;
-    bool comment_mode = false;
 
     std::string output;
 
