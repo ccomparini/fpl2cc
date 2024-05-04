@@ -115,7 +115,6 @@ class productions {
             owner(o),
             rulenum(rn),
             stepnum(sn) {
-
         }
 
         // If this step is in a subexpression, returns the step in
@@ -155,11 +154,23 @@ class productions {
             ;
         }
 
+        // this is necessary or you get silent fail putting
+        // these in std::set and similar:
+        bool operator<(const rulestep &other) const {
+            return   (owner < other.owner)
+                || (rulenum < other.rulenum)
+                || (stepnum < other.stepnum)
+            ;
+        }
+
         // convenience:
         bool is_ejected()       const { return step().is_ejected(); }
         bool is_subexpression() const { return step().is_subexpression(); }
         bool is_multiple()      const { return step().is_multiple();      }
         bool is_optional()      const { return step().is_optional();      }
+
+        // grrr hates the mix and match of variable vs parameter.  fix.
+        std::string parameter_name() const { return step().variable_name(); }
 
         bool is_in_subexpression() const {
             return rule().parent_rule_number() >= 0;
@@ -212,129 +223,6 @@ class productions {
             return result;
         }
 
-        // returns the set of rulesteps which could legitimately
-        // encountered as the start of the rule passed.
-        // (there can be more than one due to optionals)
-        static std::list<rulestep> rule_starts(
-            const productions *owner, unsigned rulenum
-        ) {
-            std::list<rulestep> result;
-            if(owner && (rulenum < owner->rules.size())) {
-                rulestep st(owner, rulenum, 0);
-                while(st) {
-                    result.push_back(st);
-                    if(!st.is_optional())
-                        break;
-                    st = st.flat_next();
-                }
-            }
-            return result;
-        }
-
-        // There are 0 or more possible rulesteps which can follow any
-        // given rulestep.
-        // The first is always the "flat" next (unless we're at the end
-        // of a rule).
-        // If the current step is multiple, or at the end of a multiple
-        // substep, another other possible next step is either itself or
-        // the start of the substep.
-        // If the "flat" next step is optional, the real next step may
-        // also be the step after that step.
-        void nexts(std::list<rulestep> &result, bool no_repeat = false) const {
-            if(!bool(*this))
-                return;
-
-            auto normal_next = flat_next();
-
-            if(normal_next) result.push_back(normal_next);
-
-            auto opt_next = normal_next;
-            while(opt_next && opt_next.step().is_optional()) {
-                opt_next = opt_next.flat_next(true);
-                if(opt_next) {
-                    result.push_back(opt_next);
-                } else if(!no_repeat && is_in_multiple_subexpression()) {
-                    // we "wrapped" past the end of the subrule,
-                    // and it's a repeated subrule. so, the next
-                    // step is any of the starts of that subrule:
-                    result.splice(
-                        result.end(), rule_starts(owner, rulenum)
-                    );
-                }
-            }
-
-            if(!no_repeat) {
-                auto this_step = step();
-                if(this_step.is_multiple() && !this_step.is_subexpression()) {
-                    // simple multiple, so possible nexts include ourself:
-                    result.push_back(*this);
-                }
-
-                int prln = rule().parent_rule_number();
-                if(prln >= 0) {
-                    if(stepnum + 1 >= rule().num_steps()) {
-                        // next is at (or past) the end of a substep.
-                        // let's see what that substep looks like:
-                        int cdp = rule().parent_countdown_pos();
-                        auto parent_rs = rulestep(owner, prln, -1);
-                        parent_rs.stepnum = parent_rs.rule().num_steps() - cdp;
-                        if(parent_rs.step().is_multiple()) {
-                            // .. it's multiple, so we'll need to wrap
-                            // back to the start:
-                            parent_rs.nexts(result, true);
-                        }
-                    }
-                }
-            }
-        }
-
-        std::list<std::list<rulestep>> paths(
-            std::list<rulestep> in = {},
-            bool no_repeat = false
-        ) const {
-            std::list<rulestep> path_so_far = in;
-
-            path_so_far.push_back(*this);
-
-            std::list<std::list<rulestep>> result;
-
-            std::list<rulestep> next_steps;
-            nexts(next_steps, no_repeat);
-            if(next_steps.size() == 0) {
-                result.push_back(path_so_far);
-                return result;
-            }
-            for(auto next : next_steps) {
-                if(next.rulenum == rulenum) {
-                    if(next.stepnum <= stepnum) {
-                        // we're looking at an earlier step in the
-                        // same rule, so we've recursed once on it.
-                        // don't do it again:
-                        no_repeat = true;
-                    }
-                }
-                result.splice(
-                    result.end(), next.paths(path_so_far, no_repeat)
-                );
-            }
-
-            return result;
-        }
-
-        // returns a string containing all the "paths" forward 
-        // through various rules from this rulestep.
-        std::string paths_string(const std::string &prefix = "") const {
-            std::string result;
-            for(auto path : paths()) {
-                result += prefix;
-                for(auto rs : path) {
-                    result += rs.to_str() + " ";
-                }
-                result += "\n";
-            }
-            return result;
-        }
-
         const production_rule &rule() const {
             if(owner && (rulenum < owner->rules.size()))
                 return owner->rules[rulenum];
@@ -342,7 +230,6 @@ class productions {
             return no_rule();
         }
 
-        // const production_rule::step &step() const {
         const production_rule::step step() const {
             auto rl = rule();
             if(rl) {
@@ -465,6 +352,35 @@ class productions {
             return stringformat(
                 "<{}.{} = {}>", rulenum, stepnum, owner->stepstring(step())
             );
+        }
+    };
+
+    struct rulepath : public std::list<rulestep> {
+        bool operator<(const rulepath &other) const {
+            if(size() != other.size())
+                return size() < other.size();
+
+            // same size:  need to compare elements
+            auto ours   = begin();
+            auto theirs = other.begin();
+            while(ours != end() && theirs != other.end()) {
+                if(!(*ours == *theirs))
+                    return *ours < *theirs;
+
+                ++ours;
+                ++theirs;
+            }
+
+            // if we got here they are probably the same,
+            // because the size() check at the start of this
+            // function.  but check if one hit the end sooner
+            // than the other anyway:
+            //  ours at end | theirs at end | ours < theirs
+            //  true          true            false
+            //  true          false           true
+            //  false         true            false
+            //  false         false           (error - incomplete compare)
+            return theirs != other.end();
         }
     };
 
@@ -1918,6 +1834,10 @@ public:
     // Otherwise, returns -1.
     int subrulenum_for_step(const production_rule::step &st) const {
         return subrulenum_for_el(st.gexpr);
+    }
+
+    int rule_count() const {
+        return rules.size();
     }
 
     const production_rule &rule(int rnum, src_location cl = CALLER()) const {
@@ -3912,65 +3832,6 @@ public:
         }
     }
 
-    /*
-        Returns the number of parameter stack entries to the
-        next parameter stack entry melded into the named parameter.
-        Note:  parameter stack entries, -not- lr_stack entries.
-     */
-    stack_distance meld_distance(
-        const rulestep &from_step,
-        const std::string &pname
-    ) {
-        stack_distance dist(0);
-      
-        // false = don't include the starting step; that start step is
-        // the one from which we're setting distance.
-        //auto all_paths = from_step.paths(false);
-        auto all_paths = from_step.paths();
-
-        dprint_melds(stringformat(
-            "getting meld distance for '{}' from {}."
-            "There are {} paths:\n    {}\n",
-            pname, from_step, all_paths.size(), join(all_paths, "\n    ")
-        ));
-
-        for(auto path : all_paths) {
-            dprint_melds(stringformat("   walking path {}\n", path));
-            stack_distance this_dist(0);
-            for(auto rstep : path) {
-                if(rstep.step().is_ejected())
-                    continue; // because ejected = not on param stack
-
-                if(rstep.step().is_subexpression())
-                    continue;  // because we'll count the steps -within- it
-
-                dprint_melds(stringformat("     looking at {}?\n", rstep));
-
-                if(rstep.step().variable_name() == pname) {
-                    dist = this_dist;
-                    dprint_melds(stringformat(
-                        "       bing! on {} distance {} gives dist {}\n",
-                        rstep, this_dist, dist
-                    ));
-                    this_dist.reset();
-                }
-
-                if(dist.is_indeterminate())
-                    break;
-
-                // (everything here is one ls stack entry, since we
-                // iterate into subexes)
-                ++this_dist;
-            }
-            if(dist.is_indeterminate())
-                break;
-        }
-        dprint_melds(stringformat(
-            "   final distance for {}: {}\n", pname, dist
-        ));
-        return dist;
-    }
-
     static production_rule &no_rule() {
         static production_rule nr;
         if(nr) {
@@ -3980,6 +3841,10 @@ public:
         return nr;
     }
 
+    rulestep rule_start(int rulenum) const {
+        return rulestep(this, rulenum, 0);
+    }
+   
     rulestep canonical_step_for_param(
         int rulenum, const std::string &pname
     ) const {
@@ -4032,7 +3897,10 @@ public:
     // Sets the meld value for the (assumed canonical) rulestep
     // passed.  Throws errors (or warnings) if melds are inconsistent,
     // or if there appear to be other problems.
-    void set_meld(rulestep rstep, const std::string &pname, stack_distance meld, src_location ca = CALLER()) {
+    void set_meld(
+        rulestep rstep, const std::string &pname, stack_distance meld,
+        src_location ca = CALLER()
+    ) {
         dprint_melds(stringformat(
             "{} SETTING MELD TO {} for {} in {}\n",
             ca, meld, pname, rstep.rule()
@@ -4075,6 +3943,81 @@ public:
         }
     }
 
+    // Returns all the possible "meld paths" through the
+    // rule, starting at this step.
+    //
+    // A "meld path" is a particular way of representing the
+    // set of steps which might follow, taking into account
+    // multiple and optional steps.  Specifically, multiple
+    // steps are represented by simply doubling the step in
+    // the output sequence.  This is sufficient for measuring
+    // stack distances for purposes of determining if and how
+    // a given variable can "meld" in the generated code.
+    //
+    // I'm doing this this way (returning explicit paths and
+    // letting callers iterate them to assign melds) instead
+    // of recursing and assigning melds because this seemed
+    // simpler and easier to test.  Maybe it was, maybe not.
+    // It's not the most efficient, but seems to run fast
+    // enough at the moment.
+    std::set<rulepath> meld_paths(
+        int rulenum,
+        src_location caller = CALLER()
+    ) const {
+        if(rulenum >= rules.size()) {
+            internal_error(stringformat(
+                "rule {} is out of bounds in meld_paths",
+                rulenum
+            ), caller);
+            return { };
+        }
+
+        const production_rule &rule = rules[rulenum];
+        std::set<rulepath> result;
+
+        auto flat_nexts = rule.meld_paths();
+        // each path through the rule is going to get tacked onto the
+        // input path (which contains whatever lead up to this rule):
+        for(auto rpath : flat_nexts) {
+            std::list<rulepath> paths_so_far = { {} };
+            for(auto fsnum : rpath) {
+                auto st = rule.nth_step(fsnum);
+
+                if(st.is_ejected()) {
+                    continue;
+                }
+
+                if(!st.is_subexpression()) {
+                    for(rulepath &outpath : paths_so_far) {
+                        outpath.push_back(rulestep(this, rulenum, fsnum));
+                    }
+                } else {
+                    std::list<rulepath> splits;
+                    while(!paths_so_far.empty()) {
+                        auto psf = paths_so_far.front(); paths_so_far.pop_front();
+
+                        auto subrnum = subrulenum_for_step(st);
+                        auto subpaths = meld_paths(subrnum);
+                       // replace the "path so far" with the set of variant
+                       // paths for the subexpression:
+                       for(auto subpath : subpaths) {
+                           splits.push_front(psf);
+                           for(auto sst : subpath) {
+                               splits.begin()->push_back(sst);
+                           }
+                       }
+                    }
+                    paths_so_far.splice(paths_so_far.end(), splits);
+                }
+            }
+            for(auto path : paths_so_far) {
+                result.insert(path);
+            }
+        }
+
+        return result;
+    }
+
     void resolve_melds_for_rule(unsigned rulenum) {
         if(rulenum >= rules.size()) {
             internal_error(stringformat(
@@ -4084,20 +4027,33 @@ public:
             return;
         }
 
+        // - For each path through the rule,
+        //   - Iterate steps;  if step is/has a parameter:
+        //     - Report parameter meld according to distance from canonical
+        //       step.  The set function should determine (and thus set)
+        //       validity.
         production_rule &rule = rules[rulenum];
-        for(auto name : rule.parameter_names()) {
-            auto canonical_step = canonical_step_for_param(rulenum, name);
-           
-            if(!canonical_step) {
-                internal_error(stringformat(
-                    "No canonical step for {} in {} when trying to set meld",
-                    name, rule
-                ));
-            } else {
-                set_meld(
-                    canonical_step, name,
-                    meld_distance(canonical_step, name)
-                );
+        for(auto path : meld_paths(rulenum)) {
+            int stack_pos = 0;
+            std::map<std::string, int> last_step_for_p;
+            for(auto step : path) {
+                auto pname = step.parameter_name();
+                if(pname.length()) {
+                    if(last_step_for_p.count(pname)) {
+                        // this isn't the first time we've seen this
+                        // param, so there needs to be a meld:
+                        auto cstep = canonical_step_for_param(
+                            rule.rule_number(), pname
+                        );
+                        if(cstep) {
+                            set_meld(cstep, pname,
+                                stack_pos - last_step_for_p[pname]
+                            );
+                        }
+                    }
+                    last_step_for_p[pname] = stack_pos;
+                }
+                stack_pos++;
             }
         }
     }
@@ -4370,7 +4326,6 @@ public:
 
 
     // debugging/messaging:
-
     std::string stepstring(const production_rule::step &st) const {
         if(auto subr = sub_rule(st)) {
             return "(" + rulestring(subr) + ")" + st.qty.to_str();

@@ -1,0 +1,4 @@
+returncode = 1
+stderr = "Error src/fpl2cc/test/fpl_itself/meld_fails_issue_3.fpl:9: inconsistent meld for arg (1 vs 2) in arg ','?:comma_breaks_it -> _subex_0
+"
+stdout = ""

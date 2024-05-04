@@ -1,0 +1,88 @@
+returncode = 0
+stderr = ""
+stdout = "... testing rule paths
+simple:  a -> b;
+    { <0.0 = a> }
+a then b:  a b -> x;
+    { <0.0 = a>, <0.1 = b> }
+b repeats and is optional:  a b* -> x;
+    { <0.0 = a> }
+    { <0.0 = a>, <0.1 = b*> }
+    { <0.0 = a>, <0.1 = b*>, <0.1 = b*> }
+a repeats:  a+ -> b;
+    { <0.0 = a+> }
+    { <0.0 = a+>, <0.0 = a+> }
+a repeats and is optional:  a* -> b;
+    {  }
+    { <0.0 = a*> }
+    { <0.0 = a*>, <0.0 = a*> }
+a is opt, followed by opt:  a? b? -> c;
+    {  }
+    { <0.0 = a?> }
+    { <0.1 = b?> }
+    { <0.0 = a?>, <0.1 = b?> }
+simple subexpression:  (a b) -> c;
+    { <0.0 = a>, <0.1 = b> }
+eject entire subexpression:  (a b)^ -> c;
+    {  }
+rep before:  opt* (suba subb) -> foo;
+    { <0.0 = suba>, <0.1 = subb> }
+    { <1.0 = opt*>, <0.0 = suba>, <0.1 = subb> }
+    { <1.0 = opt*>, <1.0 = opt*>, <0.0 = suba>, <0.1 = subb> }
+simple opts and reps:  opt? mult* minmult+ -> foo;
+    { <0.2 = minmult+> }
+    { <0.0 = opt?>, <0.2 = minmult+> }
+    { <0.1 = mult*>, <0.2 = minmult+> }
+    { <0.2 = minmult+>, <0.2 = minmult+> }
+    { <0.0 = opt?>, <0.1 = mult*>, <0.2 = minmult+> }
+    { <0.0 = opt?>, <0.2 = minmult+>, <0.2 = minmult+> }
+    { <0.1 = mult*>, <0.1 = mult*>, <0.2 = minmult+> }
+    { <0.1 = mult*>, <0.2 = minmult+>, <0.2 = minmult+> }
+    { <0.0 = opt?>, <0.1 = mult*>, <0.1 = mult*>, <0.2 = minmult+> }
+    { <0.0 = opt?>, <0.1 = mult*>, <0.2 = minmult+>, <0.2 = minmult+> }
+    { <0.1 = mult*>, <0.1 = mult*>, <0.2 = minmult+>, <0.2 = minmult+> }
+    { <0.0 = opt?>, <0.1 = mult*>, <0.1 = mult*>, <0.2 = minmult+>, <0.2 = minmult+> }
+multiple subexpression:  (a b^)+ -> c;
+    { <0.0 = a> }
+    { <0.0 = a>, <0.0 = a> }
+multiple optional subexpression:  (a b^)* -> c;
+    {  }
+    { <0.0 = a> }
+    { <0.0 = a>, <0.0 = a> }
+sub subs ejected at top:  topa (sa (ssa ssb)+)^+ -> c;
+    { <2.0 = topa> }
+sub subs ejected one down:  topa (sa^ (ssa ssb)^+)+ -> c;
+    { <2.0 = topa> }
+sub subs ejected two down:  topa (sa (ssa^ ssb^)+)+ -> c;
+    { <2.0 = topa>, <1.0 = sa> }
+    { <2.0 = topa>, <1.0 = sa>, <1.0 = sa> }
+sub subs individually ejected:  topa (sa^ (ssa^ ssb^)+)+ -> c;
+    { <2.0 = topa> }
+optional multiple subexpression:  a (a b^)* c -> x;
+    { <1.0 = a>, <1.2 = c> }
+    { <1.0 = a>, <0.0 = a>, <1.2 = c> }
+    { <1.0 = a>, <0.0 = a>, <0.0 = a>, <1.2 = c> }
+weird meld test:  'a'^ ((b ','^ b) c)* 'd'^ -> foo;
+    {  }
+    { <0.0 = b>, <0.2 = b>, <1.1 = c> }
+    { <0.0 = b>, <0.2 = b>, <1.1 = c>, <0.0 = b>, <0.2 = b>, <1.1 = c> }
+optional subex:  'u'?:not_signed 'int'^ (~ size_bits)? -> type;
+    {  }
+    { <0.1 = size_bits> }
+    { <1.0 = 'u'?:not_signed> }
+    { <1.0 = 'u'?:not_signed>, <0.1 = size_bits> }
+optional subex with optional start:  a (b* c)* d -> x;
+    { <1.0 = a>, <1.2 = d> }
+    { <1.0 = a>, <0.1 = c>, <1.2 = d> }
+    { <1.0 = a>, <0.0 = b*>, <0.1 = c>, <1.2 = d> }
+    { <1.0 = a>, <0.1 = c>, <0.1 = c>, <1.2 = d> }
+    { <1.0 = a>, <0.0 = b*>, <0.0 = b*>, <0.1 = c>, <1.2 = d> }
+    { <1.0 = a>, <0.0 = b*>, <0.1 = c>, <0.1 = c>, <1.2 = d> }
+    { <1.0 = a>, <0.1 = c>, <0.0 = b*>, <0.1 = c>, <1.2 = d> }
+    { <1.0 = a>, <0.0 = b*>, <0.0 = b*>, <0.1 = c>, <0.1 = c>, <1.2 = d> }
+    { <1.0 = a>, <0.0 = b*>, <0.1 = c>, <0.0 = b*>, <0.1 = c>, <1.2 = d> }
+    { <1.0 = a>, <0.1 = c>, <0.0 = b*>, <0.0 = b*>, <0.1 = c>, <1.2 = d> }
+    { <1.0 = a>, <0.0 = b*>, <0.0 = b*>, <0.1 = c>, <0.0 = b*>, <0.1 = c>, <1.2 = d> }
+    { <1.0 = a>, <0.0 = b*>, <0.1 = c>, <0.0 = b*>, <0.0 = b*>, <0.1 = c>, <1.2 = d> }
+    { <1.0 = a>, <0.0 = b*>, <0.0 = b*>, <0.1 = c>, <0.0 = b*>, <0.0 = b*>, <0.1 = c>, <1.2 = d> }
+"

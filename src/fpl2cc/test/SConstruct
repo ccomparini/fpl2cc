@@ -4,6 +4,7 @@ import sys
 
 Import('env')
 env = env.Clone()
+env.Append(CPPPATH=['#build/fpl2cc']) # because we use/test generated headers
 
 # Support running fpl-generated languages in debug mode.
 # Example usage:

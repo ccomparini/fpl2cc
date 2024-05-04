@@ -185,14 +185,7 @@ public:
             return explicitly_named && varname.length();
         }
 
-        void set_meld(int new_meld, std::string caller = CALLER()) {
-            std::cerr << stringformat("set_meld called from {}\n", caller);
-            meld_distance = new_meld;
-        }
 
-        bool meld_is_set() const {
-            return meld_distance.to_int() != 0;
-        }
 
         // This determines the precedence with which steps
         // will be assigned to parameters in cases where there
@@ -525,7 +518,11 @@ public:
         }
     }
 
-    void rename_parameter(unsigned stepi, const std::string &oldname, const std::string &name) {
+    void rename_parameter(
+        unsigned stepi,
+        const std::string &oldname,
+        const std::string &name
+    ) {
         step_vars.erase(oldname);
         add_parameter(stepi, name);
     }
@@ -678,6 +675,53 @@ public:
 
     void set_reducer(const reducer &red) {
         abs_impl = red;
+    }
+
+    // Returns the set of possible non-looping execution "paths" through
+    // the rule, each represented as a list of step numbers.
+    // "multiple" steps are represented in each path by single duplication
+    // of the step.
+    // This is useful for analyzing the various possible reduce-time
+    // stack configurations (particularly melding).
+    std::set<std::list<int>> meld_paths(
+        int stepnum = 0, std::list<int> path_so_far = {}
+    ) const {
+
+        const step &st = nth_step(stepnum);
+
+        if(!st) {
+            // presumably it's because we're at the end of the
+            // rule, so end of path:
+            return { path_so_far };
+        }
+
+        if(st.is_ejected()) {
+            // ejected means there's nothing on the param
+            // stack for this; hence, we skip it for meld
+            // calculations:
+            return meld_paths(stepnum + 1, path_so_far);
+        }
+
+        std::set<std::list<int>> result;
+
+        if(st.is_optional()) {
+            // step is optional, so one possibility is we continue
+            // without it:
+            result.merge(meld_paths(stepnum + 1, path_so_far));
+        }
+
+        // the step itself can always exist in the path:
+        path_so_far.push_back(stepnum);
+        result.merge(meld_paths(stepnum + 1, path_so_far));
+
+        if(st.is_multiple()) {
+            // step is multiple.  we represent the multiplicity
+            // by duplicating the step one time in the result:
+            path_so_far.push_back(stepnum);
+            result.merge(meld_paths(stepnum + 1, path_so_far));
+        }
+
+        return result;
     }
 
     std::string to_str() const {

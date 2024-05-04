@@ -1,4 +1,4 @@
 returncode = 1
-stderr = "Error src/fpl2cc/test/fpl_itself/melds.fpl:16: inconsistent meld for a (0 vs ␀) in 'x':a 'b':arg_1 'x':a 'b':arg_3 'b':arg_4 'x':a -> invalid
+stderr = "Error src/fpl2cc/test/fpl_itself/melds.fpl:17: inconsistent meld for a (2 vs 3) in 'x':a 'b':arg_1 'x':a 'b':arg_3 'b':arg_4 'x':a -> invalid
 "
 stdout = ""

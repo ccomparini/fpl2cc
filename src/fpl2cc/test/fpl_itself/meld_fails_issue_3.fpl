@@ -1,0 +1,19 @@
+
+# https://github.com/ccomparini/fpl2cc/issues/3
+
+@produces std::string
+
+# this should fail, because the comma is optional but
+# not ejected, so the meld distance will be either 1 or 2,
+# and which is not knowable at fpl compile time).
+'('^ (arg ','?:comma_breaks_it)* ')'^ -> argument_list +{
+    arg@foreach([](mem) {
+        std::cout << stringformat("OH HI arg is {}\n", mem
+    });
+
+    return stringformat("args joined:\n{}\n", arg.join("\n"));
+}+
+
+
+/[a-zA-Z_]+/:arg -> arg;
+

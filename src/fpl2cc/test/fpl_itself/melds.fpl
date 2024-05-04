@@ -11,7 +11,8 @@ arg arg arg -> meld_one_on_three_explicit;
 '('^ (arg (','^ arg)*)? ')'^ -> argument_list;
 
 
-# this one should have invalid meld, because the distances are
-# inconsistent:
+# this one should have invalid meld, because the distances
+# between the :a parameters on the param stack are inconsistent
+# (2 vs 3)
 'x':a 'b' 'x':a 'b' 'b' 'x':a -> invalid;
 

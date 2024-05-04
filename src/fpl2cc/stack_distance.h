@@ -11,11 +11,15 @@ distances.
 The general arithmetic rules for these are:
 
   - Distances are always positive.  If you subtract
-    2 non-indeterminate distances, you will get a 
-    positive distance.
+    2 non-zero non-indeterminate distances, you will
+    get a positive distance.  
   - Distances may be "indeterminate".  Operations
     involving one or more indeterminate distances
     result in an indeterminate distance.
+  - Distances of 0 are uninitialized or degenerate.
+    An example would be the distance "between" a single
+    position.  Such positions can always be freely
+    assigned.
 
  */
 
@@ -39,7 +43,7 @@ public:
     int to_int() const { return dist; }
 
 
-    // resets the distance to 0 (and makes this freely  assignable)
+    // resets the distance to 0 (and makes this freely assignable)
     void reset() {
         dist = 0;
     }
@@ -57,6 +61,7 @@ public:
             // disagreeing distances means indeterminate:
             dist = INDETERMINATE;
         } else {
+            // apparently they don't disagree, so set it:
             dist = b.dist;
         }
         return *this;
@@ -72,10 +77,6 @@ public:
         return *this;
     }
 
-    // negating an already indeterminate distance
-    // yields an indeterminate distance, so this
-    // is always indeterminate:
-    stack_distance operator-() const { return indeterminate(); }
 
     stack_distance operator+(const stack_distance &b) const {
         if(b.is_indeterminate()) return indeterminate();
