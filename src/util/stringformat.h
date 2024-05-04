@@ -329,7 +329,6 @@ std::string stringformat(std::string_view fmt, Args&&... args) {
                 size_t pp_ind = 0; // pos of post processing function, if any
                 long arg_num = argi;
                 if(fmt[ind] >= '0' && fmt[ind] <= '9') {
-                    size_t num_len = 1; // (there's at least one digit)
                     const char *istart = fmt.data() + ind;
                     char       *iend   = const_cast<char *>(istart + 1);
                     arg_num = strtol(istart, &iend, 10);
