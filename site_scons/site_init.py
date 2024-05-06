@@ -409,15 +409,20 @@ def run_cc_tests(env):
         env.Program(tprog, [ main_src ])
     
         output_file = tprog + '.out'
+
+        base_dir = str(Dir('#'))
+        env['ENV']['BASE_DIR'] = base_dir
+        print(f"project root is {base_dir}", file=sys.stderr)
     
         # tests may want to find themselves and/or data directories:
         src_dir = source_dir(scons_expect).get_abspath();
-        #print(f"THIS IS PYTHON AND src_dir is {src_dir}\n", file=sys.stderr)
-        env['ENV']['SRC_DIR'] = src_dir
+        env['ENV']['SRC_DIR'] = os.path.relpath(src_dir, base_dir);
+        #print(f"    source is {env['ENV']['SRC_DIR']} from {os.getcwd()}", file=sys.stderr)
         fp_data_dir = src_dir + '/' + tprog + '.data' # (full path)
         if(os.path.isdir(fp_data_dir)):
-            # DATA_DIR environment variable is relative to SRC_DIR
-            env['ENV']['DATA_DIR'] = os.path.relpath(fp_data_dir, src_dir)
+            #print(f"    DATA DIR {fp_data_dir} is a dir", file=sys.stderr)
+            env['ENV']['DATA_DIR'] = os.path.relpath(fp_data_dir, base_dir)
+            #print(f"    ... so it's {env['ENV']['DATA_DIR']} from {os.getcwd()}", file=sys.stderr)
     
             # output depends on everything in the data dir:
             for root, dirnames, filenames in os.walk(fp_data_dir):

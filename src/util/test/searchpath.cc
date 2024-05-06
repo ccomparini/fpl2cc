@@ -14,24 +14,31 @@ bool change_dir(const std::string &dir) {
     return !err;
 }
 
-int main() {
-    if(!getenv("DATA_DIR")) {
-        std::cerr << "please set DATA_DIR to run this test\n";
-        return 1;
-    }
+int main(int argc, const char **argv) {
+/*
+    std::cerr << "\n";
+    std::cerr << stringformat("invoked as {}\n", argv[0]);
+    std::cerr << stringformat("  from dir {}\n", fs::current_path());
+    std::cerr << stringformat("   SRC_DIR {}\n", getenv("SRC_DIR"));
+    std::cerr << stringformat("  DATA_DIR {}\n", getenv("DATA_DIR"));
+ */
     if(!getenv("SRC_DIR")) {
         std::cerr << "please set SRC_DIR to run this test\n";
         return 1;
-    } else if(!change_dir(getenv("SRC_DIR"))) {
+    }
+
+    if(!getenv("DATA_DIR")) {
+        std::cerr << "please set DATA_DIR to run this test\n";
+        return 1;
+    } else if(!change_dir(getenv("DATA_DIR"))) {
         std::cerr << "can't continue.\n";
         return 1;
     }
 
-    // the current working directory is now SRC_DIR so '.' should
-    // match SRC_DIR.  DATA_DIR is expected to be relative to that:
+    // the current working directory is now DATA_DIR so '.' should
+    // match that. SRC_DIR is assumed to be above the data dir.
     Searchpath path(stringformat(
-        ".:{}/b:./{}/a:{}",
-        getenv("DATA_DIR"), getenv("DATA_DIR"), getenv("DATA_DIR")
+        "..:./b:./a:.", getenv("SRC_DIR")
     ));
     path.append("./nonexistent_dir");
 
