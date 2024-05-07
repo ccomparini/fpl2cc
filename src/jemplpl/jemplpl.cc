@@ -19814,7 +19814,6 @@ bool dummy = true // hack for comma
     [&guts] (const std::string &frag) { guts += frag; }
     );
 
-
     std::string function_name = output_function_name();
 
     #define _CLUDGE_TO_STR(x) #x
@@ -19824,8 +19823,9 @@ bool dummy = true // hack for comma
     "#define {}_H\n"
     "#line " _CLUDGE_STR(__LINE__) " \"" __FILE__ "\"\n\n"
     "#include <string>\n"
-    "#include \"util/stringformat.h\"\n"  // XXX hey these should be embedded, maybe? inception
-    "#include \"util/utf8_buffer.h\"\n" // XXX kill
+    "#include \"util/jerror.h\"\n"
+    "#include \"util/stringformat.h\"\n"
+    "#include \"util/utf8_buffer.h\"\n"
     "inline std::string {}({}) {{\n"
     "    struct _jemp_srcinfo {{\n"
     "        int ln;\n"
