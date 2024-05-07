@@ -3,9 +3,17 @@
 """
   esml - Even Simpler Minimal Language
 
-  None of json, yaml, nor toml gave me what I want.  Hence this.
+  The idea behind this is to make it as simple as possible to write
+  and compare data dumps.  For example, if you have 1000 elements and
+  only the 534th ones differ, a simple command line diff will show
+  exactly those elements.  Same with nested structures - if there are
+  deeply nested structures, even very deep differences are easy to find
+  and examine using standard unix command line tools.
 
-  Overview of key features:
+  None of json, yaml, nor toml could give me anything satisfactory in
+  this regard.
+
+  Key features:
    - trailing commas are allowed
    - multiline strings are allowed (in fact, required if there's a newline)
    - mixed type arrays work
@@ -27,21 +35,13 @@
        becomes:
            foo = 
 
-   The idea behind all this is to make it as simple as possible to
-   write and compare data dumps.  For example, if you have 1000 elements
-   and only the 534th ones differ, a simple command line diff will show
-   exactly which element differ.  Same with nested structures - if
-   there are deeply nested structures, even very deep differences
-   are easy to find and examine using standard unix command line tools.
-
    Disadvantages:
-       - output is bulkier than json, toml, and pretty much anything else
-       - I made this up so there's no off-the-shelf parser*.
-         However, it's very easy to parse - everything is
+     - output is bulkier than json, toml, and pretty much anything else
+     - I made this up so there's no off-the-shelf parser for python.
+       However, it's very easy to parse - everything is
            <nested key> = [value]
-
-   *per the goal, just about every command line unix tool is a "parser"
-   for most of the key purposes.
+       .. and, of course (per the goal) just about any unix command line
+       tool will "parse" it for the principle purposes.
 
 """
 import unittest
@@ -94,6 +94,12 @@ def dumps(value, name = ""):
     """
         dumps(value) - convert the dictionary or list passed to an esml string
         dumps(value, name="name") - convert the value passed to an esml string
+
+        In the first invocation, if the value passed is a list, the "keys" in
+        the output will be square bracketed indexes into the list.
+
+        The second invocation is necessary for writing non-compound types due
+        to the fact that in esml everything is key/value.
     """
 
     out = []
@@ -113,7 +119,7 @@ def dumps(value, name = ""):
     return ''.join(out)
 
 
-class Testesml(unittest.TestCase):
+class _Testesml(unittest.TestCase):
 
     def test_all(self):
         expected = (
@@ -153,7 +159,6 @@ class Testesml(unittest.TestCase):
             ]),
             'lat': 23.4394,
         })
-        #print(got)
 
         # I'm calling it "good enough" to test multiline-ness and
         # nesting in one go.  This module is, itself, intended for
