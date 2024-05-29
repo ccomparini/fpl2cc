@@ -3261,17 +3261,6 @@ public:
         return state_num;
     }
 
-    int32_t end_state_for_rule(int32_t rule) {
-        lr_item end_item(rule, 0);
-
-        auto rsi = state_index.find(lr_set(end_item).id());
-        if(rsi != state_index.end())
-            return rsi->second;
-
-        // end state hasn't been created yet.  create it:
-        return add_state(end_item);
-    }
-
     // clears any existing states and generates the states (and transitions)
     // needed to parse the product(s) passed
     void generate_states(const std::list<std::string> &wanted) {
