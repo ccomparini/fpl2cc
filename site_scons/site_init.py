@@ -412,7 +412,6 @@ def run_cc_tests(env):
 
         base_dir = str(Dir('#'))
         env['ENV']['BASE_DIR'] = base_dir
-        print(f"project root is {base_dir}", file=sys.stderr)
     
         # tests may want to find themselves and/or data directories:
         src_dir = source_dir(scons_expect).get_abspath();
