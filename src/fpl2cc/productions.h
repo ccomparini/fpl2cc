@@ -1266,8 +1266,8 @@ class productions {
             len++;
         }
 
-        // huh... how does this work if we don't loop here?
-
+        // we could loop here to get the next comment (if any) etc
+        // but the caller loops, so:
         return len;
     }
 
@@ -1679,26 +1679,6 @@ public:
         return inp->read_re("[ \\t]*([^\\x0a\\x0d]+?)[ \\t]*[\\x0a\\x0d]")[1];
     }
 
-    // this is some kind of utility thing which probably doesn't
-    // belong here, but it here because we need it and I'm already
-    // layers deep in yak shave..
-    // splits the given string on spaces and returns a set of the things
-    // in it.
-    // actually it's a reverse join (on space).  maybe nioj()?
-    static std::set<std::string> space_set(const std::string &in) {
-        std::set<std::string> out;
-        const std::string ws("\t "); // just tab or space actually
-        size_t next = in.npos;
-        for(auto start = in.find_first_of(ws); start != in.npos; start = next) {
-            next = in.find_first_of(ws, start);
-            if(next != in.npos) {
-                out.insert(in.substr(start, next - start));
-            } else {
-                out.insert(in.substr(start));
-            }
-        }
-        return out;
-    }
 
     void parse_goal() {
         std::string goal;
@@ -1941,10 +1921,12 @@ public:
 
     static void read_suffix(fpl_reader_p &src, production_rule::step &expr) {
         if(src->read_byte_equalling('^')) {
+            // step is "ejected" - it will not be passed to reducers
+            // at all (and probably won't even be put on the stack)
             expr.eject = true;
         } else if(src->read_byte_equalling(':')) {
-            // the name to give the argument corresponding
-            // this this step follows:
+            // :<name> - this step's match will be passed to the
+            // reducer as part of the <name>d argument:
             expr.varname = src->read_re("[A-Za-z][A-Za-z0-9_]*")[0];
             expr.explicitly_named = true;
         }
@@ -1963,6 +1945,7 @@ public:
         return read_identifier(src);
     }
 
+    // (reads a c++ type... uhh... as well as possible) 
     static inline std::string read_cpp_type(fpl_reader_p &src) {
         return src->read_re(".*")[0]; // good enough for now. shipit.
     }
@@ -2342,12 +2325,16 @@ public:
     // If there's a single, obvious name for the variable to use
     // for the subexpression passed, this returns it.  Otherwise,
     // returns an empty string.
+    // For example, if you do:
+    //   item (','^ item)* -> item_list;
+    // then the subex_varname for the subexpression "(','^ item)" is
+    // "item".
     std::string subex_varname(const std::string &subex) const {
         if(auto rule = single_rule_for_product(subex)) {
             if(auto step = rule.single_param()) {
                 return step.variable_name();
             }
-        }
+        } // else there's no such subexpression
 
         return "";
     }
