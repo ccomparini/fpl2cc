@@ -2407,7 +2407,7 @@ public:
     // subexpressions also add stuff to the containing rule...
     void add_subexpression(production_rule &rule, production_rule::step &sub) {
         if(sub.is_explicitly_named()) {
-            // Propegate the explicit name down to the subs.
+            // Propagate the explicit name down to the subs.
             // This is for stuff like (classic case):
             //   '('^ (item (','^ item)*)?:items ')'^ -> list;
             // In this case, +list will expect the "item"s in
@@ -2675,8 +2675,8 @@ public:
 
                 args.insert(name);
 
-                // allow (but do not require) commas between (or after)
-                // production names (by skipping them)
+                // allow (but do not require) a single comma between
+                // (or after) production names (by skipping them)
                 eat_separator();
                 inp->read_byte_equalling(',');
                 eat_separator();
@@ -2694,7 +2694,7 @@ public:
     // one or more rules, filling in or overriding the reduce action(s)
     // for those rules.
     //
-    // +<production_name> <argdecl> <code_block>
+    // '+'~production_name argdecl code_block
     //
     void parse_reducer() {
         if(!inp->read_byte_equalling('+')) {
@@ -2737,6 +2737,7 @@ public:
         return pname;
     }
 
+    // (everything after the '->' in a rule is considered "implementation")
     void parse_rule_implementation(production_rule &rule) {
         std::string pname = read_rule_production();
         if(!pname.length()) {
@@ -2793,7 +2794,7 @@ public:
                 // this_product is the name of the product; proceed
             } else if(inp->peek() == ']') {
                 // this_product is the last product name in the list;
-                // proceed
+                // proceed (but leave the ']' so the loop can terminate)
             } else {
                 // this_product is not a simple product name.  The
                 // other valid possibility is it's a rule producing
@@ -2843,9 +2844,12 @@ public:
         // comes later in the file, and has a greater index)
         //
         // The relative precedence index is used to resolve the
-        // special production tokens '<', '.', and '>' to the group name
-        // at index relative precedence - 1, relative precedence, and
-        // relative precedence + 1 respectively.
+        // special production tokens, shown here with their meanings:
+        //    '<<' - lowest precedence in the group
+        //    '<'  - precedence one lower than the current
+        //    '.'  - current precedence
+        //    '>'  - precedence one higher than the current
+        //    '>>' - highest precedence
         //
         if(inp->read_byte_equalling('[')) {
             std::list<std::string> prods_this_group;
@@ -3375,8 +3379,6 @@ public:
                     used = true;
                     rule.set_reducer(red);
 
-                    // it would be nice to know if we accidentally
-                    // overrode an existing reducer, ... hmm maybe...grrr
                     if(mc == existing_mc) {
                         warn(stringformat("{} overrides equally good {} on {}",
                             red, existing, rule
@@ -3404,7 +3406,9 @@ public:
 
     // returns a string containing one possible reducer
     // declaration for the rule passed.  used for giving
-    // fpl authors a hint about what to declare.
+    // fpl authors a hint about what they might need to
+    // implement (or generating stubs or whatever might
+    // help)
     std::string hypothetical_reducer(const production_rule &rule) const {
         std::string out("+");
         out += rule.product() + "(";
@@ -3430,6 +3434,8 @@ public:
         return out;
     }
 
+    // resolves the '<<', '<', '.', '>' and '>>' expressions
+    // to the appropriate rules.
     void resolve_precedence_expressions() {
         for(int rulei = 0; rulei < rules.size(); rulei++) {
             production_rule &rule = rules[rulei];
