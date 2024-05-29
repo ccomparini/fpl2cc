@@ -800,7 +800,7 @@ class productions {
             items.insert(it);
         }
 
-        // Recorsively adds all items for whatever can come after the
+        // Recursively adds all items for whatever can come after the
         // item passed.  This includes handling repetition, optionalness,
         // and items needed to match the start of nonterminals.
         // Callers will need to deal with handling multiple-match items,
