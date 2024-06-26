@@ -18,31 +18,27 @@ a_with_trailing_bs  -> stuff;
 abbb                -> stuff;
 just_a              -> stuff;
 bb                  -> stuff;
-b                   -> stuff;
+'b'                 -> stuff;
 
-a^ b:first (', '^ b)*:tr -> a_with_trailing_bs +{
+'a'^ 'b':first (', '^ 'b')*:tr -> a_with_trailing_bs +{
     return stringformat(
         "a followed by {} and {} trailing bs",
         first@join(""), tr@count()
     );
 }+
 
-a^ (b b b)+:bees -> abbb +{
+'a'^ ('b' 'b' 'b')+:bees -> abbb +{
     return stringformat(
         "a followed by {} b: {}", bees@count(), bees@join(", ")
     );
 }+
 
-a^ -> just_a +{
+'a'^ -> just_a +{
     return "just a";
 }+
 
-b b -> bb +{
+'b' 'b' -> bb +{
     return "2b";
 }+
 
-# XXX we shouldn't need these, but we do.
-# (issue #45 https://github.com/ccomparini/jest2/issues/45 )
-'a' -> a;
-'b' -> b;
 
