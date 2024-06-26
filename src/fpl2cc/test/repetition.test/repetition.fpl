@@ -14,8 +14,15 @@
                 return len + 2;
             len++;
         }
-        // error - no end of comment (XXX)?
-        return 0;
+        // error - no end of comment.  or not?
+        // the problem here is we're just passed
+        // a buffer and not something which can
+        // reasonably be used to distinguish eof.
+        // basically a bug in fpl at this point.
+        // for this test, let's just say you can
+        // terminate a comment with '\0' or end
+        // of file and move on.
+        return len;
     }
 
     if(inp[0] == '/' && inp[1] == '/') {
