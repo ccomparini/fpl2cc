@@ -34,19 +34,20 @@ fruit_list -> list;
 /[0-9]+/:digits -> integer;
 
 # these should both parse, and reducers need to see all
-# the args:
-'['^ integer:el ','^ integer:el ']'^ -> two_tuple;
-#'['^ (integer:el ','^ integer:el                ) ']'^ -> two_tuple; # XXX USE THIS ONE
-'['^ integer:el ','^ integer:el ','^ integer:el ']'^ -> three_tuple;
-#'['^ (integer:el ','^ integer:el ','^ integer:el) ']'^ -> three_tuple;
+# the args.  the subexpression in the two_tuple case
+# is unnecessary except to test that it does the same
+# thing with or without it.
+'['^ (integer:el ','^ integer:el)                ']'^ -> two_tuple;
+'['^  integer:el ','^ integer:el ','^ integer:el ']'^ -> three_tuple;
 
 # expect all these to inherit list's type:
 two_tuple   -> tuple;
 three_tuple -> tuple;
 tuple       -> list;
 
-# this one should toss a warning, and all bets are off
-# as to what it does.
+# for this one, foo has 2 different incompatible
+# types, so we need it to give a warning.
+# (additionally, it'll give a warning for being unused)
 integer:foo list:foo -> doom;
 
 ######### reduce actions/implementations
