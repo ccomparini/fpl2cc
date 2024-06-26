@@ -72,7 +72,6 @@
             try {
                 switch(type) {
                     // everything gets its own line to make diffing easier
-// XXX except that makes debugging harder...
                     case bkv_t_null:
                          return "<null>\n";
                     case bkv_t_bool:
