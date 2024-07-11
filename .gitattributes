@@ -1,0 +1,7 @@
+# tsv files are line-oriented tab separated values,
+# so each line is effectively an independent object.
+# as such, they don't need to be subject to merge
+# conflicts;  if 2 .tsvs each have a different line
+# added, we want to keep both:
+#*.tsv      text merge=union
+/**/*.tsv merge=union
