@@ -53,13 +53,13 @@ struct utf8_buffer : public std::basic_string<utf8_byte> {
         }
 
         in.seekg(0, std::ios::end);
-        size_t filesize = in.tellg();
+        const size_t filesize = in.tellg();
         in.seekg(0, std::ios::beg);
 
-        utf8_byte buf[filesize + 1];
-        in.read(reinterpret_cast<char *>(buf), filesize + 1);
+        std::vector<utf8_byte> buf(filesize + 1);
+        in.read(reinterpret_cast<char *>(buf.data()), filesize + 1);
         buf[filesize] = '\0';
-        assign(buf, filesize + 1);
+        assign(buf.data(), buf.size());
     }
 
     void slurp_stream(std::istream &in, src_location caller = CALLER()) {

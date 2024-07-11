@@ -1179,13 +1179,13 @@ void slurp_file(const std::string &fn, src_location caller = CALLER()) {
     }
 
     in.seekg(0, std::ios::end);
-    size_t filesize = in.tellg();
+    const size_t filesize = in.tellg();
     in.seekg(0, std::ios::beg);
 
-    utf8_byte buf[filesize + 1];
-    in.read(reinterpret_cast<char *>(buf), filesize + 1);
+    std::vector<utf8_byte> buf(filesize + 1);
+    in.read(reinterpret_cast<char *>(buf.data()), filesize + 1);
     buf[filesize] = '\0';
-    assign(buf, filesize + 1);
+    assign(buf.data(), buf.size());
 }
 
 void slurp_stream(std::istream &in, src_location caller = CALLER()) {
@@ -2157,7 +2157,7 @@ public:
 // text (22:1):         •/[^@\\n]+/:t                                                                                            => state 6  (src/grammarlib/jemp.fpl:133)
 // text (23:1):         •leading_ws                                                                                              => state 29 (src/grammarlib/jemp.fpl:137)
 // text (24:1):         •trailing_ws                                                                                             => state 1  (src/grammarlib/jemp.fpl:138)
-// _fpl_goal (27:1):    •complete                                                                                                => state 61 (src/fpl2cc/productions.h:4250)
+// _fpl_goal (27:1):    •complete                                                                                                => state 61 (src/fpl2cc/productions.h:4232)
 //
 void state_0() {
 
@@ -10674,7 +10674,7 @@ void state_60() {
 #line 5 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 //
-// _fpl_goal (27:0):  complete • => (done) (src/fpl2cc/productions.h:4250)
+// _fpl_goal (27:0):  complete • => (done) (src/fpl2cc/productions.h:4232)
 //
 void state_61() {
 
@@ -18129,7 +18129,7 @@ static const char *state_string(State st) {
         "    text (22:1):\t •/[^@\\\\n]+/:t \t=> state 6\t(src/grammarlib/jemp.fpl:133)\n"
         "    text (23:1):\t •leading_ws \t=> state 29\t(src/grammarlib/jemp.fpl:137)\n"
         "    text (24:1):\t •trailing_ws \t=> state 1\t(src/grammarlib/jemp.fpl:138)\n"
-        "    _fpl_goal (27:1):\t •complete \t=> state 61\t(src/fpl2cc/productions.h:4250)\n"
+        "    _fpl_goal (27:1):\t •complete \t=> state 61\t(src/fpl2cc/productions.h:4232)\n"
         ;
     }
 
@@ -18617,7 +18617,7 @@ static const char *state_string(State st) {
     #line 1286 "src/fpl2cc/fpl_x_parser.h.jemp" 
     if(&jemplpl_parser::state_61 == st) {
         return "state_61:\n"
-        "    _fpl_goal (27:0):\t complete •\t=> (done)\t(src/fpl2cc/productions.h:4250)\n"
+        "    _fpl_goal (27:0):\t complete •\t=> (done)\t(src/fpl2cc/productions.h:4232)\n"
         ;
     }
 
@@ -22975,13 +22975,13 @@ bool dummy = true // hack for comma
             return 1;
         }
         static int line_number() {
-            return 4250;
+            return 4232;
         }
         static const char *filename() {
             return "src/fpl2cc/productions.h";
         }
         static const char *location() {
-            return "src/fpl2cc/productions.h:4250";
+            return "src/fpl2cc/productions.h:4232";
         }
         static const char *to_str() {
             return "complete -> _fpl_goal";
@@ -22998,7 +22998,7 @@ bool dummy = true // hack for comma
                 return pname[ind];
             } else {
                 return "param_name index out of bounds at "
-                "src/fpl2cc/productions.h:4250";
+                "src/fpl2cc/productions.h:4232";
             }
         }
         static const char *param_type(unsigned int ind) {
@@ -23014,7 +23014,7 @@ bool dummy = true // hack for comma
             } else {
                 return (
                 "param_type index out of bounds at "
-                "src/fpl2cc/productions.h:4250"
+                "src/fpl2cc/productions.h:4232"
                 );
             }
         }
@@ -23028,7 +23028,7 @@ bool dummy = true // hack for comma
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/fpl2cc/productions.h:4250 (default action for complete -> _fpl_goal)"
+    #line 1 "src/fpl2cc/productions.h:4232 (default action for complete -> _fpl_goal)"
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
