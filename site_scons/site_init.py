@@ -112,6 +112,8 @@ def run_command(command, env, timeout, quiet=False, profile=None):
     async def runit():
         nonlocal command, env, pout, perr, returncode
 
+        start_time = time.time()
+
         # print(' '.join(command) + f" {os_env}")
         proc = await asyncio.create_subprocess_exec(
             *command,
@@ -143,7 +145,11 @@ def run_command(command, env, timeout, quiet=False, profile=None):
             await asyncio.wait_for(task, timeout=timeout)
         except asyncio.TimeoutError:
             # subproc is taking too long.  kill it:
-            warnings.warn(f"Timeout on {proc.pid} {command}\n")
+            warnings.warn(\
+                f"Timeout on {proc.pid} " +
+                f"after {time.time() - start_time} seconds " +
+                f"(max {timeout} secs).  Command: {command}\n"
+            )
             proc.kill()
 
         returncode = proc.returncode
