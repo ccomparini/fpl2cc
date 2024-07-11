@@ -154,8 +154,7 @@ class productions {
             ;
         }
 
-        // this is necessary or you get silent fail putting
-        // these in std::set and similar:
+        // So you can put these in std::set and similar:
         bool operator<(const rulestep &other) const {
             return   (owner < other.owner)
                 || (rulenum < other.rulenum)
@@ -376,10 +375,11 @@ class productions {
             // function.  but check if one hit the end sooner
             // than the other anyway:
             //  ours at end | theirs at end | ours < theirs
-            //  true          true            false
-            //  true          false           true
-            //  false         true            false
-            //  false         false           (error - incomplete compare)
+            //  ------------+---------------+--------------
+            //  true        | true          | false
+            //  true        | false         | true
+            //  false       | true          | false
+            //  false       | false         | (error - incomplete compare)
             return theirs != other.end();
         }
     };
