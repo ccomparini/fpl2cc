@@ -99,9 +99,14 @@ def run_command(command, env, timeout, quiet=False, profile=None):
         Runs the command passed, in the env passed, duplicating
         stdout and stderr.
 
-        Returns a tuple containing the exit code, and 2 bytes objects
-        containing whatever the subproc wrote to stdout and stderr
-        (respectively).  Raises exceptions on internal errors.
+        Returns a dictionary containing:
+            'returncode':  the exit code of the process
+            'stderr': bytes object containing whatever was written to stderr
+            'stdout': bytes object containing whatever was written to stdout
+
+        The dictionary may also have:
+            'exception': string describing any exceptions which occurred,
+                         including timeouts
     """
     pout = io.BytesIO(b"")
     perr = io.BytesIO(b"")
@@ -110,7 +115,7 @@ def run_command(command, env, timeout, quiet=False, profile=None):
     os_env = env.get('ENV', None);
 
     async def runit():
-        nonlocal command, env, pout, perr, returncode
+        nonlocal command, env, pout, perr, returncode, exception
 
         start_time = time.time()
 
@@ -143,27 +148,38 @@ def run_command(command, env, timeout, quiet=False, profile=None):
 
         try:
             await asyncio.wait_for(task, timeout=timeout)
-        except asyncio.TimeoutError:
-            # subproc is taking too long.  kill it:
-            warnings.warn(\
-                f"Timeout on {proc.pid} " +
+            returncode = proc.returncode
+        except asyncio.TimeoutError as t_o_ex:
+            exception = (
+                f"\nTimeout on {proc.pid} " +
                 f"after {time.time() - start_time} seconds " +
-                f"(max {timeout} secs).  Command: {command}\n"
+                f"(max {timeout} secs).  Command: {command}\n" +
+                f"(exception: {t_o_ex})\n"
             )
+        except Exception as ex:
+            exception = f"Exception thrown running {command}:\n{ex}"
+
+        if exception is not None:
             proc.kill()
+            warnings.warn(exception)
 
-        returncode = proc.returncode
-
-        # (this is what writes the profile data to a tsv file)
+        # (this is what writes the profiling data to a tsv file)
         if profile:
             subprof.Profile(*exit_results[proc.pid]).write_tsv(profile)
 
     asyncio.run(runit())
 
-    if exception is not None:
-        raise exception
 
-    return returncode, pout, perr
+    output = {
+        'stderr': perr.getvalue(),
+        'stdout': pout.getvalue(),
+        'returncode': returncode
+    }
+
+    if exception is not None:
+        output['exception'] = exception
+
+    return output
 
 def expand_scons_vars(instr, target, source, env):
     """
@@ -304,10 +320,11 @@ def run_and_capture_action(program, varlist=[], **kwargs):
             timeout = default_kw('TIMEOUT', env, kwargs, 5)
             quiet   = default_kw('QUIET', env, kwargs, False)
 
-        returncode, pout, perr = run_command(
+        output = run_command(
             command, env, timeout, quiet, profile
         )
 
+        returncode = output['returncode']
         if (returncode is not None) and (returncode < 0):
             # process died of some signal (interrupt, segfault, whatever):
             try:
@@ -318,12 +335,6 @@ def run_and_capture_action(program, varlist=[], **kwargs):
             msg = f"\n{signame} ({returncode}) failure on command \"{strcommand}\"\n"
             print(msg, file=sys.stderr)
 
-        output = {
-            'stderr': perr.getvalue(),
-            'stdout': pout.getvalue()
-        }
-        if returncode is not None:
-            output['returncode'] = returncode
 
         if capfile:
             with open(capfile, mode='wb') as outf:
