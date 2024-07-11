@@ -1,11 +1,17 @@
-
 #
 # json parsing test
 #
 # This reads json input (using the grammarlib json.fpl)
-# into an internal format, and then dumps the internal
-# data to test output.
+# into an internal (binary) format, and then dumps the
+# internal data to stdout (string formatted).
 # 
+
+# extra whitespace at the end of the next line is deliberate -
+# checking if it breaks the parsing.
+@grammar json   
+
+# bkv_item - "binary key/value item", defined in the c++ below
+@produces bkv_item
 
 +{
     #include <list>
@@ -25,11 +31,7 @@
     
         return bint.byte[0] == 0x04; 
     }
-}+
 
-@produces bkv_item
-
-+{
     enum bkv_type {
         bkv_t_null = 0x0 << 29,
         bkv_t_bool = 0x1 << 29,
@@ -146,10 +148,6 @@
 @post_parse +{
     std::cout << stringformat("======\n{}\n======\n", result);
 }+
-
-# extra whitespace at the end of the next line is deliberate -
-# checking if it breaks the parsing.
-@grammar json   
 
 +null_value  +{ return bkv_item(); }+
 +true_value  +{ return true;  }+
