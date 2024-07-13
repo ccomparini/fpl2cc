@@ -56,5 +56,8 @@
             @-}-@
         );
     @}-@
+    @/* this gives the author a non-0 chance of finding the appropriate
+        line if they forgot a return statement: */@
+    #line @rule.line_number()@ "@rule.filename()@"
 }
 
