@@ -1,0 +1,10 @@
+a_string = ``this is one a `dem strings``
+regular_string = "and is followed by a regular quoted string"
+multiline_string = ``
+multiline
+string
+``
+
+a_string
+regular_string
+multiline_string

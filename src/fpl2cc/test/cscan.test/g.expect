@@ -1,0 +1,12 @@
+returncode = 0
+stderr = ""
+stdout = "
+
+
+this is one a `dem strings
+and is followed by a regular quoted string
+multiline
+string
+
+ding!
+"

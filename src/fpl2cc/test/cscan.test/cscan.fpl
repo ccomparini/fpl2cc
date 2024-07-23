@@ -142,6 +142,11 @@ literal_double_quote -> stuff;
     return stringformat("block: [{}]", guts);
 }+
 
+# huh, is there a bug with inverting multi-char (not multi-byte)
+# strings?  let's try.
+# (seems like not a bug, but let's keep the test)
+"``"^ !"``":guts "``"^ -> string;
+
 # also for test purposes, other blocks can be specified,
 # let's say, like this:
 @scanner block_2_start /([+-])\{/
