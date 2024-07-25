@@ -121,7 +121,7 @@
         }
 
         @/*
-           foreach() is a convenience method for iterating everything
+           @foreach() is a convenience method for iterating everything
            in the parameter.  In fpl, you'd use this with a closure,
            like:
               things+ -> group +{
@@ -139,6 +139,16 @@
             }
         }
 
+        @/*
+           @join() formats each thing in the parameter and returns
+           a string containing each such thing, separated by a
+           join value.
+
+           If given one argument, that argument is used as the join
+           value.  If given 2 arguments, the first is a format string
+           for each element, and the second is the join value.
+
+         */@
         std::string join(const std::string &fmt, const std::string &jv) const {
             std::string out;
             for(int ind = 0; ind < count(); ind++) {
