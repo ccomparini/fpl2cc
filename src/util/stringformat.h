@@ -269,12 +269,22 @@ class stringformat_post_processor {
         return out;
     }
 
+    // {::l} -> translate characters to lower case
+    static std::string l(const std::string &in) {
+        std::string out;
+        for(auto ch : in) {
+            out += tolower(ch);
+        }
+        return out;
+    }
+
 public:
     static std::string process(char fmt, const std::string &in) {
         switch(fmt) {
             case 'c': return c(in);  // columnate (tab-delimited)
             case 'e': return e(in);  // c-string escape
             case 'i': return i(in);  // indent this level
+            case 'l': return l(in);  // lowercase
             case 'n': return n(in);  // translate newlines to '\n'
             case 'U': return U(in);  // uppercase
         }

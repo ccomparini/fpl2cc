@@ -85,8 +85,9 @@ int main() {
         "\t\teye"
     );
 
-    // uppercasing, and converting newlines
+    // uppercasing, lowercasing and converting newlines
     std::cout << stringformat("louder: {::Un}\n", "I said\nhello");
+    std::cout << stringformat("{::l}\n", "NO NEED TO SHOUT");
 
     const char *maybenull = nullptr;
     std::cout << stringformat("{} null pointer doesn't crash\n", maybenull);
