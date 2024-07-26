@@ -69,20 +69,18 @@ for expected in Glob('fpl_itself/*.fpl_expect'):
 #     https://scons.org/doc/production/HTML/scons-user.html#app-variables
 #
 
-# given a directory name like foo/bar/bat.test,
-# infers the language name "bat".
-def language_from_directory(directory):
+# given a file name name like foo/bar/bat.test
+# or bat.fpl, infers the language name "bat".
+def language_from_basename(directory):
     langbase, ext = os.path.splitext(directory)
     return os.path.basename(langbase)
 
 # this sets up:
 #   [lang]: [lang].cc
 #   [lang].cc: [lang].fpl #bin/fpl2cc
-# for the language whose specification corresponds to the
-# directory passed, and makes the builder for:
+# for the language specified, and makes the builder for:
 #   [x].result: [x].[lang] [lang]
-def make_language_rules(env, directory):
-    language = language_from_directory(directory)
+def make_language_rules(env, directory, language):
     langbase = directory + '/' + language
 
     # (langprog = the name of the language executable)
@@ -140,13 +138,13 @@ if len(test_dirs) > 0:
 # for each "expect" file.
 for test_dir in test_dirs:
     # (Note: test_dir.get_abspath() gets the target path, not the source)
-    make_language_rules(env, test_dir.get_abspath())
+    absdir = test_dir.get_abspath()
+    language = language_from_basename(absdir)
+    make_language_rules(env, absdir, language)
 
     #print(f"this dir: {this_dir}", file=sys.stderr)
     #print(f"test dir relpath is {test_dir.relpath}", file=sys.stderr)
     #print(f"test dir name    is {test_dir.name}", file=sys.stderr)
-
-    language, foo = os.path.splitext(test_dir.name)
 
     # we might expect certain output from the fpl compile
     # itself (for example, to test warnings emitted by
