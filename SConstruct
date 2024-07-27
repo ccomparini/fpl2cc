@@ -160,6 +160,17 @@ env.Append(BUILDERS = {
     )
 })
 
+env.Append(BUILDERS = {
+    'CaptureFplCompile': Builder(
+        action = run_and_capture_action(
+            fpl_compile_command(), varlist=["FPLOPTS"]
+        ),
+        emitter = depend_on_fpl2cc(),
+	src_suffix = '.fpl',
+	suffix = '.cc'
+    )
+})
+
 
 # another fake "Scanner" to make it so that headers generated
 # from .jemp sources depend on jemplpl.
