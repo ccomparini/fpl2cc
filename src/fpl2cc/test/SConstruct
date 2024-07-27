@@ -6,12 +6,6 @@ Import('env')
 env = env.Clone()
 env.Append(CPPPATH=['#build/fpl2cc']) # because we use/test generated headers
 
-# Support running fpl-generated languages in debug mode.
-# Example usage:
-#   FPL_TEST_DEBUG=1 scons build/fpl2cc/test/wcalc.test/prec.success
-fpl_options=""
-if 'FPL_TEST_DEBUG' in os.environ:
-    fpl_options="--debug-single-step"
 
 env.Append(BUILDERS = {
     'CaptureFplCompile': Builder(
@@ -41,8 +35,7 @@ for expected in Glob('fpl_itself/*.fpl_expect'):
     success = target_path + '/' + basename + '.success'
     env.CaptureFplCompile(
         [ ccfile, capfile ],  [ source ],
-        FPLOPTS=fpl_options, CAPFILE=capfile,
-        IGNORE_EXIT=True, QUIET=True
+        CAPFILE=capfile, IGNORE_EXIT=True, QUIET=True
     )
     env.CompareOut(success, [ expected, capfile ])
 
@@ -110,7 +103,7 @@ def make_language_rules(env, directory, language):
     #print(f"fpl options on {langsource}: {fpl_options}", file=sys.stderr)
     env.CaptureFplCompile(
         [ langcc, capfile ],  [ langsource ],
-        FPLOPTS=fpl_options, CAPFILE=capfile,
+        CAPFILE=capfile,
     )
 
     compiler = env.Program(langprog, [ langprog + '.cc' ])

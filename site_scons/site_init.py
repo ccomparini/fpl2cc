@@ -410,8 +410,15 @@ def source_dir(source_in_variant_dir) :
 # Common fpl compile command line.
 # Can be used to construct actions.
 def fpl_compile_command():
-    # return 'bin/fpl2cc --lr-stack-reserve=2 --param-stack-reserve=3 --src-path=src/grammarlib $FPLOPTS $SOURCES --out $TARGET --depfile .deps --statedump .states'
-    return 'bin/fpl2cc --src-path=src/grammarlib $FPLOPTS $SOURCES --out $TARGET --depfile .deps --statedump .states'
+    # Support running fpl-generated languages in debug mode.
+    # Example usage:
+    #   FPL_TEST_DEBUG=1 scons build/fpl2cc/test/wcalc.test/prec.success
+    additional_options=""
+    if 'FPL_TEST_DEBUG' in os.environ:
+        additional_options="--debug-single-step"
+
+    return f'bin/fpl2cc --src-path=src/grammarlib $FPLOPTS {additional_options} $SOURCES --out $TARGET --depfile .deps --statedump .states'
+
 
 # Runs .cc-based tests for each file matching "*.expect".
 # At the moment, if there are any .expect files which 
