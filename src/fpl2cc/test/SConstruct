@@ -9,10 +9,8 @@ env.Append(CPPPATH=['#build/fpl2cc']) # because we use/test generated headers
 # Support running fpl-generated languages in debug mode.
 # Example usage:
 #   FPL_TEST_DEBUG=1 scons build/fpl2cc/test/wcalc.test/prec.success
-interactive=False
 fpl_options=""
 if 'FPL_TEST_DEBUG' in os.environ:
-    interactive=True
     fpl_options="--debug-single-step"
 
 env.Append(BUILDERS = {
@@ -177,7 +175,7 @@ for test_dir in test_dirs:
         test_lang_builder(
             result_file, [ src_file ],
             CAPFILE="$TARGET",
-            INTERACTIVE=interactive,
+            INTERACTIVE='FPL_TEST_DEBUG' in os.environ, # debug -> interactive
             IGNORE_EXIT=True, # so we can test failure cases
             PROFILE=profile,
             QUIET=True,  # avoid spam when testing failures
