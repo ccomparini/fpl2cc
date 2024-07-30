@@ -663,6 +663,12 @@ class productions {
         // this set, it doesn't get pushed to the param stack:
         std::set<grammar_element>          ejected_el;
 
+        // a given state can only lead to at most one reduction;
+        // however, it's possible to write grammars which create
+        // states with multiple possible reductions (which is how
+        // you get reduce/reduce conflicts).
+        // therefore, we keep the set of reduce items in a list:
+        std::list<lr_item> reduce_items;
     public:
 
         lr_set() { }
@@ -918,21 +924,49 @@ class productions {
             warn(stringformat("{::c}\n", msg));
         }
 
-        void report_reduce_conflicts(
-            productions &prds, const std::list<lr_item> &items
-        ) {
-            std::string cons;
-            for(auto item: items) {
-                cons += stringformat("        {}\n", item.to_str(&prds));
+        void report_reduce_conflicts(const productions &prds) const {
+            // if there are 0 or 1 items, obviously no conflict:
+            if(reduce_items.size() <= 1) {
+                return;
             }
 
-            // these aren't fatal either, but typically the author
-            // will want to know because it means that one rule or
-            // the other won't ever reduce:
-            warn(stringformat(
-                "reduce/reduce conflict in state {} ({} items):\n{}",
-                prds.state_index.at(this->id()), items.size(), cons
-            ));
+            std::string canonical_product;
+            code_block canonical_reduce;
+            bool got_conflict = false;
+
+            for(auto item: reduce_items) {
+                const auto rule = prds.rule(item.rule);
+                if(!canonical_product.length()) {
+                    canonical_product = rule.product();
+                } else if(canonical_product != rule.product()) {
+                    got_conflict = true;
+                    break;
+                }
+
+                if(!canonical_reduce) {
+                    canonical_reduce = rule.reduce_code();
+                } else if(canonical_reduce != rule.reduce_code()) {
+                    got_conflict = true;
+                    break;
+                }
+            }
+
+            if(got_conflict) {
+                std::string cons;
+                for(auto item: reduce_items) {
+                    cons += stringformat("        {}\n", item.to_str(&prds));
+                }
+
+                // these aren't fatal either, but typically the author
+                // will want to know because it means that one rule or
+                // the other won't ever reduce:
+                warn(stringformat(
+                    "reduce/reduce conflict in state {} ({} items):\n{}",
+                    prds.state_index.at(this->id()),
+                    reduce_items.size(),
+                    cons
+                ));
+            }
         }
 
         // recursively generates any following states (i.e., states to
@@ -962,9 +996,6 @@ class productions {
                 // checking and reporting eject conflicts.  
                 std::list<lr_item> items_with_eject;
                 std::list<lr_item> items_without_eject;
-
-                // for checking reduce/reduce conflicts:
-                std::list<lr_item> reduce_items;
 
                 // make an lr_set for all the items matching the
                 // input element:
@@ -1016,10 +1047,6 @@ class productions {
                             reduce_items.push_back(item);
                         }
                     }
-                }
-
-                if(reduce_items.size() > 1) {
-                    report_reduce_conflicts(prds, reduce_items);
                 }
  
                 if(items_with_eject.size() > 0) {
@@ -4258,7 +4285,6 @@ public:
         resolve_goals();
 
         resolve_types();
-        apply_reducers();
         generate_states({"_fpl_goal"});
         dump_states(opts);
         resolve_actions();
@@ -4442,26 +4468,39 @@ public:
         }
     }
 
+    void report_reduce_conflicts() const {
+        for(const auto & [stid, state] : states) {
+            state.report_reduce_conflicts(*this);
+        }
+    }
+
     void resolve_actions() {
         // A given rule will be reduced according to the first of the
         // following possibilities:
-        //   1) abstracted implementations (+product). this is top
-        //      priority so that you can use the grammar defined by
-        //      non-"pure" fpl and just override anything you need to
-        //      without having to change the grammar fpl.
-        //      (handled in the production rule/reducer)
+        //   1) abstracted implementations (+product - aka "reducers").
+        //      this is top priority so that authors can use the grammar
+        //      defined by non-"pure" fpl and just override anything
+        //      they need to without having to change the grammar fpl.
         //   2) code from the +{ ... }+ block in the rule definition
         //      (handled in the production rule)
         //   3) the @default_action (handled here)
-        //   4) to construct an object of the type for the
-        //      production from the result of the steps for the rule
+        //   4) by constructing an object of the type for the
+        //      production from the steps for the rule
         //      (handled in the .jemp for the reduce action)
+        apply_reducers();
         for(int rnum = 0; rnum < rules.size(); rnum++) {
             production_rule &rule = rules[rnum];
             if(!rule.code() && default_action) {
                 rule.code(default_action);
             }
         }
+
+        // report reduce conflicts -after- all that resolution,
+        // so that we don't complain about a "conflict" in cases
+        // where multiple theoretically conflicting rules actually
+        // have the same reduce actions (in which case it's not,
+        // for practical purposes, a conflict).
+        report_reduce_conflicts();
     }
 };
 

@@ -1,0 +1,28 @@
+
+@produces std::string
+
+thingy -> done;
+thingo -> done;
+thingi -> done;
+
+# does "ab" reduce to a thingy, thingo, or a thingi?
+# expect to report a reduce/reduce conflict on types.
+'a' 'b' -> thingy;
+'a' 'b' -> thingo;
+'a' 'b' -> thingi;
+
+# this is a conflict because the input "cd" could
+# match either rule, and each rule has different
+# code:
+'c'? 'd'  -> thingo +{ return "c was optional"; }+
+'c'  'd'? -> thingo +{ return "d was optional"; }+
+
+# in this case, however, the seprate rules all share
+# the same reduce code (and produce), so there's no
+# conflict - the same code would run in either case.
+/[0-9]+/:integer? '.'^ /[0-9]+/:fraction  /[Ee][0-9]+/:exponent? -> thingy;
+/[0-9]+/:integer  '.'^ /[0-9]+/:fraction? /[Ee][0-9]+/:exponent? -> thingy;
++thingy(integer fraction exponent) +{
+    return "ok";
+}+
+

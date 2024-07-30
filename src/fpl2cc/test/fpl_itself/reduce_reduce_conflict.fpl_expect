@@ -1,0 +1,11 @@
+returncode = 0
+stderr = "    warning: reduce/reduce conflict in state 7 (2 items):
+        thingo (6:0):	 'c'?:arg_0 'd':arg_1 •	(src/fpl2cc/test/fpl_itself/reduce_reduce_conflict.fpl:17)
+        thingo (7:0):	 'c':arg_0 'd'?:arg_1 •	(src/fpl2cc/test/fpl_itself/reduce_reduce_conflict.fpl:18)
+    warning: reduce/reduce conflict in state 9 (3 items):
+        thingy (3:0):	 'a':arg_0 'b':arg_1 •	(src/fpl2cc/test/fpl_itself/reduce_reduce_conflict.fpl:10)
+        thingo (4:0):	 'a':arg_0 'b':arg_1 •	(src/fpl2cc/test/fpl_itself/reduce_reduce_conflict.fpl:11)
+        thingi (5:0):	 'a':arg_0 'b':arg_1 •	(src/fpl2cc/test/fpl_itself/reduce_reduce_conflict.fpl:12)
+src/fpl2cc/test/fpl_itself/reduce_reduce_conflict.fpl: 2 warnings
+"
+stdout = ""
