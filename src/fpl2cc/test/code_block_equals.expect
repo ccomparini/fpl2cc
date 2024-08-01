@@ -1,0 +1,7 @@
+returncode = 0
+stderr = "a1 == a1: true
+a1 != a1: false
+a1 == a2: true
+ b == a1: false
+"
+stdout = ""

@@ -25,7 +25,8 @@ struct code_block {
 
     // If this is set, it indeicates that the code block
     // is just a stub, and fpl authors are expected to
-    // implement something real.  
+    // implement something real.
+    // in the fpl grammar.
     // An example of where this might be used is if you
     // @import ansi-c;  in the ansi c fpl there are stubs
     // for enumeration constant and typedefed type tokens,
@@ -83,6 +84,20 @@ struct code_block {
 
     operator bool() const {
         return code.length();
+    }
+
+    // we need  == at all because otherwise c++ will use the bool
+    // cast for comparisons :P
+    // For our purposes, ideally equivalence would be code which
+    // executes identically.  however, for now/practical purposes
+    // we'll go with language/string equivalence.
+    bool operator==(const code_block &other) const {
+         return this->language == other.language
+             && this->code     == other.code;
+    }
+
+    bool operator!=(const code_block &other) const {
+        return !(*this == other);
     }
 
     // for backward compatibility so I can just swap code_block
