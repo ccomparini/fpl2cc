@@ -1,0 +1,22 @@
+#
+#  Creates a default rule which always matches, returning an empty string
+#  which can be replaced thus:
+#
+#    &default -> something +{ return whatever; }+
+#
+#  For example, in the numeric.fpl lib, we want exponents to default to being
+#  positive, but we don't want users of the lib to need to determine that.
+#  want the lib to just always give the correct sign, regardless of if it was
+#  explicitly specified.  To that end:
+#
+#    /[eE]/^ ~ sign ~ dec_digits -> exponent; # sign is used here...
+#    /[+-]/    -> sign;                       # .. and may be '+' or '-'
+#    &default^ -> sign +{ return "+"; }+      # .. but, if nothing, it's '+'
+#
+
+@scanner default +{
+    // default always matches, and matches exactly nothing.
+    // so return one such nothing:
+    return std::array{""};
+}+
+
