@@ -1,5 +1,6 @@
 
 @produces std::string
+@import 'builtins'.&default
 
 @separator +{
     if(size_t len = utf8::space_length(inp)) {
@@ -36,11 +37,6 @@
     return 0;
 }+
 
-@scanner default +{
-    // default always matches, and matches exactly nothing.
-    // so return one such nothing:
-    return std::array{""};
-}+
 
 +{
 #include"join.h"
