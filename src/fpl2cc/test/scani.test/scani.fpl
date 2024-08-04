@@ -1,0 +1,27 @@
+#
+# test importing scanners from other fpls
+#
+
+
+@default_main
+@produces std::string
+@grammar number_melt
+@import 'sc0'
+@import 'sc1'.&unhappyface
+
+@goal done
+
+number_face+ -> done +{
+    return number_face@join("\n");
+}+
+
+/[0-9]+/:digits &unhappyface:face -> number_face;
+/[0-9]+/:digits &happyface:face   -> number_face;
+number_melt                       -> number_face;
+
++number_face(digits face) +{
+    return stringformat("{} then visage {}", digits, face);
+}+
+
++number_melt(face) +{ return stringformat("number, then '{}'", face); }+
+

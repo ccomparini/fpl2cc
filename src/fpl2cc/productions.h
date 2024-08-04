@@ -1972,6 +1972,13 @@ public:
         return read_identifier(src);
     }
 
+    static inline std::string read_scanner_name(fpl_reader_p &src) {
+        if(src->read_exact_match("&")) {
+            return read_identifier(src);
+        }
+        return "";
+    }
+
     // (reads a c++ type... uhh... as well as possible) 
     static inline std::string read_cpp_type(fpl_reader_p &src) {
         return src->read_re(".*")[0]; // good enough for now. shipit.
@@ -2151,12 +2158,18 @@ public:
         // specified production (rules and whatever):
         std::string prod_name;
         if(inp->read_byte_equalling('.')) {
-            prod_name = read_production_name(inp);
-            if(!prod_name.length()) {
-                error("couldn't read production name after '.'");
+            auto scanner = read_scanner_name(inp);
+            if(scanner.length()) {
+                // we've been asked to import just a scanner:
+                import_scanner(subg, scanner);
             } else {
-                auto dependencies = subg->dependent_products(prod_name);
-                import_rules_for_products(subg, dependencies);
+                prod_name = read_production_name(inp);
+                if(!prod_name.length()) {
+                    error("couldn't read production name after '.'");
+                } else {
+                    auto dependencies = subg->dependent_products(prod_name);
+                    import_rules_for_products(subg, dependencies);
+                }
             }
         } else {
             // (empty products set means import everything)
@@ -2176,6 +2189,9 @@ public:
                     std::cerr << "TOO MANY GOALS\n";
                 prod_name = *(subg->goals.begin());
             }
+
+            // pull in any scanners 
+            import_scanners(subg);
         }
 
         return prod_name;
@@ -3043,6 +3059,23 @@ public:
         return out;
     }
 
+    // import a scanner by name.
+    // will not overwrite an existing scanner of the same name.
+    void import_scanner(productions *from, const std::string &sname) {
+        if(from->scanners[sname]) {
+            if(scanners.count(sname) == 0) {
+                scanners[sname] = from->scanners[sname];
+            }
+        }
+    }
+
+    // import all scanners:
+    void import_scanners(productions *from) {
+        for(auto const& [sname, foo] : from->scanners) {
+            import_scanner(from, sname);
+        }
+    }
+
     // Imports any missing custom scanners needed by the rule passed.
     // Custom scanners which already exist (either through having been
     // imported already, or from being defined previously in the importing
@@ -3051,10 +3084,8 @@ public:
         const int num_steps = rule.num_steps();
         for(int sti = 0; sti < num_steps; sti++) {
             auto scanner = rule.nth_step(sti).custom_scanner_name();
-            if(scanner != "" && from->scanners[scanner]) {
-                if(scanners.count(scanner) == 0) {
-                    scanners[scanner] = from->scanners[scanner];
-                }
+            if(scanner != "") {
+                import_scanner(from, rule.nth_step(sti).custom_scanner_name());
             }
         }
     }

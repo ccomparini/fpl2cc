@@ -1,0 +1,7 @@
+#
+# fpl containing only a scanner.  for testing scanner imports.
+#
+
+# U+1F642 🙂 = \xf0\x9f\x99\x82
+@scanner happyface /\xf0\x9f\x99\x82/
+
