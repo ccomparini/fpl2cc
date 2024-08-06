@@ -17,6 +17,7 @@ struct code_block {
         UNKNOWN = 0,
         DEFAULT, // effectively c++ at the moment
         REGEX,
+        EXACT_MATCH, // like regex, but exact match
     } language;
 
     std::string source_file;

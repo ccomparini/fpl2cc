@@ -2356,7 +2356,7 @@ public:
     // Remove backslashes which were used for escapes in single
     // quoted strings.  The 2 cases are '\'' and '\\'.  Everything
     // else is left intact.
-    static void remove_single_quote_escapes(std::string &str) {
+    static std::string remove_single_quote_escapes(std::string str) {
         for(size_t pos = 0; pos < str.length(); ++pos) {
             if(str[pos] == '\\') {
                 if(pos + 1 < str.length()) {
@@ -2366,6 +2366,7 @@ public:
                 }
             }
         }
+        return str;
     }
 
     // If there's a single, obvious name for the variable to use
@@ -2494,24 +2495,38 @@ public:
         }
     }
 
+    bool string_start() const {
+        auto nc = inp->peek();
+        return (nc == '"') || (nc == '\'');
+    }
+
+    std::string parse_string() {
+        if(inp->peek() == '"') {
+            // within double quotes, c-like escape sequences
+            // are supported:
+            return convert_escapes(inp->parse_string());
+        } else if(inp->peek() == '\'') {
+            // Within single quotes, a backslash simply removes any
+            // special meaning of the next char.  The only 2 chars
+            // with special meaning are the end quote and backslashes.
+            // So, '\\' means one backslash, '\'' means one single
+            // quote, but '\n' means 2 chars: backslash and 'n'.
+            return remove_single_quote_escapes(inp->parse_string());
+        }
+
+        return "";
+    }
+
     grammar_element parse_terminal() {
         std::string expr_str;
         grammar_element::Type type;
         switch(inp->peek()) {
             case '"':
-                // within double quotes, c-like escape sequences
-                // are supported:
-                expr_str = convert_escapes(inp->parse_string());
-                type     = grammar_element::Type::TERM_EXACT;
+                expr_str = parse_string();
+                type = grammar_element::Type::TERM_EXACT;
                 break;
             case '\'':
-                // Within single quotes, a backslash simply removes any
-                // special meaning of the next char.  The only 2 chars
-                // with special meaning are the end quote and backslashes.
-                // So, '\\' means one backslash, '\'' means one single
-                // quote, but '\n' means 2 chars: backslash and 'n'.
-                expr_str = inp->parse_string();
-                remove_single_quote_escapes(expr_str);
+                expr_str = parse_string();
                 type     = grammar_element::Type::TERM_EXACT;
                 break;
             case '/':
@@ -2688,20 +2703,28 @@ public:
     }
 
     code_block parse_regex_code_block() {
-        code_block code;
-        std::string regex;
+
+        int line = inp->line_number();
+        auto lang = code_block::UNKNOWN;
 
         if(inp->peek() == '/') {
-            int line = inp->line_number();
-            regex = inp->parse_string();
-            if(regex.length()) {
-                code = code_block(
-                    regex, code_block::REGEX, inp->filename(), line
-                );
-            }
+            lang = code_block::REGEX;
+        } else if(string_start()) {
+            // any place you can specify a regex match,
+            // you can alternately specify an exact match.
+            // some renaming may be in order; alternately
+            // (and perhaps more correctly) exact matches
+            // could be considered to be a subset of regexes.
+            lang = code_block::EXACT_MATCH;
         }
 
-        return code;
+        if(lang != code_block::UNKNOWN) {
+            return code_block(
+                inp->parse_string(), lang, inp->filename(), line
+            );
+        }
+
+        return code_block(); // "false" code block
     }
 
     // optional argument declaration for a reduction code block:
