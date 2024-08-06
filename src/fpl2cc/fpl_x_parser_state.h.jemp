@@ -35,9 +35,6 @@ void @sfn@() {
             @if(trans.what == productions::lr_transition::STATE) {@
                 @declare next_state: prds.state_fn(trans.which, true)@
                 set_state(&@next_state@);
-                @if(opts.debug) {@
-                    std::cerr << "   next state:  @trans.which@\n";
-                @}@
             @} else if(trans.what == productions::lr_transition::REDUCTION) {@
                 @declare rule: prds.rules[trans.which]@
                 @if(opts.debug) {-@
