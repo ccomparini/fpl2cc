@@ -1403,7 +1403,7 @@ public:
     };
     inline code_block code_for_directive(
         const std::string &dir,
-        code_source allowed_src = INLINE,
+        code_source allowed_src,
         bool allow_empty = false
     ) {
         eat_separator();
@@ -1741,7 +1741,9 @@ public:
                 add_comment_style(style, inp->filename(), line_num);
             }
         } else if(dir == "default_action") {
-            code_block new_code = code_for_directive(dir);
+            code_block new_code = code_for_directive(
+                dir, code_source::INLINE
+            );
             if(default_action) {
                 warn(stringformat(
                     "default_action at {} overwrites existing at {}\n",
@@ -1777,13 +1779,13 @@ public:
             // of the parser class itself.  This is either
             // convenience for the fpl author, or a hack around
             // c++, depending on how you want to look at it.
-            if(code_block mem = code_for_directive(dir)) {
+            if(auto mem = code_for_directive(dir, code_source::INLINE)) {
                 parser_members.push_back(mem);
             }
         } else if(dir == "main") {
             main_guts = code_for_directive(dir, code_source::INLINE_OR_LIB);
         } else if(dir == "post_parse") {
-            post_parse = code_for_directive(dir);
+            post_parse = code_for_directive(dir, code_source::INLINE);
         } else if(dir == "produces") {
             set_output_type(arg_for_directive());
         } else if(dir == "scanner") {
