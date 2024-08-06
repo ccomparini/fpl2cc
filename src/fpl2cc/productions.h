@@ -1424,14 +1424,15 @@ public:
         }
 
         if(!code && (allowed_src & LIB)) {
-            // expect a quoted (or otherwise string-delimited)
-            // file basename:
-            std::string fn = inp->parse_string();
-            if(fn.length() > 0) {
-                code = code_block::from_file(
-                    fn + ".inc", opts.src_path,
-                    filename, line
-                );
+            // expect a '`' quoted file basename:
+            if(inp->peek() == '`') {
+                std::string fn = inp->parse_string();
+                if(fn.length() > 0) {
+                    code = code_block::from_file(
+                        fn + ".inc", opts.src_path,
+                        filename, line
+                    );
+                }
             }
         }
 
