@@ -17,11 +17,6 @@
     std::map<std::string, std::string> symtab;
 }+
 
-# end-of-file (or input) assertion:
-@scanner eof +{
-    return reader->eof();
-}+
-
 # declared/stub scanner.  the normal use for this would be
 # in an abstract grammar, where it would be expected to
 # be implemented in an application specific way.
@@ -99,6 +94,7 @@ stuff* the_end -> done +{
 
 block -> stuff;
 
+@import `builtins`.&eof
 &eof -> the_end +{
     return "ding!";
 }+

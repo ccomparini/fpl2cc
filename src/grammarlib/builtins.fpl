@@ -20,3 +20,8 @@
     return std::array{""};
 }+
 
+# end-of-file (or input) assertion:
+@scanner eof +{
+    return reader->eof();
+}+
+
