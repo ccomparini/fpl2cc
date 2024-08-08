@@ -11,32 +11,26 @@
     auto start = reader->current_position();
     size_t shortest_match = std::numeric_limits<size_t>::max();
 
-    // XXX see comments in scan_group_terminal
     Terminal tmp;
     // @components.size()@ components:
     @for(auto component : components) {@
-// note this is suboptimal in that we end up making a terminal
-// for each instead of just advancing the read pointer.
-// The thing is, some terminals are considered a match
-// without advancing the read pointer.
-//std::cerr << stringformat("{}: checking if @component@ is a candidate (shortest: {})...\n", start, shortest_match);
+        // note this is suboptimal in that we end up making a terminal
+        // for each instead of just advancing the read pointer.
+        // The thing is, some terminals are considered a match
+        // without advancing the read pointer.
         @#scan_terminal("tmp", prds, component.inverse())@
         if(tmp.length() < shortest_match) {
-//std::cerr << stringformat("    @component@ is the best match at {} bytes ({})\n", tmp.length(), shortest_match);
             shortest_match = tmp.length();
         }
         reader->go_to(start);
     @}@
 
-//std::cerr << stringformat("shortest match is {} bytes.  might be checking vs {} bytes\n", shortest_match, std::numeric_limits<size_t>::max());
     if(shortest_match) {
         if(shortest_match < std::numeric_limits<size_t>::max()) {
-//std::cerr << stringformat("{}: MATCH reading {} byte terminal (\"{}\")\n", reader->current_position(), shortest_match, reader->debug_peek(reader->current_position(), shortest_match));
             return Terminal(reader->read_string(shortest_match));
         }
     }
 
-//std::cerr << stringformat("NO MATCH yay\n");
     return Terminal(); // no match
 }
 

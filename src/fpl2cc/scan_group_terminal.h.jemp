@@ -13,9 +13,7 @@
     int longest_match = 0;
 
     // we need tmp here because #scan_terminal() needs someplace to
-    // put its result.  BUT actually to handle 0-length matches
-    // corerctly we'll need to keep generated terminals anyway
-    // XXX fixme^^
+    // put its result.
     // It bugs me that it makes all these Terminals, because each
     // copies the matched string to itself.  Maybe terminals
     // can be made more efficient - just keep 2 SourcePositions
