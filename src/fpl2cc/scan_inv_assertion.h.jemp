@@ -1,0 +1,16 @@
+@/*
+  Generates code to scan the inverse of the given assertion.
+
+  Since an assertion is (by definition) merely returns a boolean
+  asserting one thing or another (without advancing the read pointer
+  or other side effects), we can just call the assertion function
+  and return its inverse.
+
+ */@
+
+@parameter: const productions &prds @
+@parameter: const std::string &assertion @
+
+{
+    return !custom_scanner_@assertion@(*reader);
+}

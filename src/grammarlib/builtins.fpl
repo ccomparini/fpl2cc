@@ -23,14 +23,14 @@
 #    /[+-]/    -> sign;                       # .. and may be '+' or '-'
 #    &default^ -> sign +{ return "+"; }+      # .. but, if nothing, it's '+'
 #
-@scanner default +{
+@assertion default +{
     // default always matches, and matches exactly nothing.
     // so return one such nothing:
     return std::array{""};
 }+
 
 # end-of-file (or input) assertion:
-@scanner eof +{
+@assertion eof +{
     return reader->eof();
 }+
 

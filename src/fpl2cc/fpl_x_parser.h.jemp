@@ -143,6 +143,17 @@ public:
         Terminal(const Iterable &src) : matches(src.begin(), src.end()) {
         }
 
+        void set_full_match(const std::string &match) {
+            matches[0] = match;
+        }
+
+        void add_capture(const Terminal &other) {
+            for(auto omatch : other.matches) {
+                // lotsa copies but ohwell
+                matches.push_back(omatch);
+            }
+        }
+
         std::string to_str() const {
             if(matches.size())
                 return matches[0];

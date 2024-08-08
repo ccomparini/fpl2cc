@@ -1,0 +1,7 @@
+returncode = 0
+stderr = ""
+stdout = "Foo on first line
+stuff then abc
+abc
+foo
+"

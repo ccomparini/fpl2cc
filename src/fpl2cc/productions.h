@@ -34,6 +34,9 @@ namespace fpl {
 class productions;
 std::string fpl_x_parser(const productions &, const fpl_options &);
 std::string scan_group_terminal(const productions &, const std::list<grammar_element> &);
+std::string scan_compound_terminal(const productions &, const std::list<grammar_element> &);
+std::string scan_inv_compound_terminal(const productions &, const std::list<grammar_element> &, const grammar_element &);
+std::string scan_inv_assertion(const productions &, const std::string &);
 std::string scan_inv_group_terminal(const productions &, const std::list<grammar_element> &);
 std::string regex_custom_scanner(const productions &, const grammar_element &);
 
@@ -1557,21 +1560,26 @@ public:
         return scanners.count(name);
     }
 
-    // Tries to parse a [ ]-bracketed set of terminals (a "group terminal"),
-    // adding each to the std::sets passed.
+    // Tries to parse a [ ] or ( ) bracketed set of terminals,
+    // adding each to the std::list passed.
     // Returns true if it parsed one, or false if it didn't recognize
     // a compound terminal.
     // Throws parse errors on malformed input.
     bool parse_terminal_list(
         std::list<grammar_element> &terms
     ) {
-        if(!inp->read_exact_match("[")) {
+        std::string end_match;
+        if(inp->read_exact_match("[")) {
+            end_match = "]";
+        } else if(inp->read_exact_match("(")) {
+            end_match = ")";
+        } else {
             return false;
         }
 
         eat_separator();
         bool invert_next = false;
-        while(!inp->read_exact_match("]")) {
+        while(!inp->read_exact_match(end_match)) {
             if(inp->read_exact_match("!")) {
                 invert_next = !invert_next;
                 eat_separator();
@@ -1598,7 +1606,7 @@ public:
     std::string parse_scanner_name() {
         std::string name = read_identifier(inp);
         if(name != "") {
-            if(scanners.count(name)) {
+            if(scanner_exists(name)) {
                 const code_block &existing = scanners[name];
                 if(!existing.is_stub) {
                     warn(stringformat(
@@ -1687,6 +1695,36 @@ public:
     }
 
     // As parse_scanner, this creates a custom terminal.
+    // However, in this case, it's a custom terminal representing
+    // the truth of a condition (or its inverse).
+    void parse_assertion() {
+        std::string name = parse_scanner_name();
+        if(name == "") {
+            error("expected name for terminal definition");
+        } else {
+            scanners[name] = code_for_directive(
+                stringformat(
+                    "custom terminal {} at {}",
+                    name, inp->location_str()
+                ),
+                code_source::INLINE
+            );
+            // The author is telling us that this terminal
+            // is an assertion - that is, it merely returns
+            // a boolean value asserting something or the
+            // other to be true (theoretically without advancing
+            // the read pointer or other side effects, though
+            // that's not presently enforced).  As such, its
+            // inverse is just the logical inverse of itself:
+            scanners[inverse_scanner_name(name)] = code_block(
+                scan_inv_assertion(*this, name),
+                code_block::DEFAULT,
+                inp->filename(), inp->line_number()
+            );
+        }
+    }
+
+    // As parse_scanner, this creates a custom terminal.
     // This version, however, allows syntax for terminal
     // groups and inverting matches.
     void parse_custom_terminal() {
@@ -1702,7 +1740,25 @@ public:
                 auto start = inp->current_position();
                 if(parse_terminal_list(sub_terms)) {
                     create_group_terminal(name, start, sub_terms);
-                }
+                } // else error?
+            } else if(inp->peek() == '(') {
+                // compound terminal:  matched if each subterminal within
+                // the parens matches (in order).
+                std::list<grammar_element> sub_terms;
+                auto start = inp->current_position();
+                if(parse_terminal_list(sub_terms)) {
+                    scanners[name] = code_block(
+                        scan_compound_terminal(*this, sub_terms),
+                        code_block::DEFAULT,
+                        inp->filename(), inp->line_number(start)
+                    );
+                    grammar_element base(name, grammar_element::TERM_CUSTOM);
+                    scanners[inverse_scanner_name(name)] = code_block(
+                        scan_inv_compound_terminal(*this, sub_terms, base),
+                        code_block::DEFAULT,
+                        inp->filename(), inp->line_number(start)
+                    );
+                } // else error?
             } else {
                 scanners[name] = code_for_directive(
                     stringformat(
@@ -1747,7 +1803,6 @@ public:
         return inp->read_re("[ \\t]*([^\\x0a\\x0d]+?)[ \\t]*[\\x0a\\x0d]")[1];
     }
 
-
     void parse_goal() {
         std::string goal;
         if(inp->peek() == '`') {
@@ -1770,7 +1825,9 @@ public:
     }
 
     void parse_directive(const std::string &dir) {
-        if(dir == "comment") {
+        if(dir == "assertion") {
+            parse_assertion();
+        } else if(dir == "comment") {
             // specifies a comment as a set of 2 terminals - start and end.
         } else if(dir == "comment_style") {
             // this is a near synonym with @separator
@@ -3023,7 +3080,7 @@ public:
         return out;
     }
 
-    // import a scanner by name.
+    // import a scanner (plus any scanners it requires) by name.
     // will not overwrite an existing scanner of the same name.
     void import_scanner(productions *from, const std::string &sname) {
         if(from->scanners[sname]) {
@@ -4504,6 +4561,9 @@ public:
 #include "fpl_x_parser.h"
 #include "regex_custom_scanner.h"
 #include "scan_group_terminal.h"
+#include "scan_compound_terminal.h"
+#include "scan_inv_assertion.h"
+#include "scan_inv_compound_terminal.h"
 #include "scan_inv_group_terminal.h"
 
 } // namespace fpl

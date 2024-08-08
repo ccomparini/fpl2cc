@@ -1,0 +1,47 @@
+@/*
+  Generates code to scan the inverse of the given compound terminal.
+  Analogously to how it works for inverting exact matches, "inverse"
+  matches essentially match everything until the thing they would
+  match (or eof).
+
+  Generally speaking, the component terminals must themselves be
+  invertable.
+
+  See also scan_compound_terminal.h.jemp.
+*/@
+
+@parameter: const productions &prds @
+@parameter: const std::list<grammar_element> &components @
+@parameter: const grammar_element &base_element @
+
+{
+    auto start = reader->current_position();
+    auto end = reader->current_position();
+
+    // grr we can't do knuth-morris-pratt because we are
+    // comparing -to- characters but we don't have any idea
+    // what the component scanners might be doing.  They
+    // could be assertions or anything.
+
+    // OK INSTEAD:
+    // - while invert match the first component
+    //   - save the position
+    //   - try to match the entire thing as if a positive match.
+    //     if it matches, return the saved position. Otherwise,
+    //     scan the first component (to get rid of it) and continue.
+    @declare first_component:  *components.begin()@
+    do {
+        Terminal nonmatch;
+        @#scan_terminal("nonmatch", prds, first_component.inverse())@
+        end = reader->current_position();
+        Terminal matchy;
+        @#scan_terminal("matchy", prds, base_element)@
+        if(matchy)
+            break;
+        @#scan_terminal("matchy", prds, first_component)@
+
+    } while(!reader->eof());
+
+    return Terminal(reader->read_string(end - start));
+}
+

@@ -1,0 +1,36 @@
+@/*
+  A compound terminal is composed of a set of terminals which,
+  if matched consecutively, acts as a single terminal.
+
+  Each sub-terminal gets added to the result as if it's a
+  regex capture group.  The 0th capture group contains the
+  full actual text from the input (similar to how regex ones
+  work).  Other capture groups contain the consecutive
+  capgroups of whatever their scanners return.
+  
+*/@
+@parameter: const productions &prds @
+@parameter: const std::list<grammar_element> &components @
+{
+    Terminal result(""); // "" reserves space for the full match
+
+    auto start = reader->current_position();
+    @for(auto component : components) {@ {
+        Terminal tmp;
+        @#scan_terminal("tmp", prds, component)@
+        if(!tmp) {
+            reader->go_to(start);
+            return tmp;
+        } else {
+            // this match gets added to the result as a
+            // capture group:
+            result.add_capture(tmp);
+        }
+    } @}@
+
+    // looks like we matched:
+    auto end = reader->current_position();
+    reader->go_to(start);
+    result.set_full_match(reader->read_string(end - start));
+    return result;
+}
