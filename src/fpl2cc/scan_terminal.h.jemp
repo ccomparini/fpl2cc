@@ -5,8 +5,8 @@
 {
     // "scan" a terminal by advancing the read pointer to just beyond
     // the terminal if the current input matches the element passed.
-    // leaves the read pointer where it is if the current inout doesn't
-    // match the element passed
+    // Leaves the read pointer where it is and leaves the result_var
+    // untouched if the current input doesn't match the element passed.
 
     @declare match_str: c_str_escape(el.expr)@
     // scan terminal @el@ (@match_str@)
@@ -18,8 +18,9 @@
                     reader->read_exact_match("@c_str_escape(suffix)@") ||
                 @-}-@ false
             ) {
-                // though we matched the terminal, it's part of a
-                // longer terminal.  so, cancel the match/rewind:
+                // "bad suffix" - though we matched the terminal,
+                // it's part of a longer terminal.  so, cancel
+                // the match/rewind:
                 reader->go_to(pos);
             } else {
                 @result_var@ = Terminal("@match_str@");
