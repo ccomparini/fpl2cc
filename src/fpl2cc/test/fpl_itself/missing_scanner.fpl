@@ -1,0 +1,6 @@
+
+@produces int
+@goal dreams
+
+#&missing_scanner  -> dreams;
+!&missing_scanner -> dreams;

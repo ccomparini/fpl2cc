@@ -1,0 +1,4 @@
+returncode = 1
+stderr = " No inverse defined for scanner &missing_scanner  (_inv_missing_scanner)
+"
+stdout = ""
