@@ -1525,6 +1525,10 @@ public:
         product_precedence[product] = precedence;
     }
 
+    bool scanner_exists(const std::string &name) const {
+        return scanners.count(name);
+    }
+
     // Tries to parse a [ ]-bracketed set of terminals (a "group terminal"),
     // adding each to the std::sets passed.
     // Returns true if it parsed one, or false if it didn't recognize
@@ -1637,6 +1641,23 @@ public:
         return stringformat("_inv_{}", name);
     }
 
+    void create_group_terminal(
+        const std::string &name,
+        size_t start_pos,
+        const std::list<grammar_element> &sub_terms
+    ) {
+        scanners[name] = code_block(
+            scan_group_terminal(*this, sub_terms),
+            code_block::DEFAULT,
+            inp->filename(), inp->line_number(start_pos)
+        );
+        scanners[inverse_scanner_name(name)] = code_block(
+            scan_inv_group_terminal(*this, sub_terms),
+            code_block::DEFAULT,
+            inp->filename(), inp->line_number(start_pos)
+        );
+    }
+
     // As parse_scanner, this creates a custom terminal.
     // This version, however, allows syntax for terminal
     // groups and inverting matches.
@@ -1652,16 +1673,7 @@ public:
                 std::list<grammar_element> sub_terms;
                 auto start = inp->current_position();
                 if(parse_terminal_list(sub_terms)) {
-                    scanners[name] = code_block(
-                        scan_group_terminal(*this, sub_terms),
-                        code_block::DEFAULT,
-                        inp->filename(), inp->line_number(start)
-                    );
-                    scanners[inverse_scanner_name(name)] = code_block(
-                        scan_inv_group_terminal(*this, sub_terms),
-                        code_block::DEFAULT,
-                        inp->filename(), inp->line_number(start)
-                    );
+                    create_group_terminal(name, start, sub_terms);
                 }
             } else {
                 scanners[name] = code_for_directive(
@@ -3089,7 +3101,7 @@ public:
     // will not overwrite an existing scanner of the same name.
     void import_scanner(productions *from, const std::string &sname) {
         if(from->scanners[sname]) {
-            if(scanners.count(sname) == 0) {
+            if(!scanner_exists(sname)) {
                 scanners[sname] = from->scanners[sname];
             }
         }
