@@ -1,4 +1,14 @@
 #
+#  "built in" scanners and (potentially) other
+#
+# These can be considered always available via (for example)
+#    @import `builtins`.&eof
+#
+# It's more like a standard library than "built in".  hmm.
+#
+
+
+#
 #  Creates a default rule which always matches, returning an empty string
 #  which can be replaced thus:
 #
@@ -13,7 +23,6 @@
 #    /[+-]/    -> sign;                       # .. and may be '+' or '-'
 #    &default^ -> sign +{ return "+"; }+      # .. but, if nothing, it's '+'
 #
-
 @scanner default +{
     // default always matches, and matches exactly nothing.
     // so return one such nothing:
