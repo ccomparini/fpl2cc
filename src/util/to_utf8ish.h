@@ -1,6 +1,8 @@
 #ifndef TO_UTF8ISH_H
 #define TO_UTF8ISH_H
 
+#include<stdint.h>
+
 
 /*
   "utf8-ish" is utf-8 style encoding, wherein a 31-bit value into 
