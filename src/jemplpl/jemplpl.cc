@@ -2167,7 +2167,7 @@ public:
 // text (22:1):         •/[^@\\n]+/:t                                                                                            => state 6  (src/grammarlib/jemp.fpl:133)
 // text (23:1):         •leading_ws                                                                                              => state 29 (src/grammarlib/jemp.fpl:137)
 // text (24:1):         •trailing_ws                                                                                             => state 1  (src/grammarlib/jemp.fpl:138)
-// _fpl_goal (27:1):    •complete                                                                                                => state 61 (src/fpl2cc/productions.h:4293)
+// _fpl_goal (27:1):    •complete                                                                                                => state 61 (src/fpl2cc/productions.h:4227)
 //
 void state_0() {
 
@@ -10363,7 +10363,7 @@ void state_60() {
 #line 5 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 //
-// _fpl_goal (27:0):  complete • => (done) (src/fpl2cc/productions.h:4293)
+// _fpl_goal (27:0):  complete • => (done) (src/fpl2cc/productions.h:4227)
 //
 void state_61() {
 
@@ -14436,8 +14436,8 @@ bool shift_TERM_EXACT__terminal_4(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal '@@' (@@)
 
@@ -14446,8 +14446,9 @@ bool shift_TERM_EXACT__terminal_4(bool eject) {
             if(
             false
             ) {
-                // though we matched the terminal, it's part of a
-                // longer terminal.  so, cancel the match/rewind:
+                // "bad suffix" - though we matched the terminal,
+                // it's part of a longer terminal.  so, cancel
+                // the match/rewind:
                 reader->go_to(pos);
             } else {
                 result = Terminal("@@");
@@ -14522,8 +14523,8 @@ bool shift_TERM_EXACT__terminal_5(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal '@/*' (@/*)
 
@@ -14532,8 +14533,9 @@ bool shift_TERM_EXACT__terminal_5(bool eject) {
             if(
             false
             ) {
-                // though we matched the terminal, it's part of a
-                // longer terminal.  so, cancel the match/rewind:
+                // "bad suffix" - though we matched the terminal,
+                // it's part of a longer terminal.  so, cancel
+                // the match/rewind:
                 reader->go_to(pos);
             } else {
                 result = Terminal("@/*");
@@ -14608,8 +14610,8 @@ bool shift_TERM_REGEX__terminal_6(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/ ((\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*)
 
@@ -14688,8 +14690,8 @@ bool shift_TERM_EXACT__terminal_7(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal '*/@' (*/@)
 
@@ -14698,8 +14700,9 @@ bool shift_TERM_EXACT__terminal_7(bool eject) {
             if(
             false
             ) {
-                // though we matched the terminal, it's part of a
-                // longer terminal.  so, cancel the match/rewind:
+                // "bad suffix" - though we matched the terminal,
+                // it's part of a longer terminal.  so, cancel
+                // the match/rewind:
                 reader->go_to(pos);
             } else {
                 result = Terminal("*/@");
@@ -14774,8 +14777,8 @@ bool shift_TERM_REGEX__terminal_8(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal /\\n\?/ (\\n\?)
 
@@ -14854,8 +14857,8 @@ bool shift_TERM_EXACT__terminal_9(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal '@parameter:' (@parameter:)
 
@@ -14864,8 +14867,9 @@ bool shift_TERM_EXACT__terminal_9(bool eject) {
             if(
             false
             ) {
-                // though we matched the terminal, it's part of a
-                // longer terminal.  so, cancel the match/rewind:
+                // "bad suffix" - though we matched the terminal,
+                // it's part of a longer terminal.  so, cancel
+                // the match/rewind:
                 reader->go_to(pos);
             } else {
                 result = Terminal("@parameter:");
@@ -14940,8 +14944,8 @@ bool shift_TERM_REGEX__terminal_10(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal /[^@]+/ ([^@]+)
 
@@ -15020,8 +15024,8 @@ bool shift_TERM_EXACT__terminal_11(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal '@' (@)
 
@@ -15036,8 +15040,9 @@ bool shift_TERM_EXACT__terminal_11(bool eject) {
             reader->read_exact_match("-") ||
             false
             ) {
-                // though we matched the terminal, it's part of a
-                // longer terminal.  so, cancel the match/rewind:
+                // "bad suffix" - though we matched the terminal,
+                // it's part of a longer terminal.  so, cancel
+                // the match/rewind:
                 reader->go_to(pos);
             } else {
                 result = Terminal("@");
@@ -15112,8 +15117,8 @@ bool shift_TERM_EXACT__terminal_12(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal '@include:' (@include:)
 
@@ -15122,8 +15127,9 @@ bool shift_TERM_EXACT__terminal_12(bool eject) {
             if(
             false
             ) {
-                // though we matched the terminal, it's part of a
-                // longer terminal.  so, cancel the match/rewind:
+                // "bad suffix" - though we matched the terminal,
+                // it's part of a longer terminal.  so, cancel
+                // the match/rewind:
                 reader->go_to(pos);
             } else {
                 result = Terminal("@include:");
@@ -15198,8 +15204,8 @@ bool shift_TERM_REGEX__terminal_13(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal /\\s*/ (\\s*)
 
@@ -15278,8 +15284,8 @@ bool shift_TERM_EXACT__terminal_14(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal '@embed:' (@embed:)
 
@@ -15288,8 +15294,9 @@ bool shift_TERM_EXACT__terminal_14(bool eject) {
             if(
             false
             ) {
-                // though we matched the terminal, it's part of a
-                // longer terminal.  so, cancel the match/rewind:
+                // "bad suffix" - though we matched the terminal,
+                // it's part of a longer terminal.  so, cancel
+                // the match/rewind:
                 reader->go_to(pos);
             } else {
                 result = Terminal("@embed:");
@@ -15393,8 +15400,8 @@ bool shift_TERM_REGEX__terminal_16(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal /@declare\\s+/ (@declare\\s+)
 
@@ -15502,8 +15509,8 @@ bool shift_TERM_EXACT__terminal_18(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal ':' (:)
 
@@ -15512,8 +15519,9 @@ bool shift_TERM_EXACT__terminal_18(bool eject) {
             if(
             false
             ) {
-                // though we matched the terminal, it's part of a
-                // longer terminal.  so, cancel the match/rewind:
+                // "bad suffix" - though we matched the terminal,
+                // it's part of a longer terminal.  so, cancel
+                // the match/rewind:
                 reader->go_to(pos);
             } else {
                 result = Terminal(":");
@@ -15588,8 +15596,8 @@ bool shift_TERM_REGEX__terminal_19(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal /(\?:[^@]|(\?:@@))*/ ((\?:[^@]|(\?:@@))*)
 
@@ -15668,8 +15676,8 @@ bool shift_TERM_REGEX__terminal_20(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal /@realign:\\s*/ (@realign:\\s*)
 
@@ -15748,8 +15756,8 @@ bool shift_TERM_EXACT__terminal_21(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal '#' (#)
 
@@ -15758,8 +15766,9 @@ bool shift_TERM_EXACT__terminal_21(bool eject) {
             if(
             false
             ) {
-                // though we matched the terminal, it's part of a
-                // longer terminal.  so, cancel the match/rewind:
+                // "bad suffix" - though we matched the terminal,
+                // it's part of a longer terminal.  so, cancel
+                // the match/rewind:
                 reader->go_to(pos);
             } else {
                 result = Terminal("#");
@@ -15834,8 +15843,8 @@ bool shift_TERM_EXACT_INV__terminal_22(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal !'#' (#)
 
@@ -15940,8 +15949,8 @@ bool shift_TERM_EXACT__terminal_24(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal '@-' (@-)
 
@@ -15950,8 +15959,9 @@ bool shift_TERM_EXACT__terminal_24(bool eject) {
             if(
             false
             ) {
-                // though we matched the terminal, it's part of a
-                // longer terminal.  so, cancel the match/rewind:
+                // "bad suffix" - though we matched the terminal,
+                // it's part of a longer terminal.  so, cancel
+                // the match/rewind:
                 reader->go_to(pos);
             } else {
                 result = Terminal("@-");
@@ -16055,8 +16065,8 @@ bool shift_TERM_EXACT__terminal_26(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal '-@' (-@)
 
@@ -16065,8 +16075,9 @@ bool shift_TERM_EXACT__terminal_26(bool eject) {
             if(
             false
             ) {
-                // though we matched the terminal, it's part of a
-                // longer terminal.  so, cancel the match/rewind:
+                // "bad suffix" - though we matched the terminal,
+                // it's part of a longer terminal.  so, cancel
+                // the match/rewind:
                 reader->go_to(pos);
             } else {
                 result = Terminal("-@");
@@ -16199,8 +16210,8 @@ bool shift_TERM_REGEX__terminal_29(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal /(\?:[^-@]|-[^@])+/ ((\?:[^-@]|-[^@])+)
 
@@ -16308,8 +16319,8 @@ bool shift_TERM_REGEX__terminal_31(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal /\\n*[ \\t]+/ (\\n*[ \\t]+)
 
@@ -16388,8 +16399,8 @@ bool shift_TERM_REGEX__terminal_32(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal /[ \\t]*\\n+[ \\t]+(\?!@)/ ([ \\t]*\\n+[ \\t]+(\?!@))
 
@@ -16468,8 +16479,8 @@ bool shift_TERM_REGEX__terminal_33(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal /[ \\t]*\\n/ ([ \\t]*\\n)
 
@@ -16548,8 +16559,8 @@ bool shift_TERM_REGEX__terminal_34(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal /#\\s*/ (#\\s*)
 
@@ -16628,8 +16639,8 @@ bool shift_TERM_REGEX__terminal_35(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal /(\?:[^-{}@]|-[^@]|[{}][^-@])*[{}]/ ((\?:[^-{}@]|-[^@]|[{}][^-@])*[{}])
 
@@ -16708,8 +16719,8 @@ bool shift_TERM_REGEX__terminal_36(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal /[^@\\n]+/ ([^@\\n]+)
 
@@ -16788,8 +16799,8 @@ bool shift_TERM_REGEX__terminal_37(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal /[a-zA-Z_][a-zA-Z_0-9]+/ ([a-zA-Z_][a-zA-Z_0-9]+)
 
@@ -16868,8 +16879,8 @@ bool shift_TERM_REGEX__terminal_38(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal /[ \\t]+/ ([ \\t]+)
 
@@ -16977,8 +16988,8 @@ bool shift_END_OF_PARSE__terminal_40(bool eject) {
     {
         // "scan" a terminal by advancing the read pointer to just beyond
         // the terminal if the current input matches the element passed.
-        // leaves the read pointer where it is if the current inout doesn't
-        // match the element passed
+        // Leaves the read pointer where it is and leaves the result_var
+        // untouched if the current input doesn't match the element passed.
 
         // scan terminal ␄_fpl_goal (_fpl_goal)
 
@@ -17818,7 +17829,7 @@ static const char *state_string(State st) {
         "    text (22:1):\t •/[^@\\\\n]+/:t \t=> state 6\t(src/grammarlib/jemp.fpl:133)\n"
         "    text (23:1):\t •leading_ws \t=> state 29\t(src/grammarlib/jemp.fpl:137)\n"
         "    text (24:1):\t •trailing_ws \t=> state 1\t(src/grammarlib/jemp.fpl:138)\n"
-        "    _fpl_goal (27:1):\t •complete \t=> state 61\t(src/fpl2cc/productions.h:4293)\n"
+        "    _fpl_goal (27:1):\t •complete \t=> state 61\t(src/fpl2cc/productions.h:4227)\n"
         ;
     }
 
@@ -18306,7 +18317,7 @@ static const char *state_string(State st) {
     #line 1286 "src/fpl2cc/fpl_x_parser.h.jemp" 
     if(&jemplpl_parser::state_61 == st) {
         return "state_61:\n"
-        "    _fpl_goal (27:0):\t complete •\t=> (done)\t(src/fpl2cc/productions.h:4293)\n"
+        "    _fpl_goal (27:0):\t complete •\t=> (done)\t(src/fpl2cc/productions.h:4227)\n"
         ;
     }
 
@@ -19383,7 +19394,7 @@ static size_t separator_length(const utf8_byte *inp) {
         // separator "none" means 0 bytes of separator:
         return 0;
 
-        #line 19385 "src/jemplpl/jemplpl.cc"
+        #line 19396 "src/jemplpl/jemplpl.cc"
 
 
         #line 1343 "src/fpl2cc/fpl_x_parser.h.jemp" 
@@ -22745,13 +22756,13 @@ bool dummy = true // hack for comma
             return 1;
         }
         static int line_number() {
-            return 4293;
+            return 4227;
         }
         static const char *filename() {
             return "src/fpl2cc/productions.h";
         }
         static const char *location() {
-            return "src/fpl2cc/productions.h:4293";
+            return "src/fpl2cc/productions.h:4227";
         }
         static const char *to_str() {
             return "complete -> _fpl_goal";
@@ -22768,7 +22779,7 @@ bool dummy = true // hack for comma
                 return pname[ind];
             } else {
                 return "param_name index out of bounds at "
-                "src/fpl2cc/productions.h:4293";
+                "src/fpl2cc/productions.h:4227";
             }
         }
         static const char *param_type(unsigned int ind) {
@@ -22784,7 +22795,7 @@ bool dummy = true // hack for comma
             } else {
                 return (
                 "param_type index out of bounds at "
-                "src/fpl2cc/productions.h:4293"
+                "src/fpl2cc/productions.h:4227"
                 );
             }
         }
@@ -22798,7 +22809,7 @@ bool dummy = true // hack for comma
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/fpl2cc/productions.h:4293 (default action for complete -> _fpl_goal)"
+    #line 1 "src/fpl2cc/productions.h:4227 (default action for complete -> _fpl_goal)"
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
@@ -22823,7 +22834,7 @@ bool dummy = true // hack for comma
     #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 4293 "src/fpl2cc/productions.h"
+    #line 4227 "src/fpl2cc/productions.h"
 }
 
 
@@ -22899,7 +22910,7 @@ std::cout << join(generated_code, "\n\n");
 
 return total_errors?1:0;
 
-#line 22901 "src/jemplpl/jemplpl.cc"
+#line 22912 "src/jemplpl/jemplpl.cc"
 
 }
 
