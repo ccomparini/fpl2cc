@@ -1,0 +1,7 @@
+returncode = 0
+stderr = ""
+stdout = "
+escape sequences...
+jest tests ok
+YAY
+"

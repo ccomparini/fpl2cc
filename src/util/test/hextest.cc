@@ -33,6 +33,14 @@ int main() {
     uint64_t all = from_hex<uint64_t>(multi, pos2);
     std::cout << stringformat("{}\n", to_hex(all));
 
+    const std::string one_digit("a");
+    pos = 0;
+    char nl = from_hex<char>(one_digit, pos);
+    if(nl != 0x0a) {
+        std::cout << stringformat("expected 0x0a, got 0x{}\n", to_hex(nl));
+        errors++;
+    }
+
     std::cerr << stringformat("{} errors\n", errors);
     return errors;
 }

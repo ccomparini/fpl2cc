@@ -35,6 +35,7 @@ OUT_T to_utf8ish(uint32_t cp) {
     // we support continuing this up to 6 bytes output.
     if(cp <= 0x7f) {               // 8 bits
         // fits in one byte - shipit:
+        out.resize(1);
         out[0] = cp;
     } else {
         int out_size;
