@@ -279,7 +279,7 @@ def run_and_capture_action(program, varlist=[], **kwargs):
 
     """
 
-    def strfunction(target, source, env, executor=None):
+    def strfunction(target, source, env):
         return ' '.join(command_and_args(program, target, source, env))
 
     # This is the scons Builder action we return (i.e.,
