@@ -1,0 +1,12 @@
+returncode = 0
+stderr = "
+Received error: Earth shattering kaboom \"as expected\"
+         at src/jemplpl/test/errortest.jemp:7
+Received error: No error message on 2.
+         at src/jemplpl/test/errortest.jemp:9
+"
+stdout = "
+No errors this time (0). Yay.
+
+
+"

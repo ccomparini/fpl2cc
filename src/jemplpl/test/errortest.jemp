@@ -1,0 +1,14 @@
+@parameter: int run_number @
+@parameter: const char *error_message @
+
+@-if(error_message) {-@
+    @-error {-@
+        @-if(*error_message) {-@
+            Earth shattering kaboom "@error_message@"
+        @-} else /*foo */ {-@
+            No error message on @run_number@.
+        @-}-@
+    @-}-@
+@-} else {-@
+    No errors this time (@run_number@). Yay.
+@-}-@

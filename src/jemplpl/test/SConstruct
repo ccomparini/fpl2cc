@@ -1,7 +1,8 @@
 Import('env')
 env = env.Clone()
 
-env.Jemp2h('jemptest.jemp')
+env.Jemp2h('errortest.jemp')
 env.Jemp2h('includetest.jemp')
+env.Jemp2h('jemptest.jemp')
 
 run_cc_tests(env)

@@ -25,7 +25,7 @@
 #include "util/utf8_buffer.h"
 
 #define VERSION_MAJ 0
-#define VERSION_MIN 9
+#define VERSION_MIN 10
 
 }+
 
@@ -56,6 +56,7 @@
         "        int ln;\n"
         "        std::string filename() const {{ return \"{}\"; }};\n"
         "        int line_number() const {{ return ln; }}\n"
+        "        std::string to_str() const {{ return stringformat(\"{{}}:{{}}\", filename(), line_number()); }}\n"
         "    }} source;\n"
         "    source.ln = 1;\n"
         "    std::string out;\n"
@@ -73,7 +74,7 @@
 }+
 
 +fragment(chunks) +{
-    std::string frag = "out += ";
+    std::string frag = "\nout += ";
     chunks@foreach(
         [&frag] (const std::string &chunk) { frag += quote(chunk) + "\n"; }
     );
@@ -93,7 +94,7 @@
 # @include: filename @
 +fragment(include_file) +{
     return jempl.realign_frag(include_file, "1") + stringformat(
-        "out += std::string((const char *)utf8_buffer({}).data());\n",
+        "\nout += std::string((const char *)utf8_buffer({}).data());\n",
         include_file
     ) + line_num(include_file@self()) + jempl.realign_frag();
 }+
@@ -117,6 +118,17 @@
         (const char *)contents.data(),
         line_num(embed_file@self()),
         jempl.realign_frag()
+    );
+}+
+
++fragment(error_fragments) +{
+    return stringformat(
+        "{{\n{}\n"
+        "    std::string out; // error out\n{}\n// end error fragments\n"
+        "    jerror::error(out, source.to_str());\n"
+        "}}\n\n",
+        line_num(error_fragments@self()),
+        error_fragments@join("")
     );
 }+
 

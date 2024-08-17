@@ -45,6 +45,12 @@ text+:chunks -> fragment ;
 # realign hooks can work.
 '@embed:'^ /\s*/^ /[^@]+/:embed_file '@'^ /\n?/^ -> fragment ;
 
+# Immediately print the fragment as an error.
+# Typically, you'd nest this within a control statement.
+#  eg:
+#     @if(xyz) {@ @error {@ some error message @}@ @}@
+subst_start^ 'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^ -> fragment;
+
 # Declares a constant which can be used in later expansions
 # or expressions. For example, to set "fruitbat" to 10 more
 # than the current value of x, you might do:
