@@ -97,7 +97,7 @@ leading_ws?^ '@-' -> subst_start ;
 /[ \t]*\n+[ \t]+(?!@)/:ws  -> trailing_ws ;
 
 # ... and this is the "normal" trailing whitespace
-# case.  
+# case.
 /[ \t]*\n/:ws  -> trailing_ws ;
 
 # Variant templates are a special case, because they have to
@@ -120,17 +120,19 @@ subst_start^ /#\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^ -> 
 # @} else {@
 #   something is false 
 # @}@
-# Note that the above is 3 "control statements" - if, else, and the closing }.
-subst_start^ /(?:[^-{@]|-[^@]|)*\{/:control_statement subst_end^ -> control_start;
-subst_start^                    '}':control_statement subst_end^ -> control_end;
+#@terminal control_guts /(?:[^-{@]|-[^@])*\{/ # @terminal generates failcode!
+@scanner control_guts /(?:[^-{@]|-[^@])*[{]/
+subst_start^ '}':control_statement &control_guts:control_statement subst_end^ -> control_continuation +{ return control_statement@join(" "); }+
+subst_start^ '}':control_statement           subst_end^                       -> control_end;
+subst_start^ &control_guts:control_statement subst_end^                       -> control_start;
 
-control_start:control_statement -> fragment;
-control_end:control_statement   -> fragment;
+control_start:control_statement fragment*:control_statement (control_continuation:control_statement fragment:control_statement*)* control_end:control_statement -> control_fragment;
+
+control_fragment+ -> fragment +{ return control_fragment@join(); }+
 
 # Normal substitution substitutes a value into the output.
-# eg:
-
-subst_start^ /(?:[^-@]|-[^@])+/:variable subst_end^ -> fragment ;
+# It's called "variable" but it's really any expression.
+subst_start^ /(?:[^-@}]|-[^@}])+/:variable subst_end^ -> fragment ;
 
 # plain text ends at an @ or a \n so that we can do substitutions
 # and/or games with leading/trailing whitespace

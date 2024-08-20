@@ -160,12 +160,12 @@
     );
 }+
 
-+fragment(control_statement) +{
++control_fragment(control_statement) +{
     return stringformat(
         "{}{}\n{}\n",
         line_num(control_statement@self()),
         jempl.realign_frag(),
-        control_statement
+        control_statement@join("\n")
     );
 }+
 
