@@ -160,9 +160,12 @@
 }+
 
 +fragment(control_statement) +{
-    return line_num(control_statement@self())
-         + jempl.realign_frag()
-         + control_statement.to_str();
+    return stringformat(
+        "{}{}\n{}\n",
+        line_num(control_statement@self()),
+        jempl.realign_frag(),
+        control_statement
+    );
 }+
 
 # variable substitution (@some_variable@)

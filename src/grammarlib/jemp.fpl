@@ -121,7 +121,11 @@ subst_start^ /#\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^ -> 
 #   something is false 
 # @}@
 # Note that the above is 3 "control statements" - if, else, and the closing }.
-subst_start^ /(?:[^-{}@]|-[^@]|[{}][^-@])*[{}]/:control_statement subst_end^ -> fragment ;
+subst_start^ /(?:[^-{@]|-[^@]|)*\{/:control_statement subst_end^ -> control_start;
+subst_start^                    '}':control_statement subst_end^ -> control_end;
+
+control_start:control_statement -> fragment;
+control_end:control_statement   -> fragment;
 
 # Normal substitution substitutes a value into the output.
 # eg:
