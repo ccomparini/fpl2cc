@@ -140,7 +140,5 @@ trailing_ws -> text ;
 # (identifiers might be used within @declare or whatever)
 /[a-zA-Z_][a-zA-Z_0-9]+/:name -> identifier ;
 
-# \t and regular space (0x20) might be used for readability
-/[ \t]+/:space -> sp ;
 
 

@@ -80,8 +80,6 @@
 //    /(\?:[^-{}@]|-[^@]|[{}][^-@])*[{}]/
 //    /[^@\\n]+/
 //    /[a-zA-Z_][a-zA-Z_0-9]+/
-//    /[ \\t]+/
-//    sp
 //    ␄_fpl_goal
 
 //  rules:
@@ -111,7 +109,6 @@
 //    leading_ws -> text
 //    trailing_ws -> text
 //    /[a-zA-Z_][a-zA-Z_0-9]+/:name -> identifier
-//    /[ \\t]+/:space -> sp
 //    complete -> _fpl_goal
 
 
@@ -2115,7 +2112,7 @@ inline std::string to_str() const {
 #define VERSION_MIN 9
 
 
-#line 2117 "src/jemplpl/jemplpl.cc"
+#line 2114 "src/jemplpl/jemplpl.cc"
 
 
 #line 61 "src/fpl2cc/fpl_x_parser.h.jemp" 
@@ -2167,7 +2164,7 @@ public:
 // text (22:1):         •/[^@\\n]+/:t                                                                                            => state 6  (src/grammarlib/jemp.fpl:133)
 // text (23:1):         •leading_ws                                                                                              => state 29 (src/grammarlib/jemp.fpl:137)
 // text (24:1):         •trailing_ws                                                                                             => state 1  (src/grammarlib/jemp.fpl:138)
-// _fpl_goal (27:1):    •complete                                                                                                => state 61 (src/fpl2cc/productions.h:4227)
+// _fpl_goal (26:1):    •complete                                                                                                => state 61 (src/fpl2cc/productions.h:4227)
 //
 void state_0() {
 
@@ -10363,7 +10360,7 @@ void state_60() {
 #line 5 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 //
-// _fpl_goal (27:0):  complete • => (done) (src/fpl2cc/productions.h:4227)
+// _fpl_goal (26:0):  complete • => (done) (src/fpl2cc/productions.h:4227)
 //
 void state_61() {
 
@@ -10698,12 +10695,6 @@ class Product {
 
     #line 243 "src/fpl2cc/fpl_x_parser.h.jemp" 
     Terminal _terminal_38_val() const { return std::get<Terminal>(var()); }
-
-    #line 243 "src/fpl2cc/fpl_x_parser.h.jemp" 
-    std::string _sp_val() const { return std::get<std::string>(var()); }
-
-    #line 243 "src/fpl2cc/fpl_x_parser.h.jemp" 
-    Terminal _terminal_40_val() const { return std::get<Terminal>(var()); }
 
     #line 243 "src/fpl2cc/fpl_x_parser.h.jemp" 
     operator bool() const {
@@ -12023,58 +12014,10 @@ int lr_position_before__terminal_38(int pos, bool multiple) const {
 
     #line 639 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
-    // /[ \\t]+/
-    // (checking pos >= 0 because negative indexes are relative
-    // to end of stack)
-    while(pos >= 0 && lr_stack_entry(pos).element_id == 38) {
-        --pos;
-        if(!multiple)
-        break;
-    }
-
-    #line 648 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
-
-    return pos;
-}
-
-#line 680 "src/fpl2cc/fpl_x_parser.h.jemp" 
-int lr_position_before__sp(int pos, bool multiple) const {
-
-    if(pos > lr_top_index())
-    pos = lr_top_index();
-
-
-    #line 639 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
-    // sp
-    // (checking pos >= 0 because negative indexes are relative
-    // to end of stack)
-    while(pos >= 0 && lr_stack_entry(pos).element_id == 39) {
-        --pos;
-        if(!multiple)
-        break;
-    }
-
-    #line 648 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
-
-    return pos;
-}
-
-#line 680 "src/fpl2cc/fpl_x_parser.h.jemp" 
-int lr_position_before__terminal_40(int pos, bool multiple) const {
-
-    if(pos > lr_top_index())
-    pos = lr_top_index();
-
-
-    #line 639 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
     // ␄_fpl_goal
     // (checking pos >= 0 because negative indexes are relative
     // to end of stack)
-    while(pos >= 0 && lr_stack_entry(pos).element_id == 40) {
+    while(pos >= 0 && lr_stack_entry(pos).element_id == 38) {
         --pos;
         if(!multiple)
         break;
@@ -12827,44 +12770,6 @@ int lr_stack_size_of__terminal_38(int pos, bool multiple) const {
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 38) {
-        ++size;
-        if(!multiple)
-        break;
-    }
-
-    #line 702 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
-
-    return size;
-}
-
-#line 738 "src/fpl2cc/fpl_x_parser.h.jemp" 
-int lr_stack_size_of__sp(int pos, bool multiple) const {
-    int size = 0;
-
-    #line 695 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
-    // normal case - not a subexpression
-    while(lr_stack_entry(pos + size).element_id == 39) {
-        ++size;
-        if(!multiple)
-        break;
-    }
-
-    #line 702 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
-
-    return size;
-}
-
-#line 738 "src/fpl2cc/fpl_x_parser.h.jemp" 
-int lr_stack_size_of__terminal_40(int pos, bool multiple) const {
-    int size = 0;
-
-    #line 695 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
-    // normal case - not a subexpression
-    while(lr_stack_entry(pos + size).element_id == 40) {
         ++size;
         if(!multiple)
         break;
@@ -14270,7 +14175,7 @@ void init(const std::filesystem::path &src) {
     init_import_path(src);
 }
 
-#line 14272 "src/jemplpl/jemplpl.cc"
+#line 14177 "src/jemplpl/jemplpl.cc"
 
 // return to "private" after each such block.
 // this way, authors can add public members
@@ -16858,8 +16763,8 @@ bool shift_TERM_REGEX__terminal_37(bool eject) {
 
 
 #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
-// /[ \\t]+/ 
-bool shift_TERM_REGEX__terminal_38(bool eject) {
+// ␄_fpl_goal 
+bool shift_END_OF_PARSE__terminal_38(bool eject) {
     if(auto next_up = lr_next()) {
         if(next_up.mismatch && next_up.element_id == _terminal_38) {
             // parser has already determined that this element isn't
@@ -16868,115 +16773,6 @@ bool shift_TERM_REGEX__terminal_38(bool eject) {
             // that other states/shifts can try to match something
             // else:
             lr_read(_terminal_38);
-        }
-        // Would this ever be a match?  
-        return false;
-    }
-
-    const SourcePosition pos = position();
-    Terminal result;
-
-    {
-        // "scan" a terminal by advancing the read pointer to just beyond
-        // the terminal if the current input matches the element passed.
-        // Leaves the read pointer where it is and leaves the result_var
-        // untouched if the current input doesn't match the element passed.
-
-        // scan terminal /[ \\t]+/ ([ \\t]+)
-
-        std::cmatch match = reader->read_re("[ \\t]+");
-        if(!match.empty()) {
-            if(match.length() || (lr_top().position() != position())) {
-                result = Terminal(match.begin(), match.end());
-            }
-        }
-
-
-    }
-
-
-
-    if(result) {
-        clear_mismatches();  // (we matched)
-
-        debug_print("shifting /[ \\\\t]+/\n");
-
-        lr_push(_terminal_38, eject, pos, Product(result));
-
-
-        #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
-        bytes_eaten = 0;
-
-        if(!lr_read(_terminal_38)) {
-            internal_error(stringformat(
-            "expected item with id _terminal_38 but this was next up (at lr {}): {}\n"
-            "stack:\n{}\n",
-            lr_read_pos, lr_next(),
-            lr_stack
-            ));
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
-
-
-#line 1224 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
-
-#line 1225 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
-
-#line 1219 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
-
-// sp
-bool shift_NONTERM_PRODUCTION__sp(bool eject) {
-    if(lr_next().mismatch && lr_next().element_id == _sp) {
-        debug_print(
-        "not matching mismatched nonterm ('{}' is not _sp)\n",
-        lr_next()
-        );
-        return false;
-    }
-
-    if(lr_read(_sp)) {
-        debug_print("shifting nonterm _sp\n");
-        return true;
-    }
-
-    return false;
-}
-
-
-
-#line 1221 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
-
-#line 1225 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
-
-#line 1219 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
-// (terminals and assertions - everything else)
-
-#line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
-
-
-#line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
-// ␄_fpl_goal 
-bool shift_END_OF_PARSE__terminal_40(bool eject) {
-    if(auto next_up = lr_next()) {
-        if(next_up.mismatch && next_up.element_id == _terminal_40) {
-            // parser has already determined that this element isn't
-            // leading to any legitimate production in this context
-            // (it's a "mismatch"), so "read" it and return false so
-            // that other states/shifts can try to match something
-            // else:
-            lr_read(_terminal_40);
         }
         // Would this ever be a match?  
         return false;
@@ -17005,15 +16801,15 @@ bool shift_END_OF_PARSE__terminal_40(bool eject) {
 
         debug_print("shifting ␄_fpl_goal\n");
 
-        lr_push(_terminal_40, eject, pos, Product(result));
+        lr_push(_terminal_38, eject, pos, Product(result));
 
 
         #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
         bytes_eaten = 0;
 
-        if(!lr_read(_terminal_40)) {
+        if(!lr_read(_terminal_38)) {
             internal_error(stringformat(
-            "expected item with id _terminal_40 but this was next up (at lr {}): {}\n"
+            "expected item with id _terminal_38 but this was next up (at lr {}): {}\n"
             "stack:\n{}\n",
             lr_read_pos, lr_next(),
             lr_stack
@@ -17160,13 +16956,7 @@ typedef enum {
     _terminal_37, // 37 /[a-zA-Z_][a-zA-Z_0-9]+/
 
     #line 1234 "src/fpl2cc/fpl_x_parser.h.jemp" 
-    _terminal_38, // 38 /[ \\t]+/
-
-    #line 1234 "src/fpl2cc/fpl_x_parser.h.jemp" 
-    _sp, // 39 sp
-
-    #line 1234 "src/fpl2cc/fpl_x_parser.h.jemp" 
-    _terminal_40, // 40 ␄_fpl_goal
+    _terminal_38, // 38 ␄_fpl_goal
 
     #line 1234 "src/fpl2cc/fpl_x_parser.h.jemp" 
 } ElementID;
@@ -17291,13 +17081,7 @@ static std::string element_str(int id) {
         case 37: return "/[a-zA-Z_][a-zA-Z_0-9]+/ (37)";
 
         #line 1244 "src/fpl2cc/fpl_x_parser.h.jemp" 
-        case 38: return "/[ \\\\t]+/ (38)";
-
-        #line 1244 "src/fpl2cc/fpl_x_parser.h.jemp" 
-        case 39: return "sp (39)";
-
-        #line 1244 "src/fpl2cc/fpl_x_parser.h.jemp" 
-        case 40: return "␄_fpl_goal (40)";
+        case 38: return "␄_fpl_goal (38)";
 
         #line 1244 "src/fpl2cc/fpl_x_parser.h.jemp" 
     }
@@ -17581,20 +17365,6 @@ static bool is_nonterminal(int id, const std::string &caller = CALLER()) {
         #line 1256 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         #line 1257 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
-        #line 1252 "src/fpl2cc/fpl_x_parser.h.jemp" 
-        case 39: return true;
-
-        #line 1254 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
-        #line 1257 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
-        #line 1252 "src/fpl2cc/fpl_x_parser.h.jemp" 
-        case 40: return false;
-
-        #line 1256 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
-        #line 1257 "src/fpl2cc/fpl_x_parser.h.jemp" 
     }
     jerror::error(stringformat(
     "internal error {}: invalid terminal id: {}\n", caller, id
@@ -17829,7 +17599,7 @@ static const char *state_string(State st) {
         "    text (22:1):\t •/[^@\\\\n]+/:t \t=> state 6\t(src/grammarlib/jemp.fpl:133)\n"
         "    text (23:1):\t •leading_ws \t=> state 29\t(src/grammarlib/jemp.fpl:137)\n"
         "    text (24:1):\t •trailing_ws \t=> state 1\t(src/grammarlib/jemp.fpl:138)\n"
-        "    _fpl_goal (27:1):\t •complete \t=> state 61\t(src/fpl2cc/productions.h:4227)\n"
+        "    _fpl_goal (26:1):\t •complete \t=> state 61\t(src/fpl2cc/productions.h:4227)\n"
         ;
     }
 
@@ -18317,7 +18087,7 @@ static const char *state_string(State st) {
     #line 1286 "src/fpl2cc/fpl_x_parser.h.jemp" 
     if(&jemplpl_parser::state_61 == st) {
         return "state_61:\n"
-        "    _fpl_goal (27:0):\t complete •\t=> (done)\t(src/fpl2cc/productions.h:4227)\n"
+        "    _fpl_goal (26:0):\t complete •\t=> (done)\t(src/fpl2cc/productions.h:4227)\n"
         ;
     }
 
@@ -19394,7 +19164,7 @@ static size_t separator_length(const utf8_byte *inp) {
         // separator "none" means 0 bytes of separator:
         return 0;
 
-        #line 19396 "src/jemplpl/jemplpl.cc"
+        #line 19166 "src/jemplpl/jemplpl.cc"
 
 
         #line 1343 "src/fpl2cc/fpl_x_parser.h.jemp" 
@@ -22601,133 +22371,6 @@ bool dummy = true // hack for comma
 std::string rule_26(
 
 #line 8 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-ReductionParameter<Terminal> space,
-
-#line 11 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-bool dummy = true // hack for comma
-) {
-
-    #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
-
-
-    #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
-
-    struct {
-        static const char *name() {
-            return "rule_26";
-        }
-        static const char *product() {
-            return "sp";
-        }
-        static const char *product_type() {
-            return "std::string";
-        }
-        static int num_steps() {
-            return 1;
-        }
-        static int num_params() {
-            return 1;
-        }
-        static int line_number() {
-            return 144;
-        }
-        static const char *filename() {
-            return "src/grammarlib/jemp.fpl";
-        }
-        static const char *location() {
-            return "src/grammarlib/jemp.fpl:144";
-        }
-        static const char *to_str() {
-            return "/[ \\\\t]+/:space -> sp";
-        }
-        static const char *param_name(unsigned int ind) {
-            static const char *pname[] = {
-
-                #line 40 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
-                "space"
-
-                #line 42 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
-            };
-            if(ind < 1) {
-                return pname[ind];
-            } else {
-                return "param_name index out of bounds at "
-                "src/grammarlib/jemp.fpl:144";
-            }
-        }
-        static const char *param_type(unsigned int ind) {
-            static const char *ptype[] = {
-
-                #line 53 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
-                ""
-
-                #line 55 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
-            };
-            if(ind < 1) {
-                return ptype[ind];
-            } else {
-                return (
-                "param_type index out of bounds at "
-                "src/grammarlib/jemp.fpl:144"
-                );
-            }
-        }
-    } this_rule;
-
-
-
-    // /[ \\t]+/:space -> sp
-
-    #line 17 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-
-    #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/grammarlib/jemp.fpl:144 (default action for /[ \\\\t]+/:space -> sp)"
-    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
-    return std::string(
-
-    #line 38 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 41 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 49 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    space.val().to_str()
-
-    #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    );
-
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 144 "src/grammarlib/jemp.fpl"
-}
-
-
-
-#line 1362 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
-
-#line 1363 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
-
-#line 1358 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
-
-#line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-std::string rule_27(
-
-#line 8 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 ReductionParameter<std::string> complete,
 
 #line 11 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22741,7 +22384,7 @@ bool dummy = true // hack for comma
 
     struct {
         static const char *name() {
-            return "rule_27";
+            return "rule_26";
         }
         static const char *product() {
             return "_fpl_goal";
@@ -22910,7 +22553,7 @@ std::cout << join(generated_code, "\n\n");
 
 return total_errors?1:0;
 
-#line 22912 "src/jemplpl/jemplpl.cc"
+#line 22555 "src/jemplpl/jemplpl.cc"
 
 }
 
