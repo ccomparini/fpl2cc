@@ -19,6 +19,7 @@
 #include "util/c_str_escape.h"
 #include "util/jerror.h"
 #include "util/join.h"
+#include "util/reformat_code.h"
 #include "util/searchpath.h"
 #include "util/stringformat.h"
 #include "util/utf8_buffer.h"
@@ -322,7 +323,7 @@ public:
         }
     }
 
-    std::cout << join(generated_code, "\n\n");
+    std::cout << reformat_code(join(generated_code, "\n\n"));
 
     return total_errors?1:0;
 }+

@@ -2110,6 +2110,7 @@ inline std::string to_str() const {
 #include "util/c_str_escape.h"
 #include "util/jerror.h"
 #include "util/join.h"
+#include "util/reformat_code.h"
 #include "util/searchpath.h"
 #include "util/stringformat.h"
 #include "util/utf8_buffer.h"
@@ -2118,7 +2119,7 @@ inline std::string to_str() const {
 #define VERSION_MIN 9
 
 
-#line 2120 "src/jemplpl/jemplpl.cc"
+#line 2121 "src/jemplpl/jemplpl.cc"
 
 
 #line 61 "src/fpl2cc/fpl_x_parser.h.jemp" 
@@ -2169,10 +2170,10 @@ public:
 // control_end (21:3):    •subst_start^ '}':control_statement subst_end^                                                           => state 9  (src/grammarlib/jemp.fpl:125)
 // fragment (22:1):       •control_start:control_statement                                                                         => state 40 (src/grammarlib/jemp.fpl:127)
 // fragment (23:1):       •control_end:control_statement                                                                           => state 41 (src/grammarlib/jemp.fpl:128)
-// fragment (24:3):       •subst_start^ /(\?:[^-@]|-[^@])+/:variable subst_end^                                                    => state 9  (src/grammarlib/jemp.fpl:135)
-// text (25:1):           •/[^@\\n]+/:t                                                                                            => state 6  (src/grammarlib/jemp.fpl:139)
-// text (26:1):           •leading_ws                                                                                              => state 31 (src/grammarlib/jemp.fpl:143)
-// text (27:1):           •trailing_ws                                                                                             => state 1  (src/grammarlib/jemp.fpl:144)
+// fragment (24:3):       •subst_start^ /(\?:[^-@]|-[^@])+/:variable subst_end^                                                    => state 9  (src/grammarlib/jemp.fpl:133)
+// text (25:1):           •/[^@\\n]+/:t                                                                                            => state 6  (src/grammarlib/jemp.fpl:137)
+// text (26:1):           •leading_ws                                                                                              => state 31 (src/grammarlib/jemp.fpl:141)
+// text (27:1):           •trailing_ws                                                                                             => state 1  (src/grammarlib/jemp.fpl:142)
 // _fpl_goal (29:1):      •complete                                                                                                => state 65 (src/fpl2cc/productions.h:4227)
 //
 void state_0() {
@@ -2481,7 +2482,7 @@ void state_0() {
 #line 5 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 //
-// text (27:0):  trailing_ws • => (reduce) (src/grammarlib/jemp.fpl:144)
+// text (27:0):  trailing_ws • => (reduce) (src/grammarlib/jemp.fpl:142)
 //
 void state_1() {
 
@@ -2649,9 +2650,9 @@ void state_1() {
 // leading_ws (15:1):   •/\\n*[ \\t]+/:ws               => state 5  (src/grammarlib/jemp.fpl:83)
 // trailing_ws (16:1):  •/[ \\t]*\\n+[ \\t]+(\?!@)/:ws  => state 7  (src/grammarlib/jemp.fpl:97)
 // trailing_ws (17:1):  •/[ \\t]*\\n/:ws                => state 8  (src/grammarlib/jemp.fpl:101)
-// text (25:1):         •/[^@\\n]+/:t                   => state 6  (src/grammarlib/jemp.fpl:139)
-// text (26:1):         •leading_ws                     => state 3  (src/grammarlib/jemp.fpl:143)
-// text (27:1):         •trailing_ws                    => state 1  (src/grammarlib/jemp.fpl:144)
+// text (25:1):         •/[^@\\n]+/:t                   => state 6  (src/grammarlib/jemp.fpl:137)
+// text (26:1):         •leading_ws                     => state 3  (src/grammarlib/jemp.fpl:141)
+// text (27:1):         •trailing_ws                    => state 1  (src/grammarlib/jemp.fpl:142)
 //
 void state_2() {
 
@@ -2909,7 +2910,7 @@ void state_2() {
 #line 5 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 //
-// text (26:0):  leading_ws • => (reduce) (src/grammarlib/jemp.fpl:143)
+// text (26:0):  leading_ws • => (reduce) (src/grammarlib/jemp.fpl:141)
 //
 void state_3() {
 
@@ -3395,7 +3396,7 @@ void state_5() {
 #line 5 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 //
-// text (25:0):  /[^@\\n]+/:t • => (reduce) (src/grammarlib/jemp.fpl:139)
+// text (25:0):  /[^@\\n]+/:t • => (reduce) (src/grammarlib/jemp.fpl:137)
 //
 void state_6() {
 
@@ -3885,7 +3886,7 @@ void state_8() {
 // fragment (19:4):       subst_start^ •/#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^                           => state 19 (src/grammarlib/jemp.fpl:112)
 // control_start (20:2):  subst_start^ •/(\?:[^-{@]|-[^@]|)*\\{/:control_statement subst_end^                                      => state 15 (src/grammarlib/jemp.fpl:124)
 // control_end (21:2):    subst_start^ •'}':control_statement subst_end^                                                           => state 10 (src/grammarlib/jemp.fpl:125)
-// fragment (24:2):       subst_start^ •/(\?:[^-@]|-[^@])+/:variable subst_end^                                                    => state 17 (src/grammarlib/jemp.fpl:135)
+// fragment (24:2):       subst_start^ •/(\?:[^-@]|-[^@])+/:variable subst_end^                                                    => state 17 (src/grammarlib/jemp.fpl:133)
 //
 void state_9() {
 
@@ -5130,7 +5131,7 @@ void state_16() {
 //
 // subst_end (12:2):  •'-@':arg_0 trailing_ws?^                              => state 13 (src/grammarlib/jemp.fpl:75)
 // subst_end (13:1):  •'@':arg_0                                             => state 12 (src/grammarlib/jemp.fpl:76)
-// fragment (24:1):   subst_start^ /(\?:[^-@]|-[^@])+/:variable •subst_end^  => state 18 (src/grammarlib/jemp.fpl:135)
+// fragment (24:1):   subst_start^ /(\?:[^-@]|-[^@])+/:variable •subst_end^  => state 18 (src/grammarlib/jemp.fpl:133)
 //
 void state_17() {
 
@@ -5198,7 +5199,7 @@ void state_17() {
 #line 5 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 //
-// fragment (24:0):  subst_start^ /(\?:[^-@]|-[^@])+/:variable subst_end^ • => (reduce) (src/grammarlib/jemp.fpl:135)
+// fragment (24:0):  subst_start^ /(\?:[^-@]|-[^@])+/:variable subst_end^ • => (reduce) (src/grammarlib/jemp.fpl:133)
 //
 void state_18() {
 
@@ -5420,7 +5421,7 @@ void state_18() {
 //
 // fragment (18:4):    subst_start^ /#\\s*/^ •identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^  => state 20 (src/grammarlib/jemp.fpl:109)
 // fragment (19:3):    subst_start^ /#\\s*/^ •identifier:jempl_name rest_of_sub:jempl_args subst_end^                           => state 20 (src/grammarlib/jemp.fpl:112)
-// identifier (28:1):  •/[a-zA-Z_][a-zA-Z_0-9]+/:name                                                                           => state 30 (src/grammarlib/jemp.fpl:147)
+// identifier (28:1):  •/[a-zA-Z_][a-zA-Z_0-9]+/:name                                                                           => state 30 (src/grammarlib/jemp.fpl:145)
 //
 void state_19() {
 
@@ -6853,7 +6854,7 @@ void state_29() {
 #line 5 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 //
-// identifier (28:0):  /[a-zA-Z_][a-zA-Z_0-9]+/:name • => (reduce) (src/grammarlib/jemp.fpl:147)
+// identifier (28:0):  /[a-zA-Z_][a-zA-Z_0-9]+/:name • => (reduce) (src/grammarlib/jemp.fpl:145)
 //
 void state_30() {
 
@@ -7017,7 +7018,7 @@ void state_30() {
 //
 // fragment (7:6):      leading_ws? •/@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^  => state 33 (src/grammarlib/jemp.fpl:52)
 // subst_start (10:1):  leading_ws?^ •'@-':arg_1                                                                         => state 32 (src/grammarlib/jemp.fpl:72)
-// text (26:0):         leading_ws •                                                                                     => (reduce) (src/grammarlib/jemp.fpl:143)
+// text (26:0):         leading_ws •                                                                                     => (reduce) (src/grammarlib/jemp.fpl:141)
 //
 void state_31() {
 
@@ -7395,7 +7396,7 @@ void state_32() {
 
 //
 // fragment (7:5):     leading_ws? /@declare\\s+/^ •identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^  => state 34 (src/grammarlib/jemp.fpl:52)
-// identifier (28:1):  •/[a-zA-Z_][a-zA-Z_0-9]+/:name                                                                   => state 30 (src/grammarlib/jemp.fpl:147)
+// identifier (28:1):  •/[a-zA-Z_][a-zA-Z_0-9]+/:name                                                                   => state 30 (src/grammarlib/jemp.fpl:145)
 //
 void state_33() {
 
@@ -8014,10 +8015,10 @@ void state_38() {
 // control_end (21:3):    •subst_start^ '}':control_statement subst_end^                                                           => state 9  (src/grammarlib/jemp.fpl:125)
 // fragment (22:1):       •control_start:control_statement                                                                         => state 40 (src/grammarlib/jemp.fpl:127)
 // fragment (23:1):       •control_end:control_statement                                                                           => state 41 (src/grammarlib/jemp.fpl:128)
-// fragment (24:3):       •subst_start^ /(\?:[^-@]|-[^@])+/:variable subst_end^                                                    => state 9  (src/grammarlib/jemp.fpl:135)
-// text (25:1):           •/[^@\\n]+/:t                                                                                            => state 6  (src/grammarlib/jemp.fpl:139)
-// text (26:1):           •leading_ws                                                                                              => state 31 (src/grammarlib/jemp.fpl:143)
-// text (27:1):           •trailing_ws                                                                                             => state 1  (src/grammarlib/jemp.fpl:144)
+// fragment (24:3):       •subst_start^ /(\?:[^-@]|-[^@])+/:variable subst_end^                                                    => state 9  (src/grammarlib/jemp.fpl:133)
+// text (25:1):           •/[^@\\n]+/:t                                                                                            => state 6  (src/grammarlib/jemp.fpl:137)
+// text (26:1):           •leading_ws                                                                                              => state 31 (src/grammarlib/jemp.fpl:141)
+// text (27:1):           •trailing_ws                                                                                             => state 1  (src/grammarlib/jemp.fpl:142)
 //
 void state_39() {
 
@@ -10604,9 +10605,9 @@ void state_60() {
 // leading_ws (15:1):   •/\\n*[ \\t]+/:ws                             => state 5  (src/grammarlib/jemp.fpl:83)
 // trailing_ws (16:1):  •/[ \\t]*\\n+[ \\t]+(\?!@)/:ws                => state 7  (src/grammarlib/jemp.fpl:97)
 // trailing_ws (17:1):  •/[ \\t]*\\n/:ws                              => state 8  (src/grammarlib/jemp.fpl:101)
-// text (25:1):         •/[^@\\n]+/:t                                 => state 6  (src/grammarlib/jemp.fpl:139)
-// text (26:1):         •leading_ws                                   => state 3  (src/grammarlib/jemp.fpl:143)
-// text (27:1):         •trailing_ws                                  => state 1  (src/grammarlib/jemp.fpl:144)
+// text (25:1):         •/[^@\\n]+/:t                                 => state 6  (src/grammarlib/jemp.fpl:137)
+// text (26:1):         •leading_ws                                   => state 3  (src/grammarlib/jemp.fpl:141)
+// text (27:1):         •trailing_ws                                  => state 1  (src/grammarlib/jemp.fpl:142)
 //
 void state_61() {
 
@@ -14963,7 +14964,7 @@ private:
 #line 1199 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
-#line 177 "src/jemplpl/jemplpl.fpl"
+#line 178 "src/jemplpl/jemplpl.fpl"
 
 
 static inline std::string quote(const std::string &str) {
@@ -15061,7 +15062,7 @@ void init(const std::filesystem::path &src) {
     init_import_path(src);
 }
 
-#line 15063 "src/jemplpl/jemplpl.cc"
+#line 15064 "src/jemplpl/jemplpl.cc"
 
 // return to "private" after each such block.
 // this way, authors can add public members
@@ -18680,10 +18681,10 @@ static const char *state_string(State st) {
         "    control_end (21:3):\t •subst_start^ '}':control_statement subst_end^ \t=> state 9\t(src/grammarlib/jemp.fpl:125)\n"
         "    fragment (22:1):\t •control_start:control_statement \t=> state 40\t(src/grammarlib/jemp.fpl:127)\n"
         "    fragment (23:1):\t •control_end:control_statement \t=> state 41\t(src/grammarlib/jemp.fpl:128)\n"
-        "    fragment (24:3):\t •subst_start^ /(\\\?:[^-@]|-[^@])+/:variable subst_end^ \t=> state 9\t(src/grammarlib/jemp.fpl:135)\n"
-        "    text (25:1):\t •/[^@\\\\n]+/:t \t=> state 6\t(src/grammarlib/jemp.fpl:139)\n"
-        "    text (26:1):\t •leading_ws \t=> state 31\t(src/grammarlib/jemp.fpl:143)\n"
-        "    text (27:1):\t •trailing_ws \t=> state 1\t(src/grammarlib/jemp.fpl:144)\n"
+        "    fragment (24:3):\t •subst_start^ /(\\\?:[^-@]|-[^@])+/:variable subst_end^ \t=> state 9\t(src/grammarlib/jemp.fpl:133)\n"
+        "    text (25:1):\t •/[^@\\\\n]+/:t \t=> state 6\t(src/grammarlib/jemp.fpl:137)\n"
+        "    text (26:1):\t •leading_ws \t=> state 31\t(src/grammarlib/jemp.fpl:141)\n"
+        "    text (27:1):\t •trailing_ws \t=> state 1\t(src/grammarlib/jemp.fpl:142)\n"
         "    _fpl_goal (29:1):\t •complete \t=> state 65\t(src/fpl2cc/productions.h:4227)\n"
         ;
     }
@@ -18691,7 +18692,7 @@ static const char *state_string(State st) {
     #line 1286 "src/fpl2cc/fpl_x_parser.h.jemp" 
     if(&jemplpl_parser::state_1 == st) {
         return "state_1:\n"
-        "    text (27:0):\t trailing_ws •\t=> (reduce)\t(src/grammarlib/jemp.fpl:144)\n"
+        "    text (27:0):\t trailing_ws •\t=> (reduce)\t(src/grammarlib/jemp.fpl:142)\n"
         ;
     }
 
@@ -18704,16 +18705,16 @@ static const char *state_string(State st) {
         "    leading_ws (15:1):\t •/\\\\n*[ \\\\t]+/:ws \t=> state 5\t(src/grammarlib/jemp.fpl:83)\n"
         "    trailing_ws (16:1):\t •/[ \\\\t]*\\\\n+[ \\\\t]+(\\\?!@)/:ws \t=> state 7\t(src/grammarlib/jemp.fpl:97)\n"
         "    trailing_ws (17:1):\t •/[ \\\\t]*\\\\n/:ws \t=> state 8\t(src/grammarlib/jemp.fpl:101)\n"
-        "    text (25:1):\t •/[^@\\\\n]+/:t \t=> state 6\t(src/grammarlib/jemp.fpl:139)\n"
-        "    text (26:1):\t •leading_ws \t=> state 3\t(src/grammarlib/jemp.fpl:143)\n"
-        "    text (27:1):\t •trailing_ws \t=> state 1\t(src/grammarlib/jemp.fpl:144)\n"
+        "    text (25:1):\t •/[^@\\\\n]+/:t \t=> state 6\t(src/grammarlib/jemp.fpl:137)\n"
+        "    text (26:1):\t •leading_ws \t=> state 3\t(src/grammarlib/jemp.fpl:141)\n"
+        "    text (27:1):\t •trailing_ws \t=> state 1\t(src/grammarlib/jemp.fpl:142)\n"
         ;
     }
 
     #line 1286 "src/fpl2cc/fpl_x_parser.h.jemp" 
     if(&jemplpl_parser::state_3 == st) {
         return "state_3:\n"
-        "    text (26:0):\t leading_ws •\t=> (reduce)\t(src/grammarlib/jemp.fpl:143)\n"
+        "    text (26:0):\t leading_ws •\t=> (reduce)\t(src/grammarlib/jemp.fpl:141)\n"
         ;
     }
 
@@ -18734,7 +18735,7 @@ static const char *state_string(State st) {
     #line 1286 "src/fpl2cc/fpl_x_parser.h.jemp" 
     if(&jemplpl_parser::state_6 == st) {
         return "state_6:\n"
-        "    text (25:0):\t /[^@\\\\n]+/:t •\t=> (reduce)\t(src/grammarlib/jemp.fpl:139)\n"
+        "    text (25:0):\t /[^@\\\\n]+/:t •\t=> (reduce)\t(src/grammarlib/jemp.fpl:137)\n"
         ;
     }
 
@@ -18759,7 +18760,7 @@ static const char *state_string(State st) {
         "    fragment (19:4):\t subst_start^ •/#\\\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^ \t=> state 19\t(src/grammarlib/jemp.fpl:112)\n"
         "    control_start (20:2):\t subst_start^ •/(\\\?:[^-{@]|-[^@]|)*\\\\{/:control_statement subst_end^ \t=> state 15\t(src/grammarlib/jemp.fpl:124)\n"
         "    control_end (21:2):\t subst_start^ •'}':control_statement subst_end^ \t=> state 10\t(src/grammarlib/jemp.fpl:125)\n"
-        "    fragment (24:2):\t subst_start^ •/(\\\?:[^-@]|-[^@])+/:variable subst_end^ \t=> state 17\t(src/grammarlib/jemp.fpl:135)\n"
+        "    fragment (24:2):\t subst_start^ •/(\\\?:[^-@]|-[^@])+/:variable subst_end^ \t=> state 17\t(src/grammarlib/jemp.fpl:133)\n"
         ;
     }
 
@@ -18824,14 +18825,14 @@ static const char *state_string(State st) {
         return "state_17:\n"
         "    subst_end (12:2):\t •'-@':arg_0 trailing_ws\?^ \t=> state 13\t(src/grammarlib/jemp.fpl:75)\n"
         "    subst_end (13:1):\t •'@':arg_0 \t=> state 12\t(src/grammarlib/jemp.fpl:76)\n"
-        "    fragment (24:1):\t subst_start^ /(\\\?:[^-@]|-[^@])+/:variable •subst_end^ \t=> state 18\t(src/grammarlib/jemp.fpl:135)\n"
+        "    fragment (24:1):\t subst_start^ /(\\\?:[^-@]|-[^@])+/:variable •subst_end^ \t=> state 18\t(src/grammarlib/jemp.fpl:133)\n"
         ;
     }
 
     #line 1286 "src/fpl2cc/fpl_x_parser.h.jemp" 
     if(&jemplpl_parser::state_18 == st) {
         return "state_18:\n"
-        "    fragment (24:0):\t subst_start^ /(\\\?:[^-@]|-[^@])+/:variable subst_end^ •\t=> (reduce)\t(src/grammarlib/jemp.fpl:135)\n"
+        "    fragment (24:0):\t subst_start^ /(\\\?:[^-@]|-[^@])+/:variable subst_end^ •\t=> (reduce)\t(src/grammarlib/jemp.fpl:133)\n"
         ;
     }
 
@@ -18840,7 +18841,7 @@ static const char *state_string(State st) {
         return "state_19:\n"
         "    fragment (18:4):\t subst_start^ /#\\\\s*/^ •identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^ \t=> state 20\t(src/grammarlib/jemp.fpl:109)\n"
         "    fragment (19:3):\t subst_start^ /#\\\\s*/^ •identifier:jempl_name rest_of_sub:jempl_args subst_end^ \t=> state 20\t(src/grammarlib/jemp.fpl:112)\n"
-        "    identifier (28:1):\t •/[a-zA-Z_][a-zA-Z_0-9]+/:name \t=> state 30\t(src/grammarlib/jemp.fpl:147)\n"
+        "    identifier (28:1):\t •/[a-zA-Z_][a-zA-Z_0-9]+/:name \t=> state 30\t(src/grammarlib/jemp.fpl:145)\n"
         ;
     }
 
@@ -18925,7 +18926,7 @@ static const char *state_string(State st) {
     #line 1286 "src/fpl2cc/fpl_x_parser.h.jemp" 
     if(&jemplpl_parser::state_30 == st) {
         return "state_30:\n"
-        "    identifier (28:0):\t /[a-zA-Z_][a-zA-Z_0-9]+/:name •\t=> (reduce)\t(src/grammarlib/jemp.fpl:147)\n"
+        "    identifier (28:0):\t /[a-zA-Z_][a-zA-Z_0-9]+/:name •\t=> (reduce)\t(src/grammarlib/jemp.fpl:145)\n"
         ;
     }
 
@@ -18934,7 +18935,7 @@ static const char *state_string(State st) {
         return "state_31:\n"
         "    fragment (7:6):\t leading_ws\? •/@declare\\\\s+/^ identifier:name_decl ':'^ /(\\\?:[^@]|(\\\?:@@))*/:value '@'^ /\\\\n\\\?/^ \t=> state 33\t(src/grammarlib/jemp.fpl:52)\n"
         "    subst_start (10:1):\t leading_ws\?^ •'@-':arg_1 \t=> state 32\t(src/grammarlib/jemp.fpl:72)\n"
-        "    text (26:0):\t leading_ws •\t=> (reduce)\t(src/grammarlib/jemp.fpl:143)\n"
+        "    text (26:0):\t leading_ws •\t=> (reduce)\t(src/grammarlib/jemp.fpl:141)\n"
         ;
     }
 
@@ -18949,7 +18950,7 @@ static const char *state_string(State st) {
     if(&jemplpl_parser::state_33 == st) {
         return "state_33:\n"
         "    fragment (7:5):\t leading_ws\? /@declare\\\\s+/^ •identifier:name_decl ':'^ /(\\\?:[^@]|(\\\?:@@))*/:value '@'^ /\\\\n\\\?/^ \t=> state 34\t(src/grammarlib/jemp.fpl:52)\n"
-        "    identifier (28:1):\t •/[a-zA-Z_][a-zA-Z_0-9]+/:name \t=> state 30\t(src/grammarlib/jemp.fpl:147)\n"
+        "    identifier (28:1):\t •/[a-zA-Z_][a-zA-Z_0-9]+/:name \t=> state 30\t(src/grammarlib/jemp.fpl:145)\n"
         ;
     }
 
@@ -19014,10 +19015,10 @@ static const char *state_string(State st) {
         "    control_end (21:3):\t •subst_start^ '}':control_statement subst_end^ \t=> state 9\t(src/grammarlib/jemp.fpl:125)\n"
         "    fragment (22:1):\t •control_start:control_statement \t=> state 40\t(src/grammarlib/jemp.fpl:127)\n"
         "    fragment (23:1):\t •control_end:control_statement \t=> state 41\t(src/grammarlib/jemp.fpl:128)\n"
-        "    fragment (24:3):\t •subst_start^ /(\\\?:[^-@]|-[^@])+/:variable subst_end^ \t=> state 9\t(src/grammarlib/jemp.fpl:135)\n"
-        "    text (25:1):\t •/[^@\\\\n]+/:t \t=> state 6\t(src/grammarlib/jemp.fpl:139)\n"
-        "    text (26:1):\t •leading_ws \t=> state 31\t(src/grammarlib/jemp.fpl:143)\n"
-        "    text (27:1):\t •trailing_ws \t=> state 1\t(src/grammarlib/jemp.fpl:144)\n"
+        "    fragment (24:3):\t •subst_start^ /(\\\?:[^-@]|-[^@])+/:variable subst_end^ \t=> state 9\t(src/grammarlib/jemp.fpl:133)\n"
+        "    text (25:1):\t •/[^@\\\\n]+/:t \t=> state 6\t(src/grammarlib/jemp.fpl:137)\n"
+        "    text (26:1):\t •leading_ws \t=> state 31\t(src/grammarlib/jemp.fpl:141)\n"
+        "    text (27:1):\t •trailing_ws \t=> state 1\t(src/grammarlib/jemp.fpl:142)\n"
         ;
     }
 
@@ -19176,9 +19177,9 @@ static const char *state_string(State st) {
         "    leading_ws (15:1):\t •/\\\\n*[ \\\\t]+/:ws \t=> state 5\t(src/grammarlib/jemp.fpl:83)\n"
         "    trailing_ws (16:1):\t •/[ \\\\t]*\\\\n+[ \\\\t]+(\\\?!@)/:ws \t=> state 7\t(src/grammarlib/jemp.fpl:97)\n"
         "    trailing_ws (17:1):\t •/[ \\\\t]*\\\\n/:ws \t=> state 8\t(src/grammarlib/jemp.fpl:101)\n"
-        "    text (25:1):\t •/[^@\\\\n]+/:t \t=> state 6\t(src/grammarlib/jemp.fpl:139)\n"
-        "    text (26:1):\t •leading_ws \t=> state 3\t(src/grammarlib/jemp.fpl:143)\n"
-        "    text (27:1):\t •trailing_ws \t=> state 1\t(src/grammarlib/jemp.fpl:144)\n"
+        "    text (25:1):\t •/[^@\\\\n]+/:t \t=> state 6\t(src/grammarlib/jemp.fpl:137)\n"
+        "    text (26:1):\t •leading_ws \t=> state 3\t(src/grammarlib/jemp.fpl:141)\n"
+        "    text (27:1):\t •trailing_ws \t=> state 1\t(src/grammarlib/jemp.fpl:142)\n"
         ;
     }
 
@@ -20347,7 +20348,7 @@ static size_t separator_length(const utf8_byte *inp) {
         // separator "none" means 0 bytes of separator:
         return 0;
 
-        #line 20349 "src/jemplpl/jemplpl.cc"
+        #line 20350 "src/jemplpl/jemplpl.cc"
 
 
         #line 1343 "src/fpl2cc/fpl_x_parser.h.jemp" 
@@ -20459,7 +20460,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 34 "src/jemplpl/jemplpl.fpl"
+    #line 35 "src/jemplpl/jemplpl.fpl"
 
     std::string guts;
 
@@ -20603,7 +20604,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 74 "src/jemplpl/jemplpl.fpl"
+    #line 75 "src/jemplpl/jemplpl.fpl"
 
     std::string frag = "out += ";
     chunks.foreach(
@@ -20821,7 +20822,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 83 "src/jemplpl/jemplpl.fpl"
+    #line 84 "src/jemplpl/jemplpl.fpl"
 
     return line_num(comment.self()) + jempl.realign_frag();
 
@@ -20929,7 +20930,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 87 "src/jemplpl/jemplpl.fpl"
+    #line 88 "src/jemplpl/jemplpl.fpl"
 
     jempl.params.push_back(param_decl.val());
     return "";
@@ -21038,7 +21039,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 93 "src/jemplpl/jemplpl.fpl"
+    #line 94 "src/jemplpl/jemplpl.fpl"
 
     return jempl.realign_frag(include_file.val(), "1") + stringformat(
     "out += std::string((const char *)utf8_buffer({}).data());\n",
@@ -21149,7 +21150,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 107 "src/jemplpl/jemplpl.fpl"
+    #line 108 "src/jemplpl/jemplpl.fpl"
 
     auto full_path = jempl.import_path.find(embed_file.val());
 
@@ -21286,7 +21287,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 122 "src/jemplpl/jemplpl.fpl"
+    #line 123 "src/jemplpl/jemplpl.fpl"
 
     return line_num(value.self())
     + stringformat("const auto {} = {};\n", name_decl.val(), value.val());
@@ -21395,7 +21396,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 127 "src/jemplpl/jemplpl.fpl"
+    #line 128 "src/jemplpl/jemplpl.fpl"
 
     jempl.realign_fragment = realign.val();
 
@@ -22666,7 +22667,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 138 "src/jemplpl/jemplpl.fpl"
+    #line 139 "src/jemplpl/jemplpl.fpl"
 
     std::list<std::string> cases;
     std::string search_re = stringformat("{}.*\\.h\\.jemp$", jempl_name.val());
@@ -22803,7 +22804,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 133 "src/jemplpl/jemplpl.fpl"
+    #line 134 "src/jemplpl/jemplpl.fpl"
 
     add_import(jempl.import_path.find(jempl_name.val() + ".h.jemp"));
     return stringformat("\nout += {}{};\n", jempl_name.val(), jempl_args.val());
@@ -23166,7 +23167,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 162 "src/jemplpl/jemplpl.fpl"
+    #line 163 "src/jemplpl/jemplpl.fpl"
 
     return stringformat(
     "{}{}\n{}\n",
@@ -23279,7 +23280,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 162 "src/jemplpl/jemplpl.fpl"
+    #line 163 "src/jemplpl/jemplpl.fpl"
 
     return stringformat(
     "{}{}\n{}\n",
@@ -23339,13 +23340,13 @@ bool dummy = true // hack for comma
             return 1;
         }
         static int line_number() {
-            return 135;
+            return 133;
         }
         static const char *filename() {
             return "src/grammarlib/jemp.fpl";
         }
         static const char *location() {
-            return "src/grammarlib/jemp.fpl:135";
+            return "src/grammarlib/jemp.fpl:133";
         }
         static const char *to_str() {
             return "subst_start^ /(\\\?:[^-@]|-[^@])+/:variable subst_end^ -> fragment";
@@ -23362,7 +23363,7 @@ bool dummy = true // hack for comma
                 return pname[ind];
             } else {
                 return "param_name index out of bounds at "
-                "src/grammarlib/jemp.fpl:135";
+                "src/grammarlib/jemp.fpl:133";
             }
         }
         static const char *param_type(unsigned int ind) {
@@ -23378,7 +23379,7 @@ bool dummy = true // hack for comma
             } else {
                 return (
                 "param_type index out of bounds at "
-                "src/grammarlib/jemp.fpl:135"
+                "src/grammarlib/jemp.fpl:133"
                 );
             }
         }
@@ -23392,7 +23393,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 172 "src/jemplpl/jemplpl.fpl"
+    #line 173 "src/jemplpl/jemplpl.fpl"
 
     return line_num(variable.self())
     + "out += stringformat(\"{}\"," + variable.val().to_str() + ");\n";
@@ -23401,7 +23402,7 @@ bool dummy = true // hack for comma
     #line 20 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 135 "src/grammarlib/jemp.fpl"
+    #line 133 "src/grammarlib/jemp.fpl"
 }
 
 
@@ -23448,13 +23449,13 @@ bool dummy = true // hack for comma
             return 1;
         }
         static int line_number() {
-            return 139;
+            return 137;
         }
         static const char *filename() {
             return "src/grammarlib/jemp.fpl";
         }
         static const char *location() {
-            return "src/grammarlib/jemp.fpl:139";
+            return "src/grammarlib/jemp.fpl:137";
         }
         static const char *to_str() {
             return "/[^@\\\\n]+/:t -> text";
@@ -23471,7 +23472,7 @@ bool dummy = true // hack for comma
                 return pname[ind];
             } else {
                 return "param_name index out of bounds at "
-                "src/grammarlib/jemp.fpl:139";
+                "src/grammarlib/jemp.fpl:137";
             }
         }
         static const char *param_type(unsigned int ind) {
@@ -23487,7 +23488,7 @@ bool dummy = true // hack for comma
             } else {
                 return (
                 "param_type index out of bounds at "
-                "src/grammarlib/jemp.fpl:139"
+                "src/grammarlib/jemp.fpl:137"
                 );
             }
         }
@@ -23501,7 +23502,7 @@ bool dummy = true // hack for comma
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/grammarlib/jemp.fpl:139 (default action for /[^@\\\\n]+/:t -> text)"
+    #line 1 "src/grammarlib/jemp.fpl:137 (default action for /[^@\\\\n]+/:t -> text)"
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
@@ -23528,7 +23529,7 @@ bool dummy = true // hack for comma
     #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 139 "src/grammarlib/jemp.fpl"
+    #line 137 "src/grammarlib/jemp.fpl"
 }
 
 
@@ -23575,13 +23576,13 @@ bool dummy = true // hack for comma
             return 1;
         }
         static int line_number() {
-            return 143;
+            return 141;
         }
         static const char *filename() {
             return "src/grammarlib/jemp.fpl";
         }
         static const char *location() {
-            return "src/grammarlib/jemp.fpl:143";
+            return "src/grammarlib/jemp.fpl:141";
         }
         static const char *to_str() {
             return "leading_ws -> text";
@@ -23598,7 +23599,7 @@ bool dummy = true // hack for comma
                 return pname[ind];
             } else {
                 return "param_name index out of bounds at "
-                "src/grammarlib/jemp.fpl:143";
+                "src/grammarlib/jemp.fpl:141";
             }
         }
         static const char *param_type(unsigned int ind) {
@@ -23614,7 +23615,7 @@ bool dummy = true // hack for comma
             } else {
                 return (
                 "param_type index out of bounds at "
-                "src/grammarlib/jemp.fpl:143"
+                "src/grammarlib/jemp.fpl:141"
                 );
             }
         }
@@ -23628,7 +23629,7 @@ bool dummy = true // hack for comma
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/grammarlib/jemp.fpl:143 (default action for leading_ws -> text)"
+    #line 1 "src/grammarlib/jemp.fpl:141 (default action for leading_ws -> text)"
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
@@ -23653,7 +23654,7 @@ bool dummy = true // hack for comma
     #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 143 "src/grammarlib/jemp.fpl"
+    #line 141 "src/grammarlib/jemp.fpl"
 }
 
 
@@ -23700,13 +23701,13 @@ bool dummy = true // hack for comma
             return 1;
         }
         static int line_number() {
-            return 144;
+            return 142;
         }
         static const char *filename() {
             return "src/grammarlib/jemp.fpl";
         }
         static const char *location() {
-            return "src/grammarlib/jemp.fpl:144";
+            return "src/grammarlib/jemp.fpl:142";
         }
         static const char *to_str() {
             return "trailing_ws -> text";
@@ -23723,7 +23724,7 @@ bool dummy = true // hack for comma
                 return pname[ind];
             } else {
                 return "param_name index out of bounds at "
-                "src/grammarlib/jemp.fpl:144";
+                "src/grammarlib/jemp.fpl:142";
             }
         }
         static const char *param_type(unsigned int ind) {
@@ -23739,7 +23740,7 @@ bool dummy = true // hack for comma
             } else {
                 return (
                 "param_type index out of bounds at "
-                "src/grammarlib/jemp.fpl:144"
+                "src/grammarlib/jemp.fpl:142"
                 );
             }
         }
@@ -23753,7 +23754,7 @@ bool dummy = true // hack for comma
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/grammarlib/jemp.fpl:144 (default action for trailing_ws -> text)"
+    #line 1 "src/grammarlib/jemp.fpl:142 (default action for trailing_ws -> text)"
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
@@ -23778,7 +23779,7 @@ bool dummy = true // hack for comma
     #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 144 "src/grammarlib/jemp.fpl"
+    #line 142 "src/grammarlib/jemp.fpl"
 }
 
 
@@ -23825,13 +23826,13 @@ bool dummy = true // hack for comma
             return 1;
         }
         static int line_number() {
-            return 147;
+            return 145;
         }
         static const char *filename() {
             return "src/grammarlib/jemp.fpl";
         }
         static const char *location() {
-            return "src/grammarlib/jemp.fpl:147";
+            return "src/grammarlib/jemp.fpl:145";
         }
         static const char *to_str() {
             return "/[a-zA-Z_][a-zA-Z_0-9]+/:name -> identifier";
@@ -23848,7 +23849,7 @@ bool dummy = true // hack for comma
                 return pname[ind];
             } else {
                 return "param_name index out of bounds at "
-                "src/grammarlib/jemp.fpl:147";
+                "src/grammarlib/jemp.fpl:145";
             }
         }
         static const char *param_type(unsigned int ind) {
@@ -23864,7 +23865,7 @@ bool dummy = true // hack for comma
             } else {
                 return (
                 "param_type index out of bounds at "
-                "src/grammarlib/jemp.fpl:147"
+                "src/grammarlib/jemp.fpl:145"
                 );
             }
         }
@@ -23878,7 +23879,7 @@ bool dummy = true // hack for comma
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/grammarlib/jemp.fpl:147 (default action for /[a-zA-Z_][a-zA-Z_0-9]+/:name -> identifier)"
+    #line 1 "src/grammarlib/jemp.fpl:145 (default action for /[a-zA-Z_][a-zA-Z_0-9]+/:name -> identifier)"
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
@@ -23905,7 +23906,7 @@ bool dummy = true // hack for comma
     #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 147 "src/grammarlib/jemp.fpl"
+    #line 145 "src/grammarlib/jemp.fpl"
 }
 
 
@@ -24051,7 +24052,7 @@ bool dummy = true // hack for comma
 
 int main(int argc, const char **argv) {
 
-#line 275 "src/jemplpl/jemplpl.fpl"
+#line 276 "src/jemplpl/jemplpl.fpl"
 
 if(argc < 2) {
     jerror::error("Please provide a source file name.\n");
@@ -24102,11 +24103,11 @@ for(auto template_fn : templates_to_expand) {
     }
 }
 
-std::cout << join(generated_code, "\n\n");
+std::cout << reformat_code(join(generated_code, "\n\n"));
 
 return total_errors?1:0;
 
-#line 24108 "src/jemplpl/jemplpl.cc"
+#line 24109 "src/jemplpl/jemplpl.cc"
 
 }
 
