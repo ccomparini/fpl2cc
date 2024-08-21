@@ -8,9 +8,9 @@
 // code for most cases.
 // ... this should also be done in fpl.
 // fn is the name of the file this will be written to, and is
-// used in "restoring" line numbers
+// used in "restoring" line numbers marked with #$LINE.
 static std::string reformat_code(
-    const std::string &code, const std::string &fn
+    const std::string &code, const std::string &fn=""
 ) {
     int indent_lev = 0;
     int line_no = 1;
