@@ -935,6 +935,7 @@ public:
         out += stringformat(
             "{} bytes of separator since last terminal\n", bytes_eaten
         );
+        out += param_stack_string();
         out += stringformat("lr stack ({} items):\n", lr_stack.size());
         for(int sind = lr_stack.size() - 1; sind >= 0; --sind) {
             out += stringformat(
@@ -942,7 +943,6 @@ public:
                 sind == lr_read_pos?"->":"  ", sind, lr_stack_entry(sind)
             );
         }
-        out += param_stack_string();
         return out;
     }
 
