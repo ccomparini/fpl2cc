@@ -147,6 +147,7 @@
            If given one argument, that argument is used as the join
            value.  If given 2 arguments, the first is a format string
            for each element, and the second is the join value.
+           Given no arguments, just concatenate.
 
          */@
         std::string join(const std::string &fmt, const std::string &jv) const {
@@ -161,7 +162,7 @@
             return out;
         }
 
-        std::string join(const std::string &jv) const {
+        std::string join(const std::string &jv = "") const {
             return join("{}", jv);
         }
 
