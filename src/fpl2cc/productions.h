@@ -807,6 +807,37 @@ class productions {
             items.insert(it);
         }
 
+        // Adds lr_items representing the start(s) of each existing rule
+        // for the product passed.  Rules may have multiple starts
+        // due to optionals - eg 'a'? 'b' -> c could start with 'a'
+        // or 'b'.
+        // This is used for setting up the initial parsing goals.
+        void add_starts_for_product(
+            const std::string &pname,
+            const productions &prds,
+            const std::string &context // for error messages
+        ) {
+            auto strl  = prds.rules_for_product.lower_bound(pname);
+            auto endrl = prds.rules_for_product.upper_bound(pname);
+
+            if(strl == endrl) {
+                prds.error(context, stringformat(
+                    "Nothing produces '{}'\n", pname
+                ));
+            }
+        
+            for(auto rit = strl; rit != endrl; ++rit) {
+                const production_rule &ruleref = prds.rule(rit->second);
+                    // items here are always referring to the start
+                    // of the rule, and since items count down to the
+                    // end of the rule, start position is num_steps().
+                lr_item start_item(rit->second, ruleref.num_steps());
+                if(items.count(start_item) == 0) {
+                    add_expanded(start_item, prds);
+                }
+            }
+        }
+
         // Recursively adds all items for whatever can come after the
         // item passed.  This includes handling repetition, optionalness,
         // and items needed to match the start of nonterminals.
@@ -816,7 +847,7 @@ class productions {
         void add_expanded(const lr_item &it, const productions &prds) {
             if(!it) return;
 
-            const production_rule &rule = prds.rules[it.rule];
+            const production_rule &rule = prds.rule(it.rule);
 
             for(int ctd = it.countdown; ctd >= 0; ctd--)  {
                 production_rule::step expr = rule.nth_from_end(ctd);
@@ -827,23 +858,8 @@ class productions {
                 // can correctly recognize the start of the match:
                 if(expr.is_nonterminal()) {
                     const std::string &pname = expr.production_name();
-                    auto strl  = prds.rules_for_product.lower_bound(pname);
-                    auto endrl = prds.rules_for_product.upper_bound(pname);
-                    if(strl == endrl) {
-                        error(rule.location(), stringformat(
-                            "nothing produces '{}' ({})\n", pname, expr
-                        ));
-                    }
-                    for(auto rit = strl; rit != endrl; ++rit) {
-                        const production_rule &prule = prds.rules[rit->second];
-                        lr_item start_item(rit->second, prule.num_steps());
-                        if(items.count(start_item) == 0) {
-                            // recursively add rule starts:
-                            add_expanded(
-                                lr_item(rit->second, prule.num_steps()), prds
-                            );
-                        }
-                    }
+                    // NOTE: this is the recursion:
+                    add_starts_for_product(pname, prds, rule.location());
                 }
 
                 // last, if the current step is optional, we'll look
@@ -1089,36 +1105,6 @@ class productions {
         }
     };
 
-    // Adds lr_items representing the start(s) of each existing rule
-    // for the product passed.  Rules may have multiple starts
-    // due to optionals - eg 'a'? 'b' -> c could start with 'a'
-    // or 'b'.
-    // This is used for setting up the initial parsing goals.
-    void add_starts_for_product(
-        lr_set &set,
-        const std::string &pname,
-        const std::string &context
-    ) const {
-        auto strl  = rules_for_product.lower_bound(pname);
-        auto endrl = rules_for_product.upper_bound(pname);
-
-        if(strl == endrl) {
-            error(context, stringformat(
-                "Nothing produces '{}'\n", pname
-            ));
-        }
-        
-        for(auto rit = strl; rit != endrl; ++rit) {
-            const production_rule &ruleref = rules[rit->second];
-            set.add_expanded(
-                // (items here are always referring to the start
-                // of the rule, and since items count down to the
-                // end of the rule, start position is num_steps().
-                lr_item(rit->second, ruleref.num_steps()),
-                *this
-            );
-        }
-    }
 
     // Represents the need to generate a type for a particular product.
     // Provides the information needed (by the code generator) to generate
@@ -3267,7 +3253,7 @@ public:
 
         lr_set ns;
         for(auto prodname : wanted)
-            add_starts_for_product(ns, prodname, "initial goal set");
+            ns.add_starts_for_product(prodname, *this, "initial goal set");
 
         int32_t start_state = add_state(ns);
         if(start_state != 0) {

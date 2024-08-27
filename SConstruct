@@ -25,6 +25,7 @@ SetOption('num_jobs', cpu_count + 1);
 # .. but now I'm using clang on ubuntu as well.
 # (though I should probably test if it also compiles under g++)
 ccflags = "-std=c++20 -Wno-parentheses"
+#ccflags = "-std=c++20 -Wno-parentheses -fsanitize=address"
 ccflags += " -g"
 
 #if debugger : ccflags += " -g"
@@ -63,6 +64,9 @@ config = {
     ],
     'LIBS' : [
     ],
+#    'LINKFLAGS' : [
+#        '-fsanitize=address',
+#    ],
     'tools' : toolset(),
     'LLVM_VERSION' : llvm_version,
 }
