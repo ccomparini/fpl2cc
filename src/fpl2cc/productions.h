@@ -1050,9 +1050,7 @@ class productions {
                             }
                             lr_item next_in_parent = us_in_parent.next_in_rule();
                             if(next_in_parent) {
-                                next_state.add_expanded(
-                                    us_in_parent.next_in_rule(), prds
-                                );
+                                next_state.add_expanded(next_in_parent, prds);
                             } else {
                                 // We are the final step in the parent
                                 // rule.  Therefore, the next step is
