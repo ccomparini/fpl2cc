@@ -2174,7 +2174,7 @@ public:
 // text (25:1):           •/[^@\\n]+/:t                                                                                            => state 6  (src/grammarlib/jemp.fpl:137)
 // text (26:1):           •leading_ws                                                                                              => state 31 (src/grammarlib/jemp.fpl:141)
 // text (27:1):           •trailing_ws                                                                                             => state 1  (src/grammarlib/jemp.fpl:142)
-// _fpl_goal (29:1):      •complete                                                                                                => state 65 (src/fpl2cc/productions.h:4227)
+// _fpl_goal (29:1):      •complete                                                                                                => state 65 (src/fpl2cc/productions.h:4254)
 //
 void state_0() {
 
@@ -11072,7 +11072,7 @@ void state_64() {
 #line 5 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 //
-// _fpl_goal (29:0):  complete • => (done) (src/fpl2cc/productions.h:4227)
+// _fpl_goal (29:0):  complete • => (done) (src/fpl2cc/productions.h:4254)
 //
 void state_65() {
 
@@ -13939,7 +13939,7 @@ class ReductionParameter {
         return out;
     }
 
-    std::string join(const std::string &jv) const {
+    std::string join(const std::string &jv = "") const {
         return join("{}", jv);
     }
 
@@ -13999,6 +13999,7 @@ std::string to_str() const {
     out += stringformat(
     "{} bytes of separator since last terminal\n", bytes_eaten
     );
+    out += param_stack_string();
     out += stringformat("lr stack ({} items):\n", lr_stack.size());
     for(int sind = lr_stack.size() - 1; sind >= 0; --sind) {
         out += stringformat(
@@ -14006,7 +14007,6 @@ std::string to_str() const {
         sind == lr_read_pos?"->":"  ", sind, lr_stack_entry(sind)
         );
     }
-    out += param_stack_string();
     return out;
 }
 
@@ -18685,7 +18685,7 @@ static const char *state_string(State st) {
         "    text (25:1):\t •/[^@\\\\n]+/:t \t=> state 6\t(src/grammarlib/jemp.fpl:137)\n"
         "    text (26:1):\t •leading_ws \t=> state 31\t(src/grammarlib/jemp.fpl:141)\n"
         "    text (27:1):\t •trailing_ws \t=> state 1\t(src/grammarlib/jemp.fpl:142)\n"
-        "    _fpl_goal (29:1):\t •complete \t=> state 65\t(src/fpl2cc/productions.h:4227)\n"
+        "    _fpl_goal (29:1):\t •complete \t=> state 65\t(src/fpl2cc/productions.h:4254)\n"
         ;
     }
 
@@ -19207,7 +19207,7 @@ static const char *state_string(State st) {
     #line 1286 "src/fpl2cc/fpl_x_parser.h.jemp" 
     if(&jemplpl_parser::state_65 == st) {
         return "state_65:\n"
-        "    _fpl_goal (29:0):\t complete •\t=> (done)\t(src/fpl2cc/productions.h:4227)\n"
+        "    _fpl_goal (29:0):\t complete •\t=> (done)\t(src/fpl2cc/productions.h:4254)\n"
         ;
     }
 
@@ -23953,13 +23953,13 @@ bool dummy = true // hack for comma
             return 1;
         }
         static int line_number() {
-            return 4227;
+            return 4254;
         }
         static const char *filename() {
             return "src/fpl2cc/productions.h";
         }
         static const char *location() {
-            return "src/fpl2cc/productions.h:4227";
+            return "src/fpl2cc/productions.h:4254";
         }
         static const char *to_str() {
             return "complete -> _fpl_goal";
@@ -23976,7 +23976,7 @@ bool dummy = true // hack for comma
                 return pname[ind];
             } else {
                 return "param_name index out of bounds at "
-                "src/fpl2cc/productions.h:4227";
+                "src/fpl2cc/productions.h:4254";
             }
         }
         static const char *param_type(unsigned int ind) {
@@ -23992,7 +23992,7 @@ bool dummy = true // hack for comma
             } else {
                 return (
                 "param_type index out of bounds at "
-                "src/fpl2cc/productions.h:4227"
+                "src/fpl2cc/productions.h:4254"
                 );
             }
         }
@@ -24006,7 +24006,7 @@ bool dummy = true // hack for comma
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/fpl2cc/productions.h:4227 (default action for complete -> _fpl_goal)"
+    #line 1 "src/fpl2cc/productions.h:4254 (default action for complete -> _fpl_goal)"
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
@@ -24031,7 +24031,7 @@ bool dummy = true // hack for comma
     #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 4227 "src/fpl2cc/productions.h"
+    #line 4254 "src/fpl2cc/productions.h"
 }
 
 
