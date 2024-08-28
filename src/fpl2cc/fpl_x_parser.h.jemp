@@ -414,7 +414,8 @@ private:
     int                     max_errors;
     int                     num_errors;
 
-    bool                    single_step; // debugging
+    bool                    single_step;       // debugging
+    int                     debug_step_number; // debugging
 
     // this is called when something appears to have
     // gone wrong due to a bug in the parser itself:
@@ -437,7 +438,8 @@ public:
         stop_parsing(false),
         max_errors(1),
         num_errors(0),
-        single_step(false) {
+        single_step(false),
+        debug_step_number(0) {
 
         @if(opts.single_step) {@
             set_single_step(true);

@@ -8,6 +8,8 @@
 @state.to_str(&prds, "// ")-@
 //
 void @sfn@() {
+    @if(opts.debug) {@ debug_step_number++; @}@
+
     @/* skip any separator before doing anything else, saving the
         number of bytes it took up.  we need to do this before
         trying to match terminals (of course), and we use the
@@ -17,8 +19,9 @@ void @sfn@() {
 
     @if(opts.debug) {@
         std::cerr << stringformat(
-            "======= @sfn@ =======\n"
+            "======= @sfn@ (step {})=======\n"
             "{::c}\n{}\n--\n",
+            debug_step_number,
             state_string(&@prds.fq_member_name(sfn)@), *this
         );
         debug_pause();
