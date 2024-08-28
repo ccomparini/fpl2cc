@@ -1,0 +1,19 @@
+returncode = 0
+stderr = "bing!
+bing!
+bing!
+bing!
+bing!
+bing!
+bing!
+bing!
+"
+stdout = "matched
+matched
+matched
+matched
+matched
+matched
+matched
+p
+"

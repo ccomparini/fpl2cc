@@ -1,0 +1,10 @@
+begin   end
+begin p end
+begin   continue end
+begin p continue end
+begin   continue p end
+begin p continue p end
+begin
+  begin p continue p end
+end
+p

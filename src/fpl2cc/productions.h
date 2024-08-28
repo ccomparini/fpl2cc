@@ -531,6 +531,20 @@ class productions {
             return rule << 16 | countdown;
         }
 
+        // If this lr_item is part of a subexpression,
+        //  returns an lr_item for that subexpression within the parent rule.
+        // Otherwise, returns a false lr_item.
+        lr_item parent_step(const productions &prds) const {
+            const production_rule &our_rule = prds.rule(rule);
+            int prulenum = our_rule.parent_rule_number();
+
+            if(prulenum >= 0) {
+                return lr_item(prulenum, our_rule.parent_countdown_pos());
+            } // else not in a subexpression
+
+            return lr_item();
+        }
+
         // returns the rule step which this item refers to,
         // which will be false in the case that it's the end
         // of (or past the end of) the rule. (i.e. the reduce
@@ -758,7 +772,7 @@ class productions {
                 int32_t next_stn = next_state(step);
                 bool ejected = ejected_el.count(step.gexpr) > 0;
                 if(next_stn < 0) {
-                    // This may be over articulated.   Possibly the
+                    // This may be over-articulated.   Possibly the
                     // reduce call (or action!) could handle the
                     // distinction between reducing to a normal
                     // product and being done.  Right now, I think
@@ -782,9 +796,21 @@ class productions {
                     );
                 }
 
+                // this puts the transitions into the appropriate
+                // bucket by type so that we can order such that
+                // nonterminals come first and "none" comes last:
                 if(step.gexpr.type == grammar_element::Type::NONE) {
+                    if(none_trans && none_trans != trans) {
+                        // this shouldn't be able to happen.  if it does,
+                        // I'm fairly sure it's due a bug in fpl:
+                        jerror::warning(stringformat(
+                            "conflicting transitions : {} vs {} (fpl bug?)",
+                            none_trans, trans
+                        ));
+                    }
                     none_trans = trans;
                 } else if(step.gexpr.is_nonterminal()) {
+                    // (if we didn't just push an identical transition...)
                     if(!nonterm_trans.size() || (trans.right_of_dot != nonterm_trans.back().right_of_dot))
                         nonterm_trans.push_back(trans);
                 } else {
@@ -811,7 +837,8 @@ class productions {
         // for the product passed.  Rules may have multiple starts
         // due to optionals - eg 'a'? 'b' -> c could start with 'a'
         // or 'b'.
-        // This is used for setting up the initial parsing goals.
+        // This is used for setting up the initial parsing goals as well
+        // as for generating following states.
         void add_starts_for_product(
             const std::string &pname,
             const productions &prds,
@@ -825,12 +852,12 @@ class productions {
                     "Nothing produces '{}'\n", pname
                 ));
             }
-        
+
             for(auto rit = strl; rit != endrl; ++rit) {
                 const production_rule &ruleref = prds.rule(rit->second);
-                    // items here are always referring to the start
-                    // of the rule, and since items count down to the
-                    // end of the rule, start position is num_steps().
+                // items here are always referring to the start
+                // of the rule, and since items count down to the
+                // end of the rule, start position is num_steps().
                 lr_item start_item(rit->second, ruleref.num_steps());
                 if(items.count(start_item) == 0) {
                     add_expanded(start_item, prds);
@@ -839,23 +866,24 @@ class productions {
         }
 
         // Recursively adds all items for whatever can come after the
-        // item passed.  This includes handling repetition, optionalness,
-        // and items needed to match the start of nonterminals.
-        // Callers will need to deal with handling multiple-match items,
-        // since this only adds to this state (and multiple-match requires
+        // item passed.  This includes handling optionalness and items
+        // needed to match the start of nonterminals.
+        // Callers will need to deal with handling repetition since
+        // this only adds to this state (and multiple-match requires
         // adding to the next state).
         void add_expanded(const lr_item &it, const productions &prds) {
             if(!it) return;
 
             const production_rule &rule = prds.rule(it.rule);
 
-            for(int ctd = it.countdown; ctd >= 0; ctd--)  {
-                production_rule::step expr = rule.nth_from_end(ctd);
+            int ctd = it.countdown;
+            for( ; ctd >= 0; ctd--)  {
                 add_item(lr_item(it.rule, ctd));
 
                 // if it's a nonterm, we need to add each thing which
                 // can start that nonterm so that the generated state
                 // can correctly recognize the start of the match:
+                production_rule::step expr = rule.nth_from_end(ctd);
                 if(expr.is_nonterminal()) {
                     const std::string &pname = expr.production_name();
                     // NOTE: this is the recursion:
@@ -866,6 +894,22 @@ class productions {
                 // at the next step.  otherwise, we're done:
                 if(!expr.is_optional())
                     break;
+            }
+
+            if(ctd <= 0) {
+                lr_item us_in_parent = it.parent_step(prds);
+                if(us_in_parent) {
+                    // subexpressions are going to differ from other products
+                    // in this regard:  if you have (eg)
+                    //   if statement* (else statement*)* end -> statement;
+                    // it needs to be able to transition from the else to the
+                    // end.  See issue 15 (and test/issue_15.test/*)
+                    add_expanded(us_in_parent, prds);
+
+                    // (should we also do this for other products as well,
+                    // though?  Would have to do it in all places the
+                    // product is used.  Not sure that's the right thing)
+                }
             }
         }
 
@@ -993,8 +1037,9 @@ class productions {
             productions &prds,
             src_location caller = CALLER()
         ) {
-            if(next_state_for_el.size() > 0)
+            if(next_state_for_el.size() > 0) {
                 return; // (already generated)
+            }
 
             auto items_for_el = items_per_element(prds);
             if(items_for_el.size() == 0) {
@@ -1038,12 +1083,8 @@ class productions {
                         // subexpression.  Instead, we move on to the
                         // next step in the parent.  The parent will
                         // glean this rule's steps at reduce time.
-                        auto rule = prds.rules.at(item.rule);
-                        int prulenum = rule.parent_rule_number();
-                        if(prulenum >= 0) {
-                            lr_item us_in_parent = lr_item(
-                                prulenum, rule.parent_countdown_pos()
-                            );
+                        lr_item us_in_parent = item.parent_step(prds);
+                        if(us_in_parent) {
                             auto pstep = us_in_parent.step(prds);
                             if(pstep.is_multiple()) {
                                 next_state.add_expanded(us_in_parent, prds);
@@ -1056,7 +1097,9 @@ class productions {
                                 // rule.  Therefore, the next step is
                                 // the 0 countdown of the parent as well,
                                 // so add item (parent rule num, 0)
-                                next_state.add_item(lr_item(prulenum, 0));
+                                next_state.add_item(
+                                    lr_item(us_in_parent.rule, 0)
+                                );
                             }
                         } else {
                             reduce_items.push_back(item);
@@ -4326,7 +4369,8 @@ public:
     std::string states_to_string() const {
         std::string out;
 
-        // print the actual state transitions:
+        // print the actual state transitions, in the order
+        // in which they'll be evaluated:
         for(int stind = 0; stind < states.size(); stind++) {
             out += stringformat("state {}:\n", stind);
             auto st_trans = states.at(stind).transitions(*this);
@@ -4344,6 +4388,7 @@ public:
                 stind, states.at(stind).to_str(this, "    ")
             );
         }
+
         return out;
     }
 

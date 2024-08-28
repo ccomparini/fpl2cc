@@ -1,0 +1,39 @@
+
+# https://github.com/ccomparini/fpl2cc/issues/15
+
+@produces std::string
+@default_main
+@comment_style sh
+
+yay* -> done +{ return yay@join(); }+
+
+#'trail' 'ing'*^ -> trailing;
+#trailing -> fragment;
+
+'b'          -> fragment;
+
+'be' 'gin'    -> control_start +{ return arg_0 + arg_1; }+
+'p'           -> fragment;
+'con' 'tinue' -> control_continuation +{ return arg_0 + arg_1; }+
+
+# the bug seems to be that in some cases we -don't- get the 'nd'
+# check after the 'e' in cases where the control_end may exist.
+'e' 'nd'      -> control_end +{ return arg_0 + arg_1; }+
+'e'           -> fragment;
+
+# doing this has the same result as the subex, so maybe ot's not subexes:
+#control_continuation^ fragment*^ -> cont_and_frags +{ return "ok cont and frags"; }+
+#control_start^ fragment*^ cont_and_frags* control_end^ -> control_fragment +{
+
+control_start^ fragment*^ (control_continuation^ fragment*^)* control_end^ -> control_fragment +{
+    std::cerr << "bing!\n";
+    return stringformat("matched\n");
+}+
+
+# maybe don't want to stack control fragments like this, but for now
+# it makes it easier to debug:
+control_fragment+ -> fragment +{ return control_fragment@join(); }+
+#control_fragment -> fragment;
+
+fragment+ -> yay +{ return fragment@join(); }+
+
