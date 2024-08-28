@@ -1054,7 +1054,7 @@ class productions {
             while(trit != done) {
                 lr_set next_state;
 
-                // these pertain to cur_el (below) and are use for
+                // these pertain to cur_el (below) and are used for
                 // checking and reporting eject conflicts.  
                 std::list<lr_item> items_with_eject;
                 std::list<lr_item> items_without_eject;
