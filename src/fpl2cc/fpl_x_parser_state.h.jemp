@@ -56,7 +56,9 @@ void @sfn@() {
                 // matched a goal:
                 terminate();
             @} else {@
-                #error unknown transition type for @trans@
+                @error {@
+                    Internal error: unknown transition type for @trans@
+                @}@
             @}@
         } else
     @-}-@

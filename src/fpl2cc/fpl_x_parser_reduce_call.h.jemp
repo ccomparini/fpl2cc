@@ -21,8 +21,10 @@
     @for(int stind = rule.num_steps() - 1; stind >= 0; --stind) {-@
         @declare step: rule.nth_step(stind)@
         @if(!step) {-@
-            // If there's no such step, it's a bug in fpl
-            #error Bug: no expression for step @stind@ @rule.to_str()@ @rule.location()@
+            @/* If there's no such step, it's a bug in fpl */@
+            @error {-@
+                 Internal error: no expression for step @stind@ @rule.to_str()@ @rule.location()@ 
+            @}@
         @-} else {-@
             @declare el_id:  prds.element_id(step.gexpr)@
             @declare elname: prds.element_id_name(el_id)@
@@ -59,8 +61,10 @@
     @for(int stind = 0; stind < rule.num_steps(); ++stind) {-@
         @declare step: rule.nth_step(stind)@
         @if(!step) {-@
-            // no step means there's a bug..
-            #error no expression for step @stind@ @rule.to_str()@ @rule.location()@
+            @/* in theory, this can't happen either: */@
+            @error {-@
+                Internal error: no expression for step @stind@ @rule.to_str()@ @rule.location()@
+            @}@
         @-} else {-@
             @declare el_id: prds.element_index.at(step.gexpr)@
             @declare elname: prds.element_id_name(el_id)@

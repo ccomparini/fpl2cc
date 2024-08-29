@@ -39,11 +39,9 @@
                 @declare param: rule.parameter_step(parmi)@
                 @declare vname: param.variable_name()@
                 @-if(param.is_optional()){-@
-                    #line @rule.line_number()@ "@rule.filename()@"
-                    #error "no default for optional '@vname@' in rule @rule.to_str()@"
+                    @#fpl_x_parser_rule_error(rule, stringformat("no default for optional '{}'", vname))@;
                 @-} else if(!param.is_single()){-@
-                    #line @rule.line_number()@ "@rule.filename()@"
-                    #error "no default for multiple '@vname@' in rule @rule.to_str()@"
+                    @#fpl_x_parser_rule_error(rule, stringformat("no default for multiple '{}'", vname))@;
                 @-} else {-@
                     @-if(parmi > 0){@,@}-@ @/* argument separator */@
                     @-if(param.is_nonterminal()) {-@

@@ -1,0 +1,7 @@
+@parameter: const production_rule &rule@
+@parameter: const std::string &message@
+
+@error {@
+    @-message@ in rule @rule.to_str()@ at @rule.filename()@:@rule.line_number()@ 
+@}@
+

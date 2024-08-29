@@ -2194,12 +2194,12 @@ void state_0() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__fragment(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_79);
 
     } else
@@ -2207,7 +2207,7 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__text(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_2);
 
     } else
@@ -2215,7 +2215,7 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_9);
 
     } else
@@ -2223,7 +2223,7 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_17);
 
     } else
@@ -2231,7 +2231,7 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_9);
 
     } else
@@ -2239,7 +2239,7 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__control_start(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_43);
 
     } else
@@ -2247,7 +2247,7 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__control_fragment(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_49);
 
     } else
@@ -2255,7 +2255,7 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_9);
 
     } else
@@ -2263,7 +2263,7 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_17);
 
     } else
@@ -2271,7 +2271,7 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__trailing_ws(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_1);
 
     } else
@@ -2279,7 +2279,7 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__complete(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_80);
 
     } else
@@ -2287,7 +2287,7 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_4(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_4);
 
     } else
@@ -2295,7 +2295,7 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_5(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_71);
 
     } else
@@ -2303,7 +2303,7 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_9(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_57);
 
     } else
@@ -2311,7 +2311,7 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_12(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_61);
 
     } else
@@ -2319,7 +2319,7 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_14(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_66);
 
     } else
@@ -2327,7 +2327,7 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_20(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_19);
 
     } else
@@ -2335,7 +2335,7 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_24(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_75);
 
     } else
@@ -2343,7 +2343,7 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_28(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_18);
 
     } else
@@ -2351,7 +2351,7 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_11(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_52);
 
     } else
@@ -2359,7 +2359,7 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_33(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_5);
 
     } else
@@ -2367,7 +2367,7 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_34(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_7);
 
     } else
@@ -2375,7 +2375,7 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_35(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_8);
 
     } else
@@ -2383,19 +2383,19 @@ void state_0() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_44(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_6);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -2420,12 +2420,12 @@ void state_1() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -2441,9 +2441,9 @@ void state_1() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__trailing_ws(
         lr_read_pos, false
@@ -2453,7 +2453,7 @@ void state_1() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -2468,16 +2468,16 @@ void state_1() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__trailing_ws(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -2487,7 +2487,7 @@ void state_1() {
         int step_1_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // trailing_ws has base step num 0; canonical step is <30.0 = trailing_ws>
         ReductionParameter<std::string> arg_trailing_ws(
         *this, step_0_start + 0,
@@ -2496,54 +2496,54 @@ void state_1() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_30 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_30 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_trailing_ws);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _text);
         lr_push(_text, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -2576,12 +2576,12 @@ void state_2() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__text(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_2);
 
     } else
@@ -2589,7 +2589,7 @@ void state_2() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_3);
 
     } else
@@ -2597,7 +2597,7 @@ void state_2() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__trailing_ws(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_1);
 
     } else
@@ -2605,7 +2605,7 @@ void state_2() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_4(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_4);
 
     } else
@@ -2613,7 +2613,7 @@ void state_2() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_33(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_5);
 
     } else
@@ -2621,7 +2621,7 @@ void state_2() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_34(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_7);
 
     } else
@@ -2629,7 +2629,7 @@ void state_2() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_35(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_8);
 
     } else
@@ -2637,7 +2637,7 @@ void state_2() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_44(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_6);
 
     } else
@@ -2645,7 +2645,7 @@ void state_2() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -2661,9 +2661,9 @@ void state_2() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__text(
         lr_read_pos, true
@@ -2673,7 +2673,7 @@ void state_2() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -2688,16 +2688,16 @@ void state_2() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__text(
         argument_start, true
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -2707,7 +2707,7 @@ void state_2() {
         int step_1_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // chunks has base step num 0; canonical step is <1.0 = text+:chunks>
         ReductionParameter<std::string> arg_chunks(
         *this, step_0_start + 0,
@@ -2716,54 +2716,54 @@ void state_2() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_1 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_1 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_chunks);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -2788,12 +2788,12 @@ void state_3() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -2809,9 +2809,9 @@ void state_3() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__leading_ws(
         lr_read_pos, false
@@ -2821,7 +2821,7 @@ void state_3() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -2836,16 +2836,16 @@ void state_3() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__leading_ws(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -2855,7 +2855,7 @@ void state_3() {
         int step_1_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // leading_ws has base step num 0; canonical step is <29.0 = leading_ws>
         ReductionParameter<std::string> arg_leading_ws(
         *this, step_0_start + 0,
@@ -2864,54 +2864,54 @@ void state_3() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_29 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_29 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_leading_ws);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _text);
         lr_push(_text, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -2936,12 +2936,12 @@ void state_4() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -2957,9 +2957,9 @@ void state_4() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_4(
         lr_read_pos, false
@@ -2969,7 +2969,7 @@ void state_4() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -2984,16 +2984,16 @@ void state_4() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_4(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -3003,7 +3003,7 @@ void state_4() {
         int step_1_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // at_sign has base step num 0; canonical step is <2.0 = '@@':at_sign>
         ReductionParameter<Terminal> arg_at_sign(
         *this, step_0_start + 0,
@@ -3012,54 +3012,54 @@ void state_4() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_2 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_2 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_at_sign);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _text);
         lr_push(_text, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -3084,12 +3084,12 @@ void state_5() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -3105,9 +3105,9 @@ void state_5() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_33(
         lr_read_pos, false
@@ -3117,7 +3117,7 @@ void state_5() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -3132,16 +3132,16 @@ void state_5() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_33(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -3151,7 +3151,7 @@ void state_5() {
         int step_1_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // ws has base step num 0; canonical step is <16.0 = /\\n*[ \\t]+/:ws>
         ReductionParameter<Terminal> arg_ws(
         *this, step_0_start + 0,
@@ -3160,54 +3160,54 @@ void state_5() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_16 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_16 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_ws);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _leading_ws);
         lr_push(_leading_ws, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -3232,12 +3232,12 @@ void state_6() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -3253,9 +3253,9 @@ void state_6() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_44(
         lr_read_pos, false
@@ -3265,7 +3265,7 @@ void state_6() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -3280,16 +3280,16 @@ void state_6() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_44(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -3299,7 +3299,7 @@ void state_6() {
         int step_1_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // t has base step num 0; canonical step is <28.0 = /[^@\\n]+/:t>
         ReductionParameter<Terminal> arg_t(
         *this, step_0_start + 0,
@@ -3308,54 +3308,54 @@ void state_6() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_28 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_28 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_t);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _text);
         lr_push(_text, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -3380,12 +3380,12 @@ void state_7() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -3401,9 +3401,9 @@ void state_7() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_34(
         lr_read_pos, false
@@ -3413,7 +3413,7 @@ void state_7() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -3428,16 +3428,16 @@ void state_7() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_34(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -3447,7 +3447,7 @@ void state_7() {
         int step_1_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // ws has base step num 0; canonical step is <17.0 = /[ \\t]*\\n+[ \\t]+(\?!@)/:ws>
         ReductionParameter<Terminal> arg_ws(
         *this, step_0_start + 0,
@@ -3456,54 +3456,54 @@ void state_7() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_17 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_17 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_ws);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _trailing_ws);
         lr_push(_trailing_ws, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -3528,12 +3528,12 @@ void state_8() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -3549,9 +3549,9 @@ void state_8() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_35(
         lr_read_pos, false
@@ -3561,7 +3561,7 @@ void state_8() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -3576,16 +3576,16 @@ void state_8() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_35(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -3595,7 +3595,7 @@ void state_8() {
         int step_1_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // ws has base step num 0; canonical step is <18.0 = /[ \\t]*\\n/:ws>
         ReductionParameter<Terminal> arg_ws(
         *this, step_0_start + 0,
@@ -3604,54 +3604,54 @@ void state_8() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_18 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_18 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_ws);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _trailing_ws);
         lr_push(_trailing_ws, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -3680,12 +3680,12 @@ void state_9() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_16(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_15);
 
     } else
@@ -3693,7 +3693,7 @@ void state_9() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_36(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_32);
 
     } else
@@ -3701,7 +3701,7 @@ void state_9() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_CUSTOM__terminal_37(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_10);
 
     } else
@@ -3709,19 +3709,19 @@ void state_9() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_43(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_30);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -3748,12 +3748,12 @@ void state_10() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_end(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_11);
 
     } else
@@ -3761,7 +3761,7 @@ void state_10() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_29(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_13);
 
     } else
@@ -3769,19 +3769,19 @@ void state_10() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_11(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_12);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -3806,12 +3806,12 @@ void state_11() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -3827,23 +3827,23 @@ void state_11() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_end(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_37(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_start(
         lr_read_pos, false
@@ -3853,7 +3853,7 @@ void state_11() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -3868,44 +3868,44 @@ void state_11() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_start(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_37(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_end(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
@@ -3915,7 +3915,7 @@ void state_11() {
         int step_3_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // control_statement has base step num 1; canonical step is <23.1 = &control_guts:control_statement>
         ReductionParameter<Terminal> arg_control_statement(
         *this, step_1_start + 0,
@@ -3924,54 +3924,54 @@ void state_11() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_23 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_23 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_control_statement);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _control_start);
         lr_push(_control_start, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -3996,12 +3996,12 @@ void state_12() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -4017,9 +4017,9 @@ void state_12() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_11(
         lr_read_pos, false
@@ -4029,7 +4029,7 @@ void state_12() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -4044,16 +4044,16 @@ void state_12() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_11(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -4063,7 +4063,7 @@ void state_12() {
         int step_1_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // arg_0 has base step num 0; canonical step is <14.0 = '@':arg_0>
         ReductionParameter<Terminal> arg_arg_0(
         *this, step_0_start + 0,
@@ -4072,54 +4072,54 @@ void state_12() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_14 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_14 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_arg_0);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _subst_end);
         lr_push(_subst_end, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -4147,12 +4147,12 @@ void state_13() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__trailing_ws(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_14);
 
     } else
@@ -4160,7 +4160,7 @@ void state_13() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_34(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_7);
 
     } else
@@ -4168,7 +4168,7 @@ void state_13() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_35(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_8);
 
     } else
@@ -4176,7 +4176,7 @@ void state_13() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -4192,16 +4192,16 @@ void state_13() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__trailing_ws(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_29(
         lr_read_pos, false
@@ -4211,7 +4211,7 @@ void state_13() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -4226,30 +4226,30 @@ void state_13() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_29(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__trailing_ws(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
@@ -4259,7 +4259,7 @@ void state_13() {
         int step_2_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // arg_0 has base step num 0; canonical step is <13.0 = '-@':arg_0>
         ReductionParameter<Terminal> arg_arg_0(
         *this, step_0_start + 0,
@@ -4268,54 +4268,54 @@ void state_13() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_13 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_13 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_arg_0);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _subst_end);
         lr_push(_subst_end, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -4340,12 +4340,12 @@ void state_14() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -4361,16 +4361,16 @@ void state_14() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__trailing_ws(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_29(
         lr_read_pos, false
@@ -4380,7 +4380,7 @@ void state_14() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -4395,30 +4395,30 @@ void state_14() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_29(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__trailing_ws(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
@@ -4428,7 +4428,7 @@ void state_14() {
         int step_2_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // arg_0 has base step num 0; canonical step is <13.0 = '-@':arg_0>
         ReductionParameter<Terminal> arg_arg_0(
         *this, step_0_start + 0,
@@ -4437,54 +4437,54 @@ void state_14() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_13 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_13 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_arg_0);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _subst_end);
         lr_push(_subst_end, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -4511,12 +4511,12 @@ void state_15() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_end(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_16);
 
     } else
@@ -4524,7 +4524,7 @@ void state_15() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_29(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_13);
 
     } else
@@ -4532,19 +4532,19 @@ void state_15() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_11(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_12);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -4594,12 +4594,12 @@ void state_16() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__text(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_2);
 
     } else
@@ -4607,7 +4607,7 @@ void state_16() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_9);
 
     } else
@@ -4615,7 +4615,7 @@ void state_16() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__fragment(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_26);
 
     } else
@@ -4623,7 +4623,7 @@ void state_16() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_17);
 
     } else
@@ -4631,7 +4631,7 @@ void state_16() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_9);
 
     } else
@@ -4639,7 +4639,7 @@ void state_16() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__control_start(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_43);
 
     } else
@@ -4647,7 +4647,7 @@ void state_16() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__control_fragment(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_49);
 
     } else
@@ -4655,7 +4655,7 @@ void state_16() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_9);
 
     } else
@@ -4663,7 +4663,7 @@ void state_16() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_17);
 
     } else
@@ -4671,7 +4671,7 @@ void state_16() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__trailing_ws(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_1);
 
     } else
@@ -4679,7 +4679,7 @@ void state_16() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_4(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_4);
 
     } else
@@ -4687,7 +4687,7 @@ void state_16() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_5(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_71);
 
     } else
@@ -4695,7 +4695,7 @@ void state_16() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_9(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_57);
 
     } else
@@ -4703,7 +4703,7 @@ void state_16() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_12(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_61);
 
     } else
@@ -4711,7 +4711,7 @@ void state_16() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_14(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_66);
 
     } else
@@ -4719,7 +4719,7 @@ void state_16() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_20(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_19);
 
     } else
@@ -4727,7 +4727,7 @@ void state_16() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_24(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_75);
 
     } else
@@ -4735,7 +4735,7 @@ void state_16() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_28(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_18);
 
     } else
@@ -4743,7 +4743,7 @@ void state_16() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_11(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_52);
 
     } else
@@ -4751,7 +4751,7 @@ void state_16() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_33(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_5);
 
     } else
@@ -4759,7 +4759,7 @@ void state_16() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_34(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_7);
 
     } else
@@ -4767,7 +4767,7 @@ void state_16() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_35(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_8);
 
     } else
@@ -4775,19 +4775,19 @@ void state_16() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_44(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_6);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -4814,12 +4814,12 @@ void state_17() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_20(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_19);
 
     } else
@@ -4827,7 +4827,7 @@ void state_17() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_28(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_18);
 
     } else
@@ -4835,7 +4835,7 @@ void state_17() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -4851,9 +4851,9 @@ void state_17() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__leading_ws(
         lr_read_pos, false
@@ -4863,7 +4863,7 @@ void state_17() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -4878,16 +4878,16 @@ void state_17() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__leading_ws(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -4897,7 +4897,7 @@ void state_17() {
         int step_1_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // leading_ws has base step num 0; canonical step is <29.0 = leading_ws>
         ReductionParameter<std::string> arg_leading_ws(
         *this, step_0_start + 0,
@@ -4906,54 +4906,54 @@ void state_17() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_29 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_29 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_leading_ws);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _text);
         lr_push(_text, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -4978,12 +4978,12 @@ void state_18() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -4999,16 +4999,16 @@ void state_18() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_28(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__leading_ws(
         lr_read_pos, false
@@ -5018,7 +5018,7 @@ void state_18() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -5033,30 +5033,30 @@ void state_18() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__leading_ws(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_28(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
@@ -5066,7 +5066,7 @@ void state_18() {
         int step_2_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // arg_1 has base step num 1; canonical step is <11.1 = '@-':arg_1>
         ReductionParameter<Terminal> arg_arg_1(
         *this, step_1_start + 0,
@@ -5075,54 +5075,54 @@ void state_18() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_11 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_11 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_arg_1);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _subst_start);
         lr_push(_subst_start, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -5148,12 +5148,12 @@ void state_19() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__identifier(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_20);
 
     } else
@@ -5161,19 +5161,19 @@ void state_19() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_45(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_25);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -5198,24 +5198,24 @@ void state_20() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_22(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_21);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -5240,24 +5240,24 @@ void state_21() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_23(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_22);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -5282,24 +5282,24 @@ void state_22() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_11(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_23);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -5324,24 +5324,24 @@ void state_23() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_8(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_24);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -5366,12 +5366,12 @@ void state_24() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -5387,51 +5387,51 @@ void state_24() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_8(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_11(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_23(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_22(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__identifier(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_20(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__leading_ws(
         lr_read_pos, false
@@ -5441,7 +5441,7 @@ void state_24() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -5456,100 +5456,100 @@ void state_24() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__leading_ws(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_20(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__identifier(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_22(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_3_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_23(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_4_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_11(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_5_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_8(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_6_start = argument_start;
@@ -5559,7 +5559,7 @@ void state_24() {
         int step_7_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // leading_ws has base step num 0; canonical step is <8.0 = leading_ws?>
         ReductionParameter<std::string> arg_leading_ws(
         *this, step_0_start + 0,
@@ -5568,7 +5568,7 @@ void state_24() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         // name_decl has base step num 2; canonical step is <8.2 = identifier:name_decl>
         ReductionParameter<std::string> arg_name_decl(
@@ -5578,7 +5578,7 @@ void state_24() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         // value has base step num 4; canonical step is <8.4 = /(\?:[^@]|(\?:@@))*/:value>
         ReductionParameter<Terminal> arg_value(
@@ -5588,54 +5588,54 @@ void state_24() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_8 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_8 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_leading_ws, arg_name_decl, arg_value);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -5660,12 +5660,12 @@ void state_25() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -5681,9 +5681,9 @@ void state_25() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_45(
         lr_read_pos, false
@@ -5693,7 +5693,7 @@ void state_25() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -5708,16 +5708,16 @@ void state_25() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_45(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -5727,7 +5727,7 @@ void state_25() {
         int step_1_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // name has base step num 0; canonical step is <31.0 = /[a-zA-Z_][a-zA-Z_0-9]+/:name>
         ReductionParameter<Terminal> arg_name(
         *this, step_0_start + 0,
@@ -5736,54 +5736,54 @@ void state_25() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_31 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_31 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_name);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _identifier);
         lr_push(_identifier, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -5834,12 +5834,12 @@ void state_26() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__text(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_2);
 
     } else
@@ -5847,7 +5847,7 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_27);
 
     } else
@@ -5855,7 +5855,7 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__fragment(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_26);
 
     } else
@@ -5863,7 +5863,7 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_27);
 
     } else
@@ -5871,7 +5871,7 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_17);
 
     } else
@@ -5879,7 +5879,7 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_27);
 
     } else
@@ -5887,7 +5887,7 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__control_start(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_43);
 
     } else
@@ -5895,7 +5895,7 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__control_fragment(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_49);
 
     } else
@@ -5903,7 +5903,7 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_27);
 
     } else
@@ -5911,7 +5911,7 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_17);
 
     } else
@@ -5919,7 +5919,7 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__trailing_ws(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_1);
 
     } else
@@ -5927,7 +5927,7 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_4(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_4);
 
     } else
@@ -5935,7 +5935,7 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_5(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_71);
 
     } else
@@ -5943,7 +5943,7 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_9(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_57);
 
     } else
@@ -5951,7 +5951,7 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_12(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_61);
 
     } else
@@ -5959,7 +5959,7 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_14(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_66);
 
     } else
@@ -5967,7 +5967,7 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_20(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_19);
 
     } else
@@ -5975,7 +5975,7 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_24(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_75);
 
     } else
@@ -5983,7 +5983,7 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_28(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_18);
 
     } else
@@ -5991,7 +5991,7 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_11(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_52);
 
     } else
@@ -5999,7 +5999,7 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_33(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_5);
 
     } else
@@ -6007,7 +6007,7 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_34(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_7);
 
     } else
@@ -6015,7 +6015,7 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_35(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_8);
 
     } else
@@ -6023,19 +6023,19 @@ void state_26() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_44(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_6);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -6065,12 +6065,12 @@ void state_27() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_16(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_15);
 
     } else
@@ -6078,7 +6078,7 @@ void state_27() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_18(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_28);
 
     } else
@@ -6086,7 +6086,7 @@ void state_27() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_36(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_32);
 
     } else
@@ -6094,7 +6094,7 @@ void state_27() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_CUSTOM__terminal_37(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_10);
 
     } else
@@ -6102,19 +6102,19 @@ void state_27() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_43(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_30);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -6141,12 +6141,12 @@ void state_28() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_end(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_29);
 
     } else
@@ -6154,7 +6154,7 @@ void state_28() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_29(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_13);
 
     } else
@@ -6162,19 +6162,19 @@ void state_28() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_11(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_12);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -6199,12 +6199,12 @@ void state_29() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -6220,51 +6220,51 @@ void state_29() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_end(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_18(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_start(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__fragment(
         lr_read_pos, true
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_end(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_16(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_start(
         lr_read_pos, false
@@ -6274,7 +6274,7 @@ void state_29() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -6289,100 +6289,100 @@ void state_29() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_start(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_16(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_end(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__fragment(
         argument_start, true
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_3_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_start(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_4_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_18(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_5_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_end(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_6_start = argument_start;
@@ -6392,7 +6392,7 @@ void state_29() {
         int step_7_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // error_fragments has base step num 3; canonical step is <7.3 = fragment+:error_fragments>
         ReductionParameter<std::string> arg_error_fragments(
         *this, step_3_start + 0,
@@ -6401,54 +6401,54 @@ void state_29() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_7 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_7 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_error_fragments);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -6475,12 +6475,12 @@ void state_30() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_end(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_31);
 
     } else
@@ -6488,7 +6488,7 @@ void state_30() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_29(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_13);
 
     } else
@@ -6496,19 +6496,19 @@ void state_30() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_11(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_12);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -6533,12 +6533,12 @@ void state_31() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -6554,23 +6554,23 @@ void state_31() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_end(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_43(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_start(
         lr_read_pos, false
@@ -6580,7 +6580,7 @@ void state_31() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -6595,44 +6595,44 @@ void state_31() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_start(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_43(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_end(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
@@ -6642,7 +6642,7 @@ void state_31() {
         int step_3_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // variable has base step num 1; canonical step is <27.1 = /(\?:[^-@}]|-[^@}])+/:variable>
         ReductionParameter<Terminal> arg_variable(
         *this, step_1_start + 0,
@@ -6651,54 +6651,54 @@ void state_31() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_27 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_27 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_variable);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -6725,12 +6725,12 @@ void state_32() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__identifier(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_33);
 
     } else
@@ -6738,19 +6738,19 @@ void state_32() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_45(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_25);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -6778,12 +6778,12 @@ void state_33() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__template_variant(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_34);
 
     } else
@@ -6791,7 +6791,7 @@ void state_33() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__rest_of_sub(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_38);
 
     } else
@@ -6799,7 +6799,7 @@ void state_33() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_25(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_40);
 
     } else
@@ -6807,19 +6807,19 @@ void state_33() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_31(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_37);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -6845,12 +6845,12 @@ void state_34() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__rest_of_sub(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_35);
 
     } else
@@ -6858,19 +6858,19 @@ void state_34() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_31(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_37);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -6897,12 +6897,12 @@ void state_35() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_end(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_36);
 
     } else
@@ -6910,7 +6910,7 @@ void state_35() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_29(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_13);
 
     } else
@@ -6918,19 +6918,19 @@ void state_35() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_11(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_12);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -6955,12 +6955,12 @@ void state_36() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -6976,44 +6976,44 @@ void state_36() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_end(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__rest_of_sub(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__template_variant(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__identifier(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_36(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_start(
         lr_read_pos, false
@@ -7023,7 +7023,7 @@ void state_36() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -7038,86 +7038,86 @@ void state_36() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_start(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_36(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__identifier(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__template_variant(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_3_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__rest_of_sub(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_4_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_end(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_5_start = argument_start;
@@ -7127,7 +7127,7 @@ void state_36() {
         int step_6_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // jempl_args has base step num 4; canonical step is <19.4 = rest_of_sub:jempl_args>
         ReductionParameter<std::string> arg_jempl_args(
         *this, step_4_start + 0,
@@ -7136,7 +7136,7 @@ void state_36() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         // jempl_name has base step num 2; canonical step is <19.2 = identifier:jempl_name>
         ReductionParameter<std::string> arg_jempl_name(
@@ -7146,7 +7146,7 @@ void state_36() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         // variant has base step num 3; canonical step is <19.3 = template_variant:variant>
         ReductionParameter<std::string> arg_variant(
@@ -7156,54 +7156,54 @@ void state_36() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_19 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_19 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_jempl_args, arg_jempl_name, arg_variant);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -7228,12 +7228,12 @@ void state_37() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -7249,9 +7249,9 @@ void state_37() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_31(
         lr_read_pos, false
@@ -7261,7 +7261,7 @@ void state_37() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -7276,16 +7276,16 @@ void state_37() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_31(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -7295,7 +7295,7 @@ void state_37() {
         int step_1_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // arg_0 has base step num 0; canonical step is <15.0 = /(\?:[^-@]|-[^@])+/:arg_0>
         ReductionParameter<Terminal> arg_arg_0(
         *this, step_0_start + 0,
@@ -7304,54 +7304,54 @@ void state_37() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_15 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_15 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_arg_0);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _rest_of_sub);
         lr_push(_rest_of_sub, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -7378,12 +7378,12 @@ void state_38() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_end(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_39);
 
     } else
@@ -7391,7 +7391,7 @@ void state_38() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_29(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_13);
 
     } else
@@ -7399,19 +7399,19 @@ void state_38() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_11(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_12);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -7436,12 +7436,12 @@ void state_39() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -7457,37 +7457,37 @@ void state_39() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_end(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__rest_of_sub(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__identifier(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_36(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_start(
         lr_read_pos, false
@@ -7497,7 +7497,7 @@ void state_39() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -7512,72 +7512,72 @@ void state_39() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_start(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_36(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__identifier(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__rest_of_sub(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_3_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_end(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_4_start = argument_start;
@@ -7587,7 +7587,7 @@ void state_39() {
         int step_5_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // jempl_args has base step num 3; canonical step is <20.3 = rest_of_sub:jempl_args>
         ReductionParameter<std::string> arg_jempl_args(
         *this, step_3_start + 0,
@@ -7596,7 +7596,7 @@ void state_39() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         // jempl_name has base step num 2; canonical step is <20.2 = identifier:jempl_name>
         ReductionParameter<std::string> arg_jempl_name(
@@ -7606,54 +7606,54 @@ void state_39() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_20 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_20 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_jempl_args, arg_jempl_name);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -7678,24 +7678,24 @@ void state_40() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT_INV__terminal_26(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_41);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -7720,24 +7720,24 @@ void state_41() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_25(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_42);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -7762,12 +7762,12 @@ void state_42() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -7783,23 +7783,23 @@ void state_42() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_25(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_26(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_25(
         lr_read_pos, false
@@ -7809,7 +7809,7 @@ void state_42() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -7824,44 +7824,44 @@ void state_42() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_25(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_26(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_25(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
@@ -7871,7 +7871,7 @@ void state_42() {
         int step_3_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // variant_expression has base step num 1; canonical step is <10.1 = !'#':variant_expression>
         ReductionParameter<Terminal> arg_variant_expression(
         *this, step_1_start + 0,
@@ -7880,54 +7880,54 @@ void state_42() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_10 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_10 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_variant_expression);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _template_variant);
         lr_push(_template_variant, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -7982,12 +7982,12 @@ void state_43() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__text(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_2);
 
     } else
@@ -7995,7 +7995,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_44);
 
     } else
@@ -8003,7 +8003,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_17);
 
     } else
@@ -8011,7 +8011,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_44);
 
     } else
@@ -8019,7 +8019,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__control_continuation(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_54);
 
     } else
@@ -8027,7 +8027,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__control_start(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_43);
 
     } else
@@ -8035,7 +8035,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__fragment(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_43);
 
     } else
@@ -8043,7 +8043,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_SUBEXPRESSION___subex_0(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_55);
 
     } else
@@ -8051,7 +8051,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__control_end(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_53);
 
     } else
@@ -8059,7 +8059,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__control_fragment(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_49);
 
     } else
@@ -8067,7 +8067,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_44);
 
     } else
@@ -8075,7 +8075,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_17);
 
     } else
@@ -8083,7 +8083,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__trailing_ws(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_1);
 
     } else
@@ -8091,7 +8091,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_4(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_4);
 
     } else
@@ -8099,7 +8099,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_5(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_71);
 
     } else
@@ -8107,7 +8107,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_9(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_57);
 
     } else
@@ -8115,7 +8115,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_12(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_61);
 
     } else
@@ -8123,7 +8123,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_14(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_66);
 
     } else
@@ -8131,7 +8131,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_20(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_19);
 
     } else
@@ -8139,7 +8139,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_24(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_75);
 
     } else
@@ -8147,7 +8147,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_28(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_18);
 
     } else
@@ -8155,7 +8155,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_11(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_52);
 
     } else
@@ -8163,7 +8163,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_33(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_5);
 
     } else
@@ -8171,7 +8171,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_34(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_7);
 
     } else
@@ -8179,7 +8179,7 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_35(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_8);
 
     } else
@@ -8187,19 +8187,19 @@ void state_43() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_44(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_6);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -8230,12 +8230,12 @@ void state_44() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_16(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_15);
 
     } else
@@ -8243,7 +8243,7 @@ void state_44() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_36(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_32);
 
     } else
@@ -8251,7 +8251,7 @@ void state_44() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_18(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_45);
 
     } else
@@ -8259,7 +8259,7 @@ void state_44() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_CUSTOM__terminal_37(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_10);
 
     } else
@@ -8267,19 +8267,19 @@ void state_44() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_43(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_30);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -8307,12 +8307,12 @@ void state_45() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_end(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_46);
 
     } else
@@ -8320,7 +8320,7 @@ void state_45() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_29(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_13);
 
     } else
@@ -8328,7 +8328,7 @@ void state_45() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_11(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_12);
 
     } else
@@ -8336,19 +8336,19 @@ void state_45() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_CUSTOM__terminal_37(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_47);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -8373,12 +8373,12 @@ void state_46() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -8394,23 +8394,23 @@ void state_46() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_end(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_18(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_start(
         lr_read_pos, false
@@ -8420,7 +8420,7 @@ void state_46() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -8435,44 +8435,44 @@ void state_46() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_start(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_18(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_end(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
@@ -8482,7 +8482,7 @@ void state_46() {
         int step_3_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // control_statement has base step num 1; canonical step is <22.1 = '}':control_statement>
         ReductionParameter<Terminal> arg_control_statement(
         *this, step_1_start + 0,
@@ -8491,54 +8491,54 @@ void state_46() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_22 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_22 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_control_statement);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _control_end);
         lr_push(_control_end, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -8565,12 +8565,12 @@ void state_47() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_end(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_48);
 
     } else
@@ -8578,7 +8578,7 @@ void state_47() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_29(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_13);
 
     } else
@@ -8586,19 +8586,19 @@ void state_47() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_11(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_12);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -8623,12 +8623,12 @@ void state_48() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -8644,30 +8644,30 @@ void state_48() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_end(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_37(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_18(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_start(
         lr_read_pos, false
@@ -8677,7 +8677,7 @@ void state_48() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -8692,58 +8692,58 @@ void state_48() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_start(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_18(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_37(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_end(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_3_start = argument_start;
@@ -8753,7 +8753,7 @@ void state_48() {
         int step_4_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // control_statement has base step num 1; canonical step is <21.1 = '}':control_statement>
         ReductionParameter<Terminal> arg_control_statement(
         *this, step_1_start + 0,
@@ -8762,54 +8762,54 @@ void state_48() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_21 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_21 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_control_statement);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _control_continuation);
         lr_push(_control_continuation, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -8841,12 +8841,12 @@ void state_49() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__leading_ws(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_51);
 
     } else
@@ -8854,7 +8854,7 @@ void state_49() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_50);
 
     } else
@@ -8862,7 +8862,7 @@ void state_49() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__control_start(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_43);
 
     } else
@@ -8870,7 +8870,7 @@ void state_49() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__control_fragment(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_49);
 
     } else
@@ -8878,7 +8878,7 @@ void state_49() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_28(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_18);
 
     } else
@@ -8886,7 +8886,7 @@ void state_49() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_11(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_52);
 
     } else
@@ -8894,7 +8894,7 @@ void state_49() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_33(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_5);
 
     } else
@@ -8902,7 +8902,7 @@ void state_49() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -8918,9 +8918,9 @@ void state_49() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__control_fragment(
         lr_read_pos, true
@@ -8930,7 +8930,7 @@ void state_49() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -8945,16 +8945,16 @@ void state_49() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__control_fragment(
         argument_start, true
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -8964,7 +8964,7 @@ void state_49() {
         int step_1_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // control_fragment has base step num 0; canonical step is <26.0 = control_fragment+>
         ReductionParameter<std::string> arg_control_fragment(
         *this, step_0_start + 0,
@@ -8973,54 +8973,54 @@ void state_49() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_26 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_26 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_control_fragment);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -9045,24 +9045,24 @@ void state_50() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_CUSTOM__terminal_37(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_10);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -9087,24 +9087,24 @@ void state_51() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_28(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_18);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -9129,12 +9129,12 @@ void state_52() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -9150,9 +9150,9 @@ void state_52() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_11(
         lr_read_pos, false
@@ -9162,7 +9162,7 @@ void state_52() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -9177,16 +9177,16 @@ void state_52() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_11(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -9196,7 +9196,7 @@ void state_52() {
         int step_1_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // arg_0 has base step num 0; canonical step is <12.0 = '@':arg_0>
         ReductionParameter<Terminal> arg_arg_0(
         *this, step_0_start + 0,
@@ -9205,54 +9205,54 @@ void state_52() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_12 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_12 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_arg_0);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _subst_start);
         lr_push(_subst_start, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -9277,12 +9277,12 @@ void state_53() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -9298,30 +9298,30 @@ void state_53() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__control_end(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before___subex_0(
         lr_read_pos, true
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__fragment(
         lr_read_pos, true
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__control_start(
         lr_read_pos, false
@@ -9331,7 +9331,7 @@ void state_53() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -9346,58 +9346,58 @@ void state_53() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__control_start(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__fragment(
         argument_start, true
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of___subex_0(
         argument_start, true
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__control_end(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_3_start = argument_start;
@@ -9407,7 +9407,7 @@ void state_53() {
         int step_4_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // control_statement has base step num 0; canonical step is <25.0 = control_start:control_statement>
         ReductionParameter<std::string> arg_control_statement(
         *this, step_0_start + 0,
@@ -9416,54 +9416,54 @@ void state_53() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_25 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_25 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_control_statement);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _control_fragment);
         lr_push(_control_fragment, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -9519,12 +9519,12 @@ void state_54() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__text(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_2);
 
     } else
@@ -9532,7 +9532,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_44);
 
     } else
@@ -9540,7 +9540,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_17);
 
     } else
@@ -9548,7 +9548,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_44);
 
     } else
@@ -9556,7 +9556,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__control_continuation(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_54);
 
     } else
@@ -9564,7 +9564,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__fragment(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_54);
 
     } else
@@ -9572,7 +9572,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__control_start(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_43);
 
     } else
@@ -9580,7 +9580,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_SUBEXPRESSION___subex_0(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_55);
 
     } else
@@ -9588,7 +9588,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__control_end(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_53);
 
     } else
@@ -9596,7 +9596,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__control_fragment(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_49);
 
     } else
@@ -9604,7 +9604,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_44);
 
     } else
@@ -9612,7 +9612,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_17);
 
     } else
@@ -9620,7 +9620,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__trailing_ws(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_1);
 
     } else
@@ -9628,7 +9628,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_4(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_4);
 
     } else
@@ -9636,7 +9636,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_5(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_71);
 
     } else
@@ -9644,7 +9644,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_9(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_57);
 
     } else
@@ -9652,7 +9652,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_12(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_61);
 
     } else
@@ -9660,7 +9660,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_14(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_66);
 
     } else
@@ -9668,7 +9668,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_20(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_19);
 
     } else
@@ -9676,7 +9676,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_24(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_75);
 
     } else
@@ -9684,7 +9684,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_28(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_18);
 
     } else
@@ -9692,7 +9692,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_11(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_52);
 
     } else
@@ -9700,7 +9700,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_33(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_5);
 
     } else
@@ -9708,7 +9708,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_34(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_7);
 
     } else
@@ -9716,7 +9716,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_35(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_8);
 
     } else
@@ -9724,7 +9724,7 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_44(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_6);
 
     } else
@@ -9732,19 +9732,19 @@ void state_54() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_55);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -9777,12 +9777,12 @@ void state_55() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__leading_ws(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_51);
 
     } else
@@ -9790,7 +9790,7 @@ void state_55() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_56);
 
     } else
@@ -9798,7 +9798,7 @@ void state_55() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__control_continuation(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_54);
 
     } else
@@ -9806,7 +9806,7 @@ void state_55() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_SUBEXPRESSION___subex_0(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_55);
 
     } else
@@ -9814,7 +9814,7 @@ void state_55() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__control_end(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_53);
 
     } else
@@ -9822,7 +9822,7 @@ void state_55() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_28(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_18);
 
     } else
@@ -9830,7 +9830,7 @@ void state_55() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_11(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_52);
 
     } else
@@ -9838,19 +9838,19 @@ void state_55() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_33(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_5);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -9876,24 +9876,24 @@ void state_56() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_18(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_45);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -9918,24 +9918,24 @@ void state_57() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_10(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_58);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -9960,24 +9960,24 @@ void state_58() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_11(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_59);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -10002,24 +10002,24 @@ void state_59() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_8(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_60);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -10044,12 +10044,12 @@ void state_60() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -10065,30 +10065,30 @@ void state_60() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_8(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_11(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_10(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_9(
         lr_read_pos, false
@@ -10098,7 +10098,7 @@ void state_60() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -10113,58 +10113,58 @@ void state_60() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_9(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_10(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_11(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_8(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_3_start = argument_start;
@@ -10174,7 +10174,7 @@ void state_60() {
         int step_4_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // param_decl has base step num 1; canonical step is <4.1 = /[^@]+/:param_decl>
         ReductionParameter<Terminal> arg_param_decl(
         *this, step_1_start + 0,
@@ -10183,54 +10183,54 @@ void state_60() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_4 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_4 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_param_decl);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -10255,24 +10255,24 @@ void state_61() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_13(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_62);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -10297,24 +10297,24 @@ void state_62() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_10(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_63);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -10339,24 +10339,24 @@ void state_63() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_11(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_64);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -10381,24 +10381,24 @@ void state_64() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_8(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_65);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -10423,12 +10423,12 @@ void state_65() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -10444,37 +10444,37 @@ void state_65() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_8(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_11(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_10(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_13(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_12(
         lr_read_pos, false
@@ -10484,7 +10484,7 @@ void state_65() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -10499,72 +10499,72 @@ void state_65() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_12(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_13(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_10(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_11(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_3_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_8(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_4_start = argument_start;
@@ -10574,7 +10574,7 @@ void state_65() {
         int step_5_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // include_file has base step num 2; canonical step is <5.2 = /[^@]+/:include_file>
         ReductionParameter<Terminal> arg_include_file(
         *this, step_2_start + 0,
@@ -10583,54 +10583,54 @@ void state_65() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_5 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_5 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_include_file);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -10655,24 +10655,24 @@ void state_66() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_13(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_67);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -10697,24 +10697,24 @@ void state_67() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_10(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_68);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -10739,24 +10739,24 @@ void state_68() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_11(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_69);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -10781,24 +10781,24 @@ void state_69() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_8(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_70);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -10823,12 +10823,12 @@ void state_70() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -10844,37 +10844,37 @@ void state_70() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_8(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_11(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_10(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_13(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_14(
         lr_read_pos, false
@@ -10884,7 +10884,7 @@ void state_70() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -10899,72 +10899,72 @@ void state_70() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_14(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_13(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_10(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_11(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_3_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_8(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_4_start = argument_start;
@@ -10974,7 +10974,7 @@ void state_70() {
         int step_5_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // embed_file has base step num 2; canonical step is <6.2 = /[^@]+/:embed_file>
         ReductionParameter<Terminal> arg_embed_file(
         *this, step_2_start + 0,
@@ -10983,54 +10983,54 @@ void state_70() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_6 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_6 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_embed_file);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -11055,24 +11055,24 @@ void state_71() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_6(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_72);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -11097,24 +11097,24 @@ void state_72() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_7(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_73);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -11139,24 +11139,24 @@ void state_73() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_8(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_74);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -11181,12 +11181,12 @@ void state_74() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -11202,30 +11202,30 @@ void state_74() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_8(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_7(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_6(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_5(
         lr_read_pos, false
@@ -11235,7 +11235,7 @@ void state_74() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -11250,58 +11250,58 @@ void state_74() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_5(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_6(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_7(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_8(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_3_start = argument_start;
@@ -11311,7 +11311,7 @@ void state_74() {
         int step_4_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // comment has base step num 1; canonical step is <3.1 = /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment>
         ReductionParameter<Terminal> arg_comment(
         *this, step_1_start + 0,
@@ -11320,54 +11320,54 @@ void state_74() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_3 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_3 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_comment);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -11399,12 +11399,12 @@ void state_75() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__text(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_76);
 
     } else
@@ -11412,7 +11412,7 @@ void state_75() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_3);
 
     } else
@@ -11420,7 +11420,7 @@ void state_75() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__trailing_ws(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_1);
 
     } else
@@ -11428,7 +11428,7 @@ void state_75() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_4(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_4);
 
     } else
@@ -11436,7 +11436,7 @@ void state_75() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_33(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_5);
 
     } else
@@ -11444,7 +11444,7 @@ void state_75() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_34(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_7);
 
     } else
@@ -11452,7 +11452,7 @@ void state_75() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_35(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_8);
 
     } else
@@ -11460,19 +11460,19 @@ void state_75() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_44(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_6);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -11497,24 +11497,24 @@ void state_76() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_11(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_77);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -11539,24 +11539,24 @@ void state_77() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_8(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_78);
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -11581,12 +11581,12 @@ void state_78() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -11602,30 +11602,30 @@ void state_78() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_8(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_11(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__text(
         lr_read_pos, false
         );
 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_24(
         lr_read_pos, false
@@ -11635,7 +11635,7 @@ void state_78() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -11650,58 +11650,58 @@ void state_78() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_24(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__text(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_11(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
 
         argument_start += step_size;
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_8(
         argument_start, false
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_3_start = argument_start;
@@ -11711,7 +11711,7 @@ void state_78() {
         int step_4_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // realign has base step num 1; canonical step is <9.1 = text:realign>
         ReductionParameter<std::string> arg_realign(
         *this, step_1_start + 0,
@@ -11720,54 +11720,54 @@ void state_78() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_9 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_9 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_realign);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -11818,12 +11818,12 @@ void state_79() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__fragment(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_79);
 
     } else
@@ -11831,7 +11831,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__text(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_2);
 
     } else
@@ -11839,7 +11839,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_9);
 
     } else
@@ -11847,7 +11847,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_17);
 
     } else
@@ -11855,7 +11855,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_9);
 
     } else
@@ -11863,7 +11863,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__control_start(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_43);
 
     } else
@@ -11871,7 +11871,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__control_fragment(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_49);
 
     } else
@@ -11879,7 +11879,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_9);
 
     } else
@@ -11887,7 +11887,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_17);
 
     } else
@@ -11895,7 +11895,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__trailing_ws(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_1);
 
     } else
@@ -11903,7 +11903,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_4(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_4);
 
     } else
@@ -11911,7 +11911,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_5(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_71);
 
     } else
@@ -11919,7 +11919,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_9(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_57);
 
     } else
@@ -11927,7 +11927,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_12(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_61);
 
     } else
@@ -11935,7 +11935,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_14(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_66);
 
     } else
@@ -11943,7 +11943,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_20(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_19);
 
     } else
@@ -11951,7 +11951,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_24(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_75);
 
     } else
@@ -11959,7 +11959,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_28(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_18);
 
     } else
@@ -11967,7 +11967,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_11(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_52);
 
     } else
@@ -11975,7 +11975,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_33(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_5);
 
     } else
@@ -11983,7 +11983,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_34(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_7);
 
     } else
@@ -11991,7 +11991,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_35(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_8);
 
     } else
@@ -11999,7 +11999,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_44(false)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_6);
 
     } else
@@ -12007,7 +12007,7 @@ void state_79() {
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
@@ -12023,9 +12023,9 @@ void state_79() {
 
         #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 33 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__fragment(
         lr_read_pos, true
@@ -12035,7 +12035,7 @@ void state_79() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 46 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -12050,16 +12050,16 @@ void state_79() {
         int step_size;
 
 
-        #line 87 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 86 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__fragment(
         argument_start, true
         );
 
 
-        #line 81 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -12069,7 +12069,7 @@ void state_79() {
         int step_1_start = argument_start;
 
 
-        #line 109 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // fragments has base step num 0; canonical step is <0.0 = fragment+:fragments>
         ReductionParameter<std::string> arg_fragments(
         *this, step_0_start + 0,
@@ -12078,54 +12078,54 @@ void state_79() {
         );
 
 
-        #line 108 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 119 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 121 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        std::string result = rule_0 (
 
         #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        std::string result = rule_0 (
+
+        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         arg_fragments);
 
         Product prod(result);
 
-        #line 134 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 136 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 147 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _complete);
         lr_push(_complete, eject, src_pos, prod);
 
 
-        #line 156 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -12150,12 +12150,12 @@ void state_80() {
 
 
 
-    #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
     #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
-        #line 60 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
         #line 55 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -12165,13 +12165,13 @@ void state_80() {
     } else
     {
 
-        #line 66 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+        #line 68 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
         mismatch();
     }
 
 
-    #line 72 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 }
 
@@ -20935,7 +20935,7 @@ bool dummy = true // hack for comma
 
     // fragment+:fragments -> complete
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
@@ -20981,7 +20981,7 @@ bool dummy = true // hack for comma
     );
 
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 12 "src/grammarlib/jemp.fpl"
 }
 
@@ -21068,7 +21068,7 @@ bool dummy = true // hack for comma
 
     // text+:chunks -> fragment
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
@@ -21081,7 +21081,7 @@ bool dummy = true // hack for comma
     return frag + ";\n";
 
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 15 "src/grammarlib/jemp.fpl"
 }
 
@@ -21168,14 +21168,14 @@ bool dummy = true // hack for comma
 
     // '@@':at_sign -> text
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 20 "src/grammarlib/jemp.fpl"
     return "@"; 
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 20 "src/grammarlib/jemp.fpl"
 }
 
@@ -21262,7 +21262,7 @@ bool dummy = true // hack for comma
 
     // '@/*'^ /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment '*/@'^ /\\n\?/^ -> fragment
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
@@ -21271,7 +21271,7 @@ bool dummy = true // hack for comma
     return line_num(comment.self()) + jempl.realign_frag();
 
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 24 "src/grammarlib/jemp.fpl"
 }
 
@@ -21358,7 +21358,7 @@ bool dummy = true // hack for comma
 
     // '@parameter:'^ /[^@]+/:param_decl '@'^ /\\n\?/^ -> fragment
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
@@ -21368,7 +21368,7 @@ bool dummy = true // hack for comma
     return "";
 
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 35 "src/grammarlib/jemp.fpl"
 }
 
@@ -21455,7 +21455,7 @@ bool dummy = true // hack for comma
 
     // '@include:'^ /\\s*/^ /[^@]+/:include_file '@'^ /\\n\?/^ -> fragment
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
@@ -21467,7 +21467,7 @@ bool dummy = true // hack for comma
     ) + line_num(include_file.self()) + jempl.realign_frag();
 
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 40 "src/grammarlib/jemp.fpl"
 }
 
@@ -21554,7 +21554,7 @@ bool dummy = true // hack for comma
 
     // '@embed:'^ /\\s*/^ /[^@]+/:embed_file '@'^ /\\n\?/^ -> fragment
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
@@ -21574,7 +21574,7 @@ bool dummy = true // hack for comma
     );
 
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 46 "src/grammarlib/jemp.fpl"
 }
 
@@ -21661,7 +21661,7 @@ bool dummy = true // hack for comma
 
     // subst_start^ 'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^ -> fragment
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
@@ -21677,7 +21677,7 @@ bool dummy = true // hack for comma
     );
 
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 52 "src/grammarlib/jemp.fpl"
 }
 
@@ -21770,7 +21770,7 @@ bool dummy = true // hack for comma
 
     // leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^ -> fragment
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
@@ -21780,7 +21780,7 @@ bool dummy = true // hack for comma
     + stringformat("const auto {} = {};\n", name_decl.val(), value.val());
 
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 58 "src/grammarlib/jemp.fpl"
 }
 
@@ -21867,7 +21867,7 @@ bool dummy = true // hack for comma
 
     // /@realign:\\s*/^ text:realign '@'^ /\\n\?/^ -> fragment
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
@@ -21878,7 +21878,7 @@ bool dummy = true // hack for comma
     return line_num(realign.self()) + jempl.realign_frag();
 
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 71 "src/grammarlib/jemp.fpl"
 }
 
@@ -21965,7 +21965,7 @@ bool dummy = true // hack for comma
 
     // '#'^ !'#':variant_expression '#'^ -> template_variant
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -21973,21 +21973,21 @@ bool dummy = true // hack for comma
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
     #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
+    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     variant_expression.val().to_str()
     );
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 76 "src/grammarlib/jemp.fpl"
 }
 
@@ -22074,7 +22074,7 @@ bool dummy = true // hack for comma
 
     // leading_ws?^ '@-':arg_1 -> subst_start
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22082,21 +22082,21 @@ bool dummy = true // hack for comma
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
     #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
+    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     arg_1.val().to_str()
     );
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 78 "src/grammarlib/jemp.fpl"
 }
 
@@ -22183,7 +22183,7 @@ bool dummy = true // hack for comma
 
     // '@':arg_0 -> subst_start
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22191,21 +22191,21 @@ bool dummy = true // hack for comma
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
     #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
+    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     arg_0.val().to_str()
     );
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 79 "src/grammarlib/jemp.fpl"
 }
 
@@ -22292,7 +22292,7 @@ bool dummy = true // hack for comma
 
     // '-@':arg_0 trailing_ws?^ -> subst_end
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22300,21 +22300,21 @@ bool dummy = true // hack for comma
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
     #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
+    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     arg_0.val().to_str()
     );
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 81 "src/grammarlib/jemp.fpl"
 }
 
@@ -22401,7 +22401,7 @@ bool dummy = true // hack for comma
 
     // '@':arg_0 -> subst_end
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22409,21 +22409,21 @@ bool dummy = true // hack for comma
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
     #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
+    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     arg_0.val().to_str()
     );
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 82 "src/grammarlib/jemp.fpl"
 }
 
@@ -22510,7 +22510,7 @@ bool dummy = true // hack for comma
 
     // /(\?:[^-@]|-[^@])+/:arg_0 -> rest_of_sub
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22518,21 +22518,21 @@ bool dummy = true // hack for comma
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
     #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
+    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     arg_0.val().to_str()
     );
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 83 "src/grammarlib/jemp.fpl"
 }
 
@@ -22619,7 +22619,7 @@ bool dummy = true // hack for comma
 
     // /\\n*[ \\t]+/:ws -> leading_ws
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22627,21 +22627,21 @@ bool dummy = true // hack for comma
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
     #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
+    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     ws.val().to_str()
     );
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 89 "src/grammarlib/jemp.fpl"
 }
 
@@ -22728,7 +22728,7 @@ bool dummy = true // hack for comma
 
     // /[ \\t]*\\n+[ \\t]+(\?!@)/:ws -> trailing_ws
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22736,21 +22736,21 @@ bool dummy = true // hack for comma
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
     #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
+    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     ws.val().to_str()
     );
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 103 "src/grammarlib/jemp.fpl"
 }
 
@@ -22837,7 +22837,7 @@ bool dummy = true // hack for comma
 
     // /[ \\t]*\\n/:ws -> trailing_ws
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22845,21 +22845,21 @@ bool dummy = true // hack for comma
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
     #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
+    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     ws.val().to_str()
     );
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 107 "src/grammarlib/jemp.fpl"
 }
 
@@ -22952,7 +22952,7 @@ bool dummy = true // hack for comma
 
     // subst_start^ /#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^ -> fragment
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
@@ -22981,7 +22981,7 @@ bool dummy = true // hack for comma
     );
 
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 115 "src/grammarlib/jemp.fpl"
 }
 
@@ -23071,7 +23071,7 @@ bool dummy = true // hack for comma
 
     // subst_start^ /#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^ -> fragment
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
@@ -23081,7 +23081,7 @@ bool dummy = true // hack for comma
     return stringformat("\nout += {}{};\n", jempl_name.val(), jempl_args.val());
 
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 118 "src/grammarlib/jemp.fpl"
 }
 
@@ -23168,14 +23168,14 @@ bool dummy = true // hack for comma
 
     // subst_start^ '}':control_statement &control_guts:control_statement subst_end^ -> control_continuation
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 131 "src/grammarlib/jemp.fpl"
     return control_statement.join(" "); 
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 131 "src/grammarlib/jemp.fpl"
 }
 
@@ -23262,7 +23262,7 @@ bool dummy = true // hack for comma
 
     // subst_start^ '}':control_statement subst_end^ -> control_end
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -23270,21 +23270,21 @@ bool dummy = true // hack for comma
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
     #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
+    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     control_statement.val().to_str()
     );
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 132 "src/grammarlib/jemp.fpl"
 }
 
@@ -23371,7 +23371,7 @@ bool dummy = true // hack for comma
 
     // subst_start^ &control_guts:control_statement subst_end^ -> control_start
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -23379,21 +23379,21 @@ bool dummy = true // hack for comma
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
     #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
+    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     control_statement.val().to_str()
     );
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 133 "src/grammarlib/jemp.fpl"
 }
 
@@ -23486,7 +23486,7 @@ bool dummy = true // hack for comma
 
     // control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement control_end:control_statement -> control_fragment
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
@@ -23500,7 +23500,7 @@ bool dummy = true // hack for comma
     );
 
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 135 "src/grammarlib/jemp.fpl"
 }
 
@@ -23587,14 +23587,14 @@ bool dummy = true // hack for comma
 
     // control_fragment+ -> fragment
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 137 "src/grammarlib/jemp.fpl"
     return control_fragment.join(); 
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 137 "src/grammarlib/jemp.fpl"
 }
 
@@ -23681,7 +23681,7 @@ bool dummy = true // hack for comma
 
     // subst_start^ /(\?:[^-@}]|-[^@}])+/:variable subst_end^ -> fragment
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
@@ -23691,7 +23691,7 @@ bool dummy = true // hack for comma
     + "out += stringformat(\"{}\"," + variable.val().to_str() + ");\n";
 
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 141 "src/grammarlib/jemp.fpl"
 }
 
@@ -23778,7 +23778,7 @@ bool dummy = true // hack for comma
 
     // /[^@\\n]+/:t -> text
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -23786,21 +23786,21 @@ bool dummy = true // hack for comma
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
     #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
+    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     t.val().to_str()
     );
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 145 "src/grammarlib/jemp.fpl"
 }
 
@@ -23887,7 +23887,7 @@ bool dummy = true // hack for comma
 
     // leading_ws -> text
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -23895,19 +23895,19 @@ bool dummy = true // hack for comma
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
     #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     leading_ws.val()
     );
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 149 "src/grammarlib/jemp.fpl"
 }
 
@@ -23994,7 +23994,7 @@ bool dummy = true // hack for comma
 
     // trailing_ws -> text
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -24002,19 +24002,19 @@ bool dummy = true // hack for comma
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
     #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     trailing_ws.val()
     );
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 150 "src/grammarlib/jemp.fpl"
 }
 
@@ -24101,7 +24101,7 @@ bool dummy = true // hack for comma
 
     // /[a-zA-Z_][a-zA-Z_0-9]+/:name -> identifier
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -24109,21 +24109,21 @@ bool dummy = true // hack for comma
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
     #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
+    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     name.val().to_str()
     );
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 153 "src/grammarlib/jemp.fpl"
 }
 
@@ -24210,7 +24210,7 @@ bool dummy = true // hack for comma
 
     // complete -> _fpl_goal
 
-    #line 58 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -24218,19 +24218,19 @@ bool dummy = true // hack for comma
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 55 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 48 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
     #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     complete.val()
     );
 
-    #line 59 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 4254 "src/fpl2cc/productions.h"
 }
 
