@@ -1,0 +1,2 @@
+git_id	cpu_total	cpu_user	cpu_system	max_rss	timestamp	hostname	arch	os	exit_code	signal
+a746b3b	0.023696	0.021926	0.001770	4456448	1724965573	sunbird	arm64	Darwin 23.4.0	0	-
