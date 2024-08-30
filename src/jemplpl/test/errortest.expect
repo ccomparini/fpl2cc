@@ -1,8 +1,7 @@
 returncode = 0
-stderr = "
-Received error: Earth shattering kaboom \"as expected\"
+stderr = "Received message: Earth shattering kaboom \"as expected\"
          at src/jemplpl/test/errortest.jemp:7
-Received error: No error message on 2.
+Received message: No error message on 2.
          at src/jemplpl/test/errortest.jemp:9
 "
 stdout = "
