@@ -5,6 +5,7 @@
 #include "escape_sequences.h"
 #include "fpl_options.h"
 #include "fpl_reader.h"
+#include "grammar_element.h"
 #include "production_rule.h"
 #include "reducer.h"
 #include "stack_distance.h"
