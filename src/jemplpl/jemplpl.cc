@@ -15,7 +15,7 @@
 
   options:
         src_fpl: src/jemplpl/jemplpl.fpl
-    src_path: /Users/chris/projects/fpl2cc/src/grammarlib
+    src_path: /newhome/home/chris/projects/fpl2cc/src/grammarlib
     out: 
     output_fn: src/jemplpl/jemplpl.cc
     check_only: false
@@ -2102,9 +2102,13 @@ inline std::string to_str() const {
 
  jemplpl - .jemp to c++ converter.
 
- Given one or more template files, creates corresponding c++ functions
- white return strings containing filled-in copies of said templates,
- and writes them to stdout.
+ Given one or more template files, creates the corresponding c++
+ functions which return strings containing filled-in copies of
+ said templates, and writes them to stdout.
+
+ So, say that x.h.jemp is a jemp template file. This converts
+   x.h.jemp -> x.h
+ .. and x.h will 
 
  */
 
@@ -2127,7 +2131,7 @@ inline std::string to_str() const {
 #define VERSION_MIN 10
 
 
-#line 2129 "src/jemplpl/jemplpl.cc"
+#line 2133 "src/jemplpl/jemplpl.cc"
 
 
 
@@ -2178,7 +2182,7 @@ public:
 // text (28:1):              •/[^@\\n]+/:t                                                                                                             => state 6  (src/grammarlib/jemp.fpl:145)
 // text (29:1):              •leading_ws                                                                                                               => state 17 (src/grammarlib/jemp.fpl:149)
 // text (30:1):              •trailing_ws                                                                                                              => state 1  (src/grammarlib/jemp.fpl:150)
-// _fpl_goal (32:1):         •complete                                                                                                                 => state 80 (src/fpl2cc/productions.h:4254)
+// _fpl_goal (32:1):         •complete                                                                                                                 => state 80 (src/fpl2cc/productions.h:4311)
 //
 void state_0() {
 
@@ -12134,7 +12138,7 @@ void state_79() {
 #line 5 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 //
-// _fpl_goal (32:0):  complete • => (done) (src/fpl2cc/productions.h:4254)
+// _fpl_goal (32:0):  complete • => (done) (src/fpl2cc/productions.h:4311)
 //
 void state_80() {
 
@@ -12245,6 +12249,17 @@ class Terminal {
     Terminal(const Iterable &src) : matches(src.begin(), src.end()) {
     }
 
+    void set_full_match(const std::string &match) {
+        matches[0] = match;
+    }
+
+    void add_capture(const Terminal &other) {
+        for(auto omatch : other.matches) {
+            // lotsa copies but ohwell
+            matches.push_back(omatch);
+        }
+    }
+
     std::string to_str() const {
         if(matches.size())
         return matches[0];
@@ -12337,7 +12352,7 @@ class Product {
 
     // type-specific constructors:
 
-    #line 231 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 242 "src/fpl2cc/fpl_x_parser.h.jemp" 
     Product(Terminal result) : red(result) { }
     Product(std::string result) : red(result) { }
     const Var &var() const { return red; }
@@ -12346,7 +12361,7 @@ class Product {
     // We start at type 1 instead of 0 because we don't need/want an
     // fpl_null accessor (it has no type anyway)
 
-    #line 243 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 254 "src/fpl2cc/fpl_x_parser.h.jemp" 
     std::string _fragment_val() const { return std::get<std::string>(var()); }
     std::string _complete_val() const { return std::get<std::string>(var()); }
     std::string _text_val() const { return std::get<std::string>(var()); }
@@ -12405,7 +12420,7 @@ class Product {
         return "Terminal";
 
 
-        #line 259 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 270 "src/fpl2cc/fpl_x_parser.h.jemp" 
         if(std::holds_alternative<Terminal>(red))
         return "Terminal";
         if(std::holds_alternative<std::string>(red))
@@ -12423,15 +12438,15 @@ class Product {
         return stringformat("{}", std::get<Terminal>(var()));
 
 
-        #line 278 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 289 "src/fpl2cc/fpl_x_parser.h.jemp" 
         if(std::holds_alternative<Terminal>(var())) {
 
-            #line 274 "src/fpl2cc/fpl_x_parser.h.jemp" 
+            #line 285 "src/fpl2cc/fpl_x_parser.h.jemp" 
             return stringformat("{}", std::get<Terminal>(var()));
         }
         if(std::holds_alternative<std::string>(var())) {
 
-            #line 274 "src/fpl2cc/fpl_x_parser.h.jemp" 
+            #line 285 "src/fpl2cc/fpl_x_parser.h.jemp" 
             return stringformat("{}", std::get<std::string>(var()));
         }
 
@@ -12601,7 +12616,7 @@ single_step(false),
 debug_step_number(0) {
 
 
-    #line 446 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 457 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
     lr_stack.reserve(1000);
@@ -12621,7 +12636,7 @@ void debug_pause() {
 template<typename... Args>
 void debug_print(const std::string_view &fmt, Args&&... args) {
 
-    #line 468 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 479 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // --debug option is off
 
@@ -12725,7 +12740,7 @@ void clear_mismatches() {
     }
 
 
-    #line 575 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 586 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 }
 
@@ -12762,7 +12777,7 @@ bool lr_read(int element_id) {
         bool mismatch = lr_next().mismatch;
         if(mismatch) {
 
-            #line 615 "src/fpl2cc/fpl_x_parser.h.jemp" 
+            #line 626 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         }
 
@@ -12781,14 +12796,14 @@ bool lr_read(int element_id) {
 // These are used to put together the arguments for reduce
 // actions.
 
-#line 682 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 693 "src/fpl2cc/fpl_x_parser.h.jemp" 
 int lr_position_before___fpl_null(int pos, bool multiple) const {
 
     if(pos > lr_top_index())
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // _fpl_null
     // (checking pos >= 0 because negative indexes are relative
@@ -12808,7 +12823,7 @@ int lr_position_before__fragment(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // fragment
     // (checking pos >= 0 because negative indexes are relative
@@ -12828,7 +12843,7 @@ int lr_position_before__complete(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // complete
     // (checking pos >= 0 because negative indexes are relative
@@ -12848,7 +12863,7 @@ int lr_position_before__text(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // text
     // (checking pos >= 0 because negative indexes are relative
@@ -12868,7 +12883,7 @@ int lr_position_before__terminal_4(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // '@@'
     // (checking pos >= 0 because negative indexes are relative
@@ -12888,7 +12903,7 @@ int lr_position_before__terminal_5(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // '@/*'
     // (checking pos >= 0 because negative indexes are relative
@@ -12908,7 +12923,7 @@ int lr_position_before__terminal_6(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/
     // (checking pos >= 0 because negative indexes are relative
@@ -12928,7 +12943,7 @@ int lr_position_before__terminal_7(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // '*/@'
     // (checking pos >= 0 because negative indexes are relative
@@ -12948,7 +12963,7 @@ int lr_position_before__terminal_8(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /\\n\?/
     // (checking pos >= 0 because negative indexes are relative
@@ -12968,7 +12983,7 @@ int lr_position_before__terminal_9(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // '@parameter:'
     // (checking pos >= 0 because negative indexes are relative
@@ -12988,7 +13003,7 @@ int lr_position_before__terminal_10(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /[^@]+/
     // (checking pos >= 0 because negative indexes are relative
@@ -13008,7 +13023,7 @@ int lr_position_before__terminal_11(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // '@'
     // (checking pos >= 0 because negative indexes are relative
@@ -13028,7 +13043,7 @@ int lr_position_before__terminal_12(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // '@include:'
     // (checking pos >= 0 because negative indexes are relative
@@ -13048,7 +13063,7 @@ int lr_position_before__terminal_13(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /\\s*/
     // (checking pos >= 0 because negative indexes are relative
@@ -13068,7 +13083,7 @@ int lr_position_before__terminal_14(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // '@embed:'
     // (checking pos >= 0 because negative indexes are relative
@@ -13088,7 +13103,7 @@ int lr_position_before__subst_start(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // subst_start
     // (checking pos >= 0 because negative indexes are relative
@@ -13108,7 +13123,7 @@ int lr_position_before__terminal_16(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // 'error {'
     // (checking pos >= 0 because negative indexes are relative
@@ -13128,7 +13143,7 @@ int lr_position_before__subst_end(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // subst_end
     // (checking pos >= 0 because negative indexes are relative
@@ -13148,7 +13163,7 @@ int lr_position_before__terminal_18(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // '}'
     // (checking pos >= 0 because negative indexes are relative
@@ -13168,7 +13183,7 @@ int lr_position_before__leading_ws(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // leading_ws
     // (checking pos >= 0 because negative indexes are relative
@@ -13188,7 +13203,7 @@ int lr_position_before__terminal_20(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /@declare\\s+/
     // (checking pos >= 0 because negative indexes are relative
@@ -13208,7 +13223,7 @@ int lr_position_before__identifier(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // identifier
     // (checking pos >= 0 because negative indexes are relative
@@ -13228,7 +13243,7 @@ int lr_position_before__terminal_22(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // ':'
     // (checking pos >= 0 because negative indexes are relative
@@ -13248,7 +13263,7 @@ int lr_position_before__terminal_23(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /(\?:[^@]|(\?:@@))*/
     // (checking pos >= 0 because negative indexes are relative
@@ -13268,7 +13283,7 @@ int lr_position_before__terminal_24(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /@realign:\\s*/
     // (checking pos >= 0 because negative indexes are relative
@@ -13288,7 +13303,7 @@ int lr_position_before__terminal_25(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // '#'
     // (checking pos >= 0 because negative indexes are relative
@@ -13308,7 +13323,7 @@ int lr_position_before__terminal_26(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // !'#'
     // (checking pos >= 0 because negative indexes are relative
@@ -13328,7 +13343,7 @@ int lr_position_before__template_variant(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // template_variant
     // (checking pos >= 0 because negative indexes are relative
@@ -13348,7 +13363,7 @@ int lr_position_before__terminal_28(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // '@-'
     // (checking pos >= 0 because negative indexes are relative
@@ -13368,7 +13383,7 @@ int lr_position_before__terminal_29(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // '-@'
     // (checking pos >= 0 because negative indexes are relative
@@ -13388,7 +13403,7 @@ int lr_position_before__trailing_ws(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // trailing_ws
     // (checking pos >= 0 because negative indexes are relative
@@ -13408,7 +13423,7 @@ int lr_position_before__terminal_31(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /(\?:[^-@]|-[^@])+/
     // (checking pos >= 0 because negative indexes are relative
@@ -13428,7 +13443,7 @@ int lr_position_before__rest_of_sub(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // rest_of_sub
     // (checking pos >= 0 because negative indexes are relative
@@ -13448,7 +13463,7 @@ int lr_position_before__terminal_33(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /\\n*[ \\t]+/
     // (checking pos >= 0 because negative indexes are relative
@@ -13468,7 +13483,7 @@ int lr_position_before__terminal_34(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /[ \\t]*\\n+[ \\t]+(\?!@)/
     // (checking pos >= 0 because negative indexes are relative
@@ -13488,7 +13503,7 @@ int lr_position_before__terminal_35(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /[ \\t]*\\n/
     // (checking pos >= 0 because negative indexes are relative
@@ -13508,7 +13523,7 @@ int lr_position_before__terminal_36(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /#\\s*/
     // (checking pos >= 0 because negative indexes are relative
@@ -13528,7 +13543,7 @@ int lr_position_before__terminal_37(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // &control_guts
     // (checking pos >= 0 because negative indexes are relative
@@ -13548,7 +13563,7 @@ int lr_position_before__control_continuation(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // control_continuation
     // (checking pos >= 0 because negative indexes are relative
@@ -13568,7 +13583,7 @@ int lr_position_before__control_end(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // control_end
     // (checking pos >= 0 because negative indexes are relative
@@ -13588,7 +13603,7 @@ int lr_position_before__control_start(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // control_start
     // (checking pos >= 0 because negative indexes are relative
@@ -13608,18 +13623,18 @@ int lr_position_before___subex_0(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
     //   control_continuation:control_statement fragment*:control_statement -> _subex_0
     int subp = pos;
     int lastp;
     while(subp >= 0) {
         const int startp = pos;
 
-        #line 673 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 684 "src/fpl2cc/fpl_x_parser.h.jemp" 
         lastp = subp;
         subp = lr_position_before__fragment(subp, true);
 
-        #line 671 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 682 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         // (_fragment is optional)
 
@@ -13627,7 +13642,7 @@ int lr_position_before___subex_0(int pos, bool multiple) const {
         lastp = subp;
         subp = lr_position_before__control_continuation(subp, false);
 
-        #line 671 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 682 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(lastp == subp) {
             // did not match _control_continuation - no match
@@ -13650,7 +13665,7 @@ int lr_position_before__control_fragment(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // control_fragment
     // (checking pos >= 0 because negative indexes are relative
@@ -13670,7 +13685,7 @@ int lr_position_before__terminal_43(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /(\?:[^-@}]|-[^@}])+/
     // (checking pos >= 0 because negative indexes are relative
@@ -13690,7 +13705,7 @@ int lr_position_before__terminal_44(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /[^@\\n]+/
     // (checking pos >= 0 because negative indexes are relative
@@ -13710,7 +13725,7 @@ int lr_position_before__terminal_45(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /[a-zA-Z_][a-zA-Z_0-9]+/
     // (checking pos >= 0 because negative indexes are relative
@@ -13730,7 +13745,7 @@ int lr_position_before__terminal_46(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 678 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 689 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // ␄_fpl_goal
     // (checking pos >= 0 because negative indexes are relative
@@ -13754,11 +13769,11 @@ int lr_position_before__terminal_46(int pos, bool multiple) const {
 // each, subexpressions can (and normally do) take up multiple
 // stack entries per X.
 
-#line 740 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 751 "src/fpl2cc/fpl_x_parser.h.jemp" 
 int lr_stack_size_of___fpl_null(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 0) {
@@ -13773,7 +13788,7 @@ int lr_stack_size_of___fpl_null(int pos, bool multiple) const {
 int lr_stack_size_of__fragment(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 1) {
@@ -13788,7 +13803,7 @@ int lr_stack_size_of__fragment(int pos, bool multiple) const {
 int lr_stack_size_of__complete(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 2) {
@@ -13803,7 +13818,7 @@ int lr_stack_size_of__complete(int pos, bool multiple) const {
 int lr_stack_size_of__text(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 3) {
@@ -13818,7 +13833,7 @@ int lr_stack_size_of__text(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_4(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 4) {
@@ -13833,7 +13848,7 @@ int lr_stack_size_of__terminal_4(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_5(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 5) {
@@ -13848,7 +13863,7 @@ int lr_stack_size_of__terminal_5(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_6(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 6) {
@@ -13863,7 +13878,7 @@ int lr_stack_size_of__terminal_6(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_7(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 7) {
@@ -13878,7 +13893,7 @@ int lr_stack_size_of__terminal_7(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_8(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 8) {
@@ -13893,7 +13908,7 @@ int lr_stack_size_of__terminal_8(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_9(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 9) {
@@ -13908,7 +13923,7 @@ int lr_stack_size_of__terminal_9(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_10(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 10) {
@@ -13923,7 +13938,7 @@ int lr_stack_size_of__terminal_10(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_11(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 11) {
@@ -13938,7 +13953,7 @@ int lr_stack_size_of__terminal_11(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_12(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 12) {
@@ -13953,7 +13968,7 @@ int lr_stack_size_of__terminal_12(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_13(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 13) {
@@ -13968,7 +13983,7 @@ int lr_stack_size_of__terminal_13(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_14(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 14) {
@@ -13983,7 +13998,7 @@ int lr_stack_size_of__terminal_14(int pos, bool multiple) const {
 int lr_stack_size_of__subst_start(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 15) {
@@ -13998,7 +14013,7 @@ int lr_stack_size_of__subst_start(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_16(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 16) {
@@ -14013,7 +14028,7 @@ int lr_stack_size_of__terminal_16(int pos, bool multiple) const {
 int lr_stack_size_of__subst_end(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 17) {
@@ -14028,7 +14043,7 @@ int lr_stack_size_of__subst_end(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_18(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 18) {
@@ -14043,7 +14058,7 @@ int lr_stack_size_of__terminal_18(int pos, bool multiple) const {
 int lr_stack_size_of__leading_ws(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 19) {
@@ -14058,7 +14073,7 @@ int lr_stack_size_of__leading_ws(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_20(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 20) {
@@ -14073,7 +14088,7 @@ int lr_stack_size_of__terminal_20(int pos, bool multiple) const {
 int lr_stack_size_of__identifier(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 21) {
@@ -14088,7 +14103,7 @@ int lr_stack_size_of__identifier(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_22(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 22) {
@@ -14103,7 +14118,7 @@ int lr_stack_size_of__terminal_22(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_23(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 23) {
@@ -14118,7 +14133,7 @@ int lr_stack_size_of__terminal_23(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_24(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 24) {
@@ -14133,7 +14148,7 @@ int lr_stack_size_of__terminal_24(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_25(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 25) {
@@ -14148,7 +14163,7 @@ int lr_stack_size_of__terminal_25(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_26(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 26) {
@@ -14163,7 +14178,7 @@ int lr_stack_size_of__terminal_26(int pos, bool multiple) const {
 int lr_stack_size_of__template_variant(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 27) {
@@ -14178,7 +14193,7 @@ int lr_stack_size_of__template_variant(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_28(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 28) {
@@ -14193,7 +14208,7 @@ int lr_stack_size_of__terminal_28(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_29(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 29) {
@@ -14208,7 +14223,7 @@ int lr_stack_size_of__terminal_29(int pos, bool multiple) const {
 int lr_stack_size_of__trailing_ws(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 30) {
@@ -14223,7 +14238,7 @@ int lr_stack_size_of__trailing_ws(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_31(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 31) {
@@ -14238,7 +14253,7 @@ int lr_stack_size_of__terminal_31(int pos, bool multiple) const {
 int lr_stack_size_of__rest_of_sub(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 32) {
@@ -14253,7 +14268,7 @@ int lr_stack_size_of__rest_of_sub(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_33(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 33) {
@@ -14268,7 +14283,7 @@ int lr_stack_size_of__terminal_33(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_34(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 34) {
@@ -14283,7 +14298,7 @@ int lr_stack_size_of__terminal_34(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_35(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 35) {
@@ -14298,7 +14313,7 @@ int lr_stack_size_of__terminal_35(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_36(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 36) {
@@ -14313,7 +14328,7 @@ int lr_stack_size_of__terminal_36(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_37(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 37) {
@@ -14328,7 +14343,7 @@ int lr_stack_size_of__terminal_37(int pos, bool multiple) const {
 int lr_stack_size_of__control_continuation(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 38) {
@@ -14343,7 +14358,7 @@ int lr_stack_size_of__control_continuation(int pos, bool multiple) const {
 int lr_stack_size_of__control_end(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 39) {
@@ -14358,7 +14373,7 @@ int lr_stack_size_of__control_end(int pos, bool multiple) const {
 int lr_stack_size_of__control_start(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 40) {
@@ -14373,7 +14388,7 @@ int lr_stack_size_of__control_start(int pos, bool multiple) const {
 int lr_stack_size_of___subex_0(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
     //   control_continuation:control_statement fragment*:control_statement -> _subex_0
     int subp = pos;
     bool matched_whole = true;
@@ -14381,7 +14396,7 @@ int lr_stack_size_of___subex_0(int pos, bool multiple) const {
         int ssize = 0; // size of substep
         int msize = 0; // size of subexpression match
 
-        #line 724 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 735 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         ssize = lr_stack_size_of__control_continuation(subp, false);
 
@@ -14417,7 +14432,7 @@ int lr_stack_size_of___subex_0(int pos, bool multiple) const {
 int lr_stack_size_of__control_fragment(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 42) {
@@ -14432,7 +14447,7 @@ int lr_stack_size_of__control_fragment(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_43(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 43) {
@@ -14447,7 +14462,7 @@ int lr_stack_size_of__terminal_43(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_44(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 44) {
@@ -14462,7 +14477,7 @@ int lr_stack_size_of__terminal_44(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_45(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 45) {
@@ -14477,7 +14492,7 @@ int lr_stack_size_of__terminal_45(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_46(int pos, bool multiple) const {
     int size = 0;
 
-    #line 736 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 747 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 46) {
@@ -14631,7 +14646,7 @@ StackSlice all_matched_steps() {
 // call this like:  prod_type_name(typeid(...));
 static std::string prod_type_name(const std::type_info &tinf) {
 
-    #line 885 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 896 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     if(std::type_index(typeid(Terminal)) == std::type_index(tinf)) {
         return "Terminal";
@@ -14943,7 +14958,7 @@ std::string next_up_str() const {
 // and hoping it really just gets inlined.
 inline void post_parse(std::string result) {
 
-    #line 1032 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 1043 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 }
 
@@ -15013,10 +15028,10 @@ const Product parse_goal() {
 // when in the state passed.  Used for error messages.
 static std::string expected_terminals(State st) {
 
-    #line 1107 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 1118 "src/fpl2cc/fpl_x_parser.h.jemp" 
     if(&jemplpl_parser::state_0 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@parameter:', "
         "'@include:', "
         "'@embed:', "
@@ -15034,12 +15049,12 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_1 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_2 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@@', "
         "/\\\\n*[ \\\\t]+/, "
         "/[^@\\\\n]+/, "
@@ -15049,37 +15064,37 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_3 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_4 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_5 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_6 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_7 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_8 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_9 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "&control_guts, "
         "'error {', "
         "/(\\\?:[^-@}]|-[^@}])+/, "
@@ -15088,43 +15103,43 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_10 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "'-@', "
         "";
     }
     if(&jemplpl_parser::state_11 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_12 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_13 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/[ \\\\t]*\\\\n+[ \\\\t]+(\\\?!@)/, "
         "/[ \\\\t]*\\\\n/, "
         "";
     }
     if(&jemplpl_parser::state_14 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_15 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "'-@', "
         "";
     }
     if(&jemplpl_parser::state_16 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@parameter:', "
         "'@include:', "
         "'@embed:', "
@@ -15142,59 +15157,59 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_17 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@-', "
         "/@declare\\\\s+/, "
         "";
     }
     if(&jemplpl_parser::state_18 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_19 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/[a-zA-Z_][a-zA-Z_0-9]+/, "
         "";
     }
     if(&jemplpl_parser::state_20 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "':', "
         "";
     }
     if(&jemplpl_parser::state_21 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/(\\\?:[^@]|(\\\?:@@))*/, "
         "";
     }
     if(&jemplpl_parser::state_22 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "";
     }
     if(&jemplpl_parser::state_23 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/\\\\n\\\?/, "
         "";
     }
     if(&jemplpl_parser::state_24 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_25 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_26 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@parameter:', "
         "'@include:', "
         "'@embed:', "
@@ -15212,7 +15227,7 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_27 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "&control_guts, "
         "'}', "
         "'error {', "
@@ -15222,96 +15237,96 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_28 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "'-@', "
         "";
     }
     if(&jemplpl_parser::state_29 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_30 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "'-@', "
         "";
     }
     if(&jemplpl_parser::state_31 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_32 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/[a-zA-Z_][a-zA-Z_0-9]+/, "
         "";
     }
     if(&jemplpl_parser::state_33 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'#', "
         "/(\\\?:[^-@]|-[^@])+/, "
         "";
     }
     if(&jemplpl_parser::state_34 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/(\\\?:[^-@]|-[^@])+/, "
         "";
     }
     if(&jemplpl_parser::state_35 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "'-@', "
         "";
     }
     if(&jemplpl_parser::state_36 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_37 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_38 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "'-@', "
         "";
     }
     if(&jemplpl_parser::state_39 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_40 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "!'#', "
         "";
     }
     if(&jemplpl_parser::state_41 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'#', "
         "";
     }
     if(&jemplpl_parser::state_42 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_43 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@parameter:', "
         "'@include:', "
         "'@embed:', "
@@ -15329,7 +15344,7 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_44 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "&control_guts, "
         "'}', "
         "'error {', "
@@ -15339,7 +15354,7 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_45 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "&control_guts, "
         "'@', "
         "'-@', "
@@ -15347,24 +15362,24 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_46 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_47 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "'-@', "
         "";
     }
     if(&jemplpl_parser::state_48 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_49 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@-', "
         "'@', "
         "/\\\\n*[ \\\\t]+/, "
@@ -15372,29 +15387,29 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_50 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "&control_guts, "
         "";
     }
     if(&jemplpl_parser::state_51 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@-', "
         "";
     }
     if(&jemplpl_parser::state_52 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_53 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_54 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "\?\?\?\?\?\?\?\?\?\?\?\?, "
         "'@parameter:', "
         "'@include:', "
@@ -15413,7 +15428,7 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_55 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@-', "
         "'@', "
         "/\\\\n*[ \\\\t]+/, "
@@ -15421,117 +15436,117 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_56 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'}', "
         "";
     }
     if(&jemplpl_parser::state_57 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/[^@]+/, "
         "";
     }
     if(&jemplpl_parser::state_58 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "";
     }
     if(&jemplpl_parser::state_59 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/\\\\n\\\?/, "
         "";
     }
     if(&jemplpl_parser::state_60 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_61 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/\\\\s*/, "
         "";
     }
     if(&jemplpl_parser::state_62 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/[^@]+/, "
         "";
     }
     if(&jemplpl_parser::state_63 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "";
     }
     if(&jemplpl_parser::state_64 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/\\\\n\\\?/, "
         "";
     }
     if(&jemplpl_parser::state_65 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_66 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/\\\\s*/, "
         "";
     }
     if(&jemplpl_parser::state_67 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/[^@]+/, "
         "";
     }
     if(&jemplpl_parser::state_68 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "";
     }
     if(&jemplpl_parser::state_69 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/\\\\n\\\?/, "
         "";
     }
     if(&jemplpl_parser::state_70 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_71 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/(\\\?:[^*]|(\\\?:\\\\*[^\\\\/])|(\\\?:\\\\*\\\\/[^@]))*/, "
         "";
     }
     if(&jemplpl_parser::state_72 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'*/@', "
         "";
     }
     if(&jemplpl_parser::state_73 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/\\\\n\\\?/, "
         "";
     }
     if(&jemplpl_parser::state_74 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_75 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@@', "
         "/\\\\n*[ \\\\t]+/, "
         "/[^@\\\\n]+/, "
@@ -15541,24 +15556,24 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_76 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "";
     }
     if(&jemplpl_parser::state_77 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/\\\\n\\\?/, "
         "";
     }
     if(&jemplpl_parser::state_78 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_79 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@parameter:', "
         "'@include:', "
         "'@embed:', "
@@ -15576,7 +15591,7 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_80 == st) {
         return 
-        #line 1105 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1116 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
 
@@ -15674,10 +15689,10 @@ std::string parse() {
 private:
 
 
-#line 1207 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1218 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
-#line 190 "src/jemplpl/jemplpl.fpl"
+#line 194 "src/jemplpl/jemplpl.fpl"
 
 
 static inline std::string quote(const std::string &str) {
@@ -15775,7 +15790,7 @@ void init(const std::filesystem::path &src) {
     init_import_path(src);
 }
 
-#line 15777 "src/jemplpl/jemplpl.cc"
+#line 15792 "src/jemplpl/jemplpl.cc"
 
 // return to "private" after each such block.
 // this way, authors can add public members
@@ -15785,7 +15800,7 @@ private:
 
 // custom scanners:
 
-#line 1215 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 #line 130 "src/grammarlib/jemp.fpl"
 Terminal custom_scanner_control_guts(fpl_reader &input) {
@@ -15819,18 +15834,18 @@ Terminal custom_scanner_control_guts(fpl_reader &input) {
     return result;
 
 
-    #line 15821 "src/jemplpl/jemplpl.cc"
+    #line 15836 "src/jemplpl/jemplpl.cc"
 
 }
 
 
 
-#line 1217 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1228 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
-#line 1227 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1238 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // _fpl_null
@@ -15855,7 +15870,7 @@ bool shift_NONTERM_PRODUCTION___fpl_null(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // fragment
@@ -15880,7 +15895,7 @@ bool shift_NONTERM_PRODUCTION__fragment(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // complete
@@ -15905,7 +15920,7 @@ bool shift_NONTERM_PRODUCTION__complete(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // text
@@ -15930,7 +15945,7 @@ bool shift_NONTERM_PRODUCTION__text(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -16013,7 +16028,7 @@ bool shift_TERM_EXACT__terminal_4(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -16096,7 +16111,7 @@ bool shift_TERM_EXACT__terminal_5(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -16172,7 +16187,7 @@ bool shift_TERM_REGEX__terminal_6(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -16255,7 +16270,7 @@ bool shift_TERM_EXACT__terminal_7(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -16331,7 +16346,7 @@ bool shift_TERM_REGEX__terminal_8(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -16414,7 +16429,7 @@ bool shift_TERM_EXACT__terminal_9(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -16490,7 +16505,7 @@ bool shift_TERM_REGEX__terminal_10(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -16579,7 +16594,7 @@ bool shift_TERM_EXACT__terminal_11(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -16662,7 +16677,7 @@ bool shift_TERM_EXACT__terminal_12(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -16738,7 +16753,7 @@ bool shift_TERM_REGEX__terminal_13(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -16821,7 +16836,7 @@ bool shift_TERM_EXACT__terminal_14(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // subst_start
@@ -16846,7 +16861,7 @@ bool shift_NONTERM_PRODUCTION__subst_start(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -16929,7 +16944,7 @@ bool shift_TERM_EXACT__terminal_16(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // subst_end
@@ -16954,7 +16969,7 @@ bool shift_NONTERM_PRODUCTION__subst_end(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -17037,7 +17052,7 @@ bool shift_TERM_EXACT__terminal_18(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // leading_ws
@@ -17062,7 +17077,7 @@ bool shift_NONTERM_PRODUCTION__leading_ws(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -17138,7 +17153,7 @@ bool shift_TERM_REGEX__terminal_20(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // identifier
@@ -17163,7 +17178,7 @@ bool shift_NONTERM_PRODUCTION__identifier(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -17246,7 +17261,7 @@ bool shift_TERM_EXACT__terminal_22(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -17322,7 +17337,7 @@ bool shift_TERM_REGEX__terminal_23(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -17398,7 +17413,7 @@ bool shift_TERM_REGEX__terminal_24(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -17481,7 +17496,7 @@ bool shift_TERM_EXACT__terminal_25(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -17554,7 +17569,7 @@ bool shift_TERM_EXACT_INV__terminal_26(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // template_variant
@@ -17579,7 +17594,7 @@ bool shift_NONTERM_PRODUCTION__template_variant(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -17662,7 +17677,7 @@ bool shift_TERM_EXACT__terminal_28(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -17745,7 +17760,7 @@ bool shift_TERM_EXACT__terminal_29(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // trailing_ws
@@ -17770,7 +17785,7 @@ bool shift_NONTERM_PRODUCTION__trailing_ws(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -17846,7 +17861,7 @@ bool shift_TERM_REGEX__terminal_31(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // rest_of_sub
@@ -17871,7 +17886,7 @@ bool shift_NONTERM_PRODUCTION__rest_of_sub(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -17947,7 +17962,7 @@ bool shift_TERM_REGEX__terminal_33(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -18023,7 +18038,7 @@ bool shift_TERM_REGEX__terminal_34(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -18099,7 +18114,7 @@ bool shift_TERM_REGEX__terminal_35(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -18175,7 +18190,7 @@ bool shift_TERM_REGEX__terminal_36(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -18246,7 +18261,7 @@ bool shift_TERM_CUSTOM__terminal_37(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // control_continuation
@@ -18271,7 +18286,7 @@ bool shift_NONTERM_PRODUCTION__control_continuation(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // control_end
@@ -18296,7 +18311,7 @@ bool shift_NONTERM_PRODUCTION__control_end(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // control_start
@@ -18321,7 +18336,7 @@ bool shift_NONTERM_PRODUCTION__control_start(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // (_subex_0)
@@ -18346,7 +18361,7 @@ bool shift_NONTERM_SUBEXPRESSION___subex_0(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // control_fragment
@@ -18371,7 +18386,7 @@ bool shift_NONTERM_PRODUCTION__control_fragment(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -18447,7 +18462,7 @@ bool shift_TERM_REGEX__terminal_43(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -18523,7 +18538,7 @@ bool shift_TERM_REGEX__terminal_44(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -18599,7 +18614,7 @@ bool shift_TERM_REGEX__terminal_45(bool eject) {
 
 
 
-#line 1226 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -18681,7 +18696,7 @@ public:
 
 typedef enum {
 
-    #line 1236 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 1247 "src/fpl2cc/fpl_x_parser.h.jemp" 
     __fpl_null, // 0 _fpl_null
     _fragment, // 1 fragment
     _complete, // 2 complete
@@ -18736,7 +18751,7 @@ typedef enum {
 static std::string element_str(int id) {
     switch(id) {
 
-        #line 1246 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1257 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 0: return "_fpl_null (0)";
         case 1: return "fragment (1)";
         case 2: return "complete (2)";
@@ -18791,147 +18806,147 @@ static std::string element_str(int id) {
 static bool is_nonterminal(int id, const std::string &caller = CALLER()) {
     switch(id) {
 
-        #line 1259 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1270 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 0: return true;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 1: return true;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 2: return true;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 3: return true;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 4: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 5: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 6: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 7: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 8: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 9: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 10: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 11: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 12: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 13: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 14: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 15: return true;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 16: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 17: return true;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 18: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 19: return true;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 20: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 21: return true;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 22: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 23: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 24: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 25: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 26: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 27: return true;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 28: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 29: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 30: return true;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 31: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 32: return true;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 33: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 34: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 35: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 36: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 37: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 38: return true;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 39: return true;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 40: return true;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 41: return true;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 42: return true;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 43: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 44: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 45: return false;
 
-        #line 1258 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1269 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 46: return false;
     }
     jerror::error(stringformat(
@@ -18945,7 +18960,7 @@ static std::string state_to_str(State st) {
     if(!st) return "NULL";
     // c++ won't let you compare pointers in a switch statement.. sigh
 
-    #line 1273 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 1284 "src/fpl2cc/fpl_x_parser.h.jemp" 
     if(&jemplpl_parser::state_0 == st) return "state_0";
     if(&jemplpl_parser::state_1 == st) return "state_1";
     if(&jemplpl_parser::state_2 == st) return "state_2";
@@ -19036,7 +19051,7 @@ static std::string state_to_str(State st) {
 // return a stack-trace style dump of the state passed.
 static const char *state_string(State st) {
 
-    #line 1288 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 1299 "src/fpl2cc/fpl_x_parser.h.jemp" 
     if(&jemplpl_parser::state_0 == st) {
         return "state_0:\n"
         "    complete (0:1):\t •fragment+:fragments \t=> state 79\t(src/grammarlib/jemp.fpl:12)\n"
@@ -19065,7 +19080,7 @@ static const char *state_string(State st) {
         "    text (28:1):\t •/[^@\\\\n]+/:t \t=> state 6\t(src/grammarlib/jemp.fpl:145)\n"
         "    text (29:1):\t •leading_ws \t=> state 17\t(src/grammarlib/jemp.fpl:149)\n"
         "    text (30:1):\t •trailing_ws \t=> state 1\t(src/grammarlib/jemp.fpl:150)\n"
-        "    _fpl_goal (32:1):\t •complete \t=> state 80\t(src/fpl2cc/productions.h:4254)\n"
+        "    _fpl_goal (32:1):\t •complete \t=> state 80\t(src/fpl2cc/productions.h:4311)\n"
         ;
     }
     if(&jemplpl_parser::state_1 == st) {
@@ -19678,7 +19693,7 @@ static const char *state_string(State st) {
     }
     if(&jemplpl_parser::state_80 == st) {
         return "state_80:\n"
-        "    _fpl_goal (32:0):\t complete •\t=> (done)\t(src/fpl2cc/productions.h:4254)\n"
+        "    _fpl_goal (32:0):\t complete •\t=> (done)\t(src/fpl2cc/productions.h:4311)\n"
         ;
     }
 
@@ -19692,10 +19707,10 @@ static const char *state_string(State st) {
 // needs no runtime check.  nicht war?
 static bool state_ejects(State st, int element_id) {
 
-    #line 1310 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 1321 "src/fpl2cc/fpl_x_parser.h.jemp" 
     if(&jemplpl_parser::state_0 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_start == element_id) {
             return true;
@@ -19731,7 +19746,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_1 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -19743,7 +19758,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_2 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -19755,7 +19770,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_3 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -19767,7 +19782,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_4 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -19779,7 +19794,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_5 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -19791,7 +19806,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_6 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -19803,7 +19818,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_7 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -19815,7 +19830,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_8 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -19827,7 +19842,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_9 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_16 == element_id) {
             return true;
@@ -19843,7 +19858,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_10 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_end == element_id) {
             return true;
@@ -19855,7 +19870,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_11 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -19867,7 +19882,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_12 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -19879,7 +19894,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_13 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -19895,7 +19910,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_14 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -19907,7 +19922,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_15 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_end == element_id) {
             return true;
@@ -19919,7 +19934,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_16 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_start == element_id) {
             return true;
@@ -19955,7 +19970,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_17 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -19971,7 +19986,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_18 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -19983,7 +19998,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_19 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -19991,7 +20006,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_20 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_22 == element_id) {
             return true;
@@ -20003,7 +20018,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_21 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -20011,7 +20026,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_22 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_11 == element_id) {
             return true;
@@ -20023,7 +20038,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_23 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_8 == element_id) {
             return true;
@@ -20035,7 +20050,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_24 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20047,7 +20062,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_25 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20059,7 +20074,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_26 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_start == element_id) {
             return true;
@@ -20095,7 +20110,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_27 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_18 == element_id) {
             return true;
@@ -20115,7 +20130,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_28 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_end == element_id) {
             return true;
@@ -20127,7 +20142,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_29 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20139,7 +20154,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_30 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_end == element_id) {
             return true;
@@ -20151,7 +20166,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_31 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20163,7 +20178,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_32 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -20171,7 +20186,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_33 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_25 == element_id) {
             return true;
@@ -20183,7 +20198,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_34 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -20191,7 +20206,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_35 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_end == element_id) {
             return true;
@@ -20203,7 +20218,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_36 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20215,7 +20230,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_37 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20227,7 +20242,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_38 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_end == element_id) {
             return true;
@@ -20239,7 +20254,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_39 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20251,7 +20266,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_40 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -20259,7 +20274,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_41 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_25 == element_id) {
             return true;
@@ -20271,7 +20286,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_42 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20283,7 +20298,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_43 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_start == element_id) {
             return true;
@@ -20319,7 +20334,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_44 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_16 == element_id) {
             return true;
@@ -20335,7 +20350,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_45 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_end == element_id) {
             return true;
@@ -20347,7 +20362,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_46 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20359,7 +20374,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_47 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_end == element_id) {
             return true;
@@ -20371,7 +20386,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_48 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20383,7 +20398,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_49 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20403,7 +20418,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_50 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -20411,7 +20426,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_51 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -20419,7 +20434,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_52 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20431,7 +20446,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_53 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20443,7 +20458,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_54 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20483,7 +20498,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_55 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_start == element_id) {
             return true;
@@ -20499,7 +20514,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_56 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -20507,7 +20522,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_57 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -20515,7 +20530,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_58 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_11 == element_id) {
             return true;
@@ -20527,7 +20542,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_59 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_8 == element_id) {
             return true;
@@ -20539,7 +20554,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_60 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20551,7 +20566,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_61 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_13 == element_id) {
             return true;
@@ -20563,7 +20578,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_62 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -20571,7 +20586,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_63 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_11 == element_id) {
             return true;
@@ -20583,7 +20598,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_64 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_8 == element_id) {
             return true;
@@ -20595,7 +20610,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_65 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20607,7 +20622,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_66 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_13 == element_id) {
             return true;
@@ -20619,7 +20634,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_67 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -20627,7 +20642,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_68 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_11 == element_id) {
             return true;
@@ -20639,7 +20654,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_69 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_8 == element_id) {
             return true;
@@ -20651,7 +20666,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_70 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20663,7 +20678,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_71 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -20671,7 +20686,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_72 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_7 == element_id) {
             return true;
@@ -20683,7 +20698,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_73 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_8 == element_id) {
             return true;
@@ -20695,7 +20710,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_74 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20707,7 +20722,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_75 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -20715,7 +20730,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_76 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_11 == element_id) {
             return true;
@@ -20727,7 +20742,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_77 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_8 == element_id) {
             return true;
@@ -20739,7 +20754,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_78 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20751,7 +20766,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_79 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20791,7 +20806,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_80 == st) {
 
-        #line 1305 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1316 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20809,7 +20824,7 @@ static bool state_ejects(State st, int element_id) {
 static bool is_goal(int el_id) {
     switch(el_id) {
 
-        #line 1320 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1331 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case ElementID::_complete: return true;
 
         default: return false;
@@ -20823,26 +20838,26 @@ bool result_is_goal() const {
 
 static size_t separator_length(const utf8_byte *inp) {
 
-    #line 1334 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 1345 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
-    #line 1347 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 1358 "src/fpl2cc/fpl_x_parser.h.jemp" 
     {
 
-        #line 1338 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1349 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
-        #line 1345 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1356 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
         #line 1 "src/grammarlib/none.inc"
         // separator "none" means 0 bytes of separator:
         return 0;
 
-        #line 20839 "src/jemplpl/jemplpl.cc"
+        #line 20854 "src/jemplpl/jemplpl.cc"
 
 
     }
 
-    #line 1349 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 1360 "src/fpl2cc/fpl_x_parser.h.jemp" 
     return 0;
 }
 
@@ -20853,10 +20868,10 @@ size_t eat_separator() {
 
 // reduction rules:
 
-#line 1365 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1376 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -20939,7 +20954,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 35 "src/jemplpl/jemplpl.fpl"
+    #line 39 "src/jemplpl/jemplpl.fpl"
 
     std::string guts;
 
@@ -20989,7 +21004,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -21072,7 +21087,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 76 "src/jemplpl/jemplpl.fpl"
+    #line 80 "src/jemplpl/jemplpl.fpl"
 
     std::string frag = "\nout += ";
     chunks.foreach(
@@ -21089,7 +21104,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -21183,7 +21198,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -21266,7 +21281,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 85 "src/jemplpl/jemplpl.fpl"
+    #line 89 "src/jemplpl/jemplpl.fpl"
 
     return line_num(comment.self()) + jempl.realign_frag();
 
@@ -21279,7 +21294,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -21362,7 +21377,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 89 "src/jemplpl/jemplpl.fpl"
+    #line 93 "src/jemplpl/jemplpl.fpl"
 
     jempl.params.push_back(param_decl.val());
     return "";
@@ -21376,7 +21391,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -21459,7 +21474,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 95 "src/jemplpl/jemplpl.fpl"
+    #line 99 "src/jemplpl/jemplpl.fpl"
 
     return jempl.realign_frag(include_file.val(), "1") + stringformat(
     "\nout += std::string((const char *)utf8_buffer({}).data());\n",
@@ -21475,7 +21490,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -21558,7 +21573,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 109 "src/jemplpl/jemplpl.fpl"
+    #line 113 "src/jemplpl/jemplpl.fpl"
 
     auto full_path = jempl.import_path.find(embed_file.val());
 
@@ -21582,7 +21597,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -21665,7 +21680,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 124 "src/jemplpl/jemplpl.fpl"
+    #line 128 "src/jemplpl/jemplpl.fpl"
 
     return stringformat(
     "{{\n{}\n"
@@ -21685,7 +21700,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -21774,7 +21789,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 135 "src/jemplpl/jemplpl.fpl"
+    #line 139 "src/jemplpl/jemplpl.fpl"
 
     return line_num(value.self())
     + stringformat("const auto {} = {};\n", name_decl.val(), value.val());
@@ -21788,7 +21803,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -21871,7 +21886,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 140 "src/jemplpl/jemplpl.fpl"
+    #line 144 "src/jemplpl/jemplpl.fpl"
 
     jempl.realign_fragment = realign.val();
 
@@ -21886,7 +21901,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -21995,7 +22010,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22104,7 +22119,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22213,7 +22228,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22322,7 +22337,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22431,7 +22446,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22540,7 +22555,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22649,7 +22664,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22758,7 +22773,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22867,7 +22882,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22956,7 +22971,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 151 "src/jemplpl/jemplpl.fpl"
+    #line 155 "src/jemplpl/jemplpl.fpl"
 
     std::list<std::string> cases;
     std::string search_re = stringformat("{}.*\\.h\\.jemp$", jempl_name.val());
@@ -22989,7 +23004,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -23075,7 +23090,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 146 "src/jemplpl/jemplpl.fpl"
+    #line 150 "src/jemplpl/jemplpl.fpl"
 
     add_import(jempl.import_path.find(jempl_name.val() + ".h.jemp"));
     return stringformat("\nout += {}{};\n", jempl_name.val(), jempl_args.val());
@@ -23089,7 +23104,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -23183,7 +23198,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -23292,7 +23307,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -23401,13 +23416,13 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (control_continuation:control_statement fragment*:control_statement -> _subex_0 is a subexpression)
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -23490,7 +23505,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 175 "src/jemplpl/jemplpl.fpl"
+    #line 179 "src/jemplpl/jemplpl.fpl"
 
     return stringformat(
     "{}{}\n{}\n",
@@ -23508,7 +23523,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -23602,7 +23617,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -23685,7 +23700,7 @@ bool dummy = true // hack for comma
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 185 "src/jemplpl/jemplpl.fpl"
+    #line 189 "src/jemplpl/jemplpl.fpl"
 
     return line_num(variable.self())
     + "out += stringformat(\"{}\"," + variable.val().to_str() + ");\n";
@@ -23699,7 +23714,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -23808,7 +23823,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -23915,7 +23930,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -24022,7 +24037,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -24131,7 +24146,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1364 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1375 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -24165,13 +24180,13 @@ bool dummy = true // hack for comma
             return 1;
         }
         static int line_number() {
-            return 4254;
+            return 4311;
         }
         static const char *filename() {
             return "src/fpl2cc/productions.h";
         }
         static const char *location() {
-            return "src/fpl2cc/productions.h:4254";
+            return "src/fpl2cc/productions.h:4311";
         }
         static const char *to_str() {
             return "complete -> _fpl_goal";
@@ -24186,7 +24201,7 @@ bool dummy = true // hack for comma
                 return pname[ind];
             } else {
                 return "param_name index out of bounds at "
-                "src/fpl2cc/productions.h:4254";
+                "src/fpl2cc/productions.h:4311";
             }
         }
         static const char *param_type(unsigned int ind) {
@@ -24200,7 +24215,7 @@ bool dummy = true // hack for comma
             } else {
                 return (
                 "param_type index out of bounds at "
-                "src/fpl2cc/productions.h:4254"
+                "src/fpl2cc/productions.h:4311"
                 );
             }
         }
@@ -24214,7 +24229,7 @@ bool dummy = true // hack for comma
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/fpl2cc/productions.h:4254 (default action for complete -> _fpl_goal)"
+    #line 1 "src/fpl2cc/productions.h:4311 (default action for complete -> _fpl_goal)"
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
@@ -24231,7 +24246,7 @@ bool dummy = true // hack for comma
     );
 
     #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 4254 "src/fpl2cc/productions.h"
+    #line 4311 "src/fpl2cc/productions.h"
 }
 
 
@@ -24244,11 +24259,11 @@ bool dummy = true // hack for comma
 #endif // header guard
 
 
-#line 1378 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 int main(int argc, const char **argv) {
 
-#line 288 "src/jemplpl/jemplpl.fpl"
+#line 292 "src/jemplpl/jemplpl.fpl"
 
 if(argc < 2) {
     jerror::error("Please provide a source file name.\n");
@@ -24303,7 +24318,7 @@ std::cout << reformat_code(join(generated_code, "\n\n"));
 
 return total_errors?1:0;
 
-#line 24305 "src/jemplpl/jemplpl.cc"
+#line 24320 "src/jemplpl/jemplpl.cc"
 
 }
 

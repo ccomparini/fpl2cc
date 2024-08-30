@@ -3,9 +3,13 @@
 
  jemplpl - .jemp to c++ converter.
 
- Given one or more template files, creates corresponding c++ functions
- white return strings containing filled-in copies of said templates,
- and writes them to stdout.
+ Given one or more template files, creates the corresponding c++
+ functions which return strings containing filled-in copies of
+ said templates, and writes them to stdout.
+
+ So, say that x.h.jemp is a jemp template file. This converts
+   x.h.jemp -> x.h
+ .. and x.h will 
 
  */
 
