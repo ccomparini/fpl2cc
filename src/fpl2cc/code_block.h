@@ -24,10 +24,9 @@ struct code_block {
     int line;
     std::string code;
 
-    // If this is set, it indeicates that the code block
+    // If this is set, it indicates that the code block
     // is just a stub, and fpl authors are expected to
     // implement something real.
-    // in the fpl grammar.
     // An example of where this might be used is if you
     // @import ansi-c;  in the ansi c fpl there are stubs
     // for enumeration constant and typedefed type tokens,
@@ -132,6 +131,8 @@ struct code_block {
     std::string source_filename() const { return source_file; }
     int         line_number()     const { return line; }
 
+    // formats the code with the assumption that it's c/c++.
+    // phase this out in favor of jemp/templates etc.
     std::string format(bool restore_line = true) const {
         std::string out;
         out += stringformat("\n#line {} \"{}\"\n", line, source_file);
@@ -240,6 +241,20 @@ public:
         }
     }
 };
+
+std::string to_string(const code_block::source_language &l) {
+    switch(l) {
+        case code_block::UNKNOWN:
+            return "UNKNOWN";
+        case code_block::DEFAULT:
+            return "DEFAULT";
+        case code_block::REGEX:
+            return "REGEX";
+        case code_block::EXACT_MATCH:
+            return "EXACT_MATCH";
+    }
+    return stringformat("Invalid source language id 0x{:x}", int(l));
+}
 
 }
 
