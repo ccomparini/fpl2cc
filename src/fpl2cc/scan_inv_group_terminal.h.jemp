@@ -1,5 +1,7 @@
 @/*
-  Generates code to scan the inverse of the given group terminal.
+  Generates code to scan the inverse of the given group terminal -
+  in effect, it scans -until- it finds a match for the group
+  terminal.
 
   See also scan_group_terminal.h.jemp.
 */@
@@ -17,7 +19,8 @@
         // note this is suboptimal in that we end up making a terminal
         // for each instead of just advancing the read pointer.
         // The thing is, some terminals are considered a match
-        // without advancing the read pointer.
+        // without advancing the read pointer (eg any assertion),
+        // so we kinda have to do this.
         @#scan_terminal("tmp", prds, component.inverse())@
         if(tmp.length() < shortest_match) {
             shortest_match = tmp.length();
@@ -31,6 +34,6 @@
         }
     }
 
-    return Terminal(); // no match
+    return Terminal(); // no match (i.e. we matched something in the group)
 }
 

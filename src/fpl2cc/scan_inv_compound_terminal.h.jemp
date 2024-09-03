@@ -1,8 +1,8 @@
 @/*
   Generates code to scan the inverse of the given compound terminal.
   Analogously to how it works for inverting exact matches, "inverse"
-  matches essentially match everything until the thing they would
-  match (or eof).
+  matches match everything -until- the terminal they are the inverse
+  of (or eof).
 
   Generally speaking, the component terminals must themselves be
   invertable.
