@@ -1,0 +1,9 @@
+returncode = 0
+stderr = ""
+stdout = "woo abc
+'abd ' at src/fpl2cc/test/cterm.test/d.cterm:1:9 is not 'abc' - good
+abc
+'afoo' at src/fpl2cc/test/cterm.test/d.cterm:1:17 is not 'abc' - good
+abc
+'moo\\n' at src/fpl2cc/test/cterm.test/d.cterm:1:25 is not 'abc' - good
+"

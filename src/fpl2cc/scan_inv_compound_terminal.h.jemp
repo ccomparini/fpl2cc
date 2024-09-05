@@ -14,8 +14,8 @@
 @parameter: const custom_terminal &term @
 
 {
-    auto start = reader->current_position();
-    auto end = reader->current_position();
+    auto const start = reader->current_position();
+    auto         end = reader->current_position();
 
     // grr we can't do knuth-morris-pratt because we are
     // comparing -to- characters but we don't have any idea
@@ -29,18 +29,25 @@
     //     if it matches, return the saved position. Otherwise,
     //     scan the first component (to get rid of it) and continue.
     @declare first_component:  *term.components.begin()@
+    @declare inv_first:  first_component.inverse()@
     do {
         Terminal nonmatch;
-        @#scan_terminal("nonmatch", prds, first_component.inverse())@
+        @#scan_terminal("nonmatch", prds, inv_first)@
         end = reader->current_position();
         Terminal matchy;
         @#scan_terminal("matchy", prds, term.element())@
-        if(matchy)
+        if(matchy) {
             break;
+        }
         @#scan_terminal("matchy", prds, first_component)@
 
     } while(!reader->eof());
 
-    return Terminal(reader->read_string(end - start));
+    if(end > start) {
+        reader->go_to(start);
+        return Terminal(reader->read_string(end - start));
+    }
+
+    return false;
 }
 
