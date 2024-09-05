@@ -86,6 +86,19 @@ struct custom_terminal {
         components(se) {
     }
 
+    std::string to_str() const {
+        if(components.size())
+            return stringformat("{}: {}\n", gel, components);
+
+        if(code.language == code_block::DEFAULT) {
+            // (because dumping the actual source code could be
+            // a lot)
+            return stringformat("{}: (code from {})\n", gel, code.location());
+        }
+
+        return stringformat("{}: {}\n", gel, code);
+    }
+
     bool is_stub() const { return code.is_stub; }
 
     std::string source_location()          const { return code.location(); }
