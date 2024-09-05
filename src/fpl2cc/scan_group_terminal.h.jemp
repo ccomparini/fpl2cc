@@ -6,7 +6,7 @@
 */@
 
 @parameter: const productions &prds @
-@parameter: const std::list<grammar_element> &components @
+@parameter: const custom_terminal &term @
 
 {
     auto start = reader->current_position();
@@ -19,8 +19,8 @@
     // can be made more efficient - just keep 2 SourcePositions
     // and return the string between them or something?  anyway...
     Terminal tmp;
-    // @components.size()@ components:
-    @for(auto component : components) {@
+    // @term.components.size()@ components:
+    @for(auto component : term.components) {@
         @#scan_terminal("tmp", prds, component)@
         if(reader->current_position() - start > longest_match) {
             longest_match = reader->current_position() - start;

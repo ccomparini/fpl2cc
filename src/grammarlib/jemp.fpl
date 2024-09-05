@@ -126,8 +126,7 @@ subst_start^ /#\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^ -> 
 # @} else {@
 #   something is false 
 # @}@
-#@terminal control_guts /(?:[^-{@]|-[^@])*\{/ # @terminal generates failcode!
-@scanner control_guts /(?:[^-{@]|-[^@])*[{]/
+@terminal control_guts /(?:[^-{@]|-[^@])*[{]/
 subst_start^ '}':control_statement &control_guts:control_statement subst_end^ -> control_continuation +{ return control_statement@join(" "); }+
 subst_start^ '}':control_statement           subst_end^                       -> control_end;
 subst_start^ &control_guts:control_statement subst_end^                       -> control_start;

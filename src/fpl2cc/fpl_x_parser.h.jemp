@@ -130,7 +130,7 @@ public:
         }
 
         // this is so that bool "just works" in return values from
-        // custom scanners
+        // assertions
         Terminal(bool matched) {
             if(matched) matches.push_back("");
         }
@@ -1218,11 +1218,8 @@ private:
     @}@
 
     // custom scanners:
-    @for(auto &[scanner_name, scanner_code] : prds.scanners) {@
-        #line @scanner_code.line@ "@scanner_code.source_file@"
-        Terminal custom_scanner_@scanner_name@(fpl_reader &input) {
-            @scanner_code.format()@
-        }
+    @for(auto &[scanner_name, scanner] : prds.custom_terminals) {@
+        @#custom_scanner(prds, scanner_name, scanner)@
     @}@
 
     @/* "shift" methods.  these check for the relevant element and,

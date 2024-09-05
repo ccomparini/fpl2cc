@@ -7,15 +7,15 @@
 */@
 
 @parameter: const productions &prds @
-@parameter: const std::list<grammar_element> &components @
+@parameter: const custom_terminal &term @
 
 {
     auto start = reader->current_position();
     size_t shortest_match = std::numeric_limits<size_t>::max();
 
     Terminal tmp;
-    // @components.size()@ components:
-    @for(auto component : components) {@
+    // @term.components.size()@ components:
+    @for(auto component : term.components) {@
         // note this is suboptimal in that we end up making a terminal
         // for each instead of just advancing the read pointer.
         // The thing is, some terminals are considered a match

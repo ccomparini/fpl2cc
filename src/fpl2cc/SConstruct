@@ -3,12 +3,6 @@ Import('env')
 env = env.Clone()
 
 jemps = []
-jemps.append(env.Jemp2h('scan_compound_terminal.h.jemp'))
-jemps.append(env.Jemp2h('scan_inv_compound_terminal.h.jemp'))
-jemps.append(env.Jemp2h('scan_group_terminal.h.jemp'))
-jemps.append(env.Jemp2h('scan_inv_assertion.h.jemp'))
-jemps.append(env.Jemp2h('scan_inv_group_terminal.h.jemp'))
-jemps.append(env.Jemp2h('regex_custom_scanner.h.jemp'))
 
 jemps.append(env.Jemp2h('fpl_x_parser.h.jemp'))
 

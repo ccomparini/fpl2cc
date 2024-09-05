@@ -1,18 +1,21 @@
 #
 #  second custom terminal/scanner test.
 #
-#  The cscan one has gotten too rangy and out of hand.
+#  The cscan one has gotten too rangy and out of hand
+#  (just like the scanner code it's testing).
 #
-#  This one mainly tests compound terminals.
+#  This one mainly tests compound terminals and assertions.
 #
 
 @default_main
 @produces std::string
 @goal done
 
+# (builtins gives us &eof - testing if it imports as expected)
 @import `builtins`
 
 # hmm what if we can invoke subgrammars as terminals?
+# HEY what if we -dont- use parens for compound terminals.  much smarter.
 
 @terminal abc ('a' 'b' 'c')
 @terminal not_a_then_abc (!'a' 'a' 'b' 'c')
@@ -20,19 +23,39 @@
 @assertion on_first_line +{
     return reader->line_number() == 1;
 }+
+@assertion start_of_input +{
+    return reader->current_position() == 0;
+}+
 @terminal foo_on_first_line (&on_first_line 'foo')
+@terminal foo_not_on_first_line (!&on_first_line 'foo')
+
+@terminal line_number +{
+    // always matches; returns current line number
+    return stringformat("{}", reader->line_number());
+}+
 
 @terminal abc_nl_eof (&abc "\n" &eof)
+@terminal empty_file (&start_of_input &eof)
 
-token+ -> done +{ return token@join("\n"); }+
+&empty_file -> done +{ return "no input"; }+
+token+      -> done +{ return token@join("\n"); }+
 
-&foo_on_first_line  -> token +{ return "Foo on first line"; }+
-&abc_nl_eof         -> token +{ return "abc on last line"; }+
-&abc                -> token;
-&num_then_k         -> token +{
+&foo_on_first_line -> token +{ return "Foo on first line"; }+
+&foo_not_on_first_line &eof -> token +{
+    return "foo, after which we are done.";
+}+
+&foo_not_on_first_line &line_number -> token +{
+    return stringformat(
+        "{}, after which we are on line {}",
+        foo_not_on_first_line, line_number
+    );
+}+
+
+&abc_nl_eof             -> token +{ return "abc on last line"; }+
+&abc                    -> token;
+&num_then_k             -> token +{
     return stringformat("k preceeded by {}", num_then_k.capgroup(0));
 }+
 
-&not_a_then_abc      -> token;
-'foo'                -> token;
-#!&abc          -> token;
+&not_a_then_abc -> token;
+#!&abc           -> token;

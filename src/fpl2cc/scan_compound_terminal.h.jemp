@@ -10,12 +10,12 @@
   
 */@
 @parameter: const productions &prds @
-@parameter: const std::list<grammar_element> &components @
+@parameter: const custom_terminal &term @
 {
     Terminal result(""); // "" reserves space for the full match
 
     auto start = reader->current_position();
-    @for(auto component : components) {@ {
+    @for(auto component : term.components) {@ {
         Terminal tmp;
         @#scan_terminal("tmp", prds, component)@
         if(!tmp) {

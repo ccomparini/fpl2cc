@@ -20,6 +20,7 @@
 # declared/stub scanner.  the normal use for this would be
 # in an abstract grammar, where it would be expected to
 # be implemented in an application specific way.
+# in this test case, we expect fpl to issue a warning.
 @scanner unimplemented_stub_scanner
 
 # "scans" and expands a variable
@@ -144,9 +145,9 @@ literal_double_quote -> stuff;
 "``"^ !"``":guts "``"^ -> string;
 
 # also for test purposes, other blocks can be specified,
-# let's say, like this:
-@scanner block_2_start /([+-])\{/
-@scanner block_2_end   /\}([+-])/
+# let's say, like this
+@terminal block_2_start /([+-])\{/
+@terminal block_2_end   /\}([+-])/
 &block_2_start !&block_2_end:guts &block_2_end -> block +{
     auto start = block_2_start.capgroup(0);
     auto end   = block_2_end.capgroup(0);

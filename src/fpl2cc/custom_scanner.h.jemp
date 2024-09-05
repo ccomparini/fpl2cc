@@ -1,0 +1,37 @@
+@parameter: const productions &prds@
+@parameter: const std::string &scanner_name @
+@parameter: const custom_terminal &term @
+
+@/*
+   Defines the scan function for the custom terminal passed.
+ */@
+#line @term.code.line@ "@term.code.source_file@"
+Terminal custom_scanner_@scanner_name@(fpl_reader &input) {
+    @if(auto builtin_impl = term.builtin_el()) {@
+        Terminal result;
+        @/* there's some builtin type we can use (regex etc),
+            so just use the same template the builtins use:
+        */@
+        @#scan_terminal("result", prds, builtin_impl)@
+        return result;
+    @} else if(term.el_type() == grammar_element::TERM_GROUP) {@
+        @#scan_group_terminal(prds, term)@
+    @} else if(term.el_type() == grammar_element::TERM_GROUP_INV) {@
+        @#scan_inv_group_terminal(prds, term)@
+    @} else if(term.el_type() == grammar_element::TERM_COMPOUND) {@
+        @#scan_compound_terminal(prds, term)@
+    @} else if(term.el_type() == grammar_element::TERM_COMPOUND_INV) {@
+        @#scan_inv_compound_terminal(prds, term)@
+    @} else if(term.el_type() == grammar_element::TERM_ASSERTION_INV) {@
+        @/*
+           since the base terminal is an assertion, it merely
+           returns a boolean value asserting something or the
+           other to be true; therefore the inverse is just the
+           logical "not":
+         */@
+        return !custom_scanner_@term.element().expr@(input);
+    @} else {@
+        @term.code.format()@
+    @}@
+}
+

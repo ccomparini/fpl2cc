@@ -1,0 +1,5 @@
+returncode = 0
+stderr = "    warning: src/fpl2cc/test/cscan.test/cscan.fpl:69: &unimplemented_stub_scanner (src/fpl2cc/test/cscan.test/cscan.fpl:27) is unimplemented
+src/fpl2cc/test/cscan.test/cscan.fpl: 1 warnings
+"
+stdout = ""

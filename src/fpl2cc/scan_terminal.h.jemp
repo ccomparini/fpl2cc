@@ -59,22 +59,36 @@
         if(match.length())
             @result_var@ = Terminal(match);
     @} else if(el.type == grammar_element::TERM_CUSTOM) {@
-        @result_var@ = custom_scanner_@match_str@(*reader);
+        @result_var@ = custom_scanner_@el.expr@(*reader);
     @} else if(el.type == grammar_element::TERM_CUSTOM_INV) {@
         @declare inv_name: prds.inverse_scanner_name(match_str)@
         @if(prds.scanner_exists(inv_name)) {@
             @result_var@ = custom_scanner_@inv_name@(*reader);
         @} else {@
-            @error {@ No inverse defined for scanner &@match_str@ @-}@
+            @error {@ No inverse defined for scanner &@match_str@  (@inv_name@)@-}@
         @}@
     @} else if(el.type == grammar_element::LACK_OF_SEPARATOR) {@
         if(!bytes_eaten) {
             @result_var@ = Terminal("⦑lack-of-separator⦒");
         }
+    @} else if(el.type == grammar_element::TERM_ASSERTION) {@
+        @result_var@ = bool(custom_scanner_@el.expr@(*reader));
+    @} else if(el.type == grammar_element::TERM_ASSERTION_INV) {@
+        @result_var@ = custom_scanner_@el.expr@(*reader);
+    @} else if(el.type == grammar_element::TERM_GROUP) {@
+        @result_var@ = custom_scanner_@el.expr@(*reader);
+    @} else if(el.type == grammar_element::TERM_GROUP_INV) {@
+        @result_var@ = custom_scanner_@el.expr@(*reader);
+    @} else if(el.type == grammar_element::TERM_COMPOUND) {@
+        @result_var@ = custom_scanner_@el.expr@(*reader);
+    @} else if(el.type == grammar_element::TERM_COMPOUND_INV) {@
+        @result_var@ = custom_scanner_@el.expr@(*reader);
     @} else if(el.type == grammar_element::END_OF_PARSE) {@
         // end of parse placeholder
     @} else {@
-        #error Unimplemented terminal type: @el.type@
+// ALSO maybe simplify by defaulting to calling custom_scanner_ el_expr here instead?
+// and/or do the check for its existence here. XXX DO THIS it really simplifies
+        @error {-@ Unimplemented terminal type: @el.type@  (@el@)@}@
     @}@
 
 }

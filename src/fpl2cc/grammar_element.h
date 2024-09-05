@@ -19,10 +19,18 @@ struct grammar_element {
         TERM_CUSTOM,       // custom code for matching terminal
         TERM_CUSTOM_INV,   // match anything -but- this custom
         LACK_OF_SEPARATOR, // pseudoterminal indicating no separator
+        TERM_ASSERTION,    // match if condition pertains
+        TERM_ASSERTION_INV,// match if condition does not pertain
         TERM_EXACT,        // exact string match
         TERM_EXACT_INV,    // match anything -but- this exact string
         TERM_REGEX,        // regular expression match
         TERM_REGEX_INV,    // match anything -but- this regex
+        // at the moment, these are custom terminals only:
+        TERM_GROUP,        // match anything in the group of terminals
+        TERM_GROUP_INV,    // match up to anything in group of terminals
+        TERM_COMPOUND,     // match only if each terminal within matches
+        TERM_COMPOUND_INV, // match anything -but- this compound
+        // end custom terminals only
         END_OF_PARSE,      // indicates we're done parsing (good or bad)
         _TYPE_CAP
     } Type;
@@ -36,11 +44,17 @@ struct grammar_element {
             "NONTERM_PREC_PLACEHOLDER",
             "TERM_CUSTOM",
             "TERM_CUSTOM_INV",
-            "LACK_OF_SEPARATOR", // convert to TERM_CUSTOM?
+            "LACK_OF_SEPARATOR", // (special case of TERM_ASSERTION now)
+            "TERM_ASSERTION",
+            "TERM_ASSERTION_INV",
             "TERM_EXACT",
             "TERM_EXACT_INV",
             "TERM_REGEX",
             "TERM_REGEX_INV",
+            "TERM_GROUP",
+            "TERM_GROUP_INV",
+            "TERM_COMPOUND",
+            "TERM_COMPOUND_INV",
             "END_OF_PARSE"
         };
         if(t >= NONE && t < _TYPE_CAP) {
@@ -59,10 +73,16 @@ struct grammar_element {
             "custom terminal",
             "inverted custom terminal",
             "lack-of-separator assertion",
+            "custom assertion",
+            "inverse of custom assertion",
             "exact match",
             "inverted exact match",
             "regular expression match",
             "inverted regular expression match",
+            "scan any element in group",
+            "scan anything not matching the group",
+            "scan if all elements match in order",
+            "scan until all elements match in order",
             "end of parse"
         };
         if(t >= NONE && t < _TYPE_CAP) {
@@ -157,6 +177,10 @@ struct grammar_element {
             case TERM_REGEX_INV:  return TERM_REGEX;
             case TERM_CUSTOM_INV: return TERM_CUSTOM;
 
+            // assertions (being boolean functions) are trivially
+            // invertible:
+            case TERM_ASSERTION:     return TERM_ASSERTION_INV;
+            case TERM_ASSERTION_INV: return TERM_ASSERTION;
 
             // I'm not sure how to support nonterms, or if it's
             // even possible, because there may be any number
@@ -229,13 +253,38 @@ struct grammar_element {
                 rb = "";
                 break;
             case LACK_OF_SEPARATOR:
+                // phase out - this is an assertion
                 lb = "⸢";
+                rb = "⸣";
+                break;
+            case TERM_ASSERTION:
+                lb = "⸢";
+                rb = "⸣";
+                break;
+            case TERM_ASSERTION_INV:
+                lb = "!⸢";
                 rb = "⸣";
                 break;
             case NONTERM_PRODUCTION:
             case NONTERM_PREC_PLACEHOLDER:
                 lb = "";
                 rb = "";
+                break;
+            case TERM_GROUP:
+                lb = "[";
+                rb = "]";
+                break;
+            case TERM_GROUP_INV:
+                lb = "![";
+                rb = "]";
+                break;
+            case TERM_COMPOUND:
+                lb = "(";
+                rb = ")";
+                break;
+            case TERM_COMPOUND_INV:
+                lb = "!(";
+                rb = ")";
                 break;
             case NONTERM_SUBEXPRESSION:
                 lb = "(";

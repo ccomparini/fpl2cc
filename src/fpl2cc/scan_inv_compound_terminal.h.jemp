@@ -11,8 +11,7 @@
 */@
 
 @parameter: const productions &prds @
-@parameter: const std::list<grammar_element> &components @
-@parameter: const grammar_element &base_element @
+@parameter: const custom_terminal &term @
 
 {
     auto start = reader->current_position();
@@ -29,13 +28,13 @@
     //   - try to match the entire thing as if a positive match.
     //     if it matches, return the saved position. Otherwise,
     //     scan the first component (to get rid of it) and continue.
-    @declare first_component:  *components.begin()@
+    @declare first_component:  *term.components.begin()@
     do {
         Terminal nonmatch;
         @#scan_terminal("nonmatch", prds, first_component.inverse())@
         end = reader->current_position();
         Terminal matchy;
-        @#scan_terminal("matchy", prds, base_element)@
+        @#scan_terminal("matchy", prds, term.element())@
         if(matchy)
             break;
         @#scan_terminal("matchy", prds, first_component)@

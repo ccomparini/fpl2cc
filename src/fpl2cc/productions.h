@@ -2,12 +2,14 @@
 #define PRODUCTIONS_H
 
 #include "code_block.h"
+#include "custom_terminal.h"
 #include "escape_sequences.h"
 #include "fpl_options.h"
 #include "fpl_reader.h"
 #include "grammar_element.h"
 #include "production_rule.h"
 #include "reducer.h"
+#include "custom_terminal.h"
 #include "stack_distance.h"
 
 #include "util/c_str_escape.h"
@@ -28,18 +30,9 @@
 
 namespace fpl {
 
-// Predeclarations for jemp-generated functions.
-// This is fer da boids.  can we make jemp generate
-// member-ready methods or something?  Or otherwise
-// not have to do this by hand?
+// fpl_x_parser is generated from fpl_x_parser.h.jemp
 class productions;
 std::string fpl_x_parser(const productions &, const fpl_options &);
-std::string scan_group_terminal(const productions &, const std::list<grammar_element> &);
-std::string scan_compound_terminal(const productions &, const std::list<grammar_element> &);
-std::string scan_inv_compound_terminal(const productions &, const std::list<grammar_element> &, const grammar_element &);
-std::string scan_inv_assertion(const productions &, const std::string &);
-std::string scan_inv_group_terminal(const productions &, const std::list<grammar_element> &);
-std::string regex_custom_scanner(const productions &, const grammar_element &);
 
 class productions {
 
@@ -74,7 +67,7 @@ class productions {
     std::list<code_block> preamble;
     std::list<code_block> parser_members;
     std::list<std::string> goals; // goal is any of these
-    std::map<std::string, code_block> scanners;
+    std::map<std::string, custom_terminal> custom_terminals;
 
     // for precedence lists:
     std::vector<std::string>   precedence_group_names;
@@ -1557,8 +1550,9 @@ public:
         product_precedence[product] = precedence;
     }
 
+    // grrr... terminals are now more than just scanners...
     bool scanner_exists(const std::string &name) const {
-        return scanners.count(name);
+        return custom_terminals.count(name);
     }
 
     // Tries to parse a [ ] or ( ) bracketed set of terminals,
@@ -1608,11 +1602,11 @@ public:
         std::string name = read_identifier(inp);
         if(name != "") {
             if(scanner_exists(name)) {
-                const code_block &existing = scanners[name];
-                if(!existing.is_stub) {
+                const auto &existing = custom_terminals[name];
+                if(!existing.is_stub()) {
                     warn(stringformat(
                         "scanner {} overwrites existing scanner at {}\n",
-                        name, existing.location()
+                        name, existing.source_location()
                     ));
                 }
             }
@@ -1621,54 +1615,20 @@ public:
         return name;
     }
 
-    void parse_scanner() {
-        std::string name = parse_scanner_name();
-
-        if(name == "") {
-            error("expected name of scanner");
-        } else {
-            code_block scanner = code_for_directive(
-                "scanner", code_source::INLINE_OR_REGEX, true
-            );
-            code_block inverse;
-
-            if(!scanner) {
-                // No scanner was specified, so stub one.
-                // Stub scanners never match.  If the stub scanner
-                // never gets overridden, we'll warn so that the
-                // author knows they need to implement something,
-                // but the stub will still "work".
-                // (This allows authors to stub scanners in an abtract
-                // grammar without having to deal with implementation)
-                scanner.stub("return Terminal();");
-            }
-
-            // if the scanner is regex-implemented, convert
-            // that scanner to target code and make an inverse
-            // so that we have fewer special cases down the line
-            if(scanner.language == code_block::REGEX) {
-                auto regex = scanner.code;
-                inverse = code_block(
-                    regex_custom_scanner(*this, grammar_element(
-                        regex, grammar_element::TERM_REGEX_INV
-                    )),
-                    code_block::DEFAULT,
-                    scanner.source_filename(), scanner.line_number()
-                );
-                scanner = code_block(
-                    regex_custom_scanner(*this, grammar_element(
-                        regex, grammar_element::TERM_REGEX
-                    )),
-                    code_block::DEFAULT,
-                    scanner.source_filename(), scanner.line_number()
-                );
-            }
-          
-            scanners[name] = scanner;
-            if(inverse) {
-                scanners[inverse_scanner_name(name)] = inverse;
-            }
-        }
+    // Enters "stub" scanner code into the code block passed.
+    // Stub scanners never match.  If the stub scanner never
+    // gets overridden, we'll warn so that the author knows
+    // they need to implement it, but the stub will still
+    // "work".
+    // This allows authors to stub scanners in an abstract
+    // grammar;  anything specific using that grammar then
+    // has to supply an appropriate scanner.
+    // For example, if you wanted to parse c code, you probably
+    // need to have a scanner which recognizes user defined
+    // types, so you'd implement a scanner which matches
+    // symbols in your type table.
+    static void stub_scanner(code_block &code) {
+        code.stub("return Terminal();");
     }
 
     // given the name of a custom scanner, returns the name to use
@@ -1678,20 +1638,42 @@ public:
         return stringformat("_inv_{}", name);
     }
 
+    void parse_scanner(const std::string &name) {
+
+        if(name == "") {
+            error("expected name of scanner");
+        } else {
+            code_block code(code_for_directive(
+                stringformat(
+                    "custom terminal {} at {}",
+                    name, inp->location_str()
+                ),
+                code_source::INLINE_OR_REGEX, true
+            ));
+
+            // No scanner was specified, so stub one:
+            if(!code) stub_scanner(code);
+
+            auto ct = custom_terminal(code);
+            custom_terminals[name] = ct;
+            if(ct.can_auto_invert()) {
+                custom_terminals[inverse_scanner_name(name)] = custom_terminal(
+                    code, true
+                );
+            }
+        }
+    }
+
     void create_group_terminal(
         const std::string &name,
         size_t start_pos,
         const std::list<grammar_element> &sub_terms
     ) {
-        scanners[name] = code_block(
-            scan_group_terminal(*this, sub_terms),
-            code_block::DEFAULT,
-            inp->filename(), inp->line_number(start_pos)
+        custom_terminals[name] = custom_terminal(
+            grammar_element(name, grammar_element::TERM_GROUP), sub_terms
         );
-        scanners[inverse_scanner_name(name)] = code_block(
-            scan_inv_group_terminal(*this, sub_terms),
-            code_block::DEFAULT,
-            inp->filename(), inp->line_number(start_pos)
+        custom_terminals[inverse_scanner_name(name)] = custom_terminal(
+            grammar_element(name, grammar_element::TERM_GROUP_INV), sub_terms
         );
     }
 
@@ -1703,24 +1685,19 @@ public:
         if(name == "") {
             error("expected name for terminal definition");
         } else {
-            scanners[name] = code_for_directive(
+            auto code = code_for_directive(
                 stringformat(
                     "custom terminal {} at {}",
                     name, inp->location_str()
                 ),
                 code_source::INLINE
             );
-            // The author is telling us that this terminal
-            // is an assertion - that is, it merely returns
-            // a boolean value asserting something or the
-            // other to be true (theoretically without advancing
-            // the read pointer or other side effects, though
-            // that's not presently enforced).  As such, its
-            // inverse is just the logical inverse of itself:
-            scanners[inverse_scanner_name(name)] = code_block(
-                scan_inv_assertion(*this, name),
-                code_block::DEFAULT,
-                inp->filename(), inp->line_number()
+
+            custom_terminals[name] = custom_terminal(
+                grammar_element(name, grammar_element::TERM_ASSERTION), code
+            );
+            custom_terminals[inverse_scanner_name(name)] = custom_terminal(
+                grammar_element(name, grammar_element::TERM_ASSERTION_INV)
             );
         }
     }
@@ -1748,42 +1725,22 @@ public:
                 std::list<grammar_element> sub_terms;
                 auto start = inp->current_position();
                 if(parse_terminal_list(sub_terms)) {
-                    scanners[name] = code_block(
-                        scan_compound_terminal(*this, sub_terms),
-                        code_block::DEFAULT,
-                        inp->filename(), inp->line_number(start)
+                    custom_terminals[name] = custom_terminal(
+                        grammar_element(name, grammar_element::TERM_COMPOUND),
+                        sub_terms
                     );
-                    grammar_element base(name, grammar_element::TERM_CUSTOM);
-                    scanners[inverse_scanner_name(name)] = code_block(
-                        scan_inv_compound_terminal(*this, sub_terms, base),
-                        code_block::DEFAULT,
-                        inp->filename(), inp->line_number(start)
+                    custom_terminals[inverse_scanner_name(name)] = custom_terminal(
+                        grammar_element(name, grammar_element::TERM_COMPOUND_INV),
+                        sub_terms
                     );
                 } // else error?
             } else {
-                scanners[name] = code_for_directive(
-                    stringformat(
-                        "custom terminal {} at {}",
-                        name, inp->location_str()
-                    ),
-                    code_source::INLINE_OR_REGEX
-                );
+                parse_scanner(name);
                 eat_separator();
                 if(inp->read_exact_match("inverse")) {
-                    if(scanners[name].language == code_block::REGEX) {
-                        // regex scanner inversion is already covered,
-                        // and I'm thinking it'll lead to inconsistencies
-                        // and confusion if someone tries to hand code an
-                        // inverse of a regex match (which, in the present
-                        // implementation, wouldn't even get called), so
-                        // for now I'm just going to disallow it.
-                        error(stringformat(
-                            "can't override inverse of regex scanner '{}'",
-                            name
-                        ));
-                    }
                     eat_separator();
-                    scanners[inverse_scanner_name(name)] = code_for_directive(
+                    auto inv_name = inverse_scanner_name(name);
+                    custom_terminals[inv_name] = code_for_directive(
                         stringformat(
                             "inverse of custom terminal {} at {}",
                             name, inp->location_str()
@@ -1890,7 +1847,7 @@ public:
         } else if(dir == "scanner") {
             // Note: this is superceded by @terminal; perhaps
             // it shall be deprecated.
-            parse_scanner();
+            parse_scanner(parse_scanner_name());
         } else if(dir == "separator") {
             add_separator_code(code_for_directive(dir, code_source::ANY));
         } else if(dir == "terminal") {
@@ -2291,7 +2248,7 @@ public:
                 prod_name = *(subg->goals.begin());
             }
 
-            // pull in any scanners 
+            // pull in any custom terminals:
             import_scanners(subg);
         }
 
@@ -3084,16 +3041,16 @@ public:
     // import a scanner (plus any scanners it requires) by name.
     // will not overwrite an existing scanner of the same name.
     void import_scanner(productions *from, const std::string &sname) {
-        if(from->scanners[sname]) {
+        if(from->scanner_exists(sname)) {
             if(!scanner_exists(sname)) {
-                scanners[sname] = from->scanners[sname];
+                custom_terminals[sname] = from->custom_terminals[sname];
             }
         }
     }
 
     // import all scanners:
     void import_scanners(productions *from) {
-        for(auto const& [sname, foo] : from->scanners) {
+        for(auto const& [sname, foo] : from->custom_terminals) {
             import_scanner(from, sname);
         }
     }
@@ -3847,13 +3804,13 @@ public:
     // Formerly, this matched custom scanner steps to their
     // implementations.  We no longer do that here, so at
     // the moment, all it does is report if a custom scanner
-    // is undefined.
+    // is undefined/unimplemented.
     void resolve_custom_step(production_rule &rule, int stepi) {
         auto step = rule.nth_step(stepi);
         std::string scanner_name = step.gexpr.expr;
-        auto found = scanners.find(scanner_name);
+        auto found = custom_terminals.find(scanner_name);
 
-        if(found == scanners.end()) {
+        if(found == custom_terminals.end()) {
             // it is possible that the rule isn't
             // used, so the scanner won't be used, but
             // we're going to complain about it here
@@ -3864,10 +3821,10 @@ public:
                 "{} use of undefined scanner &{} in rule {}",
                 rule.location(), scanner_name, rule
             ));
-        } else if(found->second.is_stub) {
+        } else if(found->second.is_stub()) {
             warn(stringformat(
                 "{}: &{} ({}) is unimplemented",
-                rule.location(), scanner_name, found->second.location()
+                rule.location(), scanner_name, found->second.source_location()
             ));
         }
     }
@@ -4123,10 +4080,10 @@ public:
     // Rules can have more than one step corresponding to a
     // particular parameter.  For example, the reducer for:
     //    arg (','^ arg)* -> arg_list;
-    // .. should get one argument "arg", which should contain
-    // all the (comma separated) arguments.  But, this requires
-    // some precalculation, and not all combinations are valid,
-    // so we need to detect invalid ones.
+    // .. should get one argument "arg", which should contain all
+    // the arguments.  But, this requires some precalculation, and
+    // not all combinations are valid, so we need to detectinvalid
+    // ones.
     void resolve_melds() {
         for(int rulei = 0; rulei < rules.size(); ++rulei) {
             production_rule &rule = rules[rulei];
@@ -4345,10 +4302,7 @@ public:
     }
 
     // jemp-based output:
-    //  this friends thing is horrible.  can we make them members?
-    //  problem then is that the generated code format is then
-    //  even more tightly bound to this class.
-    //  also, that's not how headers in c++ work.
+    //  this friends thing is horrible.  moving on.
     friend std::string fpl_x_parser_state(
         const productions &,
         const productions::lr_set &,
@@ -4473,7 +4427,7 @@ public:
             // scanner's going to need to exist:
             if(step.type() == grammar_element::TERM_CUSTOM) {
                 std::string scanner_name = step.gexpr.expr;
-                if(!scanners.count(scanner_name)) {
+                if(!custom_terminals.count(scanner_name)) {
                     // it is possible that the rule isn't
                     // used, so the scanner won't be used, but
                     // we're going to complain about it anyway
@@ -4560,12 +4514,6 @@ public:
 };
 
 #include "fpl_x_parser.h"
-#include "regex_custom_scanner.h"
-#include "scan_group_terminal.h"
-#include "scan_compound_terminal.h"
-#include "scan_inv_assertion.h"
-#include "scan_inv_compound_terminal.h"
-#include "scan_inv_group_terminal.h"
 
 } // namespace fpl
 

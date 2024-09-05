@@ -2,6 +2,8 @@ returncode = 0
 stderr = ""
 stdout = "Foo on first line
 stuff then abc
+foo, after which we are on line 3
+foo, after which we are on line 4
 abc
-foo
+foo, after which we are done.
 "
