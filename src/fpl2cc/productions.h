@@ -421,9 +421,6 @@ class productions {
         error(*inp, inp->current_position(), msg);
     }
 
-    void error(const fpl_reader_p &rdr, const std::string &msg) {
-        error(*rdr, msg);
-    }
 
     // report an error at a possibly-not-input-file location:
     static void error(const std::string &where, const std::string &msg) {
