@@ -470,6 +470,51 @@ def run_cc_tests(env):
         # .success file is/becomes up to date if output matched
         env.CompareOut(tprog + '.success', [ tprog + '.out', tprog + '.expect' ])
 
+#
+# fpl language tests:
+#
+# dependencies:
+#   [src language].test/[src language]: [src language].cc
+#   [src language].test/[src language].cc: [src language].fpl
+#   [src language].test/[test name].result: [src language].test/[test name].[src language] [src language]
+#   [src language].test/[test name].success: [src language].test/[test name].expect [src language].test/[test name].result
+#
+# So each test language is defined by an .fpl file,
+# and then each test consists of a source file for that language and
+# a .expect file with the corresponding expected .result file.
+# This lets us black-box test the fpl compiler for various cases.
+#
+# references (these were hard to find):
+#   scons' idea of a target:
+#     https://scons.org/doc/latest/HTML/scons-api/SCons.Node/#
+#   action variables:
+#     https://scons.org/doc/production/HTML/scons-user.html#app-variables
+#
+def run_target_language_tests(env):
+    # (Note this is the scons Glob, so it returns target-path dirs)
+    test_dirs = Glob('*.test')
+
+    if len(test_dirs) <= 0:
+        warnings.warn(f"No tests found in {Dir('.').srcnode().path}")
+    else:
+        # If we're on the main branch, generate profiling info.
+        # Profiling info is tied to the commit ID of the current
+        # HEAD.
+        # This works well if the workflow is to do development on
+        # a branch, and integrate said development onto main
+        # as a single commit (via squashing and/or picking),
+        # which is how I like to work.
+        # Obviously the above assumes git, but whatever.
+        profile_dir = None
+        if git_branch() == 'master':
+            this_dir = os.path.dirname(test_dirs[0].get_path())
+            profile=this_dir + '/' + test_name + '.prof_out'
+            # profile_dir = os.path.dirname(test_dirs[0].relpath) # on linux, complains no relpath
+            profile_dir = os.path.dirname(test_dirs[0].get_path())
+
+        run_language_tests(env, test_dirs, profile_dir)
+
+
 # split commands on the pipe symbol ('|') and
 # return them as a list-of-lists
 def _pipe_subcommands(cmd_and_args):
