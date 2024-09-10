@@ -1,0 +1,6 @@
+# this is some kind of scons cache (which really doesn't want to
+# be in git)
+.sconsign.dblite
+
+# python/scons creates this;  git should not care:
+site_scons/__pycache__

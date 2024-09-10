@@ -216,6 +216,14 @@ src_subdirs = [
 # output directory:
 output_subdir = 'build/'
 
+if not os.path.isdir(output_subdir):
+    print(f"Creating output directory '{output_subdir}'....")
+    os.mkdir(output_subdir)
+    # drop a gitignore in the output dir since we don't want it checked in:
+    with open(output_subdir + '/.gitignore', mode='w') as file:
+        file.write("*\n") # (i.e. ignore the whole dir)
+
+
 for sdir in src_subdirs:
     SConscript('src/' + sdir + 'SConstruct', exports='env', variant_dir=output_subdir+sdir, duplicate=False)
 
