@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-""" Gather cpu, memory, etc usage (profiling data) for a given
-   (sub)process.
+"""
+
+Gather cpu, memory, etc usage (profiling data) for a given
+(sub)process.
+
+This is used to generate the files we dump in the yprof directory.
 
 """
 
@@ -19,7 +23,7 @@ import warnings
 
 FIELDS = [
     # order here is based on how I want the columns to show up in the output.
-    'git_id',     # git commit ID so you can find relevsant changes
+    'git_id',     # git commit ID so you can find relevant changes
     'cpu_total',  # sys + user cpu seconds
     'cpu_user',   # user space cpu seconds
     'cpu_system', # system cpu seconds
@@ -51,9 +55,13 @@ def exit_code_str(waitstatus):
     finally:
         return str[0]
 
+def fmt_commit_id(cid):
+    if cid is None:
+        warnings.warn(f"no commit ID available - using 0000000")
+        return '0000000'
+    return cid
+
 def fmt_secs(secs):
-    #return round(secs, 6)
-    #return format(secs, '0>.6')
     return format(secs, 'f')
 
 # using named tuple here because I'm imagining dumping this
@@ -70,7 +78,7 @@ class Profile(collections.namedtuple("Subprof", FIELDS)):
             max_rss    = rusage.ru_maxrss,
             exit_code  = exit_code_str(waitstatus),
             signal     = signal_str(waitstatus),
-            git_id     = _git_commit_id(),
+            git_id     = fmt_commit_id(_git_commit_id()),
             hostname   = uname.node,
             arch       = uname.machine,
             os         = f"{uname.system} {uname.release}",
@@ -113,10 +121,24 @@ class Profile(collections.namedtuple("Subprof", FIELDS)):
 #    ru_nivcsw=46
 #  )
 
+# returns true if git says the working tree matches the HEAD;
+# false otherwise (including cases where we're not even in
+# a git tree)
+def _git_is_at_head():
+    try:
+        git_result = subprocess.run(
+            ['git', 'diff-index', 'HEAD', '--quiet']
+        )
+    except Exception as ex:
+        warnings.warn(f"\nerror on git diff-index: {ex}")
+
+    return git_result.returncode == 0
+
+
 @functools.cache
 def _git_commit_id():
 
-    git_id = "[unavailable]"
+    git_id = None
     try:
         # this is a good-enough stab at getting the git commit ID,
         # and doesn't require anyone to install any special modules.
@@ -125,8 +147,18 @@ def _git_commit_id():
             stdout=subprocess.PIPE, check=True
         )
         git_id = git_result.stdout.decode('ascii')
+        if not _git_is_at_head():
+            # the working tree doesn't match the HEAD, but we're
+            # profiling code on the working tree (i.e. on disk),
+            # so we want to be clear that the git ID doesn't really
+            # match what we ran against.  So, warn, and add an
+            # asterisk to the end:
+            warnings.warn(
+                f"\ngit working tree does not match HEAD"
+            )
+            git_id += '*'
     except Exception as ex:
-        warnings.warn(f"can't get git commit id: {ex}")
+        warnings.warn(f"\ncan't get git commit id: {ex}")
 
     return git_id
 
