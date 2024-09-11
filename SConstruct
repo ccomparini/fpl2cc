@@ -82,6 +82,8 @@ env = Environment(**config)
 # impact on performance (good or bad).
 if git_branch() == 'main':
     use_yprof = True
+elif os.environ.get('DO_YPROF', False):
+    use_yprof = True
 else:
     use_yprof = False
 
