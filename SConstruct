@@ -73,7 +73,6 @@ config = {
 
 env = Environment(**config)
 
-
 # If we're on the main branch, append profiling data for
 # generated programs to files in the yprof directory.
 # Because we don't do development directly on the main
@@ -81,11 +80,11 @@ env = Environment(**config)
 # change (historical or otherwise) had a significant
 # impact on performance (good or bad).
 if git_branch() == 'main':
-    use_yprof = True
+    env.use_yprof = True
 elif os.environ.get('DO_YPROF', False):
-    use_yprof = True
+    env.use_yprof = True
 else:
-    use_yprof = False
+    env.use_yprof = False
 
 def read_dependencies(senv):
     for dirpath, dirnames, filenames in os.walk('.'):
@@ -142,7 +141,7 @@ env.Append(BUILDERS = {
             "$SOURCE",
             # default capture file is the target:
             CAPFILE = "$TARGET",
-            PROFILE = use_yprof,
+            PROFILE = env.use_yprof,
         ),
     )
 })
@@ -197,7 +196,7 @@ env.Append(BUILDERS = {
         action = run_and_capture_action(
             [ 'bin/jemplpl', '$SOURCE' ],
             STDOUT = '$TARGET',
-            PROFILE = use_yprof
+            PROFILE = env.use_yprof
         ),
 	suffix = '.h',
 	src_suffix = '.h.jemp'
