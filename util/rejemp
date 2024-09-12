@@ -1,5 +1,18 @@
 #!/bin/sh
 
+#
+#  rejemp:  rebuilds bin/jemplpl, updating src/jemplpl.cc along the way
+#
+# Rationale:  jemplpl is written in fpl/c++, and, as such, needs fpl2cc
+# to exist in order to compile it. However, fpl2cc itself uses .jemp
+# source, which needs to be compiled using jemplpl.  So, we check the
+# intermediate src/jemplpl/jemplpl.cc file generated from jemplpl.fpl
+# in to version control, and regenerate it as necessary using this script.
+#
+# Usage:   ./util/rejemp
+#
+
+
 SOURCE_DIR="src/jemplpl"
 TARGET_CC="$SOURCE_DIR/jemplpl.cc"
 
