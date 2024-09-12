@@ -8,7 +8,7 @@
 namespace fpl {
 
 struct grammar_element {
-    std::string expr; // either a string, regex, or name of product
+    std::string expr; // string or regex to match, or name of product/terminal
     typedef enum {
         // order here matters:  earlier types are matched first
         // in parsing
@@ -104,7 +104,7 @@ struct grammar_element {
     inline int compare(const grammar_element &other) const {
         int cmp = type - other.type;
         if(cmp == 0) {
-            // to avoid termianl masking, we reverse-lexical compare
+            // to avoid terminal masking, we reverse-lexical compare
             // so that if there's a term that's a prefix of another,
             // the prefix one comes later and thereby doesn't match
             // first and prevent the the longer one from matching.
@@ -137,6 +137,22 @@ struct grammar_element {
 
     inline bool is_end_of_parse() const {
         return (type == END_OF_PARSE);
+    }
+
+    inline bool is_custom_terminal() const {
+        switch(type) {
+            case TERM_CUSTOM:        return true;
+            case TERM_CUSTOM_INV:    return true;
+            case TERM_ASSERTION:     return true;
+            case TERM_ASSERTION_INV: return true;
+            case TERM_GROUP:         return true;
+            case TERM_GROUP_INV:     return true;
+            case TERM_COMPOUND:      return true;
+            case TERM_COMPOUND_INV:  return true;
+            default:
+                return false;
+        }
+        return false; // (can't get here)
     }
 
     std::string nonterm_id_str() const {
