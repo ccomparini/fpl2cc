@@ -3040,7 +3040,16 @@ public:
     void import_scanner(productions *from, const std::string &sname) {
         if(from->scanner_exists(sname)) {
             if(!scanner_exists(sname)) {
-                custom_terminals[sname] = from->custom_terminals[sname];
+                auto subterm = from->custom_terminals[sname];
+                custom_terminals[sname] = subterm;
+
+                // if it's got custom subscanners, we need to import
+                // them (recursively)
+                for(auto component : subterm.components) {
+                    if(component.is_custom_terminal()) {
+                        import_scanner(from, component.expr);
+                    }
+                }
             }
         }
     }

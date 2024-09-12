@@ -1,7 +1,10 @@
 
 
 # 🫠 melting face = f0 9f ab a0 in utf-8
-@scanner melt /\xf0\x9f\xab\xa0/
+@scanner melty_face /\xf0\x9f\xab\xa0/
+
+# .. and this is to check that component scanners also get imported:
+@terminal melt (&melty_face)
 
 /[0-9]+/:digits ~ &melt:face -> number_melt;
 
