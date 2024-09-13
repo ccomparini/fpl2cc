@@ -168,7 +168,7 @@ std::string _stringformat(const std::pair<T, U> &x) {;
 
 class stringformat_post_processor {
     // {::c} -> columnate output (on tabs)
-    static std::string c(const std::string &in) {
+    static std::string process_c(const std::string &in) {
         std::list<int> colwidths;
 
         // find out the starts and widths of the columns:
@@ -217,14 +217,14 @@ class stringformat_post_processor {
     }
 
     // {::e} -> do a c string ecape
-    static std::string e(const std::string &in) {
+    static std::string process_e(const std::string &in) {
         return c_str_escape(in);
     }
 
     // {::i} -> indent by the level indicated in the string
     // (which needs to be numeric, but, annoyingly, will
     // already have been stringformatted)
-    static std::string i(const std::string &in) {
+    static std::string process_i(const std::string &in) {
         int indent = 0;
         int exponent = 1;
         for(int ch = in.length() - 1; ch >= 0; --ch) {
@@ -246,7 +246,7 @@ class stringformat_post_processor {
     }
 
     // {::n} -> translate newlines to "\n"
-    static std::string n(const std::string &in) {
+    static std::string process_n(const std::string &in) {
         std::string out;
         size_t last_pos = 0;
         size_t pos = in.find("\n");
@@ -261,7 +261,7 @@ class stringformat_post_processor {
     }
 
     // {::U} -> translate characters to upper case
-    static std::string U(const std::string &in) {
+    static std::string process_U(const std::string &in) {
         std::string out;
         for(auto ch : in) {
             out += toupper(ch);
@@ -270,7 +270,7 @@ class stringformat_post_processor {
     }
 
     // {::l} -> translate characters to lower case
-    static std::string l(const std::string &in) {
+    static std::string process_l(const std::string &in) {
         std::string out;
         for(auto ch : in) {
             out += tolower(ch);
@@ -281,12 +281,12 @@ class stringformat_post_processor {
 public:
     static std::string process(char fmt, const std::string &in) {
         switch(fmt) {
-            case 'c': return c(in);  // columnate (tab-delimited)
-            case 'e': return e(in);  // c-string escape
-            case 'i': return i(in);  // indent this level
-            case 'l': return l(in);  // lowercase
-            case 'n': return n(in);  // translate newlines to '\n'
-            case 'U': return U(in);  // uppercase
+            case 'c': return process_c(in);  // columnate (tab-delimited)
+            case 'e': return process_e(in);  // c-string escape
+            case 'i': return process_i(in);  // indent this level
+            case 'l': return process_l(in);  // lowercase
+            case 'n': return process_n(in);  // translate newlines to '\n'
+            case 'U': return process_U(in);  // uppercase
         }
         // .. would be nice to warn about missing format here....
         return in;
