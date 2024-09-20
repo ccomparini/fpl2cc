@@ -753,7 +753,7 @@ return _stringformat(x.first) + " => " + _stringformat(x.second);
 
 class stringformat_post_processor {
 // {::c} -> columnate output (on tabs)
-static std::string c(const std::string &in) {
+static std::string process_c(const std::string &in) {
     std::list<int> colwidths;
 
     // find out the starts and widths of the columns:
@@ -802,14 +802,14 @@ static std::string c(const std::string &in) {
 }
 
 // {::e} -> do a c string ecape
-static std::string e(const std::string &in) {
+static std::string process_e(const std::string &in) {
     return c_str_escape(in);
 }
 
 // {::i} -> indent by the level indicated in the string
 // (which needs to be numeric, but, annoyingly, will
 // already have been stringformatted)
-static std::string i(const std::string &in) {
+static std::string process_i(const std::string &in) {
     int indent = 0;
     int exponent = 1;
     for(int ch = in.length() - 1; ch >= 0; --ch) {
@@ -831,7 +831,7 @@ static std::string i(const std::string &in) {
 }
 
 // {::n} -> translate newlines to "\n"
-static std::string n(const std::string &in) {
+static std::string process_n(const std::string &in) {
     std::string out;
     size_t last_pos = 0;
     size_t pos = in.find("\n");
@@ -846,7 +846,7 @@ static std::string n(const std::string &in) {
 }
 
 // {::U} -> translate characters to upper case
-static std::string U(const std::string &in) {
+static std::string process_U(const std::string &in) {
     std::string out;
     for(auto ch : in) {
         out += toupper(ch);
@@ -855,7 +855,7 @@ static std::string U(const std::string &in) {
 }
 
 // {::l} -> translate characters to lower case
-static std::string l(const std::string &in) {
+static std::string process_l(const std::string &in) {
     std::string out;
     for(auto ch : in) {
         out += tolower(ch);
@@ -866,12 +866,12 @@ static std::string l(const std::string &in) {
 public:
 static std::string process(char fmt, const std::string &in) {
     switch(fmt) {
-        case 'c': return c(in);  // columnate (tab-delimited)
-        case 'e': return e(in);  // c-string escape
-        case 'i': return i(in);  // indent this level
-        case 'l': return l(in);  // lowercase
-        case 'n': return n(in);  // translate newlines to '\n'
-        case 'U': return U(in);  // uppercase
+        case 'c': return process_c(in);  // columnate (tab-delimited)
+        case 'e': return process_e(in);  // c-string escape
+        case 'i': return process_i(in);  // indent this level
+        case 'l': return process_l(in);  // lowercase
+        case 'n': return process_n(in);  // translate newlines to '\n'
+        case 'U': return process_U(in);  // uppercase
     }
     // .. would be nice to warn about missing format here....
     return in;
@@ -2182,7 +2182,7 @@ public:
 // text (28:1):              •/[^@\\n]+/:t                                                                                                             => state 6  (src/grammarlib/jemp.fpl:144)
 // text (29:1):              •leading_ws                                                                                                               => state 17 (src/grammarlib/jemp.fpl:148)
 // text (30:1):              •trailing_ws                                                                                                              => state 1  (src/grammarlib/jemp.fpl:149)
-// _fpl_goal (32:1):         •complete                                                                                                                 => state 80 (src/fpl2cc/productions.h:4265)
+// _fpl_goal (32:1):         •complete                                                                                                                 => state 80 (src/fpl2cc/productions.h:4275)
 //
 void state_0() {
 
@@ -12138,7 +12138,7 @@ void state_79() {
 #line 5 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 //
-// _fpl_goal (32:0):  complete • => (done) (src/fpl2cc/productions.h:4265)
+// _fpl_goal (32:0):  complete • => (done) (src/fpl2cc/productions.h:4275)
 //
 void state_80() {
 
@@ -19075,7 +19075,7 @@ static const char *state_string(State st) {
         "    text (28:1):\t •/[^@\\\\n]+/:t \t=> state 6\t(src/grammarlib/jemp.fpl:144)\n"
         "    text (29:1):\t •leading_ws \t=> state 17\t(src/grammarlib/jemp.fpl:148)\n"
         "    text (30:1):\t •trailing_ws \t=> state 1\t(src/grammarlib/jemp.fpl:149)\n"
-        "    _fpl_goal (32:1):\t •complete \t=> state 80\t(src/fpl2cc/productions.h:4265)\n"
+        "    _fpl_goal (32:1):\t •complete \t=> state 80\t(src/fpl2cc/productions.h:4275)\n"
         ;
     }
     if(&jemplpl_parser::state_1 == st) {
@@ -19688,7 +19688,7 @@ static const char *state_string(State st) {
     }
     if(&jemplpl_parser::state_80 == st) {
         return "state_80:\n"
-        "    _fpl_goal (32:0):\t complete •\t=> (done)\t(src/fpl2cc/productions.h:4265)\n"
+        "    _fpl_goal (32:0):\t complete •\t=> (done)\t(src/fpl2cc/productions.h:4275)\n"
         ;
     }
 
@@ -24175,13 +24175,13 @@ bool dummy = true // hack for comma
             return 1;
         }
         static int line_number() {
-            return 4265;
+            return 4275;
         }
         static const char *filename() {
             return "src/fpl2cc/productions.h";
         }
         static const char *location() {
-            return "src/fpl2cc/productions.h:4265";
+            return "src/fpl2cc/productions.h:4275";
         }
         static const char *to_str() {
             return "complete -> _fpl_goal";
@@ -24196,7 +24196,7 @@ bool dummy = true // hack for comma
                 return pname[ind];
             } else {
                 return "param_name index out of bounds at "
-                "src/fpl2cc/productions.h:4265";
+                "src/fpl2cc/productions.h:4275";
             }
         }
         static const char *param_type(unsigned int ind) {
@@ -24210,7 +24210,7 @@ bool dummy = true // hack for comma
             } else {
                 return (
                 "param_type index out of bounds at "
-                "src/fpl2cc/productions.h:4265"
+                "src/fpl2cc/productions.h:4275"
                 );
             }
         }
@@ -24224,7 +24224,7 @@ bool dummy = true // hack for comma
 
 
     #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/fpl2cc/productions.h:4265 (default action for complete -> _fpl_goal)"
+    #line 1 "src/fpl2cc/productions.h:4275 (default action for complete -> _fpl_goal)"
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
     return std::string(
 
@@ -24241,7 +24241,7 @@ bool dummy = true // hack for comma
     );
 
     #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 4265 "src/fpl2cc/productions.h"
+    #line 4275 "src/fpl2cc/productions.h"
 }
 
 
