@@ -18,9 +18,11 @@ TARGET_CC="$SOURCE_DIR/jemplpl.cc"
 
 echo rebuilding $TARGET_CC
 
+MOAR_OPTS=""
+#MOAR_OPTS="--debug-single-step"
+
 # recreate jemplpl.cc from jemplpl.fpl:
-#bin/fpl2cc --src-path=src/grammarlib $SOURCE_DIR/jemplpl.fpl --statedump .states --out $TARGET_CC --debug-single-step\
-bin/fpl2cc --src-path=src/grammarlib $SOURCE_DIR/jemplpl.fpl --statedump .states --out $TARGET_CC\
+bin/fpl2cc --src-path=src/grammarlib $SOURCE_DIR/jemplpl.fpl --statedump .states --out $TARGET_CC $MOAR_OPTS\
  || { echo "   bin/fpl2cc failed"; exit 1; }
 
 # .. and make it and run any necessary tests:
