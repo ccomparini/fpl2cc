@@ -80,7 +80,7 @@
                 );
             }
             catch (const std::bad_variant_access& e) {
-                // this is an internal error and needs to be taken seriously:
+                // this is an internal error (i.e. a bug in fpl2cc)
                 jerror::error(stringformat(
                     "{} bad variant access (expected {}) on val({}) in {}\n",
                     ca, prod_type_name(typeid(ReduceType)), ind, lr_slice

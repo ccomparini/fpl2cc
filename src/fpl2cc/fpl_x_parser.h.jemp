@@ -206,6 +206,10 @@ public:
 
     @#fpl_x_parser_generated_types(prds)@
 
+    // "Products" are what we put on the parameter stack.
+    // They are either the result of a reduction, or the
+    // contents of a terminal.  Reduction rules are passed
+    // sets of these (via ReductionParameter)
     class Product {
         struct false_product { };
 
@@ -223,49 +227,62 @@ public:
             check_only(Args&&... args) { }
         };
 
-        // different fpl rules may or may not evaluate to different
+        // different fpl rules can evaluate to different
         // types, so we use a std::variant:
         using Var = std::variant<
             false_product,
             @join(prds.all_types, ",\n")@
         >;
 
-        Var red;
+        Var reduce_value;
 
     public:
         // creates a false-valued Product:
-        Product() : red(false_product()) { }
+        Product() : reduce_value(false_product()) { }
 
         // type-specific constructors:
         @-for(auto type : prds.all_types) {-@
-            Product(@type@ result) : red(result) { }
+            Product(@type@ result) : reduce_value(result) { }
         @-}-@
 
-        const Var &var() const { return red; }
+        const Var &var() const { return reduce_value; }
 
         // Accessors for the different types are named as [element name]_val()
         // We start at type 1 instead of 0 because we don't need/want an
         // fpl_null accessor (it has no type anyway)
+        // NOTE:  generally, access is through ReductionParameters
         @for(int el_id = 1; el_id < prds.elements.size(); ++el_id) {-@
             @declare el: prds.elements[el_id]@
             @declare type: prds.type_for(el)@
             @declare el_name: prds.element_id_name(el_id)@
-            @type@ @el_name@_val() const { return std::get<@type@>(var()); }
+            @type@ @el_name@_val(const std::string &caller = CALLER()) const {
+                try {
+                    return std::get<@type@>(var());
+                }
+                catch (std::bad_variant_access& e) {
+                    std::cerr << stringformat(
+                        "{} in @el_name@_val access at {}: "
+                        "tried to get @type@ but it's a {}\n",
+                        e.what(), caller, type_name()
+                    );
+                    throw;
+                }
+            }
         @-}-@
 
         operator bool() const {
-            return !std::holds_alternative<false_product>(red);
+            return !std::holds_alternative<false_product>(reduce_value);
         }
 
         std::string type_name() const {
-            if(std::holds_alternative<false_product>(red))
+            if(std::holds_alternative<false_product>(reduce_value))
                 return "<no type>";
 
-            if(std::holds_alternative<Terminal>(red))
+            if(std::holds_alternative<Terminal>(reduce_value))
                 return "Terminal";
 
             @-for(auto type : prds.all_types) {-@
-                if(std::holds_alternative<@type@>(red))
+                if(std::holds_alternative<@type@>(reduce_value))
                     return "@type@";
             @-}-@
             // can't get here?
@@ -274,7 +291,7 @@ public:
         }
 
         std::string var_str() const {
-            if(std::holds_alternative<false_product>(red))
+            if(std::holds_alternative<false_product>(reduce_value))
                 return "<null product>";
 
             if(std::holds_alternative<Terminal>(var()))
@@ -300,20 +317,22 @@ public:
 
         // phase out if possible, because this only supports the
         // top output_type() and that's wacky.
+        // (this is called only from parse() and test/goal.test/goal.fpl,
+        // so we can phase this out.)
         @prds.output_type()@ val(const std::string &caller = CALLER()) const {
-            if(!std::holds_alternative<@prds.output_type()@>(red)) {
+            if(!std::holds_alternative<@prds.output_type()@>(reduce_value)) {
                 @prds.output_type()@ dummy;
                 return dummy;
             }
-            return std::get<@prds.output_type()@>(red);
+            return std::get<@prds.output_type()@>(reduce_value);
         }
 
         // if it's a (regex) terminal with capture groups, this returns
         // the contents of the nth capgroup.  otherwise, returns an
         // empty string.
         std::string capgroup(int capi) const {
-            if(std::holds_alternative<Terminal>(red))
-                return std::get<Terminal>(red).capgroup(capi);
+            if(std::holds_alternative<Terminal>(reduce_value))
+                return std::get<Terminal>(reduce_value).capgroup(capi);
             return "";
         }
     };
@@ -752,8 +771,8 @@ public:
 
     // A StackSlice here is a set of 0 or more consecutive lr_stack
     // entries. It's used to represent the match(es) which went into
-    // 1 particular step (see ReductionParameter, below), or the set
-    // of all steps which led to a current rule match (see
+    // 1 particular step (see fpl_x_parser_reduction_parameter.h.jemp),
+    // or the set of all steps which led to a current rule match (see
     // all_matched_steps(), below), or any other slice of the lr_stack.
     class StackSlice {
         int base_index; // in lr_stack
@@ -888,6 +907,7 @@ public:
     }
 
     // call this like:  prod_type_name(typeid(...));
+    // used mainly in error reporting.
     static std::string prod_type_name(const std::type_info &tinf) {
         @-for(auto type : prds.all_types) {@
             if(std::type_index(typeid(@type@)) == std::type_index(tinf)) {
@@ -905,7 +925,9 @@ public:
         return stringformat("<unknown type {} in prod_type_name>", tinf);
     }
 
+    @/* definition for ReductionParameter: */@
     @#fpl_x_parser_reduction_parameter(class_name)@
+
     void set_state(State st) {
         cur_state = st;
     }
@@ -1102,7 +1124,7 @@ public:
         if(result_is_goal()) {
             return result();
         }
-        return Product();
+        return Product(); // i.e. false/did not match
     }
 
     // Returns a string containing a list of possible terminals
