@@ -161,6 +161,7 @@ public:
             return gexpr.type != grammar_element::Type::NONE;
         }
 
+        // returns true if there can only be exactly one:
         bool is_single() const {
             return !(qty.optional || qty.multiple);
         }
