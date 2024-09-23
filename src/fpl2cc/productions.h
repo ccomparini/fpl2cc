@@ -190,11 +190,11 @@ class productions {
         // Returns the "flat" next rulestep, which is the rulestep
         // after the current rulestep, ignoring multiples/optionals
         // etc. (but traversing parent/child relationships)
-        rulestep flat_next(bool no_descend = false) const {
+        rulestep flat_next() const {
             rulestep result = *this;
             if(result) {
                 auto st = result.step();
-                if(!st.is_subexpression() || no_descend) {
+                if(!st.is_subexpression()) {
                     result.stepnum++;
                 } else {
                     // descend into the subexpression:
