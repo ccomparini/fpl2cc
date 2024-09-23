@@ -2,12 +2,12 @@ state 0:
     fragment: (STATE 79)
     text: (STATE 2)
     subst_start: (STATE 9)
-    leading_ws: (STATE 17)
+    leading_ws: (STATE 19)
     subst_start: (STATE 9)
     control_start: (STATE 43)
     control_fragment: (STATE 49)
     subst_start: (STATE 9)
-    leading_ws: (STATE 17)
+    leading_ws: (STATE 19)
     trailing_ws: (STATE 1)
     complete: (STATE 80)
     '@@': (STATE 4)
@@ -15,9 +15,9 @@ state 0:
     '@parameter:': (STATE 57)
     '@include:': (STATE 61)
     '@embed:': (STATE 66)
-    /@declare\\s+/: (STATE 19)
+    /@declare\\s+/: (STATE 21)
     /@realign:\\s*/: (STATE 75)
-    '@-': (STATE 18)
+    '@-': (STATE 20)
     '@': (STATE 52)
     /\\n*[ \\t]+/: (STATE 5)
     /[ \\t]*\\n+[ \\t]+(\?!@)/: (STATE 7)
@@ -57,10 +57,10 @@ state 8:
     (REDUCTION 18)
 
 state 9:
-    'error {': (STATE 15)
+    'error {': (STATE 17)
     /#\\s*/: (STATE 32)
-    &control_guts: (STATE 10)
-    /(\?:[^-@}]|-[^@}])+/: (STATE 30)
+    &control_guts: (STATE 15)
+    &subst_guts: (STATE 10)
 
 state 10:
     subst_end: (STATE 11)
@@ -68,7 +68,7 @@ state 10:
     '@': (STATE 12)
 
 state 11:
-    (REDUCTION 23)
+    (REDUCTION 27)
 
 state 12:
     (REDUCTION 14)
@@ -88,100 +88,100 @@ state 15:
     '@': (STATE 12)
 
 state 16:
-    text: (STATE 2)
-    subst_start: (STATE 9)
-    fragment: (STATE 26)
-    leading_ws: (STATE 17)
-    subst_start: (STATE 9)
-    control_start: (STATE 43)
-    control_fragment: (STATE 49)
-    subst_start: (STATE 9)
-    leading_ws: (STATE 17)
-    trailing_ws: (STATE 1)
-    '@@': (STATE 4)
-    '@/*': (STATE 71)
-    '@parameter:': (STATE 57)
-    '@include:': (STATE 61)
-    '@embed:': (STATE 66)
-    /@declare\\s+/: (STATE 19)
-    /@realign:\\s*/: (STATE 75)
-    '@-': (STATE 18)
-    '@': (STATE 52)
-    /\\n*[ \\t]+/: (STATE 5)
-    /[ \\t]*\\n+[ \\t]+(\?!@)/: (STATE 7)
-    /[ \\t]*\\n/: (STATE 8)
-    /[^@\\n]+/: (STATE 6)
+    (REDUCTION 23)
 
 state 17:
-    /@declare\\s+/: (STATE 19)
-    '@-': (STATE 18)
-    (REDUCTION 29)
-
-state 18:
-    (REDUCTION 11)
-
-state 19:
-    identifier: (STATE 20)
-    /[a-zA-Z_][a-zA-Z_0-9]+/: (STATE 25)
-
-state 20:
-    ':': (STATE 21)
-
-state 21:
-    /(\?:[^@]|(\?:@@))*/: (STATE 22)
-
-state 22:
-    '@': (STATE 23)
-
-state 23:
-    /\\n\?/: (STATE 24)
-
-state 24:
-    (REDUCTION 8)
-
-state 25:
-    (REDUCTION 31)
-
-state 26:
-    text: (STATE 2)
-    subst_start: (STATE 27)
-    fragment: (STATE 26)
-    subst_start: (STATE 27)
-    leading_ws: (STATE 17)
-    subst_start: (STATE 27)
-    control_start: (STATE 43)
-    control_fragment: (STATE 49)
-    subst_start: (STATE 27)
-    leading_ws: (STATE 17)
-    trailing_ws: (STATE 1)
-    '@@': (STATE 4)
-    '@/*': (STATE 71)
-    '@parameter:': (STATE 57)
-    '@include:': (STATE 61)
-    '@embed:': (STATE 66)
-    /@declare\\s+/: (STATE 19)
-    /@realign:\\s*/: (STATE 75)
-    '@-': (STATE 18)
-    '@': (STATE 52)
-    /\\n*[ \\t]+/: (STATE 5)
-    /[ \\t]*\\n+[ \\t]+(\?!@)/: (STATE 7)
-    /[ \\t]*\\n/: (STATE 8)
-    /[^@\\n]+/: (STATE 6)
-
-state 27:
-    'error {': (STATE 15)
-    '}': (STATE 28)
-    /#\\s*/: (STATE 32)
-    &control_guts: (STATE 10)
-    /(\?:[^-@}]|-[^@}])+/: (STATE 30)
-
-state 28:
-    subst_end: (STATE 29)
+    subst_end: (STATE 18)
     '-@': (STATE 13)
     '@': (STATE 12)
 
+state 18:
+    text: (STATE 2)
+    subst_start: (STATE 9)
+    fragment: (STATE 28)
+    leading_ws: (STATE 19)
+    subst_start: (STATE 9)
+    control_start: (STATE 43)
+    control_fragment: (STATE 49)
+    subst_start: (STATE 9)
+    leading_ws: (STATE 19)
+    trailing_ws: (STATE 1)
+    '@@': (STATE 4)
+    '@/*': (STATE 71)
+    '@parameter:': (STATE 57)
+    '@include:': (STATE 61)
+    '@embed:': (STATE 66)
+    /@declare\\s+/: (STATE 21)
+    /@realign:\\s*/: (STATE 75)
+    '@-': (STATE 20)
+    '@': (STATE 52)
+    /\\n*[ \\t]+/: (STATE 5)
+    /[ \\t]*\\n+[ \\t]+(\?!@)/: (STATE 7)
+    /[ \\t]*\\n/: (STATE 8)
+    /[^@\\n]+/: (STATE 6)
+
+state 19:
+    /@declare\\s+/: (STATE 21)
+    '@-': (STATE 20)
+    (REDUCTION 29)
+
+state 20:
+    (REDUCTION 11)
+
+state 21:
+    identifier: (STATE 22)
+    /[a-zA-Z_][a-zA-Z_0-9]+/: (STATE 27)
+
+state 22:
+    ':': (STATE 23)
+
+state 23:
+    /(\?:[^@]|(\?:@@))*/: (STATE 24)
+
+state 24:
+    '@': (STATE 25)
+
+state 25:
+    /\\n\?/: (STATE 26)
+
+state 26:
+    (REDUCTION 8)
+
+state 27:
+    (REDUCTION 31)
+
+state 28:
+    text: (STATE 2)
+    subst_start: (STATE 29)
+    fragment: (STATE 28)
+    subst_start: (STATE 29)
+    leading_ws: (STATE 19)
+    subst_start: (STATE 29)
+    control_start: (STATE 43)
+    control_fragment: (STATE 49)
+    subst_start: (STATE 29)
+    leading_ws: (STATE 19)
+    trailing_ws: (STATE 1)
+    '@@': (STATE 4)
+    '@/*': (STATE 71)
+    '@parameter:': (STATE 57)
+    '@include:': (STATE 61)
+    '@embed:': (STATE 66)
+    /@declare\\s+/: (STATE 21)
+    /@realign:\\s*/: (STATE 75)
+    '@-': (STATE 20)
+    '@': (STATE 52)
+    /\\n*[ \\t]+/: (STATE 5)
+    /[ \\t]*\\n+[ \\t]+(\?!@)/: (STATE 7)
+    /[ \\t]*\\n/: (STATE 8)
+    /[^@\\n]+/: (STATE 6)
+
 state 29:
-    (REDUCTION 7)
+    'error {': (STATE 17)
+    '}': (STATE 30)
+    /#\\s*/: (STATE 32)
+    &control_guts: (STATE 15)
+    &subst_guts: (STATE 10)
 
 state 30:
     subst_end: (STATE 31)
@@ -189,11 +189,11 @@ state 30:
     '@': (STATE 12)
 
 state 31:
-    (REDUCTION 27)
+    (REDUCTION 7)
 
 state 32:
     identifier: (STATE 33)
-    /[a-zA-Z_][a-zA-Z_0-9]+/: (STATE 25)
+    /[a-zA-Z_][a-zA-Z_0-9]+/: (STATE 27)
 
 state 33:
     template_variant: (STATE 34)
@@ -236,7 +236,7 @@ state 42:
 state 43:
     text: (STATE 2)
     subst_start: (STATE 44)
-    leading_ws: (STATE 17)
+    leading_ws: (STATE 19)
     subst_start: (STATE 44)
     control_continuation: (STATE 54)
     control_start: (STATE 43)
@@ -245,16 +245,16 @@ state 43:
     control_end: (STATE 53)
     control_fragment: (STATE 49)
     subst_start: (STATE 44)
-    leading_ws: (STATE 17)
+    leading_ws: (STATE 19)
     trailing_ws: (STATE 1)
     '@@': (STATE 4)
     '@/*': (STATE 71)
     '@parameter:': (STATE 57)
     '@include:': (STATE 61)
     '@embed:': (STATE 66)
-    /@declare\\s+/: (STATE 19)
+    /@declare\\s+/: (STATE 21)
     /@realign:\\s*/: (STATE 75)
-    '@-': (STATE 18)
+    '@-': (STATE 20)
     '@': (STATE 52)
     /\\n*[ \\t]+/: (STATE 5)
     /[ \\t]*\\n+[ \\t]+(\?!@)/: (STATE 7)
@@ -262,20 +262,20 @@ state 43:
     /[^@\\n]+/: (STATE 6)
 
 state 44:
-    'error {': (STATE 15)
+    'error {': (STATE 17)
     /#\\s*/: (STATE 32)
-    '}': (STATE 45)
-    &control_guts: (STATE 10)
-    /(\?:[^-@}]|-[^@}])+/: (STATE 30)
+    &continuation_guts: (STATE 45)
+    '}': (STATE 47)
+    &control_guts: (STATE 15)
+    &subst_guts: (STATE 10)
 
 state 45:
     subst_end: (STATE 46)
     '-@': (STATE 13)
     '@': (STATE 12)
-    &control_guts: (STATE 47)
 
 state 46:
-    (REDUCTION 22)
+    (REDUCTION 21)
 
 state 47:
     subst_end: (STATE 48)
@@ -283,23 +283,23 @@ state 47:
     '@': (STATE 12)
 
 state 48:
-    (REDUCTION 21)
+    (REDUCTION 22)
 
 state 49:
     leading_ws: (STATE 51)
     subst_start: (STATE 50)
     control_start: (STATE 43)
     control_fragment: (STATE 49)
-    '@-': (STATE 18)
+    '@-': (STATE 20)
     '@': (STATE 52)
     /\\n*[ \\t]+/: (STATE 5)
     (REDUCTION 26)
 
 state 50:
-    &control_guts: (STATE 10)
+    &control_guts: (STATE 15)
 
 state 51:
-    '@-': (STATE 18)
+    '@-': (STATE 20)
 
 state 52:
     (REDUCTION 12)
@@ -310,7 +310,7 @@ state 53:
 state 54:
     text: (STATE 2)
     subst_start: (STATE 44)
-    leading_ws: (STATE 17)
+    leading_ws: (STATE 19)
     subst_start: (STATE 44)
     control_continuation: (STATE 54)
     fragment: (STATE 54)
@@ -319,16 +319,16 @@ state 54:
     control_end: (STATE 53)
     control_fragment: (STATE 49)
     subst_start: (STATE 44)
-    leading_ws: (STATE 17)
+    leading_ws: (STATE 19)
     trailing_ws: (STATE 1)
     '@@': (STATE 4)
     '@/*': (STATE 71)
     '@parameter:': (STATE 57)
     '@include:': (STATE 61)
     '@embed:': (STATE 66)
-    /@declare\\s+/: (STATE 19)
+    /@declare\\s+/: (STATE 21)
     /@realign:\\s*/: (STATE 75)
-    '@-': (STATE 18)
+    '@-': (STATE 20)
     '@': (STATE 52)
     /\\n*[ \\t]+/: (STATE 5)
     /[ \\t]*\\n+[ \\t]+(\?!@)/: (STATE 7)
@@ -342,12 +342,13 @@ state 55:
     control_continuation: (STATE 54)
     (_subex_0): (STATE 55)
     control_end: (STATE 53)
-    '@-': (STATE 18)
+    '@-': (STATE 20)
     '@': (STATE 52)
     /\\n*[ \\t]+/: (STATE 5)
 
 state 56:
-    '}': (STATE 45)
+    &continuation_guts: (STATE 45)
+    '}': (STATE 47)
 
 state 57:
     /[^@]+/: (STATE 58)
@@ -426,21 +427,21 @@ state 79:
     fragment: (STATE 79)
     text: (STATE 2)
     subst_start: (STATE 9)
-    leading_ws: (STATE 17)
+    leading_ws: (STATE 19)
     subst_start: (STATE 9)
     control_start: (STATE 43)
     control_fragment: (STATE 49)
     subst_start: (STATE 9)
-    leading_ws: (STATE 17)
+    leading_ws: (STATE 19)
     trailing_ws: (STATE 1)
     '@@': (STATE 4)
     '@/*': (STATE 71)
     '@parameter:': (STATE 57)
     '@include:': (STATE 61)
     '@embed:': (STATE 66)
-    /@declare\\s+/: (STATE 19)
+    /@declare\\s+/: (STATE 21)
     /@realign:\\s*/: (STATE 75)
-    '@-': (STATE 18)
+    '@-': (STATE 20)
     '@': (STATE 52)
     /\\n*[ \\t]+/: (STATE 5)
     /[ \\t]*\\n+[ \\t]+(\?!@)/: (STATE 7)
@@ -455,483 +456,482 @@ state 80:
 
 
 state 0:
-    complete (0:1):           •fragment+:fragments                                                                                                      => state 79 (src/grammarlib/jemp.fpl:12)
-    fragment (1:1):           •text+:chunks                                                                                                             => state 2  (src/grammarlib/jemp.fpl:15)
-    text (2:1):               •'@@':at_sign                                                                                                             => state 4  (src/grammarlib/jemp.fpl:20)
-    fragment (3:4):           •'@/*'^ /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment '*/@'^ /\\n\?/^                                               => state 71 (src/grammarlib/jemp.fpl:24)
-    fragment (4:4):           •'@parameter:'^ /[^@]+/:param_decl '@'^ /\\n\?/^                                                                          => state 57 (src/grammarlib/jemp.fpl:35)
-    fragment (5:5):           •'@include:'^ /\\s*/^ /[^@]+/:include_file '@'^ /\\n\?/^                                                                  => state 61 (src/grammarlib/jemp.fpl:40)
-    fragment (6:5):           •'@embed:'^ /\\s*/^ /[^@]+/:embed_file '@'^ /\\n\?/^                                                                      => state 66 (src/grammarlib/jemp.fpl:46)
-    fragment (7:7):           •subst_start^ 'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^                                => state 9  (src/grammarlib/jemp.fpl:52)
-    fragment (8:7):           •leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 17 (src/grammarlib/jemp.fpl:58)
-    fragment (8:6):           leading_ws? •/@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 19 (src/grammarlib/jemp.fpl:58)
-    fragment (9:4):           •/@realign:\\s*/^ text:realign '@'^ /\\n\?/^                                                                              => state 75 (src/grammarlib/jemp.fpl:71)
-    subst_start (11:2):       •leading_ws?^ '@-':arg_1                                                                                                  => state 17 (src/grammarlib/jemp.fpl:78)
-    subst_start (11:1):       leading_ws?^ •'@-':arg_1                                                                                                  => state 18 (src/grammarlib/jemp.fpl:78)
-    subst_start (12:1):       •'@':arg_0                                                                                                                => state 52 (src/grammarlib/jemp.fpl:79)
-    leading_ws (16:1):        •/\\n*[ \\t]+/:ws                                                                                                         => state 5  (src/grammarlib/jemp.fpl:89)
-    trailing_ws (17:1):       •/[ \\t]*\\n+[ \\t]+(\?!@)/:ws                                                                                            => state 7  (src/grammarlib/jemp.fpl:103)
-    trailing_ws (18:1):       •/[ \\t]*\\n/:ws                                                                                                          => state 8  (src/grammarlib/jemp.fpl:107)
-    fragment (19:6):          •subst_start^ /#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^                   => state 9  (src/grammarlib/jemp.fpl:115)
-    fragment (20:5):          •subst_start^ /#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^                                            => state 9  (src/grammarlib/jemp.fpl:118)
-    control_start (23:3):     •subst_start^ &control_guts:control_statement subst_end^                                                                  => state 9  (src/grammarlib/jemp.fpl:132)
-    control_fragment (25:4):  •control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement control_end:control_statement  => state 43 (src/grammarlib/jemp.fpl:134)
-    fragment (26:1):          •control_fragment+                                                                                                        => state 49 (src/grammarlib/jemp.fpl:136)
-    fragment (27:3):          •subst_start^ /(\?:[^-@}]|-[^@}])+/:variable subst_end^                                                                   => state 9  (src/grammarlib/jemp.fpl:140)
-    text (28:1):              •/[^@\\n]+/:t                                                                                                             => state 6  (src/grammarlib/jemp.fpl:144)
-    text (29:1):              •leading_ws                                                                                                               => state 17 (src/grammarlib/jemp.fpl:148)
-    text (30:1):              •trailing_ws                                                                                                              => state 1  (src/grammarlib/jemp.fpl:149)
+    complete (0:1):           •fragment+:fragments                                                                                                      => state 79 (src/grammarlib/jemp.fpl:16)
+    fragment (1:1):           •text+:chunks                                                                                                             => state 2  (src/grammarlib/jemp.fpl:19)
+    text (2:1):               •'@@':at_sign                                                                                                             => state 4  (src/grammarlib/jemp.fpl:24)
+    fragment (3:4):           •'@/*'^ /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment '*/@'^ /\\n\?/^                                               => state 71 (src/grammarlib/jemp.fpl:28)
+    fragment (4:4):           •'@parameter:'^ /[^@]+/:param_decl '@'^ /\\n\?/^                                                                          => state 57 (src/grammarlib/jemp.fpl:39)
+    fragment (5:5):           •'@include:'^ /\\s*/^ /[^@]+/:include_file '@'^ /\\n\?/^                                                                  => state 61 (src/grammarlib/jemp.fpl:44)
+    fragment (6:5):           •'@embed:'^ /\\s*/^ /[^@]+/:embed_file '@'^ /\\n\?/^                                                                      => state 66 (src/grammarlib/jemp.fpl:50)
+    fragment (7:7):           •subst_start^ 'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^                                => state 9  (src/grammarlib/jemp.fpl:56)
+    fragment (8:7):           •leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 19 (src/grammarlib/jemp.fpl:62)
+    fragment (8:6):           leading_ws? •/@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 21 (src/grammarlib/jemp.fpl:62)
+    fragment (9:4):           •/@realign:\\s*/^ text:realign '@'^ /\\n\?/^                                                                              => state 75 (src/grammarlib/jemp.fpl:75)
+    subst_start (11:2):       •leading_ws?^ '@-':arg_1                                                                                                  => state 19 (src/grammarlib/jemp.fpl:82)
+    subst_start (11:1):       leading_ws?^ •'@-':arg_1                                                                                                  => state 20 (src/grammarlib/jemp.fpl:82)
+    subst_start (12:1):       •'@':arg_0                                                                                                                => state 52 (src/grammarlib/jemp.fpl:83)
+    leading_ws (16:1):        •/\\n*[ \\t]+/:ws                                                                                                         => state 5  (src/grammarlib/jemp.fpl:93)
+    trailing_ws (17:1):       •/[ \\t]*\\n+[ \\t]+(\?!@)/:ws                                                                                            => state 7  (src/grammarlib/jemp.fpl:107)
+    trailing_ws (18:1):       •/[ \\t]*\\n/:ws                                                                                                          => state 8  (src/grammarlib/jemp.fpl:111)
+    fragment (19:6):          •subst_start^ /#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^                   => state 9  (src/grammarlib/jemp.fpl:119)
+    fragment (20:5):          •subst_start^ /#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^                                            => state 9  (src/grammarlib/jemp.fpl:122)
+    control_start (23:3):     •subst_start^ &control_guts:control_statement subst_end^                                                                  => state 9  (src/grammarlib/jemp.fpl:135)
+    control_fragment (25:4):  •control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement control_end:control_statement  => state 43 (src/grammarlib/jemp.fpl:137)
+    fragment (26:1):          •control_fragment+                                                                                                        => state 49 (src/grammarlib/jemp.fpl:139)
+    fragment (27:3):          •subst_start^ &subst_guts:variable subst_end^                                                                             => state 9  (src/grammarlib/jemp.fpl:143)
+    text (28:1):              •/[^@\\n]+/:t                                                                                                             => state 6  (src/grammarlib/jemp.fpl:147)
+    text (29:1):              •leading_ws                                                                                                               => state 19 (src/grammarlib/jemp.fpl:151)
+    text (30:1):              •trailing_ws                                                                                                              => state 1  (src/grammarlib/jemp.fpl:152)
     _fpl_goal (32:1):         •complete                                                                                                                 => state 80 (src/fpl2cc/productions.h:4275)
 
 state 1:
-    text (30:0):  trailing_ws • => (reduce) (src/grammarlib/jemp.fpl:149)
+    text (30:0):  trailing_ws • => (reduce) (src/grammarlib/jemp.fpl:152)
 
 state 2:
-    fragment (1:1):      •text+:chunks                   => state 2  (src/grammarlib/jemp.fpl:15)
-    fragment (1:0):      text+:chunks •                  => (reduce) (src/grammarlib/jemp.fpl:15)
-    text (2:1):          •'@@':at_sign                   => state 4  (src/grammarlib/jemp.fpl:20)
-    leading_ws (16:1):   •/\\n*[ \\t]+/:ws               => state 5  (src/grammarlib/jemp.fpl:89)
-    trailing_ws (17:1):  •/[ \\t]*\\n+[ \\t]+(\?!@)/:ws  => state 7  (src/grammarlib/jemp.fpl:103)
-    trailing_ws (18:1):  •/[ \\t]*\\n/:ws                => state 8  (src/grammarlib/jemp.fpl:107)
-    text (28:1):         •/[^@\\n]+/:t                   => state 6  (src/grammarlib/jemp.fpl:144)
-    text (29:1):         •leading_ws                     => state 3  (src/grammarlib/jemp.fpl:148)
-    text (30:1):         •trailing_ws                    => state 1  (src/grammarlib/jemp.fpl:149)
+    fragment (1:1):      •text+:chunks                   => state 2  (src/grammarlib/jemp.fpl:19)
+    fragment (1:0):      text+:chunks •                  => (reduce) (src/grammarlib/jemp.fpl:19)
+    text (2:1):          •'@@':at_sign                   => state 4  (src/grammarlib/jemp.fpl:24)
+    leading_ws (16:1):   •/\\n*[ \\t]+/:ws               => state 5  (src/grammarlib/jemp.fpl:93)
+    trailing_ws (17:1):  •/[ \\t]*\\n+[ \\t]+(\?!@)/:ws  => state 7  (src/grammarlib/jemp.fpl:107)
+    trailing_ws (18:1):  •/[ \\t]*\\n/:ws                => state 8  (src/grammarlib/jemp.fpl:111)
+    text (28:1):         •/[^@\\n]+/:t                   => state 6  (src/grammarlib/jemp.fpl:147)
+    text (29:1):         •leading_ws                     => state 3  (src/grammarlib/jemp.fpl:151)
+    text (30:1):         •trailing_ws                    => state 1  (src/grammarlib/jemp.fpl:152)
 
 state 3:
-    text (29:0):  leading_ws • => (reduce) (src/grammarlib/jemp.fpl:148)
+    text (29:0):  leading_ws • => (reduce) (src/grammarlib/jemp.fpl:151)
 
 state 4:
-    text (2:0):  '@@':at_sign • => (reduce) (src/grammarlib/jemp.fpl:20)
+    text (2:0):  '@@':at_sign • => (reduce) (src/grammarlib/jemp.fpl:24)
 
 state 5:
-    leading_ws (16:0):  /\\n*[ \\t]+/:ws • => (reduce) (src/grammarlib/jemp.fpl:89)
+    leading_ws (16:0):  /\\n*[ \\t]+/:ws • => (reduce) (src/grammarlib/jemp.fpl:93)
 
 state 6:
-    text (28:0):  /[^@\\n]+/:t • => (reduce) (src/grammarlib/jemp.fpl:144)
+    text (28:0):  /[^@\\n]+/:t • => (reduce) (src/grammarlib/jemp.fpl:147)
 
 state 7:
-    trailing_ws (17:0):  /[ \\t]*\\n+[ \\t]+(\?!@)/:ws • => (reduce) (src/grammarlib/jemp.fpl:103)
+    trailing_ws (17:0):  /[ \\t]*\\n+[ \\t]+(\?!@)/:ws • => (reduce) (src/grammarlib/jemp.fpl:107)
 
 state 8:
-    trailing_ws (18:0):  /[ \\t]*\\n/:ws • => (reduce) (src/grammarlib/jemp.fpl:107)
+    trailing_ws (18:0):  /[ \\t]*\\n/:ws • => (reduce) (src/grammarlib/jemp.fpl:111)
 
 state 9:
-    fragment (7:6):        subst_start^ •'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^               => state 15 (src/grammarlib/jemp.fpl:52)
-    fragment (19:5):       subst_start^ •/#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^  => state 32 (src/grammarlib/jemp.fpl:115)
-    fragment (20:4):       subst_start^ •/#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^                           => state 32 (src/grammarlib/jemp.fpl:118)
-    control_start (23:2):  subst_start^ •&control_guts:control_statement subst_end^                                                 => state 10 (src/grammarlib/jemp.fpl:132)
-    fragment (27:2):       subst_start^ •/(\?:[^-@}]|-[^@}])+/:variable subst_end^                                                  => state 30 (src/grammarlib/jemp.fpl:140)
+    fragment (7:6):        subst_start^ •'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^               => state 17 (src/grammarlib/jemp.fpl:56)
+    fragment (19:5):       subst_start^ •/#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^  => state 32 (src/grammarlib/jemp.fpl:119)
+    fragment (20:4):       subst_start^ •/#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^                           => state 32 (src/grammarlib/jemp.fpl:122)
+    control_start (23:2):  subst_start^ •&control_guts:control_statement subst_end^                                                 => state 15 (src/grammarlib/jemp.fpl:135)
+    fragment (27:2):       subst_start^ •&subst_guts:variable subst_end^                                                            => state 10 (src/grammarlib/jemp.fpl:143)
 
 state 10:
-    subst_end (13:2):      •'-@':arg_0 trailing_ws?^                                 => state 13 (src/grammarlib/jemp.fpl:81)
-    subst_end (14:1):      •'@':arg_0                                                => state 12 (src/grammarlib/jemp.fpl:82)
-    control_start (23:1):  subst_start^ &control_guts:control_statement •subst_end^  => state 11 (src/grammarlib/jemp.fpl:132)
+    subst_end (13:2):  •'-@':arg_0 trailing_ws?^                      => state 13 (src/grammarlib/jemp.fpl:85)
+    subst_end (14:1):  •'@':arg_0                                     => state 12 (src/grammarlib/jemp.fpl:86)
+    fragment (27:1):   subst_start^ &subst_guts:variable •subst_end^  => state 11 (src/grammarlib/jemp.fpl:143)
 
 state 11:
-    control_start (23:0):  subst_start^ &control_guts:control_statement subst_end^ • => (reduce) (src/grammarlib/jemp.fpl:132)
+    fragment (27:0):  subst_start^ &subst_guts:variable subst_end^ • => (reduce) (src/grammarlib/jemp.fpl:143)
 
 state 12:
-    subst_end (14:0):  '@':arg_0 • => (reduce) (src/grammarlib/jemp.fpl:82)
+    subst_end (14:0):  '@':arg_0 • => (reduce) (src/grammarlib/jemp.fpl:86)
 
 state 13:
-    subst_end (13:1):    '-@':arg_0 •trailing_ws?^       => state 14 (src/grammarlib/jemp.fpl:81)
-    subst_end (13:0):    '-@':arg_0 trailing_ws?^ •      => (reduce) (src/grammarlib/jemp.fpl:81)
-    trailing_ws (17:1):  •/[ \\t]*\\n+[ \\t]+(\?!@)/:ws  => state 7  (src/grammarlib/jemp.fpl:103)
-    trailing_ws (18:1):  •/[ \\t]*\\n/:ws                => state 8  (src/grammarlib/jemp.fpl:107)
+    subst_end (13:1):    '-@':arg_0 •trailing_ws?^       => state 14 (src/grammarlib/jemp.fpl:85)
+    subst_end (13:0):    '-@':arg_0 trailing_ws?^ •      => (reduce) (src/grammarlib/jemp.fpl:85)
+    trailing_ws (17:1):  •/[ \\t]*\\n+[ \\t]+(\?!@)/:ws  => state 7  (src/grammarlib/jemp.fpl:107)
+    trailing_ws (18:1):  •/[ \\t]*\\n/:ws                => state 8  (src/grammarlib/jemp.fpl:111)
 
 state 14:
-    subst_end (13:0):  '-@':arg_0 trailing_ws?^ • => (reduce) (src/grammarlib/jemp.fpl:81)
+    subst_end (13:0):  '-@':arg_0 trailing_ws?^ • => (reduce) (src/grammarlib/jemp.fpl:85)
 
 state 15:
-    fragment (7:5):    subst_start^ 'error {'^ •subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^  => state 16 (src/grammarlib/jemp.fpl:52)
-    subst_end (13:2):  •'-@':arg_0 trailing_ws?^                                                                   => state 13 (src/grammarlib/jemp.fpl:81)
-    subst_end (14:1):  •'@':arg_0                                                                                  => state 12 (src/grammarlib/jemp.fpl:82)
+    subst_end (13:2):      •'-@':arg_0 trailing_ws?^                                 => state 13 (src/grammarlib/jemp.fpl:85)
+    subst_end (14:1):      •'@':arg_0                                                => state 12 (src/grammarlib/jemp.fpl:86)
+    control_start (23:1):  subst_start^ &control_guts:control_statement •subst_end^  => state 16 (src/grammarlib/jemp.fpl:135)
 
 state 16:
-    fragment (1:1):           •text+:chunks                                                                                                             => state 2  (src/grammarlib/jemp.fpl:15)
-    text (2:1):               •'@@':at_sign                                                                                                             => state 4  (src/grammarlib/jemp.fpl:20)
-    fragment (3:4):           •'@/*'^ /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment '*/@'^ /\\n\?/^                                               => state 71 (src/grammarlib/jemp.fpl:24)
-    fragment (4:4):           •'@parameter:'^ /[^@]+/:param_decl '@'^ /\\n\?/^                                                                          => state 57 (src/grammarlib/jemp.fpl:35)
-    fragment (5:5):           •'@include:'^ /\\s*/^ /[^@]+/:include_file '@'^ /\\n\?/^                                                                  => state 61 (src/grammarlib/jemp.fpl:40)
-    fragment (6:5):           •'@embed:'^ /\\s*/^ /[^@]+/:embed_file '@'^ /\\n\?/^                                                                      => state 66 (src/grammarlib/jemp.fpl:46)
-    fragment (7:7):           •subst_start^ 'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^                                => state 9  (src/grammarlib/jemp.fpl:52)
-    fragment (7:4):           subst_start^ 'error {'^ subst_end^ •fragment+:error_fragments subst_start^ '}'^ subst_end^                                => state 26 (src/grammarlib/jemp.fpl:52)
-    fragment (8:7):           •leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 17 (src/grammarlib/jemp.fpl:58)
-    fragment (8:6):           leading_ws? •/@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 19 (src/grammarlib/jemp.fpl:58)
-    fragment (9:4):           •/@realign:\\s*/^ text:realign '@'^ /\\n\?/^                                                                              => state 75 (src/grammarlib/jemp.fpl:71)
-    subst_start (11:2):       •leading_ws?^ '@-':arg_1                                                                                                  => state 17 (src/grammarlib/jemp.fpl:78)
-    subst_start (11:1):       leading_ws?^ •'@-':arg_1                                                                                                  => state 18 (src/grammarlib/jemp.fpl:78)
-    subst_start (12:1):       •'@':arg_0                                                                                                                => state 52 (src/grammarlib/jemp.fpl:79)
-    leading_ws (16:1):        •/\\n*[ \\t]+/:ws                                                                                                         => state 5  (src/grammarlib/jemp.fpl:89)
-    trailing_ws (17:1):       •/[ \\t]*\\n+[ \\t]+(\?!@)/:ws                                                                                            => state 7  (src/grammarlib/jemp.fpl:103)
-    trailing_ws (18:1):       •/[ \\t]*\\n/:ws                                                                                                          => state 8  (src/grammarlib/jemp.fpl:107)
-    fragment (19:6):          •subst_start^ /#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^                   => state 9  (src/grammarlib/jemp.fpl:115)
-    fragment (20:5):          •subst_start^ /#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^                                            => state 9  (src/grammarlib/jemp.fpl:118)
-    control_start (23:3):     •subst_start^ &control_guts:control_statement subst_end^                                                                  => state 9  (src/grammarlib/jemp.fpl:132)
-    control_fragment (25:4):  •control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement control_end:control_statement  => state 43 (src/grammarlib/jemp.fpl:134)
-    fragment (26:1):          •control_fragment+                                                                                                        => state 49 (src/grammarlib/jemp.fpl:136)
-    fragment (27:3):          •subst_start^ /(\?:[^-@}]|-[^@}])+/:variable subst_end^                                                                   => state 9  (src/grammarlib/jemp.fpl:140)
-    text (28:1):              •/[^@\\n]+/:t                                                                                                             => state 6  (src/grammarlib/jemp.fpl:144)
-    text (29:1):              •leading_ws                                                                                                               => state 17 (src/grammarlib/jemp.fpl:148)
-    text (30:1):              •trailing_ws                                                                                                              => state 1  (src/grammarlib/jemp.fpl:149)
+    control_start (23:0):  subst_start^ &control_guts:control_statement subst_end^ • => (reduce) (src/grammarlib/jemp.fpl:135)
 
 state 17:
-    fragment (8:6):      leading_ws? •/@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^  => state 19 (src/grammarlib/jemp.fpl:58)
-    subst_start (11:1):  leading_ws?^ •'@-':arg_1                                                                         => state 18 (src/grammarlib/jemp.fpl:78)
-    text (29:0):         leading_ws •                                                                                     => (reduce) (src/grammarlib/jemp.fpl:148)
+    fragment (7:5):    subst_start^ 'error {'^ •subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^  => state 18 (src/grammarlib/jemp.fpl:56)
+    subst_end (13:2):  •'-@':arg_0 trailing_ws?^                                                                   => state 13 (src/grammarlib/jemp.fpl:85)
+    subst_end (14:1):  •'@':arg_0                                                                                  => state 12 (src/grammarlib/jemp.fpl:86)
 
 state 18:
-    subst_start (11:0):  leading_ws?^ '@-':arg_1 • => (reduce) (src/grammarlib/jemp.fpl:78)
+    fragment (1:1):           •text+:chunks                                                                                                             => state 2  (src/grammarlib/jemp.fpl:19)
+    text (2:1):               •'@@':at_sign                                                                                                             => state 4  (src/grammarlib/jemp.fpl:24)
+    fragment (3:4):           •'@/*'^ /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment '*/@'^ /\\n\?/^                                               => state 71 (src/grammarlib/jemp.fpl:28)
+    fragment (4:4):           •'@parameter:'^ /[^@]+/:param_decl '@'^ /\\n\?/^                                                                          => state 57 (src/grammarlib/jemp.fpl:39)
+    fragment (5:5):           •'@include:'^ /\\s*/^ /[^@]+/:include_file '@'^ /\\n\?/^                                                                  => state 61 (src/grammarlib/jemp.fpl:44)
+    fragment (6:5):           •'@embed:'^ /\\s*/^ /[^@]+/:embed_file '@'^ /\\n\?/^                                                                      => state 66 (src/grammarlib/jemp.fpl:50)
+    fragment (7:7):           •subst_start^ 'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^                                => state 9  (src/grammarlib/jemp.fpl:56)
+    fragment (7:4):           subst_start^ 'error {'^ subst_end^ •fragment+:error_fragments subst_start^ '}'^ subst_end^                                => state 28 (src/grammarlib/jemp.fpl:56)
+    fragment (8:7):           •leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 19 (src/grammarlib/jemp.fpl:62)
+    fragment (8:6):           leading_ws? •/@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 21 (src/grammarlib/jemp.fpl:62)
+    fragment (9:4):           •/@realign:\\s*/^ text:realign '@'^ /\\n\?/^                                                                              => state 75 (src/grammarlib/jemp.fpl:75)
+    subst_start (11:2):       •leading_ws?^ '@-':arg_1                                                                                                  => state 19 (src/grammarlib/jemp.fpl:82)
+    subst_start (11:1):       leading_ws?^ •'@-':arg_1                                                                                                  => state 20 (src/grammarlib/jemp.fpl:82)
+    subst_start (12:1):       •'@':arg_0                                                                                                                => state 52 (src/grammarlib/jemp.fpl:83)
+    leading_ws (16:1):        •/\\n*[ \\t]+/:ws                                                                                                         => state 5  (src/grammarlib/jemp.fpl:93)
+    trailing_ws (17:1):       •/[ \\t]*\\n+[ \\t]+(\?!@)/:ws                                                                                            => state 7  (src/grammarlib/jemp.fpl:107)
+    trailing_ws (18:1):       •/[ \\t]*\\n/:ws                                                                                                          => state 8  (src/grammarlib/jemp.fpl:111)
+    fragment (19:6):          •subst_start^ /#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^                   => state 9  (src/grammarlib/jemp.fpl:119)
+    fragment (20:5):          •subst_start^ /#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^                                            => state 9  (src/grammarlib/jemp.fpl:122)
+    control_start (23:3):     •subst_start^ &control_guts:control_statement subst_end^                                                                  => state 9  (src/grammarlib/jemp.fpl:135)
+    control_fragment (25:4):  •control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement control_end:control_statement  => state 43 (src/grammarlib/jemp.fpl:137)
+    fragment (26:1):          •control_fragment+                                                                                                        => state 49 (src/grammarlib/jemp.fpl:139)
+    fragment (27:3):          •subst_start^ &subst_guts:variable subst_end^                                                                             => state 9  (src/grammarlib/jemp.fpl:143)
+    text (28:1):              •/[^@\\n]+/:t                                                                                                             => state 6  (src/grammarlib/jemp.fpl:147)
+    text (29:1):              •leading_ws                                                                                                               => state 19 (src/grammarlib/jemp.fpl:151)
+    text (30:1):              •trailing_ws                                                                                                              => state 1  (src/grammarlib/jemp.fpl:152)
 
 state 19:
-    fragment (8:5):     leading_ws? /@declare\\s+/^ •identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^  => state 20 (src/grammarlib/jemp.fpl:58)
-    identifier (31:1):  •/[a-zA-Z_][a-zA-Z_0-9]+/:name                                                                   => state 25 (src/grammarlib/jemp.fpl:152)
+    fragment (8:6):      leading_ws? •/@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^  => state 21 (src/grammarlib/jemp.fpl:62)
+    subst_start (11:1):  leading_ws?^ •'@-':arg_1                                                                         => state 20 (src/grammarlib/jemp.fpl:82)
+    text (29:0):         leading_ws •                                                                                     => (reduce) (src/grammarlib/jemp.fpl:151)
 
 state 20:
-    fragment (8:4):  leading_ws? /@declare\\s+/^ identifier:name_decl •':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^  => state 21 (src/grammarlib/jemp.fpl:58)
+    subst_start (11:0):  leading_ws?^ '@-':arg_1 • => (reduce) (src/grammarlib/jemp.fpl:82)
 
 state 21:
-    fragment (8:3):  leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ •/(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^  => state 22 (src/grammarlib/jemp.fpl:58)
+    fragment (8:5):     leading_ws? /@declare\\s+/^ •identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^  => state 22 (src/grammarlib/jemp.fpl:62)
+    identifier (31:1):  •/[a-zA-Z_][a-zA-Z_0-9]+/:name                                                                   => state 27 (src/grammarlib/jemp.fpl:155)
 
 state 22:
-    fragment (8:2):  leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value •'@'^ /\\n\?/^  => state 23 (src/grammarlib/jemp.fpl:58)
+    fragment (8:4):  leading_ws? /@declare\\s+/^ identifier:name_decl •':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^  => state 23 (src/grammarlib/jemp.fpl:62)
 
 state 23:
-    fragment (8:1):  leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ •/\\n\?/^  => state 24 (src/grammarlib/jemp.fpl:58)
+    fragment (8:3):  leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ •/(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^  => state 24 (src/grammarlib/jemp.fpl:62)
 
 state 24:
-    fragment (8:0):  leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^ • => (reduce) (src/grammarlib/jemp.fpl:58)
+    fragment (8:2):  leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value •'@'^ /\\n\?/^  => state 25 (src/grammarlib/jemp.fpl:62)
 
 state 25:
-    identifier (31:0):  /[a-zA-Z_][a-zA-Z_0-9]+/:name • => (reduce) (src/grammarlib/jemp.fpl:152)
+    fragment (8:1):  leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ •/\\n\?/^  => state 26 (src/grammarlib/jemp.fpl:62)
 
 state 26:
-    fragment (1:1):           •text+:chunks                                                                                                             => state 2  (src/grammarlib/jemp.fpl:15)
-    text (2:1):               •'@@':at_sign                                                                                                             => state 4  (src/grammarlib/jemp.fpl:20)
-    fragment (3:4):           •'@/*'^ /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment '*/@'^ /\\n\?/^                                               => state 71 (src/grammarlib/jemp.fpl:24)
-    fragment (4:4):           •'@parameter:'^ /[^@]+/:param_decl '@'^ /\\n\?/^                                                                          => state 57 (src/grammarlib/jemp.fpl:35)
-    fragment (5:5):           •'@include:'^ /\\s*/^ /[^@]+/:include_file '@'^ /\\n\?/^                                                                  => state 61 (src/grammarlib/jemp.fpl:40)
-    fragment (6:5):           •'@embed:'^ /\\s*/^ /[^@]+/:embed_file '@'^ /\\n\?/^                                                                      => state 66 (src/grammarlib/jemp.fpl:46)
-    fragment (7:7):           •subst_start^ 'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^                                => state 27 (src/grammarlib/jemp.fpl:52)
-    fragment (7:4):           subst_start^ 'error {'^ subst_end^ •fragment+:error_fragments subst_start^ '}'^ subst_end^                                => state 26 (src/grammarlib/jemp.fpl:52)
-    fragment (7:3):           subst_start^ 'error {'^ subst_end^ fragment+:error_fragments •subst_start^ '}'^ subst_end^                                => state 27 (src/grammarlib/jemp.fpl:52)
-    fragment (8:7):           •leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 17 (src/grammarlib/jemp.fpl:58)
-    fragment (8:6):           leading_ws? •/@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 19 (src/grammarlib/jemp.fpl:58)
-    fragment (9:4):           •/@realign:\\s*/^ text:realign '@'^ /\\n\?/^                                                                              => state 75 (src/grammarlib/jemp.fpl:71)
-    subst_start (11:2):       •leading_ws?^ '@-':arg_1                                                                                                  => state 17 (src/grammarlib/jemp.fpl:78)
-    subst_start (11:1):       leading_ws?^ •'@-':arg_1                                                                                                  => state 18 (src/grammarlib/jemp.fpl:78)
-    subst_start (12:1):       •'@':arg_0                                                                                                                => state 52 (src/grammarlib/jemp.fpl:79)
-    leading_ws (16:1):        •/\\n*[ \\t]+/:ws                                                                                                         => state 5  (src/grammarlib/jemp.fpl:89)
-    trailing_ws (17:1):       •/[ \\t]*\\n+[ \\t]+(\?!@)/:ws                                                                                            => state 7  (src/grammarlib/jemp.fpl:103)
-    trailing_ws (18:1):       •/[ \\t]*\\n/:ws                                                                                                          => state 8  (src/grammarlib/jemp.fpl:107)
-    fragment (19:6):          •subst_start^ /#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^                   => state 27 (src/grammarlib/jemp.fpl:115)
-    fragment (20:5):          •subst_start^ /#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^                                            => state 27 (src/grammarlib/jemp.fpl:118)
-    control_start (23:3):     •subst_start^ &control_guts:control_statement subst_end^                                                                  => state 27 (src/grammarlib/jemp.fpl:132)
-    control_fragment (25:4):  •control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement control_end:control_statement  => state 43 (src/grammarlib/jemp.fpl:134)
-    fragment (26:1):          •control_fragment+                                                                                                        => state 49 (src/grammarlib/jemp.fpl:136)
-    fragment (27:3):          •subst_start^ /(\?:[^-@}]|-[^@}])+/:variable subst_end^                                                                   => state 27 (src/grammarlib/jemp.fpl:140)
-    text (28:1):              •/[^@\\n]+/:t                                                                                                             => state 6  (src/grammarlib/jemp.fpl:144)
-    text (29:1):              •leading_ws                                                                                                               => state 17 (src/grammarlib/jemp.fpl:148)
-    text (30:1):              •trailing_ws                                                                                                              => state 1  (src/grammarlib/jemp.fpl:149)
+    fragment (8:0):  leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^ • => (reduce) (src/grammarlib/jemp.fpl:62)
 
 state 27:
-    fragment (7:6):        subst_start^ •'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^               => state 15 (src/grammarlib/jemp.fpl:52)
-    fragment (7:2):        subst_start^ 'error {'^ subst_end^ fragment+:error_fragments subst_start^ •'}'^ subst_end^               => state 28 (src/grammarlib/jemp.fpl:52)
-    fragment (19:5):       subst_start^ •/#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^  => state 32 (src/grammarlib/jemp.fpl:115)
-    fragment (20:4):       subst_start^ •/#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^                           => state 32 (src/grammarlib/jemp.fpl:118)
-    control_start (23:2):  subst_start^ •&control_guts:control_statement subst_end^                                                 => state 10 (src/grammarlib/jemp.fpl:132)
-    fragment (27:2):       subst_start^ •/(\?:[^-@}]|-[^@}])+/:variable subst_end^                                                  => state 30 (src/grammarlib/jemp.fpl:140)
+    identifier (31:0):  /[a-zA-Z_][a-zA-Z_0-9]+/:name • => (reduce) (src/grammarlib/jemp.fpl:155)
 
 state 28:
-    fragment (7:1):    subst_start^ 'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ •subst_end^  => state 29 (src/grammarlib/jemp.fpl:52)
-    subst_end (13:2):  •'-@':arg_0 trailing_ws?^                                                                   => state 13 (src/grammarlib/jemp.fpl:81)
-    subst_end (14:1):  •'@':arg_0                                                                                  => state 12 (src/grammarlib/jemp.fpl:82)
+    fragment (1:1):           •text+:chunks                                                                                                             => state 2  (src/grammarlib/jemp.fpl:19)
+    text (2:1):               •'@@':at_sign                                                                                                             => state 4  (src/grammarlib/jemp.fpl:24)
+    fragment (3:4):           •'@/*'^ /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment '*/@'^ /\\n\?/^                                               => state 71 (src/grammarlib/jemp.fpl:28)
+    fragment (4:4):           •'@parameter:'^ /[^@]+/:param_decl '@'^ /\\n\?/^                                                                          => state 57 (src/grammarlib/jemp.fpl:39)
+    fragment (5:5):           •'@include:'^ /\\s*/^ /[^@]+/:include_file '@'^ /\\n\?/^                                                                  => state 61 (src/grammarlib/jemp.fpl:44)
+    fragment (6:5):           •'@embed:'^ /\\s*/^ /[^@]+/:embed_file '@'^ /\\n\?/^                                                                      => state 66 (src/grammarlib/jemp.fpl:50)
+    fragment (7:7):           •subst_start^ 'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^                                => state 29 (src/grammarlib/jemp.fpl:56)
+    fragment (7:4):           subst_start^ 'error {'^ subst_end^ •fragment+:error_fragments subst_start^ '}'^ subst_end^                                => state 28 (src/grammarlib/jemp.fpl:56)
+    fragment (7:3):           subst_start^ 'error {'^ subst_end^ fragment+:error_fragments •subst_start^ '}'^ subst_end^                                => state 29 (src/grammarlib/jemp.fpl:56)
+    fragment (8:7):           •leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 19 (src/grammarlib/jemp.fpl:62)
+    fragment (8:6):           leading_ws? •/@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 21 (src/grammarlib/jemp.fpl:62)
+    fragment (9:4):           •/@realign:\\s*/^ text:realign '@'^ /\\n\?/^                                                                              => state 75 (src/grammarlib/jemp.fpl:75)
+    subst_start (11:2):       •leading_ws?^ '@-':arg_1                                                                                                  => state 19 (src/grammarlib/jemp.fpl:82)
+    subst_start (11:1):       leading_ws?^ •'@-':arg_1                                                                                                  => state 20 (src/grammarlib/jemp.fpl:82)
+    subst_start (12:1):       •'@':arg_0                                                                                                                => state 52 (src/grammarlib/jemp.fpl:83)
+    leading_ws (16:1):        •/\\n*[ \\t]+/:ws                                                                                                         => state 5  (src/grammarlib/jemp.fpl:93)
+    trailing_ws (17:1):       •/[ \\t]*\\n+[ \\t]+(\?!@)/:ws                                                                                            => state 7  (src/grammarlib/jemp.fpl:107)
+    trailing_ws (18:1):       •/[ \\t]*\\n/:ws                                                                                                          => state 8  (src/grammarlib/jemp.fpl:111)
+    fragment (19:6):          •subst_start^ /#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^                   => state 29 (src/grammarlib/jemp.fpl:119)
+    fragment (20:5):          •subst_start^ /#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^                                            => state 29 (src/grammarlib/jemp.fpl:122)
+    control_start (23:3):     •subst_start^ &control_guts:control_statement subst_end^                                                                  => state 29 (src/grammarlib/jemp.fpl:135)
+    control_fragment (25:4):  •control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement control_end:control_statement  => state 43 (src/grammarlib/jemp.fpl:137)
+    fragment (26:1):          •control_fragment+                                                                                                        => state 49 (src/grammarlib/jemp.fpl:139)
+    fragment (27:3):          •subst_start^ &subst_guts:variable subst_end^                                                                             => state 29 (src/grammarlib/jemp.fpl:143)
+    text (28:1):              •/[^@\\n]+/:t                                                                                                             => state 6  (src/grammarlib/jemp.fpl:147)
+    text (29:1):              •leading_ws                                                                                                               => state 19 (src/grammarlib/jemp.fpl:151)
+    text (30:1):              •trailing_ws                                                                                                              => state 1  (src/grammarlib/jemp.fpl:152)
 
 state 29:
-    fragment (7:0):  subst_start^ 'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^ • => (reduce) (src/grammarlib/jemp.fpl:52)
+    fragment (7:6):        subst_start^ •'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^               => state 17 (src/grammarlib/jemp.fpl:56)
+    fragment (7:2):        subst_start^ 'error {'^ subst_end^ fragment+:error_fragments subst_start^ •'}'^ subst_end^               => state 30 (src/grammarlib/jemp.fpl:56)
+    fragment (19:5):       subst_start^ •/#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^  => state 32 (src/grammarlib/jemp.fpl:119)
+    fragment (20:4):       subst_start^ •/#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^                           => state 32 (src/grammarlib/jemp.fpl:122)
+    control_start (23:2):  subst_start^ •&control_guts:control_statement subst_end^                                                 => state 15 (src/grammarlib/jemp.fpl:135)
+    fragment (27:2):       subst_start^ •&subst_guts:variable subst_end^                                                            => state 10 (src/grammarlib/jemp.fpl:143)
 
 state 30:
-    subst_end (13:2):  •'-@':arg_0 trailing_ws?^                                => state 13 (src/grammarlib/jemp.fpl:81)
-    subst_end (14:1):  •'@':arg_0                                               => state 12 (src/grammarlib/jemp.fpl:82)
-    fragment (27:1):   subst_start^ /(\?:[^-@}]|-[^@}])+/:variable •subst_end^  => state 31 (src/grammarlib/jemp.fpl:140)
+    fragment (7:1):    subst_start^ 'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ •subst_end^  => state 31 (src/grammarlib/jemp.fpl:56)
+    subst_end (13:2):  •'-@':arg_0 trailing_ws?^                                                                   => state 13 (src/grammarlib/jemp.fpl:85)
+    subst_end (14:1):  •'@':arg_0                                                                                  => state 12 (src/grammarlib/jemp.fpl:86)
 
 state 31:
-    fragment (27:0):  subst_start^ /(\?:[^-@}]|-[^@}])+/:variable subst_end^ • => (reduce) (src/grammarlib/jemp.fpl:140)
+    fragment (7:0):  subst_start^ 'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^ • => (reduce) (src/grammarlib/jemp.fpl:56)
 
 state 32:
-    fragment (19:4):    subst_start^ /#\\s*/^ •identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^  => state 33 (src/grammarlib/jemp.fpl:115)
-    fragment (20:3):    subst_start^ /#\\s*/^ •identifier:jempl_name rest_of_sub:jempl_args subst_end^                           => state 33 (src/grammarlib/jemp.fpl:118)
-    identifier (31:1):  •/[a-zA-Z_][a-zA-Z_0-9]+/:name                                                                           => state 25 (src/grammarlib/jemp.fpl:152)
+    fragment (19:4):    subst_start^ /#\\s*/^ •identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^  => state 33 (src/grammarlib/jemp.fpl:119)
+    fragment (20:3):    subst_start^ /#\\s*/^ •identifier:jempl_name rest_of_sub:jempl_args subst_end^                           => state 33 (src/grammarlib/jemp.fpl:122)
+    identifier (31:1):  •/[a-zA-Z_][a-zA-Z_0-9]+/:name                                                                           => state 27 (src/grammarlib/jemp.fpl:155)
 
 state 33:
-    template_variant (10:3):  •'#'^ !'#':variant_expression '#'^                                                                       => state 40 (src/grammarlib/jemp.fpl:76)
-    rest_of_sub (15:1):       •/(\?:[^-@]|-[^@])+/:arg_0                                                                               => state 37 (src/grammarlib/jemp.fpl:83)
-    fragment (19:3):          subst_start^ /#\\s*/^ identifier:jempl_name •template_variant:variant rest_of_sub:jempl_args subst_end^  => state 34 (src/grammarlib/jemp.fpl:115)
-    fragment (20:2):          subst_start^ /#\\s*/^ identifier:jempl_name •rest_of_sub:jempl_args subst_end^                           => state 38 (src/grammarlib/jemp.fpl:118)
+    template_variant (10:3):  •'#'^ !'#':variant_expression '#'^                                                                       => state 40 (src/grammarlib/jemp.fpl:80)
+    rest_of_sub (15:1):       •/(\?:[^-@]|-[^@])+/:arg_0                                                                               => state 37 (src/grammarlib/jemp.fpl:87)
+    fragment (19:3):          subst_start^ /#\\s*/^ identifier:jempl_name •template_variant:variant rest_of_sub:jempl_args subst_end^  => state 34 (src/grammarlib/jemp.fpl:119)
+    fragment (20:2):          subst_start^ /#\\s*/^ identifier:jempl_name •rest_of_sub:jempl_args subst_end^                           => state 38 (src/grammarlib/jemp.fpl:122)
 
 state 34:
-    rest_of_sub (15:1):  •/(\?:[^-@]|-[^@])+/:arg_0                                                                               => state 37 (src/grammarlib/jemp.fpl:83)
-    fragment (19:2):     subst_start^ /#\\s*/^ identifier:jempl_name template_variant:variant •rest_of_sub:jempl_args subst_end^  => state 35 (src/grammarlib/jemp.fpl:115)
+    rest_of_sub (15:1):  •/(\?:[^-@]|-[^@])+/:arg_0                                                                               => state 37 (src/grammarlib/jemp.fpl:87)
+    fragment (19:2):     subst_start^ /#\\s*/^ identifier:jempl_name template_variant:variant •rest_of_sub:jempl_args subst_end^  => state 35 (src/grammarlib/jemp.fpl:119)
 
 state 35:
-    subst_end (13:2):  •'-@':arg_0 trailing_ws?^                                                                                => state 13 (src/grammarlib/jemp.fpl:81)
-    subst_end (14:1):  •'@':arg_0                                                                                               => state 12 (src/grammarlib/jemp.fpl:82)
-    fragment (19:1):   subst_start^ /#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args •subst_end^  => state 36 (src/grammarlib/jemp.fpl:115)
+    subst_end (13:2):  •'-@':arg_0 trailing_ws?^                                                                                => state 13 (src/grammarlib/jemp.fpl:85)
+    subst_end (14:1):  •'@':arg_0                                                                                               => state 12 (src/grammarlib/jemp.fpl:86)
+    fragment (19:1):   subst_start^ /#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args •subst_end^  => state 36 (src/grammarlib/jemp.fpl:119)
 
 state 36:
-    fragment (19:0):  subst_start^ /#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^ • => (reduce) (src/grammarlib/jemp.fpl:115)
+    fragment (19:0):  subst_start^ /#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^ • => (reduce) (src/grammarlib/jemp.fpl:119)
 
 state 37:
-    rest_of_sub (15:0):  /(\?:[^-@]|-[^@])+/:arg_0 • => (reduce) (src/grammarlib/jemp.fpl:83)
+    rest_of_sub (15:0):  /(\?:[^-@]|-[^@])+/:arg_0 • => (reduce) (src/grammarlib/jemp.fpl:87)
 
 state 38:
-    subst_end (13:2):  •'-@':arg_0 trailing_ws?^                                                       => state 13 (src/grammarlib/jemp.fpl:81)
-    subst_end (14:1):  •'@':arg_0                                                                      => state 12 (src/grammarlib/jemp.fpl:82)
-    fragment (20:1):   subst_start^ /#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args •subst_end^  => state 39 (src/grammarlib/jemp.fpl:118)
+    subst_end (13:2):  •'-@':arg_0 trailing_ws?^                                                       => state 13 (src/grammarlib/jemp.fpl:85)
+    subst_end (14:1):  •'@':arg_0                                                                      => state 12 (src/grammarlib/jemp.fpl:86)
+    fragment (20:1):   subst_start^ /#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args •subst_end^  => state 39 (src/grammarlib/jemp.fpl:122)
 
 state 39:
-    fragment (20:0):  subst_start^ /#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^ • => (reduce) (src/grammarlib/jemp.fpl:118)
+    fragment (20:0):  subst_start^ /#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^ • => (reduce) (src/grammarlib/jemp.fpl:122)
 
 state 40:
-    template_variant (10:2):  '#'^ •!'#':variant_expression '#'^  => state 41 (src/grammarlib/jemp.fpl:76)
+    template_variant (10:2):  '#'^ •!'#':variant_expression '#'^  => state 41 (src/grammarlib/jemp.fpl:80)
 
 state 41:
-    template_variant (10:1):  '#'^ !'#':variant_expression •'#'^  => state 42 (src/grammarlib/jemp.fpl:76)
+    template_variant (10:1):  '#'^ !'#':variant_expression •'#'^  => state 42 (src/grammarlib/jemp.fpl:80)
 
 state 42:
-    template_variant (10:0):  '#'^ !'#':variant_expression '#'^ • => (reduce) (src/grammarlib/jemp.fpl:76)
+    template_variant (10:0):  '#'^ !'#':variant_expression '#'^ • => (reduce) (src/grammarlib/jemp.fpl:80)
 
 state 43:
-    fragment (1:1):                 •text+:chunks                                                                                                             => state 2  (src/grammarlib/jemp.fpl:15)
-    text (2:1):                     •'@@':at_sign                                                                                                             => state 4  (src/grammarlib/jemp.fpl:20)
-    fragment (3:4):                 •'@/*'^ /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment '*/@'^ /\\n\?/^                                               => state 71 (src/grammarlib/jemp.fpl:24)
-    fragment (4:4):                 •'@parameter:'^ /[^@]+/:param_decl '@'^ /\\n\?/^                                                                          => state 57 (src/grammarlib/jemp.fpl:35)
-    fragment (5:5):                 •'@include:'^ /\\s*/^ /[^@]+/:include_file '@'^ /\\n\?/^                                                                  => state 61 (src/grammarlib/jemp.fpl:40)
-    fragment (6:5):                 •'@embed:'^ /\\s*/^ /[^@]+/:embed_file '@'^ /\\n\?/^                                                                      => state 66 (src/grammarlib/jemp.fpl:46)
-    fragment (7:7):                 •subst_start^ 'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^                                => state 44 (src/grammarlib/jemp.fpl:52)
-    fragment (8:7):                 •leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 17 (src/grammarlib/jemp.fpl:58)
-    fragment (8:6):                 leading_ws? •/@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 19 (src/grammarlib/jemp.fpl:58)
-    fragment (9:4):                 •/@realign:\\s*/^ text:realign '@'^ /\\n\?/^                                                                              => state 75 (src/grammarlib/jemp.fpl:71)
-    subst_start (11:2):             •leading_ws?^ '@-':arg_1                                                                                                  => state 17 (src/grammarlib/jemp.fpl:78)
-    subst_start (11:1):             leading_ws?^ •'@-':arg_1                                                                                                  => state 18 (src/grammarlib/jemp.fpl:78)
-    subst_start (12:1):             •'@':arg_0                                                                                                                => state 52 (src/grammarlib/jemp.fpl:79)
-    leading_ws (16:1):              •/\\n*[ \\t]+/:ws                                                                                                         => state 5  (src/grammarlib/jemp.fpl:89)
-    trailing_ws (17:1):             •/[ \\t]*\\n+[ \\t]+(\?!@)/:ws                                                                                            => state 7  (src/grammarlib/jemp.fpl:103)
-    trailing_ws (18:1):             •/[ \\t]*\\n/:ws                                                                                                          => state 8  (src/grammarlib/jemp.fpl:107)
-    fragment (19:6):                •subst_start^ /#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^                   => state 44 (src/grammarlib/jemp.fpl:115)
-    fragment (20:5):                •subst_start^ /#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^                                            => state 44 (src/grammarlib/jemp.fpl:118)
-    control_continuation (21:4):    •subst_start^ '}':control_statement &control_guts:control_statement subst_end^                                            => state 44 (src/grammarlib/jemp.fpl:130)
-    control_end (22:3):             •subst_start^ '}':control_statement subst_end^                                                                            => state 44 (src/grammarlib/jemp.fpl:131)
-    control_start (23:3):           •subst_start^ &control_guts:control_statement subst_end^                                                                  => state 44 (src/grammarlib/jemp.fpl:132)
-    control_fragment (25:2)(24:2):  •control_continuation:control_statement fragment*:control_statement                                                       => state 54 (src/grammarlib/jemp.fpl:134)
-    control_fragment (25:4):        •control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement control_end:control_statement  => state 43 (src/grammarlib/jemp.fpl:134)
-    control_fragment (25:3):        control_start:control_statement •fragment*:control_statement (_subex_0)*:control_statement control_end:control_statement  => state 43 (src/grammarlib/jemp.fpl:134)
-    control_fragment (25:2):        control_start:control_statement fragment*:control_statement •(_subex_0)*:control_statement control_end:control_statement  => state 55 (src/grammarlib/jemp.fpl:134)
-    control_fragment (25:1):        control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement •control_end:control_statement  => state 53 (src/grammarlib/jemp.fpl:134)
-    fragment (26:1):                •control_fragment+                                                                                                        => state 49 (src/grammarlib/jemp.fpl:136)
-    fragment (27:3):                •subst_start^ /(\?:[^-@}]|-[^@}])+/:variable subst_end^                                                                   => state 44 (src/grammarlib/jemp.fpl:140)
-    text (28:1):                    •/[^@\\n]+/:t                                                                                                             => state 6  (src/grammarlib/jemp.fpl:144)
-    text (29:1):                    •leading_ws                                                                                                               => state 17 (src/grammarlib/jemp.fpl:148)
-    text (30:1):                    •trailing_ws                                                                                                              => state 1  (src/grammarlib/jemp.fpl:149)
+    fragment (1:1):                 •text+:chunks                                                                                                             => state 2  (src/grammarlib/jemp.fpl:19)
+    text (2:1):                     •'@@':at_sign                                                                                                             => state 4  (src/grammarlib/jemp.fpl:24)
+    fragment (3:4):                 •'@/*'^ /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment '*/@'^ /\\n\?/^                                               => state 71 (src/grammarlib/jemp.fpl:28)
+    fragment (4:4):                 •'@parameter:'^ /[^@]+/:param_decl '@'^ /\\n\?/^                                                                          => state 57 (src/grammarlib/jemp.fpl:39)
+    fragment (5:5):                 •'@include:'^ /\\s*/^ /[^@]+/:include_file '@'^ /\\n\?/^                                                                  => state 61 (src/grammarlib/jemp.fpl:44)
+    fragment (6:5):                 •'@embed:'^ /\\s*/^ /[^@]+/:embed_file '@'^ /\\n\?/^                                                                      => state 66 (src/grammarlib/jemp.fpl:50)
+    fragment (7:7):                 •subst_start^ 'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^                                => state 44 (src/grammarlib/jemp.fpl:56)
+    fragment (8:7):                 •leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 19 (src/grammarlib/jemp.fpl:62)
+    fragment (8:6):                 leading_ws? •/@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 21 (src/grammarlib/jemp.fpl:62)
+    fragment (9:4):                 •/@realign:\\s*/^ text:realign '@'^ /\\n\?/^                                                                              => state 75 (src/grammarlib/jemp.fpl:75)
+    subst_start (11:2):             •leading_ws?^ '@-':arg_1                                                                                                  => state 19 (src/grammarlib/jemp.fpl:82)
+    subst_start (11:1):             leading_ws?^ •'@-':arg_1                                                                                                  => state 20 (src/grammarlib/jemp.fpl:82)
+    subst_start (12:1):             •'@':arg_0                                                                                                                => state 52 (src/grammarlib/jemp.fpl:83)
+    leading_ws (16:1):              •/\\n*[ \\t]+/:ws                                                                                                         => state 5  (src/grammarlib/jemp.fpl:93)
+    trailing_ws (17:1):             •/[ \\t]*\\n+[ \\t]+(\?!@)/:ws                                                                                            => state 7  (src/grammarlib/jemp.fpl:107)
+    trailing_ws (18:1):             •/[ \\t]*\\n/:ws                                                                                                          => state 8  (src/grammarlib/jemp.fpl:111)
+    fragment (19:6):                •subst_start^ /#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^                   => state 44 (src/grammarlib/jemp.fpl:119)
+    fragment (20:5):                •subst_start^ /#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^                                            => state 44 (src/grammarlib/jemp.fpl:122)
+    control_continuation (21:3):    •subst_start^ &continuation_guts:control_statement subst_end^                                                             => state 44 (src/grammarlib/jemp.fpl:133)
+    control_end (22:3):             •subst_start^ '}':control_statement subst_end^                                                                            => state 44 (src/grammarlib/jemp.fpl:134)
+    control_start (23:3):           •subst_start^ &control_guts:control_statement subst_end^                                                                  => state 44 (src/grammarlib/jemp.fpl:135)
+    control_fragment (25:2)(24:2):  •control_continuation:control_statement fragment*:control_statement                                                       => state 54 (src/grammarlib/jemp.fpl:137)
+    control_fragment (25:4):        •control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement control_end:control_statement  => state 43 (src/grammarlib/jemp.fpl:137)
+    control_fragment (25:3):        control_start:control_statement •fragment*:control_statement (_subex_0)*:control_statement control_end:control_statement  => state 43 (src/grammarlib/jemp.fpl:137)
+    control_fragment (25:2):        control_start:control_statement fragment*:control_statement •(_subex_0)*:control_statement control_end:control_statement  => state 55 (src/grammarlib/jemp.fpl:137)
+    control_fragment (25:1):        control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement •control_end:control_statement  => state 53 (src/grammarlib/jemp.fpl:137)
+    fragment (26:1):                •control_fragment+                                                                                                        => state 49 (src/grammarlib/jemp.fpl:139)
+    fragment (27:3):                •subst_start^ &subst_guts:variable subst_end^                                                                             => state 44 (src/grammarlib/jemp.fpl:143)
+    text (28:1):                    •/[^@\\n]+/:t                                                                                                             => state 6  (src/grammarlib/jemp.fpl:147)
+    text (29:1):                    •leading_ws                                                                                                               => state 19 (src/grammarlib/jemp.fpl:151)
+    text (30:1):                    •trailing_ws                                                                                                              => state 1  (src/grammarlib/jemp.fpl:152)
 
 state 44:
-    fragment (7:6):               subst_start^ •'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^               => state 15 (src/grammarlib/jemp.fpl:52)
-    fragment (19:5):              subst_start^ •/#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^  => state 32 (src/grammarlib/jemp.fpl:115)
-    fragment (20:4):              subst_start^ •/#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^                           => state 32 (src/grammarlib/jemp.fpl:118)
-    control_continuation (21:3):  subst_start^ •'}':control_statement &control_guts:control_statement subst_end^                           => state 45 (src/grammarlib/jemp.fpl:130)
-    control_end (22:2):           subst_start^ •'}':control_statement subst_end^                                                           => state 45 (src/grammarlib/jemp.fpl:131)
-    control_start (23:2):         subst_start^ •&control_guts:control_statement subst_end^                                                 => state 10 (src/grammarlib/jemp.fpl:132)
-    fragment (27:2):              subst_start^ •/(\?:[^-@}]|-[^@}])+/:variable subst_end^                                                  => state 30 (src/grammarlib/jemp.fpl:140)
+    fragment (7:6):               subst_start^ •'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^               => state 17 (src/grammarlib/jemp.fpl:56)
+    fragment (19:5):              subst_start^ •/#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^  => state 32 (src/grammarlib/jemp.fpl:119)
+    fragment (20:4):              subst_start^ •/#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^                           => state 32 (src/grammarlib/jemp.fpl:122)
+    control_continuation (21:2):  subst_start^ •&continuation_guts:control_statement subst_end^                                            => state 45 (src/grammarlib/jemp.fpl:133)
+    control_end (22:2):           subst_start^ •'}':control_statement subst_end^                                                           => state 47 (src/grammarlib/jemp.fpl:134)
+    control_start (23:2):         subst_start^ •&control_guts:control_statement subst_end^                                                 => state 15 (src/grammarlib/jemp.fpl:135)
+    fragment (27:2):              subst_start^ •&subst_guts:variable subst_end^                                                            => state 10 (src/grammarlib/jemp.fpl:143)
 
 state 45:
-    subst_end (13:2):             •'-@':arg_0 trailing_ws?^                                                       => state 13 (src/grammarlib/jemp.fpl:81)
-    subst_end (14:1):             •'@':arg_0                                                                      => state 12 (src/grammarlib/jemp.fpl:82)
-    control_continuation (21:2):  subst_start^ '}':control_statement •&control_guts:control_statement subst_end^  => state 47 (src/grammarlib/jemp.fpl:130)
-    control_end (22:1):           subst_start^ '}':control_statement •subst_end^                                  => state 46 (src/grammarlib/jemp.fpl:131)
+    subst_end (13:2):             •'-@':arg_0 trailing_ws?^                                      => state 13 (src/grammarlib/jemp.fpl:85)
+    subst_end (14:1):             •'@':arg_0                                                     => state 12 (src/grammarlib/jemp.fpl:86)
+    control_continuation (21:1):  subst_start^ &continuation_guts:control_statement •subst_end^  => state 46 (src/grammarlib/jemp.fpl:133)
 
 state 46:
-    control_end (22:0):  subst_start^ '}':control_statement subst_end^ • => (reduce) (src/grammarlib/jemp.fpl:131)
+    control_continuation (21:0):  subst_start^ &continuation_guts:control_statement subst_end^ • => (reduce) (src/grammarlib/jemp.fpl:133)
 
 state 47:
-    subst_end (13:2):             •'-@':arg_0 trailing_ws?^                                                       => state 13 (src/grammarlib/jemp.fpl:81)
-    subst_end (14:1):             •'@':arg_0                                                                      => state 12 (src/grammarlib/jemp.fpl:82)
-    control_continuation (21:1):  subst_start^ '}':control_statement &control_guts:control_statement •subst_end^  => state 48 (src/grammarlib/jemp.fpl:130)
+    subst_end (13:2):    •'-@':arg_0 trailing_ws?^                       => state 13 (src/grammarlib/jemp.fpl:85)
+    subst_end (14:1):    •'@':arg_0                                      => state 12 (src/grammarlib/jemp.fpl:86)
+    control_end (22:1):  subst_start^ '}':control_statement •subst_end^  => state 48 (src/grammarlib/jemp.fpl:134)
 
 state 48:
-    control_continuation (21:0):  subst_start^ '}':control_statement &control_guts:control_statement subst_end^ • => (reduce) (src/grammarlib/jemp.fpl:130)
+    control_end (22:0):  subst_start^ '}':control_statement subst_end^ • => (reduce) (src/grammarlib/jemp.fpl:134)
 
 state 49:
-    subst_start (11:2):       •leading_ws?^ '@-':arg_1                                                                                                  => state 51 (src/grammarlib/jemp.fpl:78)
-    subst_start (11:1):       leading_ws?^ •'@-':arg_1                                                                                                  => state 18 (src/grammarlib/jemp.fpl:78)
-    subst_start (12:1):       •'@':arg_0                                                                                                                => state 52 (src/grammarlib/jemp.fpl:79)
-    leading_ws (16:1):        •/\\n*[ \\t]+/:ws                                                                                                         => state 5  (src/grammarlib/jemp.fpl:89)
-    control_start (23:3):     •subst_start^ &control_guts:control_statement subst_end^                                                                  => state 50 (src/grammarlib/jemp.fpl:132)
-    control_fragment (25:4):  •control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement control_end:control_statement  => state 43 (src/grammarlib/jemp.fpl:134)
-    fragment (26:1):          •control_fragment+                                                                                                        => state 49 (src/grammarlib/jemp.fpl:136)
-    fragment (26:0):          control_fragment+ •                                                                                                       => (reduce) (src/grammarlib/jemp.fpl:136)
+    subst_start (11:2):       •leading_ws?^ '@-':arg_1                                                                                                  => state 51 (src/grammarlib/jemp.fpl:82)
+    subst_start (11:1):       leading_ws?^ •'@-':arg_1                                                                                                  => state 20 (src/grammarlib/jemp.fpl:82)
+    subst_start (12:1):       •'@':arg_0                                                                                                                => state 52 (src/grammarlib/jemp.fpl:83)
+    leading_ws (16:1):        •/\\n*[ \\t]+/:ws                                                                                                         => state 5  (src/grammarlib/jemp.fpl:93)
+    control_start (23:3):     •subst_start^ &control_guts:control_statement subst_end^                                                                  => state 50 (src/grammarlib/jemp.fpl:135)
+    control_fragment (25:4):  •control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement control_end:control_statement  => state 43 (src/grammarlib/jemp.fpl:137)
+    fragment (26:1):          •control_fragment+                                                                                                        => state 49 (src/grammarlib/jemp.fpl:139)
+    fragment (26:0):          control_fragment+ •                                                                                                       => (reduce) (src/grammarlib/jemp.fpl:139)
 
 state 50:
-    control_start (23:2):  subst_start^ •&control_guts:control_statement subst_end^  => state 10 (src/grammarlib/jemp.fpl:132)
+    control_start (23:2):  subst_start^ •&control_guts:control_statement subst_end^  => state 15 (src/grammarlib/jemp.fpl:135)
 
 state 51:
-    subst_start (11:1):  leading_ws?^ •'@-':arg_1  => state 18 (src/grammarlib/jemp.fpl:78)
+    subst_start (11:1):  leading_ws?^ •'@-':arg_1  => state 20 (src/grammarlib/jemp.fpl:82)
 
 state 52:
-    subst_start (12:0):  '@':arg_0 • => (reduce) (src/grammarlib/jemp.fpl:79)
+    subst_start (12:0):  '@':arg_0 • => (reduce) (src/grammarlib/jemp.fpl:83)
 
 state 53:
-    control_fragment (25:0):  control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement control_end:control_statement • => (reduce) (src/grammarlib/jemp.fpl:134)
+    control_fragment (25:0):  control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement control_end:control_statement • => (reduce) (src/grammarlib/jemp.fpl:137)
 
 state 54:
-    fragment (1:1):                 •text+:chunks                                                                                                             => state 2  (src/grammarlib/jemp.fpl:15)
-    text (2:1):                     •'@@':at_sign                                                                                                             => state 4  (src/grammarlib/jemp.fpl:20)
-    fragment (3:4):                 •'@/*'^ /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment '*/@'^ /\\n\?/^                                               => state 71 (src/grammarlib/jemp.fpl:24)
-    fragment (4:4):                 •'@parameter:'^ /[^@]+/:param_decl '@'^ /\\n\?/^                                                                          => state 57 (src/grammarlib/jemp.fpl:35)
-    fragment (5:5):                 •'@include:'^ /\\s*/^ /[^@]+/:include_file '@'^ /\\n\?/^                                                                  => state 61 (src/grammarlib/jemp.fpl:40)
-    fragment (6:5):                 •'@embed:'^ /\\s*/^ /[^@]+/:embed_file '@'^ /\\n\?/^                                                                      => state 66 (src/grammarlib/jemp.fpl:46)
-    fragment (7:7):                 •subst_start^ 'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^                                => state 44 (src/grammarlib/jemp.fpl:52)
-    fragment (8:7):                 •leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 17 (src/grammarlib/jemp.fpl:58)
-    fragment (8:6):                 leading_ws? •/@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 19 (src/grammarlib/jemp.fpl:58)
-    fragment (9:4):                 •/@realign:\\s*/^ text:realign '@'^ /\\n\?/^                                                                              => state 75 (src/grammarlib/jemp.fpl:71)
-    subst_start (11:2):             •leading_ws?^ '@-':arg_1                                                                                                  => state 17 (src/grammarlib/jemp.fpl:78)
-    subst_start (11:1):             leading_ws?^ •'@-':arg_1                                                                                                  => state 18 (src/grammarlib/jemp.fpl:78)
-    subst_start (12:1):             •'@':arg_0                                                                                                                => state 52 (src/grammarlib/jemp.fpl:79)
-    leading_ws (16:1):              •/\\n*[ \\t]+/:ws                                                                                                         => state 5  (src/grammarlib/jemp.fpl:89)
-    trailing_ws (17:1):             •/[ \\t]*\\n+[ \\t]+(\?!@)/:ws                                                                                            => state 7  (src/grammarlib/jemp.fpl:103)
-    trailing_ws (18:1):             •/[ \\t]*\\n/:ws                                                                                                          => state 8  (src/grammarlib/jemp.fpl:107)
-    fragment (19:6):                •subst_start^ /#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^                   => state 44 (src/grammarlib/jemp.fpl:115)
-    fragment (20:5):                •subst_start^ /#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^                                            => state 44 (src/grammarlib/jemp.fpl:118)
-    control_continuation (21:4):    •subst_start^ '}':control_statement &control_guts:control_statement subst_end^                                            => state 44 (src/grammarlib/jemp.fpl:130)
-    control_end (22:3):             •subst_start^ '}':control_statement subst_end^                                                                            => state 44 (src/grammarlib/jemp.fpl:131)
-    control_start (23:3):           •subst_start^ &control_guts:control_statement subst_end^                                                                  => state 44 (src/grammarlib/jemp.fpl:132)
-    control_fragment (25:2)(24:2):  •control_continuation:control_statement fragment*:control_statement                                                       => state 54 (src/grammarlib/jemp.fpl:134)
-    control_fragment (25:2)(24:1):  control_continuation:control_statement •fragment*:control_statement                                                       => state 54 (src/grammarlib/jemp.fpl:134)
-    control_fragment (25:2)(24:0):  control_continuation:control_statement fragment*:control_statement •                                                      => state 55 (src/grammarlib/jemp.fpl:134)
-    control_fragment (25:4):        •control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement control_end:control_statement  => state 43 (src/grammarlib/jemp.fpl:134)
-    control_fragment (25:2):        control_start:control_statement fragment*:control_statement •(_subex_0)*:control_statement control_end:control_statement  => state 55 (src/grammarlib/jemp.fpl:134)
-    control_fragment (25:1):        control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement •control_end:control_statement  => state 53 (src/grammarlib/jemp.fpl:134)
-    fragment (26:1):                •control_fragment+                                                                                                        => state 49 (src/grammarlib/jemp.fpl:136)
-    fragment (27:3):                •subst_start^ /(\?:[^-@}]|-[^@}])+/:variable subst_end^                                                                   => state 44 (src/grammarlib/jemp.fpl:140)
-    text (28:1):                    •/[^@\\n]+/:t                                                                                                             => state 6  (src/grammarlib/jemp.fpl:144)
-    text (29:1):                    •leading_ws                                                                                                               => state 17 (src/grammarlib/jemp.fpl:148)
-    text (30:1):                    •trailing_ws                                                                                                              => state 1  (src/grammarlib/jemp.fpl:149)
+    fragment (1:1):                 •text+:chunks                                                                                                             => state 2  (src/grammarlib/jemp.fpl:19)
+    text (2:1):                     •'@@':at_sign                                                                                                             => state 4  (src/grammarlib/jemp.fpl:24)
+    fragment (3:4):                 •'@/*'^ /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment '*/@'^ /\\n\?/^                                               => state 71 (src/grammarlib/jemp.fpl:28)
+    fragment (4:4):                 •'@parameter:'^ /[^@]+/:param_decl '@'^ /\\n\?/^                                                                          => state 57 (src/grammarlib/jemp.fpl:39)
+    fragment (5:5):                 •'@include:'^ /\\s*/^ /[^@]+/:include_file '@'^ /\\n\?/^                                                                  => state 61 (src/grammarlib/jemp.fpl:44)
+    fragment (6:5):                 •'@embed:'^ /\\s*/^ /[^@]+/:embed_file '@'^ /\\n\?/^                                                                      => state 66 (src/grammarlib/jemp.fpl:50)
+    fragment (7:7):                 •subst_start^ 'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^                                => state 44 (src/grammarlib/jemp.fpl:56)
+    fragment (8:7):                 •leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 19 (src/grammarlib/jemp.fpl:62)
+    fragment (8:6):                 leading_ws? •/@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 21 (src/grammarlib/jemp.fpl:62)
+    fragment (9:4):                 •/@realign:\\s*/^ text:realign '@'^ /\\n\?/^                                                                              => state 75 (src/grammarlib/jemp.fpl:75)
+    subst_start (11:2):             •leading_ws?^ '@-':arg_1                                                                                                  => state 19 (src/grammarlib/jemp.fpl:82)
+    subst_start (11:1):             leading_ws?^ •'@-':arg_1                                                                                                  => state 20 (src/grammarlib/jemp.fpl:82)
+    subst_start (12:1):             •'@':arg_0                                                                                                                => state 52 (src/grammarlib/jemp.fpl:83)
+    leading_ws (16:1):              •/\\n*[ \\t]+/:ws                                                                                                         => state 5  (src/grammarlib/jemp.fpl:93)
+    trailing_ws (17:1):             •/[ \\t]*\\n+[ \\t]+(\?!@)/:ws                                                                                            => state 7  (src/grammarlib/jemp.fpl:107)
+    trailing_ws (18:1):             •/[ \\t]*\\n/:ws                                                                                                          => state 8  (src/grammarlib/jemp.fpl:111)
+    fragment (19:6):                •subst_start^ /#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^                   => state 44 (src/grammarlib/jemp.fpl:119)
+    fragment (20:5):                •subst_start^ /#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^                                            => state 44 (src/grammarlib/jemp.fpl:122)
+    control_continuation (21:3):    •subst_start^ &continuation_guts:control_statement subst_end^                                                             => state 44 (src/grammarlib/jemp.fpl:133)
+    control_end (22:3):             •subst_start^ '}':control_statement subst_end^                                                                            => state 44 (src/grammarlib/jemp.fpl:134)
+    control_start (23:3):           •subst_start^ &control_guts:control_statement subst_end^                                                                  => state 44 (src/grammarlib/jemp.fpl:135)
+    control_fragment (25:2)(24:2):  •control_continuation:control_statement fragment*:control_statement                                                       => state 54 (src/grammarlib/jemp.fpl:137)
+    control_fragment (25:2)(24:1):  control_continuation:control_statement •fragment*:control_statement                                                       => state 54 (src/grammarlib/jemp.fpl:137)
+    control_fragment (25:2)(24:0):  control_continuation:control_statement fragment*:control_statement •                                                      => state 55 (src/grammarlib/jemp.fpl:137)
+    control_fragment (25:4):        •control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement control_end:control_statement  => state 43 (src/grammarlib/jemp.fpl:137)
+    control_fragment (25:2):        control_start:control_statement fragment*:control_statement •(_subex_0)*:control_statement control_end:control_statement  => state 55 (src/grammarlib/jemp.fpl:137)
+    control_fragment (25:1):        control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement •control_end:control_statement  => state 53 (src/grammarlib/jemp.fpl:137)
+    fragment (26:1):                •control_fragment+                                                                                                        => state 49 (src/grammarlib/jemp.fpl:139)
+    fragment (27:3):                •subst_start^ &subst_guts:variable subst_end^                                                                             => state 44 (src/grammarlib/jemp.fpl:143)
+    text (28:1):                    •/[^@\\n]+/:t                                                                                                             => state 6  (src/grammarlib/jemp.fpl:147)
+    text (29:1):                    •leading_ws                                                                                                               => state 19 (src/grammarlib/jemp.fpl:151)
+    text (30:1):                    •trailing_ws                                                                                                              => state 1  (src/grammarlib/jemp.fpl:152)
 
 state 55:
-    subst_start (11:2):             •leading_ws?^ '@-':arg_1                                                                                                  => state 51 (src/grammarlib/jemp.fpl:78)
-    subst_start (11:1):             leading_ws?^ •'@-':arg_1                                                                                                  => state 18 (src/grammarlib/jemp.fpl:78)
-    subst_start (12:1):             •'@':arg_0                                                                                                                => state 52 (src/grammarlib/jemp.fpl:79)
-    leading_ws (16:1):              •/\\n*[ \\t]+/:ws                                                                                                         => state 5  (src/grammarlib/jemp.fpl:89)
-    control_continuation (21:4):    •subst_start^ '}':control_statement &control_guts:control_statement subst_end^                                            => state 56 (src/grammarlib/jemp.fpl:130)
-    control_end (22:3):             •subst_start^ '}':control_statement subst_end^                                                                            => state 56 (src/grammarlib/jemp.fpl:131)
-    control_fragment (25:2)(24:2):  •control_continuation:control_statement fragment*:control_statement                                                       => state 54 (src/grammarlib/jemp.fpl:134)
-    control_fragment (25:2):        control_start:control_statement fragment*:control_statement •(_subex_0)*:control_statement control_end:control_statement  => state 55 (src/grammarlib/jemp.fpl:134)
-    control_fragment (25:1):        control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement •control_end:control_statement  => state 53 (src/grammarlib/jemp.fpl:134)
+    subst_start (11:2):             •leading_ws?^ '@-':arg_1                                                                                                  => state 51 (src/grammarlib/jemp.fpl:82)
+    subst_start (11:1):             leading_ws?^ •'@-':arg_1                                                                                                  => state 20 (src/grammarlib/jemp.fpl:82)
+    subst_start (12:1):             •'@':arg_0                                                                                                                => state 52 (src/grammarlib/jemp.fpl:83)
+    leading_ws (16:1):              •/\\n*[ \\t]+/:ws                                                                                                         => state 5  (src/grammarlib/jemp.fpl:93)
+    control_continuation (21:3):    •subst_start^ &continuation_guts:control_statement subst_end^                                                             => state 56 (src/grammarlib/jemp.fpl:133)
+    control_end (22:3):             •subst_start^ '}':control_statement subst_end^                                                                            => state 56 (src/grammarlib/jemp.fpl:134)
+    control_fragment (25:2)(24:2):  •control_continuation:control_statement fragment*:control_statement                                                       => state 54 (src/grammarlib/jemp.fpl:137)
+    control_fragment (25:2):        control_start:control_statement fragment*:control_statement •(_subex_0)*:control_statement control_end:control_statement  => state 55 (src/grammarlib/jemp.fpl:137)
+    control_fragment (25:1):        control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement •control_end:control_statement  => state 53 (src/grammarlib/jemp.fpl:137)
 
 state 56:
-    control_continuation (21:3):  subst_start^ •'}':control_statement &control_guts:control_statement subst_end^  => state 45 (src/grammarlib/jemp.fpl:130)
-    control_end (22:2):           subst_start^ •'}':control_statement subst_end^                                  => state 45 (src/grammarlib/jemp.fpl:131)
+    control_continuation (21:2):  subst_start^ •&continuation_guts:control_statement subst_end^  => state 45 (src/grammarlib/jemp.fpl:133)
+    control_end (22:2):           subst_start^ •'}':control_statement subst_end^                 => state 47 (src/grammarlib/jemp.fpl:134)
 
 state 57:
-    fragment (4:3):  '@parameter:'^ •/[^@]+/:param_decl '@'^ /\\n\?/^  => state 58 (src/grammarlib/jemp.fpl:35)
+    fragment (4:3):  '@parameter:'^ •/[^@]+/:param_decl '@'^ /\\n\?/^  => state 58 (src/grammarlib/jemp.fpl:39)
 
 state 58:
-    fragment (4:2):  '@parameter:'^ /[^@]+/:param_decl •'@'^ /\\n\?/^  => state 59 (src/grammarlib/jemp.fpl:35)
+    fragment (4:2):  '@parameter:'^ /[^@]+/:param_decl •'@'^ /\\n\?/^  => state 59 (src/grammarlib/jemp.fpl:39)
 
 state 59:
-    fragment (4:1):  '@parameter:'^ /[^@]+/:param_decl '@'^ •/\\n\?/^  => state 60 (src/grammarlib/jemp.fpl:35)
+    fragment (4:1):  '@parameter:'^ /[^@]+/:param_decl '@'^ •/\\n\?/^  => state 60 (src/grammarlib/jemp.fpl:39)
 
 state 60:
-    fragment (4:0):  '@parameter:'^ /[^@]+/:param_decl '@'^ /\\n\?/^ • => (reduce) (src/grammarlib/jemp.fpl:35)
+    fragment (4:0):  '@parameter:'^ /[^@]+/:param_decl '@'^ /\\n\?/^ • => (reduce) (src/grammarlib/jemp.fpl:39)
 
 state 61:
-    fragment (5:4):  '@include:'^ •/\\s*/^ /[^@]+/:include_file '@'^ /\\n\?/^  => state 62 (src/grammarlib/jemp.fpl:40)
+    fragment (5:4):  '@include:'^ •/\\s*/^ /[^@]+/:include_file '@'^ /\\n\?/^  => state 62 (src/grammarlib/jemp.fpl:44)
 
 state 62:
-    fragment (5:3):  '@include:'^ /\\s*/^ •/[^@]+/:include_file '@'^ /\\n\?/^  => state 63 (src/grammarlib/jemp.fpl:40)
+    fragment (5:3):  '@include:'^ /\\s*/^ •/[^@]+/:include_file '@'^ /\\n\?/^  => state 63 (src/grammarlib/jemp.fpl:44)
 
 state 63:
-    fragment (5:2):  '@include:'^ /\\s*/^ /[^@]+/:include_file •'@'^ /\\n\?/^  => state 64 (src/grammarlib/jemp.fpl:40)
+    fragment (5:2):  '@include:'^ /\\s*/^ /[^@]+/:include_file •'@'^ /\\n\?/^  => state 64 (src/grammarlib/jemp.fpl:44)
 
 state 64:
-    fragment (5:1):  '@include:'^ /\\s*/^ /[^@]+/:include_file '@'^ •/\\n\?/^  => state 65 (src/grammarlib/jemp.fpl:40)
+    fragment (5:1):  '@include:'^ /\\s*/^ /[^@]+/:include_file '@'^ •/\\n\?/^  => state 65 (src/grammarlib/jemp.fpl:44)
 
 state 65:
-    fragment (5:0):  '@include:'^ /\\s*/^ /[^@]+/:include_file '@'^ /\\n\?/^ • => (reduce) (src/grammarlib/jemp.fpl:40)
+    fragment (5:0):  '@include:'^ /\\s*/^ /[^@]+/:include_file '@'^ /\\n\?/^ • => (reduce) (src/grammarlib/jemp.fpl:44)
 
 state 66:
-    fragment (6:4):  '@embed:'^ •/\\s*/^ /[^@]+/:embed_file '@'^ /\\n\?/^  => state 67 (src/grammarlib/jemp.fpl:46)
+    fragment (6:4):  '@embed:'^ •/\\s*/^ /[^@]+/:embed_file '@'^ /\\n\?/^  => state 67 (src/grammarlib/jemp.fpl:50)
 
 state 67:
-    fragment (6:3):  '@embed:'^ /\\s*/^ •/[^@]+/:embed_file '@'^ /\\n\?/^  => state 68 (src/grammarlib/jemp.fpl:46)
+    fragment (6:3):  '@embed:'^ /\\s*/^ •/[^@]+/:embed_file '@'^ /\\n\?/^  => state 68 (src/grammarlib/jemp.fpl:50)
 
 state 68:
-    fragment (6:2):  '@embed:'^ /\\s*/^ /[^@]+/:embed_file •'@'^ /\\n\?/^  => state 69 (src/grammarlib/jemp.fpl:46)
+    fragment (6:2):  '@embed:'^ /\\s*/^ /[^@]+/:embed_file •'@'^ /\\n\?/^  => state 69 (src/grammarlib/jemp.fpl:50)
 
 state 69:
-    fragment (6:1):  '@embed:'^ /\\s*/^ /[^@]+/:embed_file '@'^ •/\\n\?/^  => state 70 (src/grammarlib/jemp.fpl:46)
+    fragment (6:1):  '@embed:'^ /\\s*/^ /[^@]+/:embed_file '@'^ •/\\n\?/^  => state 70 (src/grammarlib/jemp.fpl:50)
 
 state 70:
-    fragment (6:0):  '@embed:'^ /\\s*/^ /[^@]+/:embed_file '@'^ /\\n\?/^ • => (reduce) (src/grammarlib/jemp.fpl:46)
+    fragment (6:0):  '@embed:'^ /\\s*/^ /[^@]+/:embed_file '@'^ /\\n\?/^ • => (reduce) (src/grammarlib/jemp.fpl:50)
 
 state 71:
-    fragment (3:3):  '@/*'^ •/(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment '*/@'^ /\\n\?/^  => state 72 (src/grammarlib/jemp.fpl:24)
+    fragment (3:3):  '@/*'^ •/(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment '*/@'^ /\\n\?/^  => state 72 (src/grammarlib/jemp.fpl:28)
 
 state 72:
-    fragment (3:2):  '@/*'^ /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment •'*/@'^ /\\n\?/^  => state 73 (src/grammarlib/jemp.fpl:24)
+    fragment (3:2):  '@/*'^ /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment •'*/@'^ /\\n\?/^  => state 73 (src/grammarlib/jemp.fpl:28)
 
 state 73:
-    fragment (3:1):  '@/*'^ /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment '*/@'^ •/\\n\?/^  => state 74 (src/grammarlib/jemp.fpl:24)
+    fragment (3:1):  '@/*'^ /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment '*/@'^ •/\\n\?/^  => state 74 (src/grammarlib/jemp.fpl:28)
 
 state 74:
-    fragment (3:0):  '@/*'^ /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment '*/@'^ /\\n\?/^ • => (reduce) (src/grammarlib/jemp.fpl:24)
+    fragment (3:0):  '@/*'^ /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment '*/@'^ /\\n\?/^ • => (reduce) (src/grammarlib/jemp.fpl:28)
 
 state 75:
-    text (2:1):          •'@@':at_sign                                 => state 4  (src/grammarlib/jemp.fpl:20)
-    fragment (9:3):      /@realign:\\s*/^ •text:realign '@'^ /\\n\?/^  => state 76 (src/grammarlib/jemp.fpl:71)
-    leading_ws (16:1):   •/\\n*[ \\t]+/:ws                             => state 5  (src/grammarlib/jemp.fpl:89)
-    trailing_ws (17:1):  •/[ \\t]*\\n+[ \\t]+(\?!@)/:ws                => state 7  (src/grammarlib/jemp.fpl:103)
-    trailing_ws (18:1):  •/[ \\t]*\\n/:ws                              => state 8  (src/grammarlib/jemp.fpl:107)
-    text (28:1):         •/[^@\\n]+/:t                                 => state 6  (src/grammarlib/jemp.fpl:144)
-    text (29:1):         •leading_ws                                   => state 3  (src/grammarlib/jemp.fpl:148)
-    text (30:1):         •trailing_ws                                  => state 1  (src/grammarlib/jemp.fpl:149)
+    text (2:1):          •'@@':at_sign                                 => state 4  (src/grammarlib/jemp.fpl:24)
+    fragment (9:3):      /@realign:\\s*/^ •text:realign '@'^ /\\n\?/^  => state 76 (src/grammarlib/jemp.fpl:75)
+    leading_ws (16:1):   •/\\n*[ \\t]+/:ws                             => state 5  (src/grammarlib/jemp.fpl:93)
+    trailing_ws (17:1):  •/[ \\t]*\\n+[ \\t]+(\?!@)/:ws                => state 7  (src/grammarlib/jemp.fpl:107)
+    trailing_ws (18:1):  •/[ \\t]*\\n/:ws                              => state 8  (src/grammarlib/jemp.fpl:111)
+    text (28:1):         •/[^@\\n]+/:t                                 => state 6  (src/grammarlib/jemp.fpl:147)
+    text (29:1):         •leading_ws                                   => state 3  (src/grammarlib/jemp.fpl:151)
+    text (30:1):         •trailing_ws                                  => state 1  (src/grammarlib/jemp.fpl:152)
 
 state 76:
-    fragment (9:2):  /@realign:\\s*/^ text:realign •'@'^ /\\n\?/^  => state 77 (src/grammarlib/jemp.fpl:71)
+    fragment (9:2):  /@realign:\\s*/^ text:realign •'@'^ /\\n\?/^  => state 77 (src/grammarlib/jemp.fpl:75)
 
 state 77:
-    fragment (9:1):  /@realign:\\s*/^ text:realign '@'^ •/\\n\?/^  => state 78 (src/grammarlib/jemp.fpl:71)
+    fragment (9:1):  /@realign:\\s*/^ text:realign '@'^ •/\\n\?/^  => state 78 (src/grammarlib/jemp.fpl:75)
 
 state 78:
-    fragment (9:0):  /@realign:\\s*/^ text:realign '@'^ /\\n\?/^ • => (reduce) (src/grammarlib/jemp.fpl:71)
+    fragment (9:0):  /@realign:\\s*/^ text:realign '@'^ /\\n\?/^ • => (reduce) (src/grammarlib/jemp.fpl:75)
 
 state 79:
-    complete (0:1):           •fragment+:fragments                                                                                                      => state 79 (src/grammarlib/jemp.fpl:12)
-    complete (0:0):           fragment+:fragments •                                                                                                     => (reduce) (src/grammarlib/jemp.fpl:12)
-    fragment (1:1):           •text+:chunks                                                                                                             => state 2  (src/grammarlib/jemp.fpl:15)
-    text (2:1):               •'@@':at_sign                                                                                                             => state 4  (src/grammarlib/jemp.fpl:20)
-    fragment (3:4):           •'@/*'^ /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment '*/@'^ /\\n\?/^                                               => state 71 (src/grammarlib/jemp.fpl:24)
-    fragment (4:4):           •'@parameter:'^ /[^@]+/:param_decl '@'^ /\\n\?/^                                                                          => state 57 (src/grammarlib/jemp.fpl:35)
-    fragment (5:5):           •'@include:'^ /\\s*/^ /[^@]+/:include_file '@'^ /\\n\?/^                                                                  => state 61 (src/grammarlib/jemp.fpl:40)
-    fragment (6:5):           •'@embed:'^ /\\s*/^ /[^@]+/:embed_file '@'^ /\\n\?/^                                                                      => state 66 (src/grammarlib/jemp.fpl:46)
-    fragment (7:7):           •subst_start^ 'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^                                => state 9  (src/grammarlib/jemp.fpl:52)
-    fragment (8:7):           •leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 17 (src/grammarlib/jemp.fpl:58)
-    fragment (8:6):           leading_ws? •/@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 19 (src/grammarlib/jemp.fpl:58)
-    fragment (9:4):           •/@realign:\\s*/^ text:realign '@'^ /\\n\?/^                                                                              => state 75 (src/grammarlib/jemp.fpl:71)
-    subst_start (11:2):       •leading_ws?^ '@-':arg_1                                                                                                  => state 17 (src/grammarlib/jemp.fpl:78)
-    subst_start (11:1):       leading_ws?^ •'@-':arg_1                                                                                                  => state 18 (src/grammarlib/jemp.fpl:78)
-    subst_start (12:1):       •'@':arg_0                                                                                                                => state 52 (src/grammarlib/jemp.fpl:79)
-    leading_ws (16:1):        •/\\n*[ \\t]+/:ws                                                                                                         => state 5  (src/grammarlib/jemp.fpl:89)
-    trailing_ws (17:1):       •/[ \\t]*\\n+[ \\t]+(\?!@)/:ws                                                                                            => state 7  (src/grammarlib/jemp.fpl:103)
-    trailing_ws (18:1):       •/[ \\t]*\\n/:ws                                                                                                          => state 8  (src/grammarlib/jemp.fpl:107)
-    fragment (19:6):          •subst_start^ /#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^                   => state 9  (src/grammarlib/jemp.fpl:115)
-    fragment (20:5):          •subst_start^ /#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^                                            => state 9  (src/grammarlib/jemp.fpl:118)
-    control_start (23:3):     •subst_start^ &control_guts:control_statement subst_end^                                                                  => state 9  (src/grammarlib/jemp.fpl:132)
-    control_fragment (25:4):  •control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement control_end:control_statement  => state 43 (src/grammarlib/jemp.fpl:134)
-    fragment (26:1):          •control_fragment+                                                                                                        => state 49 (src/grammarlib/jemp.fpl:136)
-    fragment (27:3):          •subst_start^ /(\?:[^-@}]|-[^@}])+/:variable subst_end^                                                                   => state 9  (src/grammarlib/jemp.fpl:140)
-    text (28:1):              •/[^@\\n]+/:t                                                                                                             => state 6  (src/grammarlib/jemp.fpl:144)
-    text (29:1):              •leading_ws                                                                                                               => state 17 (src/grammarlib/jemp.fpl:148)
-    text (30:1):              •trailing_ws                                                                                                              => state 1  (src/grammarlib/jemp.fpl:149)
+    complete (0:1):           •fragment+:fragments                                                                                                      => state 79 (src/grammarlib/jemp.fpl:16)
+    complete (0:0):           fragment+:fragments •                                                                                                     => (reduce) (src/grammarlib/jemp.fpl:16)
+    fragment (1:1):           •text+:chunks                                                                                                             => state 2  (src/grammarlib/jemp.fpl:19)
+    text (2:1):               •'@@':at_sign                                                                                                             => state 4  (src/grammarlib/jemp.fpl:24)
+    fragment (3:4):           •'@/*'^ /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment '*/@'^ /\\n\?/^                                               => state 71 (src/grammarlib/jemp.fpl:28)
+    fragment (4:4):           •'@parameter:'^ /[^@]+/:param_decl '@'^ /\\n\?/^                                                                          => state 57 (src/grammarlib/jemp.fpl:39)
+    fragment (5:5):           •'@include:'^ /\\s*/^ /[^@]+/:include_file '@'^ /\\n\?/^                                                                  => state 61 (src/grammarlib/jemp.fpl:44)
+    fragment (6:5):           •'@embed:'^ /\\s*/^ /[^@]+/:embed_file '@'^ /\\n\?/^                                                                      => state 66 (src/grammarlib/jemp.fpl:50)
+    fragment (7:7):           •subst_start^ 'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^                                => state 9  (src/grammarlib/jemp.fpl:56)
+    fragment (8:7):           •leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 19 (src/grammarlib/jemp.fpl:62)
+    fragment (8:6):           leading_ws? •/@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^                           => state 21 (src/grammarlib/jemp.fpl:62)
+    fragment (9:4):           •/@realign:\\s*/^ text:realign '@'^ /\\n\?/^                                                                              => state 75 (src/grammarlib/jemp.fpl:75)
+    subst_start (11:2):       •leading_ws?^ '@-':arg_1                                                                                                  => state 19 (src/grammarlib/jemp.fpl:82)
+    subst_start (11:1):       leading_ws?^ •'@-':arg_1                                                                                                  => state 20 (src/grammarlib/jemp.fpl:82)
+    subst_start (12:1):       •'@':arg_0                                                                                                                => state 52 (src/grammarlib/jemp.fpl:83)
+    leading_ws (16:1):        •/\\n*[ \\t]+/:ws                                                                                                         => state 5  (src/grammarlib/jemp.fpl:93)
+    trailing_ws (17:1):       •/[ \\t]*\\n+[ \\t]+(\?!@)/:ws                                                                                            => state 7  (src/grammarlib/jemp.fpl:107)
+    trailing_ws (18:1):       •/[ \\t]*\\n/:ws                                                                                                          => state 8  (src/grammarlib/jemp.fpl:111)
+    fragment (19:6):          •subst_start^ /#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^                   => state 9  (src/grammarlib/jemp.fpl:119)
+    fragment (20:5):          •subst_start^ /#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^                                            => state 9  (src/grammarlib/jemp.fpl:122)
+    control_start (23:3):     •subst_start^ &control_guts:control_statement subst_end^                                                                  => state 9  (src/grammarlib/jemp.fpl:135)
+    control_fragment (25:4):  •control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement control_end:control_statement  => state 43 (src/grammarlib/jemp.fpl:137)
+    fragment (26:1):          •control_fragment+                                                                                                        => state 49 (src/grammarlib/jemp.fpl:139)
+    fragment (27:3):          •subst_start^ &subst_guts:variable subst_end^                                                                             => state 9  (src/grammarlib/jemp.fpl:143)
+    text (28:1):              •/[^@\\n]+/:t                                                                                                             => state 6  (src/grammarlib/jemp.fpl:147)
+    text (29:1):              •leading_ws                                                                                                               => state 19 (src/grammarlib/jemp.fpl:151)
+    text (30:1):              •trailing_ws                                                                                                              => state 1  (src/grammarlib/jemp.fpl:152)
 
 state 80:
     _fpl_goal (32:0):  complete • => (done) (src/fpl2cc/productions.h:4275)

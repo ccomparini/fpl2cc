@@ -1,0 +1,18 @@
+@-if(23){-@
+    @-if(0){@
+        bad
+    @-} else if(0) {-@
+        bad wat
+        @-if(1) {-@
+            strange
+        @-} else if(2) {-@
+            stranger
+        @-} else {-@
+            strangest
+        @-}-@
+    @-} else {-@
+        good
+    @}-@
+@-} else {-@
+    bad
+@-}-@
