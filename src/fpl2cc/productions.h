@@ -173,20 +173,6 @@ class productions {
             return rule().parent_rule_number() >= 0;
         }
 
-        // eg:
-        //   (x y)* -> foo;
-        // x and y are in a subexpression whose step is "multiple",
-        // so this would return true.
-        bool is_in_multiple_subexpression() const {
-            auto prs = parent_rulestep();
-            if(prs) {
-                return prs.is_multiple();
-            }
-
-            return false;
-        }
-
-
         // Returns the "flat" next rulestep, which is the rulestep
         // after the current rulestep, ignoring multiples/optionals
         // etc. (but traversing parent/child relationships)
