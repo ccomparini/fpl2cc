@@ -3,3 +3,4 @@ git_id	cpu_total	cpu_user	cpu_system	max_rss	timestamp	hostname	arch	os	exit_cod
 2701445	0.008939	0.007744	0.001195	3358720	1726092658	sunbird	arm64	Darwin 23.4.0	0	-
 a3fde36	0.009120	0.007566	0.001554	3063808	1726163105	sunbird	arm64	Darwin 23.4.0	0	-
 b2698ce	0.009046	0.007563	0.001483	3735552	1727064849	sunbird	arm64	Darwin 23.4.0	0	-
+e5a0fbb	0.008548	0.007511	0.001037	3096576	1727196461	sunbird.local	arm64	Darwin 23.4.0	0	-
