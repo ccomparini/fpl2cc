@@ -169,10 +169,6 @@ class productions {
         // grrr hates the mix and match of variable vs parameter.  fix.
         std::string parameter_name() const { return step().variable_name(); }
 
-        bool is_in_subexpression() const {
-            return rule().parent_rule_number() >= 0;
-        }
-
         // Returns the "flat" next rulestep, which is the rulestep
         // after the current rulestep, ignoring multiples/optionals
         // etc. (but traversing parent/child relationships)
