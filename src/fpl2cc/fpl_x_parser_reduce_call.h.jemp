@@ -123,7 +123,7 @@
     @}@
 
     @/* this is the call to the reduce code */@
-    @-prds.type_for(rule.product())@ result = @prds.rule_fn(rule) -@ (
+    auto result = @prds.rule_fn(rule) -@ (
         @-for(int pind = 0; pind < num_params; pind++) {-@
             @- pind?",":"" -@ arg_@-rule.parameter_name(pind)-@
         @-}-@
