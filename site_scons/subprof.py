@@ -11,6 +11,7 @@ This is used to generate the files we dump in the yprof directory.
 
 import collections
 import functools
+import inspect
 import os
 import pathlib
 import platform
@@ -19,7 +20,6 @@ import subprocess
 import sys
 import time
 import unittest
-import warnings
 
 FIELDS = [
     # order here is based on how I want the columns to show up in the output.
@@ -36,6 +36,10 @@ FIELDS = [
     'exit_code',  # whatever was passed to exit()
     'signal',     # name of signal which killed this (or blank)
 ]
+
+def warn_here(msg):
+    whence = inspect.stack()[1]
+    print(f"Warning ({whence.filename}:{whence.lineno}) {msg}", file=sys.stderr)
 
 def signal_str(waitstatus):
     if not os.WIFSIGNALED(waitstatus):
@@ -57,7 +61,7 @@ def exit_code_str(waitstatus):
 
 def fmt_commit_id(cid):
     if cid is None:
-        warnings.warn(f"no commit ID available - using 0000000")
+        warn_here(f"no commit ID available - using 0000000")
         return '0000000'
     return cid
 
@@ -130,7 +134,7 @@ def _git_is_at_head():
             ['git', 'diff-index', 'HEAD', '--quiet']
         )
     except Exception as ex:
-        warnings.warn(f"\nerror on git diff-index: {ex}")
+        warn_here(f"\nerror on git diff-index: {ex}")
 
     return git_result.returncode == 0
 
@@ -153,12 +157,10 @@ def _git_commit_id():
             # so we want to be clear that the git ID doesn't really
             # match what we ran against.  So, warn, and add an
             # asterisk to the end:
-            warnings.warn(
-                f"\ngit working tree does not match HEAD"
-            )
+            warn_here(f"git working tree does not match HEAD")
             git_id += '*'
     except Exception as ex:
-        warnings.warn(f"\ncan't get git commit id: {ex}")
+        warn_here(f"\ncan't get git commit id: {ex}")
 
     return git_id
 
