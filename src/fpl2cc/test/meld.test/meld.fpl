@@ -55,8 +55,9 @@ associative_array -> item;
 # here we expect:
 #   keys has offset 0 meld 2
 #   vals has offset 1 meld 2
-'⁅'^ (/[a-z_]+/:key '=>'^ arg:val ','?^)* '⁆'^ -> associative_array;
-'⟅'^ /[a-z_]+/:key '=>'^ arg:val (','^ /[a-z_]+/:key '=>'^ arg:val)* '⟆'^ -> associative_array;
+@terminal key /[a-z_]+/
+'⁅'^ (&key '=>'^ arg:val ','?^)* '⁆'^ -> associative_array;
+'⟅'^  &key '=>'^ arg:val (','^ &key '=>'^ arg:val)* '⟆'^ -> associative_array;
 +associative_array +{
     return stringformat(
         "{} (span {}) keys at {}: {}; {} (span {}) values at {}: {}",
