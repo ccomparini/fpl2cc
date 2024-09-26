@@ -3,7 +3,8 @@
 
 /*
 
-Class for 
+Class for dealing with the distances between lr_stack elements
+for purposes of melding (or, I guess, anything else).
 
 I've made this to simplify dealing with melding related
 distances.
@@ -41,7 +42,6 @@ public:
     }
 
     int to_int() const { return dist; }
-
 
     // resets the distance to 0 (and makes this freely assignable)
     void reset() {
