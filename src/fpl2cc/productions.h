@@ -3848,9 +3848,6 @@ public:
         return nr;
     }
 
-    rulestep rule_start(int rulenum) const {
-        return rulestep(this, rulenum, 0);
-    }
    
     rulestep canonical_step_for_param(
         int rulenum, const std::string &pname
