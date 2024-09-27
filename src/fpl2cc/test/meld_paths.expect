@@ -85,4 +85,11 @@ optional subex with optional start:  a (b* c)* d -> x;
     { <1.0 = a>, <0.0 = b*>, <0.0 = b*>, <0.1 = c>, <0.0 = b*>, <0.1 = c>, <1.2 = d> }
     { <1.0 = a>, <0.0 = b*>, <0.1 = c>, <0.0 = b*>, <0.0 = b*>, <0.1 = c>, <1.2 = d> }
     { <1.0 = a>, <0.0 = b*>, <0.0 = b*>, <0.1 = c>, <0.0 = b*>, <0.0 = b*>, <0.1 = c>, <1.2 = d> }
+expression which failed in rparams.test:  '('^ (fruit (','^ fruit)*)? ')'^ -> fruit_list;
+fruit_list -> list;
+    {  }
+    { <1.0 = fruit> }
+    { <1.0 = fruit>, <0.1 = fruit> }
+    { <1.0 = fruit>, <0.1 = fruit>, <0.1 = fruit> }
+    { <3.0 = fruit_list> }
 "

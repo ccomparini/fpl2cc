@@ -15,8 +15,6 @@ struct path_test {
     const utf8_buffer src;
     const std::string whence;
 
-    std::string result;
-
     path_test(const char *n, const char *s, src_location caller = CALLER())
         : name(n), src((utf8_byte *)s, strlen(s)), whence(caller) { }
 
@@ -132,6 +130,11 @@ static std::vector<path_test> tests = {
     {
         "optional subex with optional start",
         "a (b* c)* d -> x;"
+    },
+    {
+        "expression which failed in rparams.test",
+        "'('^ (fruit (','^ fruit)*)? ')'^ -> fruit_list;\n"
+        "fruit_list -> list;",
     },
 };
 

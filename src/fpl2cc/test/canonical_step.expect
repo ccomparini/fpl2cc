@@ -1,0 +1,53 @@
+returncode = 0
+stderr = ""
+stdout = "... testing canonical steps for parameters
+src/fpl2cc/test/canonical_step.cc:65:  a b c d -> e;
+  rule 0: a b c d -> e
+    a:  <0.0 = a>
+    b:  <0.1 = b>
+    c:  <0.2 = c>
+    d:  <0.3 = d>
+src/fpl2cc/test/canonical_step.cc:68:  (a b)* c d -> e;
+  rule 1: (_subex_0)* c d -> e
+    a:  <0.0 = a>
+    b: [1] <0.1 = b>
+    c:  <1.1 = c>
+    d:  <1.2 = d>
+src/fpl2cc/test/canonical_step.cc:71:  (foo:aaa b) bar:aaa d -> e;
+  rule 1: (_subex_0) bar:aaa d -> e
+    aaa:  <0.0 = foo:aaa>
+    b: [1] <0.1 = b>
+    d:  <1.2 = d>
+src/fpl2cc/test/canonical_step.cc:74:  a* -> foo;\\na foo b -> bar;
+  rule 0: a* -> foo
+    a:  <0.0 = a*>
+  rule 1: a foo b -> bar
+    a:  <1.0 = a>
+    b:  <1.2 = b>
+    foo:  <1.1 = foo>
+src/fpl2cc/test/canonical_step.cc:78:  (thing ';'^)* -> things;
+  rule 1: (_subex_0)*:thing -> things
+    thing:  <0.0 = thing>
+src/fpl2cc/test/canonical_step.cc:82:  stuff* -> goal\\na_with_trailing_bs  -> stuff;\\nabbb                -> stuff;\\njust_a              -> stuff;\\nbb                  -> stuff;\\n'b'                 -> stuff;\\n'a'^ 'b':first (', '^ 'b')*:tr -> a_with_trailing_bs;\\n'a'^ ('b' 'b' 'b')+:bees -> abbb;\\n'a'^ -> just_a;\\n'b' 'b' -> bb;
+  rule 0: stuff* -> goal
+    stuff:  <0.0 = stuff*>
+  rule 1: a_with_trailing_bs -> stuff
+    a_with_trailing_bs:  <1.0 = a_with_trailing_bs>
+  rule 2: abbb -> stuff
+    abbb:  <2.0 = abbb>
+  rule 3: just_a -> stuff
+    just_a:  <3.0 = just_a>
+  rule 4: bb -> stuff
+    bb:  <4.0 = bb>
+  rule 5: 'b':arg_0 -> stuff
+    arg_0:  <5.0 = 'b':arg_0>
+  rule 7: 'a'^ 'b':first (_subex_0)*:tr -> a_with_trailing_bs
+    first:  <7.1 = 'b':first>
+    tr:  <6.1 = 'b':tr>
+  rule 9: 'a'^ (_subex_1)+:bees -> abbb
+    bees:  <8.0 = 'b':bees>
+  rule 10: 'a'^ -> just_a
+  rule 11: 'b':arg_0 'b':arg_1 -> bb
+    arg_0:  <11.0 = 'b':arg_0>
+    arg_1:  <11.1 = 'b':arg_1>
+"
