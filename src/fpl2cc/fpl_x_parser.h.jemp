@@ -337,15 +337,17 @@ public:
         }
     };
 
-    // This is an lr stack entry (as opposed to a param stack entry).
-    // In the new dual stack scheme, you would use one of these to
-    // refer to the param stack, however.
+    // This is an lr stack entry (as opposed to a param stack entry,
+    // which would be a ReductionParameter).
+    // The lr_stack is used for tracking state, and refers to the
+    // param stack for finding the actual reduction parameters
+    // for reduce actions.
     struct StackEntry {
-        State          state;
-        int            element_id;
+        State          state;      // ptr to state function to call
+        int            element_id; // ID of the matched element
         SourcePosition pos;        // start of match in source code
         int            param_ind;  // offset in param_stack
-        bool           mismatch;
+        bool           mismatch;   // used for rewinding on mismatch
 
         StackEntry(State st, int el_id, SourcePosition p, int pind) :
             state(st),
