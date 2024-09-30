@@ -345,15 +345,13 @@ public:
         int            element_id;
         SourcePosition pos;        // start of match in source code
         int            param_ind;  // offset in param_stack
-        bool           eject;
         bool           mismatch;
 
-        StackEntry(State st, int el_id, SourcePosition p, int pind, bool ej) :
+        StackEntry(State st, int el_id, SourcePosition p, int pind) :
             state(st),
             element_id(el_id),
             pos(p),
             param_ind(pind),
-            eject(ej),
             mismatch(false) {
         }
 
@@ -362,7 +360,6 @@ public:
             state(NULL),
             element_id(-1),
             param_ind(-1),
-            eject(true),
             mismatch(false) {
         }
 
@@ -374,10 +371,6 @@ public:
 
         int grammar_element_id() const {
             return element_id;
-        }
-
-        bool ejected() const {
-            return eject;
         }
 
         SourcePosition position() const {
@@ -426,7 +419,7 @@ public:
         int element_id, bool eject, const SourcePosition &pos, Product pr
     ) {
         lr_stack.push_back(StackEntry(
-            cur_state, element_id, pos, param_stack.size(), eject
+            cur_state, element_id, pos, param_stack.size()
         ));
         if(!eject) {
             param_stack.push_back(pr);
