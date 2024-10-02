@@ -1,0 +1,6 @@
+@parameter: const std::list<std::string> &variants@
+
+@-for(auto var : variants) {-@
+    variant @var@ sez: @#variant_#var#(std::string("ok"))@
+@-}-@
+====

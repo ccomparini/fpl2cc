@@ -1,0 +1,15 @@
+returncode = 0
+stderr = "caught error: subtemplate 'variant_no-such-variant' does not exist at src/jemplpl/test/variants.jemp:4:34
+"
+stdout = "
+variant a sez: I am a and I've been told ok.
+
+variant b sez: this is b and I've been told ok.
+
+variant c sez: Now it's c and I've been told \"ok\".
+
+====
+
+variant no-such-variant sez: 
+====
+"

@@ -159,14 +159,22 @@
         add_import(templ);
 
         cases.push_back(stringformat(
-            "if(fruitbat == \"{}\") {{\n    out += {}{};\n}",
+            "if(subtemplate_name == \"{}\") {{\n    out += {}{};\n}",
             function_name(templ), function_name(templ), jempl_args
         ));
     }
+    cases.push_back(stringformat(
+        "{{\n"
+        "    jerror::error(stringformat("
+        "        \"subtemplate '{{}}' does not exist\\n\","
+        "        subtemplate_name"
+        "    ), \"{}\");\n"
+        "}}\n", variant@position()
+    ));
 
     return stringformat(
         "{{\n"
-        "    std::string fruitbat = stringformat(\"{}{}\", {});\n"
+        "    std::string subtemplate_name = stringformat(\"{}{}\", {});\n"
         "    {}\n"
         "}\n",
         jempl_name,

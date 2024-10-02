@@ -1,0 +1,2 @@
+@parameter: const std::string &stuff @
+this is b and I've been told @stuff@.
