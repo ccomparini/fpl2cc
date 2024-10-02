@@ -49,7 +49,7 @@ text+:chunks -> fragment ;
 # realign hooks can work.
 '@embed:'^ /\s*/^ /[^@]+/:embed_file '@'^ /\n?/^ -> fragment ;
 
-# Immediately print the fragment as an error.
+# Immediately (at jemp-compile time) print the fragment as an error.
 # Typically, you'd nest this within a control statement.
 #  eg:
 #     @if(xyz) {@ @error {@ some error message @}@ @}@
