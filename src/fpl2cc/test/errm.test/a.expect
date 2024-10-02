@@ -1,0 +1,9 @@
+returncode = 255
+stderr = "Warning: SOMEONE SAID HAI at src/fpl2cc/test/errm.test/a.errm:1:1
+Error: Unterminated string at src/fpl2cc/test/errm.test/a.errm:6:5
+"
+stdout = "string: foo
+string: bar
+string: bat
+done
+"

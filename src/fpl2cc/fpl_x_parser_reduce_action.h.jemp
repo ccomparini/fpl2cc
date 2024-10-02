@@ -14,9 +14,27 @@
     @#fpl_x_parser_reduce_action_meta(prds, rule)@
 
     // @rule.to_str()@
-    @if(code_block rule_code = rule.reduce_code()) {-@
+
+    @/*
+       This rule might be marked to show a warning or error.  If so, do that
+       first (though we still generate reduce code, since in either case
+       the parser may want to continue).
+     */@
+    @if(rule.error_on_match()) {@
+        jerror::error(stringformat(
+            "{}", "@c_str_escape(rule.message())@"),
+            all_matched_steps()[0].position().to_str()
+        );
+    @} else if(rule.warning_on_match()) {@
+        jerror::warning(stringformat(
+            "{}", "@c_str_escape(rule.message())@"),
+            all_matched_steps()[0].position().to_str()
+        );
+    @}@
+
+    @if(auto rule_code = rule.reduce_code()) {-@
         @/* fpl-author-supplied rule code: */@
-        @rule_code.format(false)@
+        @#fpl_action_#rule_code.language#(prds, rule)@
     @} else if(prds.has_generated_type(rule.product())) {@
         @/* auto generated type - initialize from parameters */@
         @return_type@ result;

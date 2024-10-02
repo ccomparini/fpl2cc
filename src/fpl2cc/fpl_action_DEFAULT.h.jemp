@@ -1,0 +1,10 @@
+@/*
+
+fpl-author supplied reduce action, in the "default" (= generated)
+language.
+
+ */@
+@parameter: const productions &prds@
+@parameter: const production_rule &rule@
+@rule.reduce_code().format(false)@
+

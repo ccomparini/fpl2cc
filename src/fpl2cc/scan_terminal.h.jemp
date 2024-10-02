@@ -11,7 +11,7 @@
     @declare match_str: c_str_escape(el.expr)@
     // scan terminal @el@ (@match_str@)
     @if(el.type == grammar_element::TERM_EXACT) {@
-        const SourcePosition pos = position();
+        const SourcePosition start_pos = position();
         if(reader->read_exact_match("@match_str@")) {
             if(
                 @-for(auto suffix : prds.bad_suffixes_for_element(el)) {-@
@@ -21,7 +21,7 @@
                 // "bad suffix" - though we matched the terminal,
                 // it's part of a longer terminal.  so, cancel
                 // the match/rewind:
-                reader->go_to(pos);
+                reader->go_to(start_pos);
             } else {
                 @result_var@ = Terminal("@match_str@");
             }

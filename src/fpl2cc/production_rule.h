@@ -18,9 +18,16 @@
 namespace fpl {
 
 class production_rule {
-    public: struct step; private:
+public:
+    struct step;
+    enum problem_message_type {
+        NO_PROB = 0,
+        WARNM,
+        ERRM,
+    };
+private:
 
-    std::string prod;
+    std::string           prod;          // what this rule produces
     std::vector<step>     rsteps;
     std::map<std::string, int> step_vars; // key = name; val = rstep
     code_block            code_for_rule; // reduce code, if known yet
@@ -31,6 +38,9 @@ class production_rule {
     int                   rulenum;        // assigned when added to productions
     int                   parent_rulenum; // (or -1 if not subrule)
     int                   parent_cpos;    // step relative to end of parent
+
+    problem_message_type  prob;           // if this indicates a problem..
+    std::string           msg;            // .. then show this message
 
 public:
 
@@ -45,7 +55,8 @@ public:
         prod_type(tp),
         rulenum(-1),
         parent_rulenum(-1),
-        parent_cpos(0) {
+        parent_cpos(0),
+        prob(NO_PROB) {
     }
 
     production_rule() :
@@ -53,7 +64,8 @@ public:
         prod_type(grammar_element::NONE),
         rulenum(-1),
         parent_rulenum(-1),
-        parent_cpos(0) {
+        parent_cpos(0),
+        prob(NO_PROB) {
     }
 
     static const production_rule &false_rule() {
@@ -678,6 +690,27 @@ public:
         abs_impl = red;
     }
 
+    // returns true if this rule is here to flag some erroneous
+    // construct.  classic example would be 
+    bool error_on_match()   const { return prob == ERRM; }
+    bool warning_on_match() const { return prob == WARNM; }
+
+    void set_error(const std::string &m) {
+        msg = m;
+        prob = ERRM;
+    }
+
+    void set_warning(const std::string &m) {
+        msg = m;
+        prob = WARNM;
+    }
+
+    std::string message() const {
+        if(prob)
+            return msg;
+        return "";
+    }
+
     // Returns the set of possible non-looping execution "paths" through
     // the rule, each represented as a list of step numbers.
     // "multiple" steps are represented in each path by single duplication
@@ -733,6 +766,14 @@ public:
         }
 
         out += "-> ";
+
+        // show if this rule generates a warning or error message:
+        if(prob == WARNM) {
+            out += "?? ";
+        } else if(prob == ERRM) {
+            out += "!! ";
+        }
+
         out += product();
 
         return out;

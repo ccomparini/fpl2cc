@@ -1,0 +1,39 @@
+@produces std::string
+@goal done
+@default_main
+@comment_style sh
+
+@import `builtins`.&eof
+
+'HAI' -> str !?SOMEONE SAID HAI?! +{ return ""; }+
+
+/[^"]*/ -> str_contents;
+
+# something to note here - leading and trailing whitespace are
+# removed from these strings, because they are "separator" characters.
+# should there be a way to change or supress separators by context?
+# there are numerous cases where one might want that - for example,
+# not having comments in strings.  anywaysss...
+'"'^ str_contents '"'^ -> str;
+'"'^ str_contents:unterminated_str &eof^ -> str !!Unterminated string!! +{
+    return "";
+}+
+
+# let's say you can group strings into one string, and they'll be
+# joined using spaces:
+'{'^ str+:components '}'^  -> str +{ return components@join(" "); }+
+'{'^ '}'^       -> str !?Empty string group?! +{ return ""; }+
+'{'^ str*:components &eof^ -> str !! Unterminated string group !! +{ return ""; }+;
+
+str* -> done +{
+    str@foreach([](const std::string &st)->void {
+        // we elide empty strings because that's what the error cases
+        // return.  yay.
+        if(st.length()) {
+            std::cout << stringformat("string: {}\n", st);
+        }
+    });
+
+    return "done";
+}+
+

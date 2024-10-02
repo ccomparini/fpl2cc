@@ -125,7 +125,11 @@ struct code_block {
     }
 
     std::string location() const {
-        return stringformat("{}:{}", source_file, line);
+        if(*this) {
+            return stringformat("{}:{}", source_file, line);
+        } else {
+            return stringformat("(no code)");
+        }
     }
 
     std::string source_filename() const { return source_file; }

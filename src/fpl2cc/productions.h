@@ -2670,7 +2670,7 @@ public:
             while(!inp->read_byte_equalling(')')) {
                 std::string name = read_production_name(inp);
                 if(!name.length()) {
-                    error("invalid production name");
+                    error("invalid production name in argument declaration");
                     break;
                 }
 
@@ -2697,7 +2697,7 @@ public:
     //
     // '+'~production_name argdecl code_block
     //
-    void parse_reducer() {
+    void parse_abstracted_reducer() {
         if(!inp->read_byte_equalling('+')) {
             error("expected +<production_name>");
             return;
@@ -2723,7 +2723,7 @@ public:
     }
 
     // parses the '->' [production name] in a rule definition
-    std::string read_rule_production() {
+    std::string read_rule_product_name() {
         eat_separator();
         if(!inp->read_exact_match("->")) {
             error("expected '->' before production name");
@@ -2738,24 +2738,47 @@ public:
         return pname;
     }
 
-    // (everything after the '->' in a rule is considered "implementation")
-    void parse_rule_implementation(production_rule &rule) {
-        std::string pname = read_rule_production();
+    // parse an optional ?! or !!-quoted warning or error message for
+    // the rule
+    void parse_message(production_rule &rule) {
+        eat_separator();
+        if(inp->eat_exact_match("!!")) {
+            rule.set_error(inp->read_to_exact_match("!!"));
+            inp->eat_exact_match("!!");
+        } else if(inp->eat_exact_match("!?")) {
+            rule.set_warning(inp->read_to_exact_match("?!"));
+            inp->eat_exact_match("?!");
+        } // else no message; move on
+    }
+
+    // parse a direct reduce action for the rule, if there is one.
+    // (such an action is anything after the '->'), including warnings,
+    // explicit errors, reduce actions, etc.
+    // ';' means the action is unspecified as yet, though it may
+    // be defined elsewhere.
+    void parse_action(production_rule &rule) {
+        std::string pname = read_rule_product_name();
         if(!pname.length()) {
             error("invalid production name\n");
         } else {
             rule.product(pname);
-
         }
 
-        eat_separator();
+        parse_message(rule);
 
-        // next we might have a code block:
+        // next we might have a code block or other specific thing
+        // to do when the rule is matched:
         auto code = read_code();
         if(code) {
             rule.code(code);
         }
 
+        // optional ';' can apparently follow.. heh.
+        // I'm not sure if this should be considered
+        // vestigal, or if it helps clarify where rules
+        // end (or both).  I've been thinking that ';'
+        // means "use default code", but clearly you can
+        // have +{ }+;
         inp->read_byte_equalling(';');
     }
 
@@ -2764,7 +2787,7 @@ public:
     int parse_rule() {
         production_rule rule(inp->filename(), inp->line_number());
         if(parse_expressions(rule)) {
-            parse_rule_implementation(rule);
+            parse_action(rule);
             return add_rule(rule);
         }
         return -1;
@@ -2864,7 +2887,7 @@ public:
             // which other things may use via the < . > product aliases
             // (or as any other product name).
             production_rule group_rule(inp->filename(), inp->line_number());
-            parse_rule_implementation(group_rule); // (parses the name etc)
+            parse_action(group_rule); // (parses the '->' etc)
 
             group_rule.add_step(production_rule::step(
                 ">", grammar_element::Type::NONTERM_PREC_PLACEHOLDER,
@@ -2920,7 +2943,7 @@ public:
                     }
                 } else {
                     // expect code for reducing to the production given:
-                    parse_reducer();
+                    parse_abstracted_reducer();
                 }
             } else if(inp->read_byte_equalling('@')) {
                 std::string directive = read_directive(inp);
