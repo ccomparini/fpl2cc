@@ -60,6 +60,10 @@ syn match	fplExpression	"&[a-zA-Z_]\+"
 syn match	fplExpression	"!"
 syn match	fplExpression	"\~"
 
+" error/warning messages:
+syn region	fplMessage	start=+!!+ end=+!!+
+syn region	fplMessage	start=+!?+ end=+?!+
+
 " expression suffixes:
 syn match	fplSuffix	"\^"
 
@@ -86,5 +90,6 @@ hi def link fplQuantifier	Repeat
 hi def link fplSnip	Operator
 hi def link fplSuffix	Special
 hi def link fplTodo	Todo
+hi def link fplMessage	Special
 
 
