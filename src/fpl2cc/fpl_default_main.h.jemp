@@ -40,8 +40,24 @@ bool default_main_parse_one(fpl_reader_p src) {
    supply it.
  */
 int main(int argc, const char **argv) {
-
     bool success = true;
+
+    jerror::handler erhand(jerror::error_channel,
+        [&success]
+        (const std::string &msg, src_location where) {
+            success = false;
+            std::cerr << stringformat("Error: {} at {}\n", msg, where);
+            return;
+        }
+    );
+    jerror::handler whand(jerror::warning_channel,
+        [ ]
+        (const std::string &msg, src_location where) {
+            std::cerr << stringformat("Warning: {} at {}\n", msg, where);
+            return;
+        }
+    );
+
     if(argc >= 2) {
         for(int arg = 1; arg < argc; ++arg) {
             fpl_reader_p inp = std::make_shared<fpl_reader>(argv[arg]);
