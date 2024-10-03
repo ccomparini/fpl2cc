@@ -12,6 +12,25 @@
 #include <list>
 #include <tuple>
 
+// returns the string passed, with an extra newline at the end
+// if the string didn't have one already.
+inline std::string ensure_nl(const std::string &src) {
+    if(!src.length() || src[src.length() - 1] != '\n')
+        return src + "\n";
+
+    return src;
+}
+
+// returns a copy of the string passed, with all trailing newlines removed.
+inline std::string chop_nl(std::string str) {
+    auto new_size = str.length();
+    while((new_size > 0) && str[new_size - 1] == '\n')
+        --new_size;
+
+    str.resize(new_size);
+    return str;
+}
+
 // OK SO #include<format> doen't seem to exist on my machine.
 // let the reinvention commence.
 // Oh, interesting. this is a nightmare in c++.
@@ -260,6 +279,11 @@ class stringformat_post_processor {
         return out;
     }
 
+    // {::T} -> remove Trailing newlines
+    static std::string process_t(const std::string &in) {
+        return chop_nl(in);
+    }
+
     // {::U} -> translate characters to upper case
     static std::string process_U(const std::string &in) {
         std::string out;
@@ -286,6 +310,7 @@ public:
             case 'i': return process_i(in);  // indent this level
             case 'l': return process_l(in);  // lowercase
             case 'n': return process_n(in);  // translate newlines to '\n'
+            case 'T': return process_t(in);  // remove Trailing newlines
             case 'U': return process_U(in);  // uppercase
         }
         // .. would be nice to warn about missing format here....
@@ -391,15 +416,6 @@ std::string stringformat(std::string_view fmt, Args&&... args) {
     }
 
     return out;
-}
-
-// returns the string passed, with an extra newline at the end
-// if the string didn't have one already.
-inline std::string ensure_nl(const std::string &src) {
-    if(src[src.length() - 1] != '\n') 
-        return src + "\n";
-
-    return src;
 }
 
 
