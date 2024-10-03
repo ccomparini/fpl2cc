@@ -207,11 +207,14 @@ public:
         return input_filename;
     }
 
-    inline std::string location_str(size_t offset=0) const {
-        if(offset == 0) offset = read_pos;
+    std::string location_str(size_t offset) const {
         int ch;
         int ln = line_number(offset, &ch);
         return stringformat("{}:{}:{}", filename(), ln, ch);
+    }
+
+    std::string location_str() const {
+        return location_str(read_pos);
     }
 
     std::string base_name() const {
@@ -692,7 +695,7 @@ public:
 
 class SourcePosition {
     fpl_reader_p_c source;
-    size_t         offset; // byte offset into the file
+    const size_t   offset; // byte offset into the file
 
 public:
 
