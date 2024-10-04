@@ -1,0 +1,9 @@
+returncode = 255
+stderr = "Warning: Empty string group at src/fpl2cc/test/errm.test/b.errm:16:3
+Error:  Unterminated string group  at src/fpl2cc/test/errm.test/b.errm:13:1
+"
+stdout = "string: in a good group
+string: single string
+string: outermost in nest. inside nest one layer, and this too is one layer in. 3rd layer because why not
+done
+"

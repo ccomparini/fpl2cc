@@ -1,0 +1,17 @@
+{ "in a good" "group" }
+"single string"
+
+{
+  "outermost in nest."
+  {
+    "inside nest one layer,"
+    "and this too is one layer in."
+    { "3rd layer because why not" } 
+  }
+}
+
+{
+  "cow say moo"
+  { "and this message won't show because of brace mismatch" }
+  {
+}
