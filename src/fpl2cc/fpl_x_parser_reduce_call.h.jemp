@@ -1,7 +1,6 @@
 @parameter: const productions &prds @
 @parameter: const production_rule &rule @
 @parameter: const fpl_options &opts @
-@declare num_params: rule.parameter_count()@
 @realign: #line {} "{}" @
 
 @/*
@@ -123,14 +122,16 @@
     @}@
 
     @/* this is the call to the reduce code */@
-    auto result = @prds.rule_fn(rule) -@ (
-        @-for(int pind = 0; pind < num_params; pind++) {-@
-            @- pind?",":"" -@ arg_@-rule.parameter_name(pind)-@
-        @-}-@
+    @declare num_params: rule.parameter_count()@
+    Product prod(
+        @prds.rule_fn(rule) -@ (
+            @-for(int pind = 0; pind < num_params; pind++) {-@
+                @- pind?",":"" -@ arg_@-rule.parameter_name(pind)-@
+            @-}-@
+        )
     );
 
     @declare result_el_id: prds.element_id_name(rule.product_element()) @
-    Product prod(result);
     @if(opts.debug) {-@
         std::cerr << stringformat(
             "reduced to  @result_el_id@ = {}\n", prod
