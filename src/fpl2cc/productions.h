@@ -4305,7 +4305,7 @@ public:
         resolve_types();
         generate_states({"_fpl_goal"});
         dump_states(opts);
-        resolve_actions();
+        apply_default_action();
         check_rules();
     }
 
@@ -4491,7 +4491,7 @@ public:
         }
     }
 
-    void resolve_actions() {
+    void apply_default_action() {
         // A given rule will be reduced according to the first of the
         // following possibilities:
         //   1) abstracted implementations (+product - aka "reducers").
