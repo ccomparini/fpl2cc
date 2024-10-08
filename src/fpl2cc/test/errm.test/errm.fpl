@@ -19,11 +19,13 @@
     return "";
 }+
 
-# let's say you can group strings into one string, and they'll be
-# joined using spaces:
+# to test the nestable case, let's say you can group strings into one
+# string using curlybraces, and they'll be joined using spaces:
 '{'^ str+:components '}'^  -> str +{ return components@join(" "); }+
-'{'^ '}'^       -> str !?Empty string group?! +{ return ""; }+
-'{'^ str*:components &eof^ -> str !! Unterminated string group !! +{ return ""; }+;
+'{'^ '}'^                  -> str !?Empty string group?! +{ return ""; }+
+'{'^ str*:components &eof^ -> str !! Unterminated string group !! +{
+    return "";
+}+;
 
 str* -> done +{
     str@foreach([](const std::string &st)->void {
