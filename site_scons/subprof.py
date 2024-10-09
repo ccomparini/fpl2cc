@@ -128,10 +128,10 @@ class Profile(collections.namedtuple("Subprof", FIELDS)):
 # returns true if git says the working tree matches the HEAD;
 # false otherwise (including cases where we're not even in
 # a git tree)
-def _git_is_at_head():
+def _git_is_at_head(*paths):
     try:
         git_result = subprocess.run(
-            ['git', 'diff-index', 'HEAD', '--quiet']
+            ['git', 'diff-index', 'HEAD', '--quiet', *paths]
         )
     except Exception as ex:
         warn_here(f"\nerror on git diff-index: {ex}")
@@ -151,12 +151,12 @@ def _git_commit_id():
             stdout=subprocess.PIPE, check=True
         )
         git_id = git_result.stdout.decode('ascii')
-        if not _git_is_at_head():
-            # the working tree doesn't match the HEAD, but we're
-            # profiling code on the working tree (i.e. on disk),
-            # so we want to be clear that the git ID doesn't really
-            # match what we ran against.  So, warn, and add an
-            # asterisk to the end:
+        if not _git_is_at_head(':!yprof'):
+            # the working tree (except the yprof dir) doesn't match
+            # the HEAD, but we're profiling code on the working tree
+            # (i.e. on disk), so we want to be clear that the git ID
+            # doesn't really match what we ran against.  So, warn,
+            # and add an asterisk to the end:
             warn_here(f"git working tree does not match HEAD")
             git_id += '*'
     except Exception as ex:
