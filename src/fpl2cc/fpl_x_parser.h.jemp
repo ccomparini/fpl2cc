@@ -548,34 +548,36 @@ public:
         return lr_stack.size() - 1;
     }
 
+    // pops and discards the top element of the lr_stack
     void lr_pop() {
-        if(lr_stack.size() > 0) {
-            auto popped = lr_stack.back();
-            cur_state = popped.state;
-            if(popped.param_ind >= 0) {
-                param_stack.resize(popped.param_ind);
+        lr_pop_to(lr_top_index() - 1);
+    }
+
+    // pops and discards elements from the lr_stack down to the new maximum
+    // index specified.
+    // i.e. the new lr_top_index will be new_max.
+    // popping to -1 (or less) clears the stack.
+    void lr_pop_to(int new_max) {
+        auto popped_index = new_max + 1;
+
+        if(popped_index < lr_stack.size()) {
+            cur_state        = lr_stack.at(popped_index).state;
+            auto param_index = lr_stack.at(popped_index).param_ind;
+            if(param_index >= 0) {
+                param_stack.resize(param_index);
             }
-            lr_stack.pop_back();
+            lr_stack.resize(new_max + 1);
         }
 
         if(lr_stack.size() == 0) {
-            // else there's nothing left to pop on the lr_stack,
-            // and the param stack had better be clear, too, or
-            // something is wrong:
+            // there's nothing left on the lr_stack, so the param stack
+            // had better be clear, too, or there's a bug:
             if(param_stack.size() > 0) {
                 jerror::warning(stringformat(
-                    "popping from empty lr_stack, but there are {} params\n",
+                    "lr_stack is empty, but there are {} params. bug?\n",
                     param_stack.size()
                 ));
             }
-        }
-    }
-
-    // "pops" and discards down to the new maximum index
-    // specified
-    void lr_pop_to(int new_max) {
-        while(lr_top_index() > new_max) {
-            lr_pop();
         }
     }
 
