@@ -598,6 +598,25 @@ std::string to_hex(const T &inst) {
     #include <list>
     #include <tuple>
 
+    // returns the string passed, with an extra newline at the end
+    // if the string didn't have one already.
+    inline std::string ensure_nl(const std::string &src) {
+        if(!src.length() || src[src.length() - 1] != '\n')
+        return src + "\n";
+
+        return src;
+    }
+
+    // returns a copy of the string passed, with all trailing newlines removed.
+    inline std::string chop_nl(std::string str) {
+        auto new_size = str.length();
+        while((new_size > 0) && str[new_size - 1] == '\n')
+        --new_size;
+
+        str.resize(new_size);
+        return str;
+    }
+
     // OK SO #include<format> doen't seem to exist on my machine.
     // let the reinvention commence.
     // Oh, interesting. this is a nightmare in c++.
@@ -846,6 +865,11 @@ static std::string process_n(const std::string &in) {
     return out;
 }
 
+// {::T} -> remove Trailing newlines
+static std::string process_t(const std::string &in) {
+    return chop_nl(in);
+}
+
 // {::U} -> translate characters to upper case
 static std::string process_U(const std::string &in) {
     std::string out;
@@ -872,6 +896,7 @@ static std::string process(char fmt, const std::string &in) {
         case 'i': return process_i(in);  // indent this level
         case 'l': return process_l(in);  // lowercase
         case 'n': return process_n(in);  // translate newlines to '\n'
+        case 'T': return process_t(in);  // remove Trailing newlines
         case 'U': return process_U(in);  // uppercase
     }
     // .. would be nice to warn about missing format here....
@@ -977,15 +1002,6 @@ for(ind = 0; ind < inlen; ++ind) {
 }
 
 return out;
-}
-
-// returns the string passed, with an extra newline at the end
-// if the string didn't have one already.
-inline std::string ensure_nl(const std::string &src) {
-if(src[src.length() - 1] != '\n') 
-return src + "\n";
-
-return src;
 }
 
 
@@ -1514,11 +1530,14 @@ inline const std::string &filename() const {
     return input_filename;
 }
 
-inline std::string location_str(size_t offset=0) const {
-    if(offset == 0) offset = read_pos;
+std::string location_str(size_t offset) const {
     int ch;
     int ln = line_number(offset, &ch);
     return stringformat("{}:{}:{}", filename(), ln, ch);
+}
+
+std::string location_str() const {
+    return location_str(read_pos);
 }
 
 std::string base_name() const {
@@ -1999,7 +2018,7 @@ inline std::string debug_peek(int num_chars = 12) const {
 
 class SourcePosition {
 fpl_reader_p_c source;
-size_t         offset; // byte offset into the file
+const size_t   offset; // byte offset into the file
 
 public:
 
@@ -2132,7 +2151,7 @@ inline std::string to_str() const {
 #define VERSION_MIN 10
 
 
-#line 2134 "src/jemplpl/jemplpl.cc"
+#line 2153 "src/jemplpl/jemplpl.cc"
 
 
 
@@ -2183,7 +2202,7 @@ public:
 // text (28:1):              •/[^@\\n]+/:t                                                                                                             => state 6  (src/grammarlib/jemp.fpl:147)
 // text (29:1):              •leading_ws                                                                                                               => state 19 (src/grammarlib/jemp.fpl:151)
 // text (30:1):              •trailing_ws                                                                                                              => state 1  (src/grammarlib/jemp.fpl:152)
-// _fpl_goal (32:1):         •complete                                                                                                                 => state 80 (src/fpl2cc/productions.h:4254)
+// _fpl_goal (32:1):         •complete                                                                                                                 => state 80 (src/fpl2cc/productions.h:4277)
 //
 void state_0() {
 
@@ -2434,21 +2453,21 @@ void state_1() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__trailing_ws(
         lr_read_pos, false
@@ -2458,7 +2477,7 @@ void state_1() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -2473,16 +2492,16 @@ void state_1() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__trailing_ws(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -2492,7 +2511,7 @@ void state_1() {
         int step_1_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // trailing_ws has base step num 0; canonical step is <30.0 = trailing_ws>
         ReductionParameter<std::string> arg_trailing_ws(
         *this, step_0_start + 0,
@@ -2501,41 +2520,42 @@ void state_1() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_30 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_30 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_trailing_ws);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_trailing_ws)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _text);
         lr_push(_text, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -2654,21 +2674,21 @@ void state_2() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__text(
         lr_read_pos, true
@@ -2678,7 +2698,7 @@ void state_2() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -2693,16 +2713,16 @@ void state_2() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__text(
         argument_start, true
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -2712,7 +2732,7 @@ void state_2() {
         int step_1_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // chunks has base step num 0; canonical step is <1.0 = text+:chunks>
         ReductionParameter<std::string> arg_chunks(
         *this, step_0_start + 0,
@@ -2721,41 +2741,42 @@ void state_2() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_1 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_1 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_chunks);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_chunks)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -2802,21 +2823,21 @@ void state_3() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__leading_ws(
         lr_read_pos, false
@@ -2826,7 +2847,7 @@ void state_3() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -2841,16 +2862,16 @@ void state_3() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__leading_ws(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -2860,7 +2881,7 @@ void state_3() {
         int step_1_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // leading_ws has base step num 0; canonical step is <29.0 = leading_ws>
         ReductionParameter<std::string> arg_leading_ws(
         *this, step_0_start + 0,
@@ -2869,41 +2890,42 @@ void state_3() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_29 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_29 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_leading_ws);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_leading_ws)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _text);
         lr_push(_text, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -2950,21 +2972,21 @@ void state_4() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_4(
         lr_read_pos, false
@@ -2974,7 +2996,7 @@ void state_4() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -2989,16 +3011,16 @@ void state_4() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_4(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -3008,7 +3030,7 @@ void state_4() {
         int step_1_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // at_sign has base step num 0; canonical step is <2.0 = '@@':at_sign>
         ReductionParameter<Terminal> arg_at_sign(
         *this, step_0_start + 0,
@@ -3017,41 +3039,42 @@ void state_4() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_2 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_2 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_at_sign);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_at_sign)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _text);
         lr_push(_text, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -3098,21 +3121,21 @@ void state_5() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_33(
         lr_read_pos, false
@@ -3122,7 +3145,7 @@ void state_5() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -3137,16 +3160,16 @@ void state_5() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_33(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -3156,7 +3179,7 @@ void state_5() {
         int step_1_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // ws has base step num 0; canonical step is <16.0 = /\\n*[ \\t]+/:ws>
         ReductionParameter<Terminal> arg_ws(
         *this, step_0_start + 0,
@@ -3165,41 +3188,42 @@ void state_5() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_16 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_16 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_ws);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_ws)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _leading_ws);
         lr_push(_leading_ws, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -3246,21 +3270,21 @@ void state_6() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_45(
         lr_read_pos, false
@@ -3270,7 +3294,7 @@ void state_6() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -3285,16 +3309,16 @@ void state_6() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_45(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -3304,7 +3328,7 @@ void state_6() {
         int step_1_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // t has base step num 0; canonical step is <28.0 = /[^@\\n]+/:t>
         ReductionParameter<Terminal> arg_t(
         *this, step_0_start + 0,
@@ -3313,41 +3337,42 @@ void state_6() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_28 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_28 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_t);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_t)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _text);
         lr_push(_text, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -3394,21 +3419,21 @@ void state_7() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_34(
         lr_read_pos, false
@@ -3418,7 +3443,7 @@ void state_7() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -3433,16 +3458,16 @@ void state_7() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_34(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -3452,7 +3477,7 @@ void state_7() {
         int step_1_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // ws has base step num 0; canonical step is <17.0 = /[ \\t]*\\n+[ \\t]+(\?!@)/:ws>
         ReductionParameter<Terminal> arg_ws(
         *this, step_0_start + 0,
@@ -3461,41 +3486,42 @@ void state_7() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_17 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_17 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_ws);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_ws)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _trailing_ws);
         lr_push(_trailing_ws, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -3542,21 +3568,21 @@ void state_8() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_35(
         lr_read_pos, false
@@ -3566,7 +3592,7 @@ void state_8() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -3581,16 +3607,16 @@ void state_8() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_35(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -3600,7 +3626,7 @@ void state_8() {
         int step_1_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // ws has base step num 0; canonical step is <18.0 = /[ \\t]*\\n/:ws>
         ReductionParameter<Terminal> arg_ws(
         *this, step_0_start + 0,
@@ -3609,41 +3635,42 @@ void state_8() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_18 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_18 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_ws);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_ws)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _trailing_ws);
         lr_push(_trailing_ws, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -3820,35 +3847,35 @@ void state_11() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_end(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_44(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_start(
         lr_read_pos, false
@@ -3858,7 +3885,7 @@ void state_11() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -3873,44 +3900,44 @@ void state_11() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_start(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_44(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_end(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
@@ -3920,7 +3947,7 @@ void state_11() {
         int step_3_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // variable has base step num 1; canonical step is <27.1 = &subst_guts:variable>
         ReductionParameter<Terminal> arg_variable(
         *this, step_1_start + 0,
@@ -3929,41 +3956,42 @@ void state_11() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_27 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_27 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_variable);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_variable)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -4010,21 +4038,21 @@ void state_12() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_11(
         lr_read_pos, false
@@ -4034,7 +4062,7 @@ void state_12() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -4049,16 +4077,16 @@ void state_12() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_11(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -4068,7 +4096,7 @@ void state_12() {
         int step_1_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // arg_0 has base step num 0; canonical step is <14.0 = '@':arg_0>
         ReductionParameter<Terminal> arg_arg_0(
         *this, step_0_start + 0,
@@ -4077,41 +4105,42 @@ void state_12() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_14 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_14 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_arg_0);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_arg_0)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _subst_end);
         lr_push(_subst_end, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -4185,28 +4214,28 @@ void state_13() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__trailing_ws(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_29(
         lr_read_pos, false
@@ -4216,7 +4245,7 @@ void state_13() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -4231,30 +4260,30 @@ void state_13() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_29(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__trailing_ws(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
@@ -4264,7 +4293,7 @@ void state_13() {
         int step_2_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // arg_0 has base step num 0; canonical step is <13.0 = '-@':arg_0>
         ReductionParameter<Terminal> arg_arg_0(
         *this, step_0_start + 0,
@@ -4273,41 +4302,42 @@ void state_13() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_13 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_13 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_arg_0);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_arg_0)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _subst_end);
         lr_push(_subst_end, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -4354,28 +4384,28 @@ void state_14() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__trailing_ws(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_29(
         lr_read_pos, false
@@ -4385,7 +4415,7 @@ void state_14() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -4400,30 +4430,30 @@ void state_14() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_29(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__trailing_ws(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
@@ -4433,7 +4463,7 @@ void state_14() {
         int step_2_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // arg_0 has base step num 0; canonical step is <13.0 = '-@':arg_0>
         ReductionParameter<Terminal> arg_arg_0(
         *this, step_0_start + 0,
@@ -4442,41 +4472,42 @@ void state_14() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_13 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_13 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_arg_0);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_arg_0)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _subst_end);
         lr_push(_subst_end, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -4583,35 +4614,35 @@ void state_16() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_end(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_40(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_start(
         lr_read_pos, false
@@ -4621,7 +4652,7 @@ void state_16() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -4636,44 +4667,44 @@ void state_16() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_start(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_40(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_end(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
@@ -4683,7 +4714,7 @@ void state_16() {
         int step_3_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // control_statement has base step num 1; canonical step is <23.1 = &control_guts:control_statement>
         ReductionParameter<Terminal> arg_control_statement(
         *this, step_1_start + 0,
@@ -4692,41 +4723,42 @@ void state_16() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_23 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_23 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_control_statement);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_control_statement)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _control_start);
         lr_push(_control_start, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -5094,21 +5126,21 @@ void state_19() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__leading_ws(
         lr_read_pos, false
@@ -5118,7 +5150,7 @@ void state_19() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -5133,16 +5165,16 @@ void state_19() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__leading_ws(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -5152,7 +5184,7 @@ void state_19() {
         int step_1_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // leading_ws has base step num 0; canonical step is <29.0 = leading_ws>
         ReductionParameter<std::string> arg_leading_ws(
         *this, step_0_start + 0,
@@ -5161,41 +5193,42 @@ void state_19() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_29 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_29 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_leading_ws);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_leading_ws)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _text);
         lr_push(_text, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -5242,28 +5275,28 @@ void state_20() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_28(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__leading_ws(
         lr_read_pos, false
@@ -5273,7 +5306,7 @@ void state_20() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -5288,30 +5321,30 @@ void state_20() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__leading_ws(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_28(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
@@ -5321,7 +5354,7 @@ void state_20() {
         int step_2_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // arg_1 has base step num 1; canonical step is <11.1 = '@-':arg_1>
         ReductionParameter<Terminal> arg_arg_1(
         *this, step_1_start + 0,
@@ -5330,41 +5363,42 @@ void state_20() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_11 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_11 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_arg_1);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_arg_1)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _subst_start);
         lr_push(_subst_start, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -5630,63 +5664,63 @@ void state_26() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_8(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_11(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_23(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_22(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__identifier(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_20(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__leading_ws(
         lr_read_pos, false
@@ -5696,7 +5730,7 @@ void state_26() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -5711,100 +5745,100 @@ void state_26() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__leading_ws(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_20(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__identifier(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_22(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_3_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_23(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_4_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_11(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_5_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_8(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_6_start = argument_start;
@@ -5814,7 +5848,7 @@ void state_26() {
         int step_7_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // leading_ws has base step num 0; canonical step is <8.0 = leading_ws?>
         ReductionParameter<std::string> arg_leading_ws(
         *this, step_0_start + 0,
@@ -5823,7 +5857,7 @@ void state_26() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         // name_decl has base step num 2; canonical step is <8.2 = identifier:name_decl>
         ReductionParameter<std::string> arg_name_decl(
@@ -5833,7 +5867,7 @@ void state_26() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         // value has base step num 4; canonical step is <8.4 = /(\?:[^@]|(\?:@@))*/:value>
         ReductionParameter<Terminal> arg_value(
@@ -5843,41 +5877,42 @@ void state_26() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_8 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_8 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_leading_ws, arg_name_decl, arg_value);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_leading_ws, arg_name_decl, arg_value)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -5924,21 +5959,21 @@ void state_27() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_46(
         lr_read_pos, false
@@ -5948,7 +5983,7 @@ void state_27() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -5963,16 +5998,16 @@ void state_27() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_46(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -5982,7 +6017,7 @@ void state_27() {
         int step_1_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // name has base step num 0; canonical step is <31.0 = /[a-zA-Z_][a-zA-Z_0-9]+/:name>
         ReductionParameter<Terminal> arg_name(
         *this, step_0_start + 0,
@@ -5991,41 +6026,42 @@ void state_27() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_31 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_31 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_name);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_name)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _identifier);
         lr_push(_identifier, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -6463,63 +6499,63 @@ void state_31() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_end(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_18(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_start(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__fragment(
         lr_read_pos, true
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_end(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_16(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_start(
         lr_read_pos, false
@@ -6529,7 +6565,7 @@ void state_31() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -6544,100 +6580,100 @@ void state_31() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_start(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_16(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_end(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__fragment(
         argument_start, true
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_3_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_start(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_4_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_18(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_5_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_end(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_6_start = argument_start;
@@ -6647,7 +6683,7 @@ void state_31() {
         int step_7_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // error_fragments has base step num 3; canonical step is <7.3 = fragment+:error_fragments>
         ReductionParameter<std::string> arg_error_fragments(
         *this, step_3_start + 0,
@@ -6656,41 +6692,42 @@ void state_31() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_7 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_7 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_error_fragments);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_error_fragments)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -6969,56 +7006,56 @@ void state_36() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_end(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__rest_of_sub(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__template_variant(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__identifier(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_36(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_start(
         lr_read_pos, false
@@ -7028,7 +7065,7 @@ void state_36() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -7043,86 +7080,86 @@ void state_36() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_start(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_36(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__identifier(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__template_variant(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_3_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__rest_of_sub(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_4_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_end(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_5_start = argument_start;
@@ -7132,7 +7169,7 @@ void state_36() {
         int step_6_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // jempl_args has base step num 4; canonical step is <19.4 = rest_of_sub:jempl_args>
         ReductionParameter<std::string> arg_jempl_args(
         *this, step_4_start + 0,
@@ -7141,7 +7178,7 @@ void state_36() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         // jempl_name has base step num 2; canonical step is <19.2 = identifier:jempl_name>
         ReductionParameter<std::string> arg_jempl_name(
@@ -7151,7 +7188,7 @@ void state_36() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         // variant has base step num 3; canonical step is <19.3 = template_variant:variant>
         ReductionParameter<std::string> arg_variant(
@@ -7161,41 +7198,42 @@ void state_36() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_19 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_19 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_jempl_args, arg_jempl_name, arg_variant);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_jempl_args, arg_jempl_name, arg_variant)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -7242,21 +7280,21 @@ void state_37() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_31(
         lr_read_pos, false
@@ -7266,7 +7304,7 @@ void state_37() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -7281,16 +7319,16 @@ void state_37() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_31(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -7300,7 +7338,7 @@ void state_37() {
         int step_1_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // arg_0 has base step num 0; canonical step is <15.0 = /(\?:[^-@]|-[^@])+/:arg_0>
         ReductionParameter<Terminal> arg_arg_0(
         *this, step_0_start + 0,
@@ -7309,41 +7347,42 @@ void state_37() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_15 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_15 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_arg_0);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_arg_0)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _rest_of_sub);
         lr_push(_rest_of_sub, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -7450,49 +7489,49 @@ void state_39() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_end(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__rest_of_sub(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__identifier(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_36(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_start(
         lr_read_pos, false
@@ -7502,7 +7541,7 @@ void state_39() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -7517,72 +7556,72 @@ void state_39() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_start(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_36(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__identifier(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__rest_of_sub(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_3_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_end(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_4_start = argument_start;
@@ -7592,7 +7631,7 @@ void state_39() {
         int step_5_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // jempl_args has base step num 3; canonical step is <20.3 = rest_of_sub:jempl_args>
         ReductionParameter<std::string> arg_jempl_args(
         *this, step_3_start + 0,
@@ -7601,7 +7640,7 @@ void state_39() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         // jempl_name has base step num 2; canonical step is <20.2 = identifier:jempl_name>
         ReductionParameter<std::string> arg_jempl_name(
@@ -7611,41 +7650,42 @@ void state_39() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_20 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_20 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_jempl_args, arg_jempl_name);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_jempl_args, arg_jempl_name)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -7776,35 +7816,35 @@ void state_42() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_25(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_26(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_25(
         lr_read_pos, false
@@ -7814,7 +7854,7 @@ void state_42() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -7829,44 +7869,44 @@ void state_42() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_25(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_26(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_25(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
@@ -7876,7 +7916,7 @@ void state_42() {
         int step_3_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // variant_expression has base step num 1; canonical step is <10.1 = !'#':variant_expression>
         ReductionParameter<Terminal> arg_variant_expression(
         *this, step_1_start + 0,
@@ -7885,41 +7925,42 @@ void state_42() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_10 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_10 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_variant_expression);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_variant_expression)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _template_variant);
         lr_push(_template_variant, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -8386,35 +8427,35 @@ void state_46() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_end(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_37(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_start(
         lr_read_pos, false
@@ -8424,7 +8465,7 @@ void state_46() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -8439,44 +8480,44 @@ void state_46() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_start(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_37(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_end(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
@@ -8486,7 +8527,7 @@ void state_46() {
         int step_3_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // control_statement has base step num 1; canonical step is <21.1 = &continuation_guts:control_statement>
         ReductionParameter<Terminal> arg_control_statement(
         *this, step_1_start + 0,
@@ -8495,41 +8536,42 @@ void state_46() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_21 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_21 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_control_statement);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_control_statement)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _control_continuation);
         lr_push(_control_continuation, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -8636,35 +8678,35 @@ void state_48() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_end(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_18(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__subst_start(
         lr_read_pos, false
@@ -8674,7 +8716,7 @@ void state_48() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -8689,44 +8731,44 @@ void state_48() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_start(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_18(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__subst_end(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
@@ -8736,7 +8778,7 @@ void state_48() {
         int step_3_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // control_statement has base step num 1; canonical step is <22.1 = '}':control_statement>
         ReductionParameter<Terminal> arg_control_statement(
         *this, step_1_start + 0,
@@ -8745,41 +8787,42 @@ void state_48() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_22 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_22 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_control_statement);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_control_statement)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _control_end);
         lr_push(_control_end, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -8889,21 +8932,21 @@ void state_49() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__control_fragment(
         lr_read_pos, true
@@ -8913,7 +8956,7 @@ void state_49() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -8928,16 +8971,16 @@ void state_49() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__control_fragment(
         argument_start, true
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -8947,7 +8990,7 @@ void state_49() {
         int step_1_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // control_fragment has base step num 0; canonical step is <26.0 = control_fragment+>
         ReductionParameter<std::string> arg_control_fragment(
         *this, step_0_start + 0,
@@ -8956,41 +8999,42 @@ void state_49() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_26 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_26 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_control_fragment);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_control_fragment)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -9121,21 +9165,21 @@ void state_52() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_11(
         lr_read_pos, false
@@ -9145,7 +9189,7 @@ void state_52() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -9160,16 +9204,16 @@ void state_52() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_11(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -9179,7 +9223,7 @@ void state_52() {
         int step_1_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // arg_0 has base step num 0; canonical step is <12.0 = '@':arg_0>
         ReductionParameter<Terminal> arg_arg_0(
         *this, step_0_start + 0,
@@ -9188,41 +9232,42 @@ void state_52() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_12 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_12 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_arg_0);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_arg_0)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _subst_start);
         lr_push(_subst_start, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -9269,42 +9314,42 @@ void state_53() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__control_end(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before___subex_0(
         lr_read_pos, true
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__fragment(
         lr_read_pos, true
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__control_start(
         lr_read_pos, false
@@ -9314,7 +9359,7 @@ void state_53() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -9329,58 +9374,58 @@ void state_53() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__control_start(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__fragment(
         argument_start, true
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of___subex_0(
         argument_start, true
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__control_end(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_3_start = argument_start;
@@ -9390,7 +9435,7 @@ void state_53() {
         int step_4_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // control_statement has base step num 0; canonical step is <25.0 = control_start:control_statement>
         ReductionParameter<std::string> arg_control_statement(
         *this, step_0_start + 0,
@@ -9399,41 +9444,42 @@ void state_53() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_25 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_25 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_control_statement);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_control_statement)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _control_fragment);
         lr_push(_control_fragment, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -10044,42 +10090,42 @@ void state_60() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_8(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_11(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_10(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_9(
         lr_read_pos, false
@@ -10089,7 +10135,7 @@ void state_60() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -10104,58 +10150,58 @@ void state_60() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_9(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_10(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_11(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_8(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_3_start = argument_start;
@@ -10165,7 +10211,7 @@ void state_60() {
         int step_4_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // param_decl has base step num 1; canonical step is <4.1 = /[^@]+/:param_decl>
         ReductionParameter<Terminal> arg_param_decl(
         *this, step_1_start + 0,
@@ -10174,41 +10220,42 @@ void state_60() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_4 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_4 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_param_decl);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_param_decl)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -10423,49 +10470,49 @@ void state_65() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_8(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_11(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_10(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_13(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_12(
         lr_read_pos, false
@@ -10475,7 +10522,7 @@ void state_65() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -10490,72 +10537,72 @@ void state_65() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_12(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_13(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_10(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_11(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_3_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_8(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_4_start = argument_start;
@@ -10565,7 +10612,7 @@ void state_65() {
         int step_5_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // include_file has base step num 2; canonical step is <5.2 = /[^@]+/:include_file>
         ReductionParameter<Terminal> arg_include_file(
         *this, step_2_start + 0,
@@ -10574,41 +10621,42 @@ void state_65() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_5 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_5 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_include_file);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_include_file)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -10823,49 +10871,49 @@ void state_70() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_8(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_11(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_10(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_13(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_14(
         lr_read_pos, false
@@ -10875,7 +10923,7 @@ void state_70() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -10890,72 +10938,72 @@ void state_70() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_14(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_13(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_10(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_11(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_3_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_8(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_4_start = argument_start;
@@ -10965,7 +11013,7 @@ void state_70() {
         int step_5_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // embed_file has base step num 2; canonical step is <6.2 = /[^@]+/:embed_file>
         ReductionParameter<Terminal> arg_embed_file(
         *this, step_2_start + 0,
@@ -10974,41 +11022,42 @@ void state_70() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_6 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_6 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_embed_file);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_embed_file)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -11181,42 +11230,42 @@ void state_74() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_8(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_7(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_6(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_5(
         lr_read_pos, false
@@ -11226,7 +11275,7 @@ void state_74() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -11241,58 +11290,58 @@ void state_74() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_5(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_6(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_7(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_8(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_3_start = argument_start;
@@ -11302,7 +11351,7 @@ void state_74() {
         int step_4_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // comment has base step num 1; canonical step is <3.1 = /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment>
         ReductionParameter<Terminal> arg_comment(
         *this, step_1_start + 0,
@@ -11311,41 +11360,42 @@ void state_74() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_3 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_3 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_comment);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_comment)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -11581,42 +11631,42 @@ void state_78() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_8(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_11(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__text(
         lr_read_pos, false
         );
 
 
-        #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__terminal_24(
         lr_read_pos, false
@@ -11626,7 +11676,7 @@ void state_78() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -11641,58 +11691,58 @@ void state_78() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_24(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__text(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_1_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_11(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_2_start = argument_start;
 
         argument_start += step_size;
 
-        #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__terminal_8(
         argument_start, false
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_3_start = argument_start;
@@ -11702,7 +11752,7 @@ void state_78() {
         int step_4_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // realign has base step num 1; canonical step is <9.1 = text:realign>
         ReductionParameter<std::string> arg_realign(
         *this, step_1_start + 0,
@@ -11711,41 +11761,42 @@ void state_78() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_9 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_9 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_realign);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_realign)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _fragment);
         lr_push(_fragment, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -12002,21 +12053,21 @@ void state_79() {
 
         #line 46 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
-        #line 5 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-        #line 7 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
 
-        #line 15 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
-        #line 36 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 34 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         lr_read_pos = lr_position_before__fragment(
         lr_read_pos, true
@@ -12026,7 +12077,7 @@ void state_79() {
         lr_read_pos++;  // (we went until just before the real frame start)
 
 
-        #line 48 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 47 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         // Now that we know where the frame starts, we can go forward through
@@ -12041,16 +12092,16 @@ void state_79() {
         int step_size;
 
 
-        #line 91 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-
         #line 90 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+        #line 89 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         step_size = lr_stack_size_of__fragment(
         argument_start, true
         );
 
 
-        #line 85 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 84 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
         int step_0_start = argument_start;
@@ -12060,7 +12111,7 @@ void state_79() {
         int step_1_start = argument_start;
 
 
-        #line 113 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // fragments has base step num 0; canonical step is <0.0 = fragment+:fragments>
         ReductionParameter<std::string> arg_fragments(
         *this, step_0_start + 0,
@@ -12069,41 +12120,42 @@ void state_79() {
         );
 
 
-        #line 112 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 111 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
 
-        #line 123 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
-        #line 125 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        auto result = rule_0 (
+        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        Product prod(
+        rule_0 (
 
-        #line 129 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
-        arg_fragments);
-
-        Product prod(result);
-
-        #line 138 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 130 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        arg_fragments)
+        );
 
 
+        #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-        #line 140 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+
+
+        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
 
-        #line 143 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         lr_pop_to(lr_read_pos - 1);
 
 
-        #line 151 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         bool eject = state_ejects(cur_state, _complete);
         lr_push(_complete, eject, src_pos, prod);
 
 
-        #line 160 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
+        #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
 
@@ -12125,7 +12177,7 @@ void state_79() {
 #line 5 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 //
-// _fpl_goal (32:0):  complete • => (done) (src/fpl2cc/productions.h:4254)
+// _fpl_goal (32:0):  complete • => (done) (src/fpl2cc/productions.h:4277)
 //
 void state_80() {
 
@@ -13251,34 +13303,36 @@ int lr_top_index() const {
     return lr_stack.size() - 1;
 }
 
+// pops and discards the top element of the lr_stack
 void lr_pop() {
-    if(lr_stack.size() > 0) {
-        auto popped = lr_stack.back();
-        cur_state = popped.state;
-        if(popped.param_ind >= 0) {
-            param_stack.resize(popped.param_ind);
+    lr_pop_to(lr_top_index() - 1);
+}
+
+// pops and discards elements from the lr_stack down to the new maximum
+// index specified.
+// i.e. the new lr_top_index will be new_max.
+// popping to -1 (or less) clears the stack.
+void lr_pop_to(int new_max) {
+    auto popped_index = new_max + 1;
+
+    if(popped_index < lr_stack.size()) {
+        cur_state        = lr_stack.at(popped_index).state;
+        auto param_index = lr_stack.at(popped_index).param_ind;
+        if(param_index >= 0) {
+            param_stack.resize(param_index);
         }
-        lr_stack.pop_back();
+        lr_stack.resize(new_max + 1);
     }
 
     if(lr_stack.size() == 0) {
-        // else there's nothing left to pop on the lr_stack,
-        // and the param stack had better be clear, too, or
-        // something is wrong:
+        // there's nothing left on the lr_stack, so the param stack
+        // had better be clear, too, or there's a bug:
         if(param_stack.size() > 0) {
             jerror::warning(stringformat(
-            "popping from empty lr_stack, but there are {} params\n",
+            "lr_stack is empty, but there are {} params. bug?\n",
             param_stack.size()
             ));
         }
-    }
-}
-
-// "pops" and discards down to the new maximum index
-// specified
-void lr_pop_to(int new_max) {
-    while(lr_top_index() > new_max) {
-        lr_pop();
     }
 }
 
@@ -13294,7 +13348,7 @@ void clear_mismatches() {
     }
 
 
-    #line 600 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 602 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 }
 
@@ -13331,7 +13385,7 @@ bool lr_read(int element_id) {
         bool mismatch = lr_next().mismatch;
         if(mismatch) {
 
-            #line 640 "src/fpl2cc/fpl_x_parser.h.jemp" 
+            #line 642 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         }
 
@@ -13350,14 +13404,14 @@ bool lr_read(int element_id) {
 // These are used to put together the arguments for reduce
 // actions.
 
-#line 707 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 709 "src/fpl2cc/fpl_x_parser.h.jemp" 
 int lr_position_before___fpl_null(int pos, bool multiple) const {
 
     if(pos > lr_top_index())
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // _fpl_null
     // (checking pos >= 0 because negative indexes are relative
@@ -13377,7 +13431,7 @@ int lr_position_before__fragment(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // fragment
     // (checking pos >= 0 because negative indexes are relative
@@ -13397,7 +13451,7 @@ int lr_position_before__complete(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // complete
     // (checking pos >= 0 because negative indexes are relative
@@ -13417,7 +13471,7 @@ int lr_position_before__text(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // text
     // (checking pos >= 0 because negative indexes are relative
@@ -13437,7 +13491,7 @@ int lr_position_before__terminal_4(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // '@@'
     // (checking pos >= 0 because negative indexes are relative
@@ -13457,7 +13511,7 @@ int lr_position_before__terminal_5(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // '@/*'
     // (checking pos >= 0 because negative indexes are relative
@@ -13477,7 +13531,7 @@ int lr_position_before__terminal_6(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/
     // (checking pos >= 0 because negative indexes are relative
@@ -13497,7 +13551,7 @@ int lr_position_before__terminal_7(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // '*/@'
     // (checking pos >= 0 because negative indexes are relative
@@ -13517,7 +13571,7 @@ int lr_position_before__terminal_8(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /\\n\?/
     // (checking pos >= 0 because negative indexes are relative
@@ -13537,7 +13591,7 @@ int lr_position_before__terminal_9(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // '@parameter:'
     // (checking pos >= 0 because negative indexes are relative
@@ -13557,7 +13611,7 @@ int lr_position_before__terminal_10(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /[^@]+/
     // (checking pos >= 0 because negative indexes are relative
@@ -13577,7 +13631,7 @@ int lr_position_before__terminal_11(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // '@'
     // (checking pos >= 0 because negative indexes are relative
@@ -13597,7 +13651,7 @@ int lr_position_before__terminal_12(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // '@include:'
     // (checking pos >= 0 because negative indexes are relative
@@ -13617,7 +13671,7 @@ int lr_position_before__terminal_13(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /\\s*/
     // (checking pos >= 0 because negative indexes are relative
@@ -13637,7 +13691,7 @@ int lr_position_before__terminal_14(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // '@embed:'
     // (checking pos >= 0 because negative indexes are relative
@@ -13657,7 +13711,7 @@ int lr_position_before__subst_start(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // subst_start
     // (checking pos >= 0 because negative indexes are relative
@@ -13677,7 +13731,7 @@ int lr_position_before__terminal_16(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // 'error {'
     // (checking pos >= 0 because negative indexes are relative
@@ -13697,7 +13751,7 @@ int lr_position_before__subst_end(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // subst_end
     // (checking pos >= 0 because negative indexes are relative
@@ -13717,7 +13771,7 @@ int lr_position_before__terminal_18(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // '}'
     // (checking pos >= 0 because negative indexes are relative
@@ -13737,7 +13791,7 @@ int lr_position_before__leading_ws(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // leading_ws
     // (checking pos >= 0 because negative indexes are relative
@@ -13757,7 +13811,7 @@ int lr_position_before__terminal_20(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /@declare\\s+/
     // (checking pos >= 0 because negative indexes are relative
@@ -13777,7 +13831,7 @@ int lr_position_before__identifier(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // identifier
     // (checking pos >= 0 because negative indexes are relative
@@ -13797,7 +13851,7 @@ int lr_position_before__terminal_22(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // ':'
     // (checking pos >= 0 because negative indexes are relative
@@ -13817,7 +13871,7 @@ int lr_position_before__terminal_23(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /(\?:[^@]|(\?:@@))*/
     // (checking pos >= 0 because negative indexes are relative
@@ -13837,7 +13891,7 @@ int lr_position_before__terminal_24(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /@realign:\\s*/
     // (checking pos >= 0 because negative indexes are relative
@@ -13857,7 +13911,7 @@ int lr_position_before__terminal_25(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // '#'
     // (checking pos >= 0 because negative indexes are relative
@@ -13877,7 +13931,7 @@ int lr_position_before__terminal_26(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // !'#'
     // (checking pos >= 0 because negative indexes are relative
@@ -13897,7 +13951,7 @@ int lr_position_before__template_variant(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // template_variant
     // (checking pos >= 0 because negative indexes are relative
@@ -13917,7 +13971,7 @@ int lr_position_before__terminal_28(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // '@-'
     // (checking pos >= 0 because negative indexes are relative
@@ -13937,7 +13991,7 @@ int lr_position_before__terminal_29(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // '-@'
     // (checking pos >= 0 because negative indexes are relative
@@ -13957,7 +14011,7 @@ int lr_position_before__trailing_ws(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // trailing_ws
     // (checking pos >= 0 because negative indexes are relative
@@ -13977,7 +14031,7 @@ int lr_position_before__terminal_31(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /(\?:[^-@]|-[^@])+/
     // (checking pos >= 0 because negative indexes are relative
@@ -13997,7 +14051,7 @@ int lr_position_before__rest_of_sub(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // rest_of_sub
     // (checking pos >= 0 because negative indexes are relative
@@ -14017,7 +14071,7 @@ int lr_position_before__terminal_33(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /\\n*[ \\t]+/
     // (checking pos >= 0 because negative indexes are relative
@@ -14037,7 +14091,7 @@ int lr_position_before__terminal_34(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /[ \\t]*\\n+[ \\t]+(\?!@)/
     // (checking pos >= 0 because negative indexes are relative
@@ -14057,7 +14111,7 @@ int lr_position_before__terminal_35(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /[ \\t]*\\n/
     // (checking pos >= 0 because negative indexes are relative
@@ -14077,7 +14131,7 @@ int lr_position_before__terminal_36(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /#\\s*/
     // (checking pos >= 0 because negative indexes are relative
@@ -14097,7 +14151,7 @@ int lr_position_before__terminal_37(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // &continuation_guts
     // (checking pos >= 0 because negative indexes are relative
@@ -14117,7 +14171,7 @@ int lr_position_before__control_continuation(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // control_continuation
     // (checking pos >= 0 because negative indexes are relative
@@ -14137,7 +14191,7 @@ int lr_position_before__control_end(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // control_end
     // (checking pos >= 0 because negative indexes are relative
@@ -14157,7 +14211,7 @@ int lr_position_before__terminal_40(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // &control_guts
     // (checking pos >= 0 because negative indexes are relative
@@ -14177,7 +14231,7 @@ int lr_position_before__control_start(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // control_start
     // (checking pos >= 0 because negative indexes are relative
@@ -14197,18 +14251,18 @@ int lr_position_before___subex_0(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
     //   control_continuation:control_statement fragment*:control_statement -> _subex_0
     int subp = pos;
     int lastp;
     while(subp >= 0) {
         const int startp = pos;
 
-        #line 698 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 700 "src/fpl2cc/fpl_x_parser.h.jemp" 
         lastp = subp;
         subp = lr_position_before__fragment(subp, true);
 
-        #line 696 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 698 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         // (_fragment is optional)
 
@@ -14216,7 +14270,7 @@ int lr_position_before___subex_0(int pos, bool multiple) const {
         lastp = subp;
         subp = lr_position_before__control_continuation(subp, false);
 
-        #line 696 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 698 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(lastp == subp) {
             // did not match _control_continuation - no match
@@ -14239,7 +14293,7 @@ int lr_position_before__control_fragment(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // control_fragment
     // (checking pos >= 0 because negative indexes are relative
@@ -14259,7 +14313,7 @@ int lr_position_before__terminal_44(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // &subst_guts
     // (checking pos >= 0 because negative indexes are relative
@@ -14279,7 +14333,7 @@ int lr_position_before__terminal_45(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /[^@\\n]+/
     // (checking pos >= 0 because negative indexes are relative
@@ -14299,7 +14353,7 @@ int lr_position_before__terminal_46(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // /[a-zA-Z_][a-zA-Z_0-9]+/
     // (checking pos >= 0 because negative indexes are relative
@@ -14319,7 +14373,7 @@ int lr_position_before__terminal_47(int pos, bool multiple) const {
     pos = lr_top_index();
 
 
-    #line 703 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 705 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // ␄_fpl_goal
     // (checking pos >= 0 because negative indexes are relative
@@ -14343,11 +14397,11 @@ int lr_position_before__terminal_47(int pos, bool multiple) const {
 // each, subexpressions can (and normally do) take up multiple
 // stack entries per X.
 
-#line 765 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 767 "src/fpl2cc/fpl_x_parser.h.jemp" 
 int lr_stack_size_of___fpl_null(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 0) {
@@ -14362,7 +14416,7 @@ int lr_stack_size_of___fpl_null(int pos, bool multiple) const {
 int lr_stack_size_of__fragment(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 1) {
@@ -14377,7 +14431,7 @@ int lr_stack_size_of__fragment(int pos, bool multiple) const {
 int lr_stack_size_of__complete(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 2) {
@@ -14392,7 +14446,7 @@ int lr_stack_size_of__complete(int pos, bool multiple) const {
 int lr_stack_size_of__text(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 3) {
@@ -14407,7 +14461,7 @@ int lr_stack_size_of__text(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_4(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 4) {
@@ -14422,7 +14476,7 @@ int lr_stack_size_of__terminal_4(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_5(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 5) {
@@ -14437,7 +14491,7 @@ int lr_stack_size_of__terminal_5(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_6(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 6) {
@@ -14452,7 +14506,7 @@ int lr_stack_size_of__terminal_6(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_7(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 7) {
@@ -14467,7 +14521,7 @@ int lr_stack_size_of__terminal_7(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_8(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 8) {
@@ -14482,7 +14536,7 @@ int lr_stack_size_of__terminal_8(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_9(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 9) {
@@ -14497,7 +14551,7 @@ int lr_stack_size_of__terminal_9(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_10(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 10) {
@@ -14512,7 +14566,7 @@ int lr_stack_size_of__terminal_10(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_11(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 11) {
@@ -14527,7 +14581,7 @@ int lr_stack_size_of__terminal_11(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_12(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 12) {
@@ -14542,7 +14596,7 @@ int lr_stack_size_of__terminal_12(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_13(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 13) {
@@ -14557,7 +14611,7 @@ int lr_stack_size_of__terminal_13(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_14(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 14) {
@@ -14572,7 +14626,7 @@ int lr_stack_size_of__terminal_14(int pos, bool multiple) const {
 int lr_stack_size_of__subst_start(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 15) {
@@ -14587,7 +14641,7 @@ int lr_stack_size_of__subst_start(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_16(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 16) {
@@ -14602,7 +14656,7 @@ int lr_stack_size_of__terminal_16(int pos, bool multiple) const {
 int lr_stack_size_of__subst_end(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 17) {
@@ -14617,7 +14671,7 @@ int lr_stack_size_of__subst_end(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_18(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 18) {
@@ -14632,7 +14686,7 @@ int lr_stack_size_of__terminal_18(int pos, bool multiple) const {
 int lr_stack_size_of__leading_ws(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 19) {
@@ -14647,7 +14701,7 @@ int lr_stack_size_of__leading_ws(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_20(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 20) {
@@ -14662,7 +14716,7 @@ int lr_stack_size_of__terminal_20(int pos, bool multiple) const {
 int lr_stack_size_of__identifier(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 21) {
@@ -14677,7 +14731,7 @@ int lr_stack_size_of__identifier(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_22(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 22) {
@@ -14692,7 +14746,7 @@ int lr_stack_size_of__terminal_22(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_23(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 23) {
@@ -14707,7 +14761,7 @@ int lr_stack_size_of__terminal_23(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_24(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 24) {
@@ -14722,7 +14776,7 @@ int lr_stack_size_of__terminal_24(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_25(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 25) {
@@ -14737,7 +14791,7 @@ int lr_stack_size_of__terminal_25(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_26(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 26) {
@@ -14752,7 +14806,7 @@ int lr_stack_size_of__terminal_26(int pos, bool multiple) const {
 int lr_stack_size_of__template_variant(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 27) {
@@ -14767,7 +14821,7 @@ int lr_stack_size_of__template_variant(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_28(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 28) {
@@ -14782,7 +14836,7 @@ int lr_stack_size_of__terminal_28(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_29(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 29) {
@@ -14797,7 +14851,7 @@ int lr_stack_size_of__terminal_29(int pos, bool multiple) const {
 int lr_stack_size_of__trailing_ws(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 30) {
@@ -14812,7 +14866,7 @@ int lr_stack_size_of__trailing_ws(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_31(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 31) {
@@ -14827,7 +14881,7 @@ int lr_stack_size_of__terminal_31(int pos, bool multiple) const {
 int lr_stack_size_of__rest_of_sub(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 32) {
@@ -14842,7 +14896,7 @@ int lr_stack_size_of__rest_of_sub(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_33(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 33) {
@@ -14857,7 +14911,7 @@ int lr_stack_size_of__terminal_33(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_34(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 34) {
@@ -14872,7 +14926,7 @@ int lr_stack_size_of__terminal_34(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_35(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 35) {
@@ -14887,7 +14941,7 @@ int lr_stack_size_of__terminal_35(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_36(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 36) {
@@ -14902,7 +14956,7 @@ int lr_stack_size_of__terminal_36(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_37(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 37) {
@@ -14917,7 +14971,7 @@ int lr_stack_size_of__terminal_37(int pos, bool multiple) const {
 int lr_stack_size_of__control_continuation(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 38) {
@@ -14932,7 +14986,7 @@ int lr_stack_size_of__control_continuation(int pos, bool multiple) const {
 int lr_stack_size_of__control_end(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 39) {
@@ -14947,7 +15001,7 @@ int lr_stack_size_of__control_end(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_40(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 40) {
@@ -14962,7 +15016,7 @@ int lr_stack_size_of__terminal_40(int pos, bool multiple) const {
 int lr_stack_size_of__control_start(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 41) {
@@ -14977,7 +15031,7 @@ int lr_stack_size_of__control_start(int pos, bool multiple) const {
 int lr_stack_size_of___subex_0(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
     //   control_continuation:control_statement fragment*:control_statement -> _subex_0
     int subp = pos;
     bool matched_whole = true;
@@ -14985,7 +15039,7 @@ int lr_stack_size_of___subex_0(int pos, bool multiple) const {
         int ssize = 0; // size of substep
         int msize = 0; // size of subexpression match
 
-        #line 749 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 751 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         ssize = lr_stack_size_of__control_continuation(subp, false);
 
@@ -15021,7 +15075,7 @@ int lr_stack_size_of___subex_0(int pos, bool multiple) const {
 int lr_stack_size_of__control_fragment(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 43) {
@@ -15036,7 +15090,7 @@ int lr_stack_size_of__control_fragment(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_44(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 44) {
@@ -15051,7 +15105,7 @@ int lr_stack_size_of__terminal_44(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_45(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 45) {
@@ -15066,7 +15120,7 @@ int lr_stack_size_of__terminal_45(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_46(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 46) {
@@ -15081,7 +15135,7 @@ int lr_stack_size_of__terminal_46(int pos, bool multiple) const {
 int lr_stack_size_of__terminal_47(int pos, bool multiple) const {
     int size = 0;
 
-    #line 761 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 763 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     // normal case - not a subexpression
     while(lr_stack_entry(pos + size).element_id == 47) {
@@ -15236,7 +15290,7 @@ StackSlice all_matched_steps() {
 // used mainly in error reporting.
 static std::string prod_type_name(const std::type_info &tinf) {
 
-    #line 911 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 913 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
     if(std::type_index(typeid(Terminal)) == std::type_index(tinf)) {
         return "Terminal";
@@ -15258,7 +15312,7 @@ static std::string prod_type_name(const std::type_info &tinf) {
 }
 
 
-#line 923 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 925 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // This represents the argument for a given step.  One "argument",
 // in this context, can contain 0 or more elements (for example,
@@ -15551,7 +15605,7 @@ std::string next_up_str() const {
 // and hoping it really just gets inlined.
 inline void post_parse(std::string result) {
 
-    #line 1060 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 1062 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 }
 
@@ -15621,10 +15675,10 @@ const Product parse_goal() {
 // when in the state passed.  Used for error messages.
 static std::string expected_terminals(State st) {
 
-    #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 1137 "src/fpl2cc/fpl_x_parser.h.jemp" 
     if(&jemplpl_parser::state_0 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@parameter:', "
         "'@include:', "
         "'@embed:', "
@@ -15642,12 +15696,12 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_1 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_2 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@@', "
         "/\\\\n*[ \\\\t]+/, "
         "/[^@\\\\n]+/, "
@@ -15657,37 +15711,37 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_3 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_4 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_5 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_6 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_7 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_8 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_9 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "&subst_guts, "
         "&control_guts, "
         "'error {', "
@@ -15696,55 +15750,55 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_10 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "'-@', "
         "";
     }
     if(&jemplpl_parser::state_11 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_12 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_13 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/[ \\\\t]*\\\\n+[ \\\\t]+(\\\?!@)/, "
         "/[ \\\\t]*\\\\n/, "
         "";
     }
     if(&jemplpl_parser::state_14 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_15 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "'-@', "
         "";
     }
     if(&jemplpl_parser::state_16 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_17 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "'-@', "
         "";
     }
     if(&jemplpl_parser::state_18 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@parameter:', "
         "'@include:', "
         "'@embed:', "
@@ -15762,59 +15816,59 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_19 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@-', "
         "/@declare\\\\s+/, "
         "";
     }
     if(&jemplpl_parser::state_20 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_21 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/[a-zA-Z_][a-zA-Z_0-9]+/, "
         "";
     }
     if(&jemplpl_parser::state_22 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "':', "
         "";
     }
     if(&jemplpl_parser::state_23 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/(\\\?:[^@]|(\\\?:@@))*/, "
         "";
     }
     if(&jemplpl_parser::state_24 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "";
     }
     if(&jemplpl_parser::state_25 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/\\\\n\\\?/, "
         "";
     }
     if(&jemplpl_parser::state_26 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_27 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_28 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@parameter:', "
         "'@include:', "
         "'@embed:', "
@@ -15832,7 +15886,7 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_29 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "&subst_guts, "
         "&control_guts, "
         "'}', "
@@ -15842,84 +15896,84 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_30 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "'-@', "
         "";
     }
     if(&jemplpl_parser::state_31 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_32 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/[a-zA-Z_][a-zA-Z_0-9]+/, "
         "";
     }
     if(&jemplpl_parser::state_33 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'#', "
         "/(\\\?:[^-@]|-[^@])+/, "
         "";
     }
     if(&jemplpl_parser::state_34 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/(\\\?:[^-@]|-[^@])+/, "
         "";
     }
     if(&jemplpl_parser::state_35 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "'-@', "
         "";
     }
     if(&jemplpl_parser::state_36 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_37 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_38 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "'-@', "
         "";
     }
     if(&jemplpl_parser::state_39 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_40 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "!'#', "
         "";
     }
     if(&jemplpl_parser::state_41 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'#', "
         "";
     }
     if(&jemplpl_parser::state_42 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_43 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@parameter:', "
         "'@include:', "
         "'@embed:', "
@@ -15937,7 +15991,7 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_44 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "&subst_guts, "
         "&control_guts, "
         "&continuation_guts, "
@@ -15948,31 +16002,31 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_45 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "'-@', "
         "";
     }
     if(&jemplpl_parser::state_46 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_47 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "'-@', "
         "";
     }
     if(&jemplpl_parser::state_48 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_49 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@-', "
         "'@', "
         "/\\\\n*[ \\\\t]+/, "
@@ -15980,29 +16034,29 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_50 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "&control_guts, "
         "";
     }
     if(&jemplpl_parser::state_51 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@-', "
         "";
     }
     if(&jemplpl_parser::state_52 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_53 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_54 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "\?\?\?\?\?\?\?\?\?\?\?\?, "
         "'@parameter:', "
         "'@include:', "
@@ -16021,7 +16075,7 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_55 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@-', "
         "'@', "
         "/\\\\n*[ \\\\t]+/, "
@@ -16029,118 +16083,118 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_56 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "&continuation_guts, "
         "'}', "
         "";
     }
     if(&jemplpl_parser::state_57 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/[^@]+/, "
         "";
     }
     if(&jemplpl_parser::state_58 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "";
     }
     if(&jemplpl_parser::state_59 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/\\\\n\\\?/, "
         "";
     }
     if(&jemplpl_parser::state_60 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_61 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/\\\\s*/, "
         "";
     }
     if(&jemplpl_parser::state_62 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/[^@]+/, "
         "";
     }
     if(&jemplpl_parser::state_63 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "";
     }
     if(&jemplpl_parser::state_64 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/\\\\n\\\?/, "
         "";
     }
     if(&jemplpl_parser::state_65 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_66 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/\\\\s*/, "
         "";
     }
     if(&jemplpl_parser::state_67 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/[^@]+/, "
         "";
     }
     if(&jemplpl_parser::state_68 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "";
     }
     if(&jemplpl_parser::state_69 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/\\\\n\\\?/, "
         "";
     }
     if(&jemplpl_parser::state_70 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_71 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/(\\\?:[^*]|(\\\?:\\\\*[^\\\\/])|(\\\?:\\\\*\\\\/[^@]))*/, "
         "";
     }
     if(&jemplpl_parser::state_72 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'*/@', "
         "";
     }
     if(&jemplpl_parser::state_73 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/\\\\n\\\?/, "
         "";
     }
     if(&jemplpl_parser::state_74 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_75 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@@', "
         "/\\\\n*[ \\\\t]+/, "
         "/[^@\\\\n]+/, "
@@ -16150,24 +16204,24 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_76 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@', "
         "";
     }
     if(&jemplpl_parser::state_77 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "/\\\\n\\\?/, "
         "";
     }
     if(&jemplpl_parser::state_78 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
     if(&jemplpl_parser::state_79 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "'@parameter:', "
         "'@include:', "
         "'@embed:', "
@@ -16185,7 +16239,7 @@ static std::string expected_terminals(State st) {
     }
     if(&jemplpl_parser::state_80 == st) {
         return 
-        #line 1133 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
         "";
     }
 
@@ -16283,7 +16337,7 @@ std::string parse() {
 private:
 
 
-#line 1235 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1237 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 202 "src/jemplpl/jemplpl.fpl"
@@ -16384,7 +16438,7 @@ void init(const std::filesystem::path &src) {
     init_import_path(src);
 }
 
-#line 16386 "src/jemplpl/jemplpl.cc"
+#line 16440 "src/jemplpl/jemplpl.cc"
 
 // return to "private" after each such block.
 // this way, authors can add public members
@@ -16394,7 +16448,7 @@ private:
 
 // custom scanners:
 
-#line 1240 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1242 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 0 ""
@@ -16415,7 +16469,7 @@ Terminal custom_scanner_continuation_guts(fpl_reader &input) {
 
                 // scan terminal '}' (})
 
-                const SourcePosition pos = position();
+                const SourcePosition start_pos = position();
                 if(reader->read_exact_match("}")) {
                     if(
                     false
@@ -16423,7 +16477,7 @@ Terminal custom_scanner_continuation_guts(fpl_reader &input) {
                         // "bad suffix" - though we matched the terminal,
                         // it's part of a longer terminal.  so, cancel
                         // the match/rewind:
-                        reader->go_to(pos);
+                        reader->go_to(start_pos);
                     } else {
                         tmp = Terminal("}");
                     }
@@ -16477,7 +16531,7 @@ Terminal custom_scanner_continuation_guts(fpl_reader &input) {
 
                 // scan terminal '{' ({)
 
-                const SourcePosition pos = position();
+                const SourcePosition start_pos = position();
                 if(reader->read_exact_match("{")) {
                     if(
                     false
@@ -16485,7 +16539,7 @@ Terminal custom_scanner_continuation_guts(fpl_reader &input) {
                         // "bad suffix" - though we matched the terminal,
                         // it's part of a longer terminal.  so, cancel
                         // the match/rewind:
-                        reader->go_to(pos);
+                        reader->go_to(start_pos);
                     } else {
                         tmp = Terminal("{");
                     }
@@ -16561,7 +16615,7 @@ Terminal custom_scanner_control_guts(fpl_reader &input) {
 
                 // scan terminal '{' ({)
 
-                const SourcePosition pos = position();
+                const SourcePosition start_pos = position();
                 if(reader->read_exact_match("{")) {
                     if(
                     false
@@ -16569,7 +16623,7 @@ Terminal custom_scanner_control_guts(fpl_reader &input) {
                         // "bad suffix" - though we matched the terminal,
                         // it's part of a longer terminal.  so, cancel
                         // the match/rewind:
-                        reader->go_to(pos);
+                        reader->go_to(start_pos);
                     } else {
                         tmp = Terminal("{");
                     }
@@ -16634,12 +16688,12 @@ Terminal custom_scanner_subst_guts(fpl_reader &input) {
 
 
 
-#line 1242 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1244 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
-#line 1252 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1254 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // _fpl_null
@@ -16664,7 +16718,7 @@ bool shift_NONTERM_PRODUCTION___fpl_null(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // fragment
@@ -16689,7 +16743,7 @@ bool shift_NONTERM_PRODUCTION__fragment(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // complete
@@ -16714,7 +16768,7 @@ bool shift_NONTERM_PRODUCTION__complete(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // text
@@ -16739,7 +16793,7 @@ bool shift_NONTERM_PRODUCTION__text(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -16773,7 +16827,7 @@ bool shift_TERM_EXACT__terminal_4(bool eject) {
 
         // scan terminal '@@' (@@)
 
-        const SourcePosition pos = position();
+        const SourcePosition start_pos = position();
         if(reader->read_exact_match("@@")) {
             if(
             false
@@ -16781,7 +16835,7 @@ bool shift_TERM_EXACT__terminal_4(bool eject) {
                 // "bad suffix" - though we matched the terminal,
                 // it's part of a longer terminal.  so, cancel
                 // the match/rewind:
-                reader->go_to(pos);
+                reader->go_to(start_pos);
             } else {
                 result = Terminal("@@");
             }
@@ -16795,7 +16849,7 @@ bool shift_TERM_EXACT__terminal_4(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting '@@'\n");
+        debug_print("shifting '@@' at {}\n", pos);
 
         lr_push(_terminal_4, eject, pos, Product(result));
 
@@ -16822,7 +16876,7 @@ bool shift_TERM_EXACT__terminal_4(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -16856,7 +16910,7 @@ bool shift_TERM_EXACT__terminal_5(bool eject) {
 
         // scan terminal '@/*' (@/*)
 
-        const SourcePosition pos = position();
+        const SourcePosition start_pos = position();
         if(reader->read_exact_match("@/*")) {
             if(
             false
@@ -16864,7 +16918,7 @@ bool shift_TERM_EXACT__terminal_5(bool eject) {
                 // "bad suffix" - though we matched the terminal,
                 // it's part of a longer terminal.  so, cancel
                 // the match/rewind:
-                reader->go_to(pos);
+                reader->go_to(start_pos);
             } else {
                 result = Terminal("@/*");
             }
@@ -16878,7 +16932,7 @@ bool shift_TERM_EXACT__terminal_5(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting '@/*'\n");
+        debug_print("shifting '@/*' at {}\n", pos);
 
         lr_push(_terminal_5, eject, pos, Product(result));
 
@@ -16905,7 +16959,7 @@ bool shift_TERM_EXACT__terminal_5(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -16954,7 +17008,7 @@ bool shift_TERM_REGEX__terminal_6(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting /(\\\?:[^*]|(\\\?:\\\\*[^\\\\/])|(\\\?:\\\\*\\\\/[^@]))*/\n");
+        debug_print("shifting /(\\\?:[^*]|(\\\?:\\\\*[^\\\\/])|(\\\?:\\\\*\\\\/[^@]))*/ at {}\n", pos);
 
         lr_push(_terminal_6, eject, pos, Product(result));
 
@@ -16981,7 +17035,7 @@ bool shift_TERM_REGEX__terminal_6(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -17015,7 +17069,7 @@ bool shift_TERM_EXACT__terminal_7(bool eject) {
 
         // scan terminal '*/@' (*/@)
 
-        const SourcePosition pos = position();
+        const SourcePosition start_pos = position();
         if(reader->read_exact_match("*/@")) {
             if(
             false
@@ -17023,7 +17077,7 @@ bool shift_TERM_EXACT__terminal_7(bool eject) {
                 // "bad suffix" - though we matched the terminal,
                 // it's part of a longer terminal.  so, cancel
                 // the match/rewind:
-                reader->go_to(pos);
+                reader->go_to(start_pos);
             } else {
                 result = Terminal("*/@");
             }
@@ -17037,7 +17091,7 @@ bool shift_TERM_EXACT__terminal_7(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting '*/@'\n");
+        debug_print("shifting '*/@' at {}\n", pos);
 
         lr_push(_terminal_7, eject, pos, Product(result));
 
@@ -17064,7 +17118,7 @@ bool shift_TERM_EXACT__terminal_7(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -17113,7 +17167,7 @@ bool shift_TERM_REGEX__terminal_8(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting /\\\\n\\\?/\n");
+        debug_print("shifting /\\\\n\\\?/ at {}\n", pos);
 
         lr_push(_terminal_8, eject, pos, Product(result));
 
@@ -17140,7 +17194,7 @@ bool shift_TERM_REGEX__terminal_8(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -17174,7 +17228,7 @@ bool shift_TERM_EXACT__terminal_9(bool eject) {
 
         // scan terminal '@parameter:' (@parameter:)
 
-        const SourcePosition pos = position();
+        const SourcePosition start_pos = position();
         if(reader->read_exact_match("@parameter:")) {
             if(
             false
@@ -17182,7 +17236,7 @@ bool shift_TERM_EXACT__terminal_9(bool eject) {
                 // "bad suffix" - though we matched the terminal,
                 // it's part of a longer terminal.  so, cancel
                 // the match/rewind:
-                reader->go_to(pos);
+                reader->go_to(start_pos);
             } else {
                 result = Terminal("@parameter:");
             }
@@ -17196,7 +17250,7 @@ bool shift_TERM_EXACT__terminal_9(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting '@parameter:'\n");
+        debug_print("shifting '@parameter:' at {}\n", pos);
 
         lr_push(_terminal_9, eject, pos, Product(result));
 
@@ -17223,7 +17277,7 @@ bool shift_TERM_EXACT__terminal_9(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -17272,7 +17326,7 @@ bool shift_TERM_REGEX__terminal_10(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting /[^@]+/\n");
+        debug_print("shifting /[^@]+/ at {}\n", pos);
 
         lr_push(_terminal_10, eject, pos, Product(result));
 
@@ -17299,7 +17353,7 @@ bool shift_TERM_REGEX__terminal_10(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -17333,7 +17387,7 @@ bool shift_TERM_EXACT__terminal_11(bool eject) {
 
         // scan terminal '@' (@)
 
-        const SourcePosition pos = position();
+        const SourcePosition start_pos = position();
         if(reader->read_exact_match("@")) {
             if(
             reader->read_exact_match("@") ||
@@ -17347,7 +17401,7 @@ bool shift_TERM_EXACT__terminal_11(bool eject) {
                 // "bad suffix" - though we matched the terminal,
                 // it's part of a longer terminal.  so, cancel
                 // the match/rewind:
-                reader->go_to(pos);
+                reader->go_to(start_pos);
             } else {
                 result = Terminal("@");
             }
@@ -17361,7 +17415,7 @@ bool shift_TERM_EXACT__terminal_11(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting '@'\n");
+        debug_print("shifting '@' at {}\n", pos);
 
         lr_push(_terminal_11, eject, pos, Product(result));
 
@@ -17388,7 +17442,7 @@ bool shift_TERM_EXACT__terminal_11(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -17422,7 +17476,7 @@ bool shift_TERM_EXACT__terminal_12(bool eject) {
 
         // scan terminal '@include:' (@include:)
 
-        const SourcePosition pos = position();
+        const SourcePosition start_pos = position();
         if(reader->read_exact_match("@include:")) {
             if(
             false
@@ -17430,7 +17484,7 @@ bool shift_TERM_EXACT__terminal_12(bool eject) {
                 // "bad suffix" - though we matched the terminal,
                 // it's part of a longer terminal.  so, cancel
                 // the match/rewind:
-                reader->go_to(pos);
+                reader->go_to(start_pos);
             } else {
                 result = Terminal("@include:");
             }
@@ -17444,7 +17498,7 @@ bool shift_TERM_EXACT__terminal_12(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting '@include:'\n");
+        debug_print("shifting '@include:' at {}\n", pos);
 
         lr_push(_terminal_12, eject, pos, Product(result));
 
@@ -17471,7 +17525,7 @@ bool shift_TERM_EXACT__terminal_12(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -17520,7 +17574,7 @@ bool shift_TERM_REGEX__terminal_13(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting /\\\\s*/\n");
+        debug_print("shifting /\\\\s*/ at {}\n", pos);
 
         lr_push(_terminal_13, eject, pos, Product(result));
 
@@ -17547,7 +17601,7 @@ bool shift_TERM_REGEX__terminal_13(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -17581,7 +17635,7 @@ bool shift_TERM_EXACT__terminal_14(bool eject) {
 
         // scan terminal '@embed:' (@embed:)
 
-        const SourcePosition pos = position();
+        const SourcePosition start_pos = position();
         if(reader->read_exact_match("@embed:")) {
             if(
             false
@@ -17589,7 +17643,7 @@ bool shift_TERM_EXACT__terminal_14(bool eject) {
                 // "bad suffix" - though we matched the terminal,
                 // it's part of a longer terminal.  so, cancel
                 // the match/rewind:
-                reader->go_to(pos);
+                reader->go_to(start_pos);
             } else {
                 result = Terminal("@embed:");
             }
@@ -17603,7 +17657,7 @@ bool shift_TERM_EXACT__terminal_14(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting '@embed:'\n");
+        debug_print("shifting '@embed:' at {}\n", pos);
 
         lr_push(_terminal_14, eject, pos, Product(result));
 
@@ -17630,7 +17684,7 @@ bool shift_TERM_EXACT__terminal_14(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // subst_start
@@ -17655,7 +17709,7 @@ bool shift_NONTERM_PRODUCTION__subst_start(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -17689,7 +17743,7 @@ bool shift_TERM_EXACT__terminal_16(bool eject) {
 
         // scan terminal 'error {' (error {)
 
-        const SourcePosition pos = position();
+        const SourcePosition start_pos = position();
         if(reader->read_exact_match("error {")) {
             if(
             false
@@ -17697,7 +17751,7 @@ bool shift_TERM_EXACT__terminal_16(bool eject) {
                 // "bad suffix" - though we matched the terminal,
                 // it's part of a longer terminal.  so, cancel
                 // the match/rewind:
-                reader->go_to(pos);
+                reader->go_to(start_pos);
             } else {
                 result = Terminal("error {");
             }
@@ -17711,7 +17765,7 @@ bool shift_TERM_EXACT__terminal_16(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting 'error {'\n");
+        debug_print("shifting 'error {' at {}\n", pos);
 
         lr_push(_terminal_16, eject, pos, Product(result));
 
@@ -17738,7 +17792,7 @@ bool shift_TERM_EXACT__terminal_16(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // subst_end
@@ -17763,7 +17817,7 @@ bool shift_NONTERM_PRODUCTION__subst_end(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -17797,7 +17851,7 @@ bool shift_TERM_EXACT__terminal_18(bool eject) {
 
         // scan terminal '}' (})
 
-        const SourcePosition pos = position();
+        const SourcePosition start_pos = position();
         if(reader->read_exact_match("}")) {
             if(
             false
@@ -17805,7 +17859,7 @@ bool shift_TERM_EXACT__terminal_18(bool eject) {
                 // "bad suffix" - though we matched the terminal,
                 // it's part of a longer terminal.  so, cancel
                 // the match/rewind:
-                reader->go_to(pos);
+                reader->go_to(start_pos);
             } else {
                 result = Terminal("}");
             }
@@ -17819,7 +17873,7 @@ bool shift_TERM_EXACT__terminal_18(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting '}'\n");
+        debug_print("shifting '}' at {}\n", pos);
 
         lr_push(_terminal_18, eject, pos, Product(result));
 
@@ -17846,7 +17900,7 @@ bool shift_TERM_EXACT__terminal_18(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // leading_ws
@@ -17871,7 +17925,7 @@ bool shift_NONTERM_PRODUCTION__leading_ws(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -17920,7 +17974,7 @@ bool shift_TERM_REGEX__terminal_20(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting /@declare\\\\s+/\n");
+        debug_print("shifting /@declare\\\\s+/ at {}\n", pos);
 
         lr_push(_terminal_20, eject, pos, Product(result));
 
@@ -17947,7 +18001,7 @@ bool shift_TERM_REGEX__terminal_20(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // identifier
@@ -17972,7 +18026,7 @@ bool shift_NONTERM_PRODUCTION__identifier(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -18006,7 +18060,7 @@ bool shift_TERM_EXACT__terminal_22(bool eject) {
 
         // scan terminal ':' (:)
 
-        const SourcePosition pos = position();
+        const SourcePosition start_pos = position();
         if(reader->read_exact_match(":")) {
             if(
             false
@@ -18014,7 +18068,7 @@ bool shift_TERM_EXACT__terminal_22(bool eject) {
                 // "bad suffix" - though we matched the terminal,
                 // it's part of a longer terminal.  so, cancel
                 // the match/rewind:
-                reader->go_to(pos);
+                reader->go_to(start_pos);
             } else {
                 result = Terminal(":");
             }
@@ -18028,7 +18082,7 @@ bool shift_TERM_EXACT__terminal_22(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting ':'\n");
+        debug_print("shifting ':' at {}\n", pos);
 
         lr_push(_terminal_22, eject, pos, Product(result));
 
@@ -18055,7 +18109,7 @@ bool shift_TERM_EXACT__terminal_22(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -18104,7 +18158,7 @@ bool shift_TERM_REGEX__terminal_23(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting /(\\\?:[^@]|(\\\?:@@))*/\n");
+        debug_print("shifting /(\\\?:[^@]|(\\\?:@@))*/ at {}\n", pos);
 
         lr_push(_terminal_23, eject, pos, Product(result));
 
@@ -18131,7 +18185,7 @@ bool shift_TERM_REGEX__terminal_23(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -18180,7 +18234,7 @@ bool shift_TERM_REGEX__terminal_24(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting /@realign:\\\\s*/\n");
+        debug_print("shifting /@realign:\\\\s*/ at {}\n", pos);
 
         lr_push(_terminal_24, eject, pos, Product(result));
 
@@ -18207,7 +18261,7 @@ bool shift_TERM_REGEX__terminal_24(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -18241,7 +18295,7 @@ bool shift_TERM_EXACT__terminal_25(bool eject) {
 
         // scan terminal '#' (#)
 
-        const SourcePosition pos = position();
+        const SourcePosition start_pos = position();
         if(reader->read_exact_match("#")) {
             if(
             false
@@ -18249,7 +18303,7 @@ bool shift_TERM_EXACT__terminal_25(bool eject) {
                 // "bad suffix" - though we matched the terminal,
                 // it's part of a longer terminal.  so, cancel
                 // the match/rewind:
-                reader->go_to(pos);
+                reader->go_to(start_pos);
             } else {
                 result = Terminal("#");
             }
@@ -18263,7 +18317,7 @@ bool shift_TERM_EXACT__terminal_25(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting '#'\n");
+        debug_print("shifting '#' at {}\n", pos);
 
         lr_push(_terminal_25, eject, pos, Product(result));
 
@@ -18290,7 +18344,7 @@ bool shift_TERM_EXACT__terminal_25(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -18336,7 +18390,7 @@ bool shift_TERM_EXACT_INV__terminal_26(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting !'#'\n");
+        debug_print("shifting !'#' at {}\n", pos);
 
         lr_push(_terminal_26, eject, pos, Product(result));
 
@@ -18363,7 +18417,7 @@ bool shift_TERM_EXACT_INV__terminal_26(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // template_variant
@@ -18388,7 +18442,7 @@ bool shift_NONTERM_PRODUCTION__template_variant(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -18422,7 +18476,7 @@ bool shift_TERM_EXACT__terminal_28(bool eject) {
 
         // scan terminal '@-' (@-)
 
-        const SourcePosition pos = position();
+        const SourcePosition start_pos = position();
         if(reader->read_exact_match("@-")) {
             if(
             false
@@ -18430,7 +18484,7 @@ bool shift_TERM_EXACT__terminal_28(bool eject) {
                 // "bad suffix" - though we matched the terminal,
                 // it's part of a longer terminal.  so, cancel
                 // the match/rewind:
-                reader->go_to(pos);
+                reader->go_to(start_pos);
             } else {
                 result = Terminal("@-");
             }
@@ -18444,7 +18498,7 @@ bool shift_TERM_EXACT__terminal_28(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting '@-'\n");
+        debug_print("shifting '@-' at {}\n", pos);
 
         lr_push(_terminal_28, eject, pos, Product(result));
 
@@ -18471,7 +18525,7 @@ bool shift_TERM_EXACT__terminal_28(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -18505,7 +18559,7 @@ bool shift_TERM_EXACT__terminal_29(bool eject) {
 
         // scan terminal '-@' (-@)
 
-        const SourcePosition pos = position();
+        const SourcePosition start_pos = position();
         if(reader->read_exact_match("-@")) {
             if(
             false
@@ -18513,7 +18567,7 @@ bool shift_TERM_EXACT__terminal_29(bool eject) {
                 // "bad suffix" - though we matched the terminal,
                 // it's part of a longer terminal.  so, cancel
                 // the match/rewind:
-                reader->go_to(pos);
+                reader->go_to(start_pos);
             } else {
                 result = Terminal("-@");
             }
@@ -18527,7 +18581,7 @@ bool shift_TERM_EXACT__terminal_29(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting '-@'\n");
+        debug_print("shifting '-@' at {}\n", pos);
 
         lr_push(_terminal_29, eject, pos, Product(result));
 
@@ -18554,7 +18608,7 @@ bool shift_TERM_EXACT__terminal_29(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // trailing_ws
@@ -18579,7 +18633,7 @@ bool shift_NONTERM_PRODUCTION__trailing_ws(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -18628,7 +18682,7 @@ bool shift_TERM_REGEX__terminal_31(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting /(\\\?:[^-@]|-[^@])+/\n");
+        debug_print("shifting /(\\\?:[^-@]|-[^@])+/ at {}\n", pos);
 
         lr_push(_terminal_31, eject, pos, Product(result));
 
@@ -18655,7 +18709,7 @@ bool shift_TERM_REGEX__terminal_31(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // rest_of_sub
@@ -18680,7 +18734,7 @@ bool shift_NONTERM_PRODUCTION__rest_of_sub(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -18729,7 +18783,7 @@ bool shift_TERM_REGEX__terminal_33(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting /\\\\n*[ \\\\t]+/\n");
+        debug_print("shifting /\\\\n*[ \\\\t]+/ at {}\n", pos);
 
         lr_push(_terminal_33, eject, pos, Product(result));
 
@@ -18756,7 +18810,7 @@ bool shift_TERM_REGEX__terminal_33(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -18805,7 +18859,7 @@ bool shift_TERM_REGEX__terminal_34(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting /[ \\\\t]*\\\\n+[ \\\\t]+(\\\?!@)/\n");
+        debug_print("shifting /[ \\\\t]*\\\\n+[ \\\\t]+(\\\?!@)/ at {}\n", pos);
 
         lr_push(_terminal_34, eject, pos, Product(result));
 
@@ -18832,7 +18886,7 @@ bool shift_TERM_REGEX__terminal_34(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -18881,7 +18935,7 @@ bool shift_TERM_REGEX__terminal_35(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting /[ \\\\t]*\\\\n/\n");
+        debug_print("shifting /[ \\\\t]*\\\\n/ at {}\n", pos);
 
         lr_push(_terminal_35, eject, pos, Product(result));
 
@@ -18908,7 +18962,7 @@ bool shift_TERM_REGEX__terminal_35(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -18957,7 +19011,7 @@ bool shift_TERM_REGEX__terminal_36(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting /#\\\\s*/\n");
+        debug_print("shifting /#\\\\s*/ at {}\n", pos);
 
         lr_push(_terminal_36, eject, pos, Product(result));
 
@@ -18984,7 +19038,7 @@ bool shift_TERM_REGEX__terminal_36(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -19028,7 +19082,7 @@ bool shift_TERM_CUSTOM__terminal_37(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting &continuation_guts\n");
+        debug_print("shifting &continuation_guts at {}\n", pos);
 
         lr_push(_terminal_37, eject, pos, Product(result));
 
@@ -19055,7 +19109,7 @@ bool shift_TERM_CUSTOM__terminal_37(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // control_continuation
@@ -19080,7 +19134,7 @@ bool shift_NONTERM_PRODUCTION__control_continuation(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // control_end
@@ -19105,7 +19159,7 @@ bool shift_NONTERM_PRODUCTION__control_end(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -19149,7 +19203,7 @@ bool shift_TERM_CUSTOM__terminal_40(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting &control_guts\n");
+        debug_print("shifting &control_guts at {}\n", pos);
 
         lr_push(_terminal_40, eject, pos, Product(result));
 
@@ -19176,7 +19230,7 @@ bool shift_TERM_CUSTOM__terminal_40(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // control_start
@@ -19201,7 +19255,7 @@ bool shift_NONTERM_PRODUCTION__control_start(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // (_subex_0)
@@ -19226,7 +19280,7 @@ bool shift_NONTERM_SUBEXPRESSION___subex_0(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 // control_fragment
@@ -19251,7 +19305,7 @@ bool shift_NONTERM_PRODUCTION__control_fragment(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -19295,7 +19349,7 @@ bool shift_TERM_CUSTOM__terminal_44(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting &subst_guts\n");
+        debug_print("shifting &subst_guts at {}\n", pos);
 
         lr_push(_terminal_44, eject, pos, Product(result));
 
@@ -19322,7 +19376,7 @@ bool shift_TERM_CUSTOM__terminal_44(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -19371,7 +19425,7 @@ bool shift_TERM_REGEX__terminal_45(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting /[^@\\\\n]+/\n");
+        debug_print("shifting /[^@\\\\n]+/ at {}\n", pos);
 
         lr_push(_terminal_45, eject, pos, Product(result));
 
@@ -19398,7 +19452,7 @@ bool shift_TERM_REGEX__terminal_45(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -19447,7 +19501,7 @@ bool shift_TERM_REGEX__terminal_46(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting /[a-zA-Z_][a-zA-Z_0-9]+/\n");
+        debug_print("shifting /[a-zA-Z_][a-zA-Z_0-9]+/ at {}\n", pos);
 
         lr_push(_terminal_46, eject, pos, Product(result));
 
@@ -19474,7 +19528,7 @@ bool shift_TERM_REGEX__terminal_46(bool eject) {
 
 
 
-#line 1251 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (terminals and assertions - everything else)
 
@@ -19518,7 +19572,7 @@ bool shift_END_OF_PARSE__terminal_47(bool eject) {
     if(result) {
         clear_mismatches();  // (we matched)
 
-        debug_print("shifting ␄_fpl_goal\n");
+        debug_print("shifting ␄_fpl_goal at {}\n", pos);
 
         lr_push(_terminal_47, eject, pos, Product(result));
 
@@ -19556,7 +19610,7 @@ public:
 
 typedef enum {
 
-    #line 1261 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 1263 "src/fpl2cc/fpl_x_parser.h.jemp" 
     __fpl_null, // 0 _fpl_null
     _fragment, // 1 fragment
     _complete, // 2 complete
@@ -19612,7 +19666,7 @@ typedef enum {
 static std::string element_str(int id) {
     switch(id) {
 
-        #line 1271 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1273 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 0: return "_fpl_null (0)";
         case 1: return "fragment (1)";
         case 2: return "complete (2)";
@@ -19668,150 +19722,150 @@ static std::string element_str(int id) {
 static bool is_nonterminal(int id, const std::string &caller = CALLER()) {
     switch(id) {
 
-        #line 1284 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1286 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 0: return true;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 1: return true;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 2: return true;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 3: return true;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 4: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 5: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 6: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 7: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 8: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 9: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 10: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 11: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 12: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 13: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 14: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 15: return true;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 16: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 17: return true;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 18: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 19: return true;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 20: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 21: return true;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 22: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 23: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 24: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 25: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 26: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 27: return true;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 28: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 29: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 30: return true;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 31: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 32: return true;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 33: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 34: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 35: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 36: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 37: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 38: return true;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 39: return true;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 40: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 41: return true;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 42: return true;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 43: return true;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 44: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 45: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 46: return false;
 
-        #line 1283 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1285 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case 47: return false;
     }
     jerror::error(stringformat(
@@ -19825,7 +19879,7 @@ static std::string state_to_str(State st) {
     if(!st) return "NULL";
     // c++ won't let you compare pointers in a switch statement.. sigh
 
-    #line 1298 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 1300 "src/fpl2cc/fpl_x_parser.h.jemp" 
     if(&jemplpl_parser::state_0 == st) return "state_0";
     if(&jemplpl_parser::state_1 == st) return "state_1";
     if(&jemplpl_parser::state_2 == st) return "state_2";
@@ -19916,7 +19970,7 @@ static std::string state_to_str(State st) {
 // return a stack-trace style dump of the state passed.
 static const char *state_string(State st) {
 
-    #line 1313 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 1315 "src/fpl2cc/fpl_x_parser.h.jemp" 
     if(&jemplpl_parser::state_0 == st) {
         return "state_0:\n"
         "    complete (0:1):\t •fragment+:fragments \t=> state 79\t(src/grammarlib/jemp.fpl:16)\n"
@@ -19945,7 +19999,7 @@ static const char *state_string(State st) {
         "    text (28:1):\t •/[^@\\\\n]+/:t \t=> state 6\t(src/grammarlib/jemp.fpl:147)\n"
         "    text (29:1):\t •leading_ws \t=> state 19\t(src/grammarlib/jemp.fpl:151)\n"
         "    text (30:1):\t •trailing_ws \t=> state 1\t(src/grammarlib/jemp.fpl:152)\n"
-        "    _fpl_goal (32:1):\t •complete \t=> state 80\t(src/fpl2cc/productions.h:4254)\n"
+        "    _fpl_goal (32:1):\t •complete \t=> state 80\t(src/fpl2cc/productions.h:4277)\n"
         ;
     }
     if(&jemplpl_parser::state_1 == st) {
@@ -20557,7 +20611,7 @@ static const char *state_string(State st) {
     }
     if(&jemplpl_parser::state_80 == st) {
         return "state_80:\n"
-        "    _fpl_goal (32:0):\t complete •\t=> (done)\t(src/fpl2cc/productions.h:4254)\n"
+        "    _fpl_goal (32:0):\t complete •\t=> (done)\t(src/fpl2cc/productions.h:4277)\n"
         ;
     }
 
@@ -20571,10 +20625,10 @@ static const char *state_string(State st) {
 // needs no runtime check.  nicht war?
 static bool state_ejects(State st, int element_id) {
 
-    #line 1335 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 1337 "src/fpl2cc/fpl_x_parser.h.jemp" 
     if(&jemplpl_parser::state_0 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_start == element_id) {
             return true;
@@ -20610,7 +20664,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_1 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20622,7 +20676,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_2 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20634,7 +20688,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_3 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20646,7 +20700,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_4 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20658,7 +20712,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_5 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20670,7 +20724,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_6 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20682,7 +20736,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_7 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20694,7 +20748,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_8 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20706,7 +20760,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_9 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_16 == element_id) {
             return true;
@@ -20722,7 +20776,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_10 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_end == element_id) {
             return true;
@@ -20734,7 +20788,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_11 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20746,7 +20800,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_12 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20758,7 +20812,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_13 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20774,7 +20828,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_14 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20786,7 +20840,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_15 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_end == element_id) {
             return true;
@@ -20798,7 +20852,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_16 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20810,7 +20864,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_17 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_end == element_id) {
             return true;
@@ -20822,7 +20876,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_18 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_start == element_id) {
             return true;
@@ -20858,7 +20912,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_19 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20874,7 +20928,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_20 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20886,7 +20940,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_21 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -20894,7 +20948,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_22 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_22 == element_id) {
             return true;
@@ -20906,7 +20960,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_23 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -20914,7 +20968,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_24 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_11 == element_id) {
             return true;
@@ -20926,7 +20980,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_25 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_8 == element_id) {
             return true;
@@ -20938,7 +20992,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_26 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20950,7 +21004,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_27 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -20962,7 +21016,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_28 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_start == element_id) {
             return true;
@@ -20998,7 +21052,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_29 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_18 == element_id) {
             return true;
@@ -21018,7 +21072,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_30 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_end == element_id) {
             return true;
@@ -21030,7 +21084,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_31 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -21042,7 +21096,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_32 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -21050,7 +21104,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_33 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_25 == element_id) {
             return true;
@@ -21062,7 +21116,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_34 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -21070,7 +21124,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_35 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_end == element_id) {
             return true;
@@ -21082,7 +21136,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_36 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -21094,7 +21148,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_37 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -21106,7 +21160,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_38 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_end == element_id) {
             return true;
@@ -21118,7 +21172,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_39 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -21130,7 +21184,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_40 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -21138,7 +21192,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_41 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_25 == element_id) {
             return true;
@@ -21150,7 +21204,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_42 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -21162,7 +21216,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_43 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_start == element_id) {
             return true;
@@ -21198,7 +21252,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_44 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_16 == element_id) {
             return true;
@@ -21214,7 +21268,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_45 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_end == element_id) {
             return true;
@@ -21226,7 +21280,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_46 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -21238,7 +21292,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_47 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_end == element_id) {
             return true;
@@ -21250,7 +21304,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_48 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -21262,7 +21316,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_49 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -21282,7 +21336,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_50 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -21290,7 +21344,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_51 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -21298,7 +21352,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_52 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -21310,7 +21364,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_53 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -21322,7 +21376,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_54 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -21362,7 +21416,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_55 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_subst_start == element_id) {
             return true;
@@ -21378,7 +21432,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_56 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -21386,7 +21440,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_57 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -21394,7 +21448,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_58 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_11 == element_id) {
             return true;
@@ -21406,7 +21460,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_59 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_8 == element_id) {
             return true;
@@ -21418,7 +21472,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_60 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -21430,7 +21484,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_61 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_13 == element_id) {
             return true;
@@ -21442,7 +21496,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_62 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -21450,7 +21504,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_63 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_11 == element_id) {
             return true;
@@ -21462,7 +21516,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_64 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_8 == element_id) {
             return true;
@@ -21474,7 +21528,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_65 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -21486,7 +21540,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_66 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_13 == element_id) {
             return true;
@@ -21498,7 +21552,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_67 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -21506,7 +21560,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_68 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_11 == element_id) {
             return true;
@@ -21518,7 +21572,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_69 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_8 == element_id) {
             return true;
@@ -21530,7 +21584,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_70 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -21542,7 +21596,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_71 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -21550,7 +21604,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_72 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_7 == element_id) {
             return true;
@@ -21562,7 +21616,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_73 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_8 == element_id) {
             return true;
@@ -21574,7 +21628,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_74 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -21586,7 +21640,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_75 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         {
             return false;
@@ -21594,7 +21648,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_76 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_11 == element_id) {
             return true;
@@ -21606,7 +21660,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_77 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::_terminal_8 == element_id) {
             return true;
@@ -21618,7 +21672,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_78 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -21630,7 +21684,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_79 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -21670,7 +21724,7 @@ static bool state_ejects(State st, int element_id) {
     } else
     if(&jemplpl_parser::state_80 == st) {
 
-        #line 1330 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1332 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
         if(ElementID::__fpl_null == element_id) {
             return true;
@@ -21688,7 +21742,7 @@ static bool state_ejects(State st, int element_id) {
 static bool is_goal(int el_id) {
     switch(el_id) {
 
-        #line 1345 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1347 "src/fpl2cc/fpl_x_parser.h.jemp" 
         case ElementID::_complete: return true;
 
         default: return false;
@@ -21702,26 +21756,26 @@ bool result_is_goal() const {
 
 static size_t separator_length(const utf8_byte *inp) {
 
-    #line 1359 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 1361 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
-    #line 1372 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 1374 "src/fpl2cc/fpl_x_parser.h.jemp" 
     {
 
-        #line 1363 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1365 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
-        #line 1370 "src/fpl2cc/fpl_x_parser.h.jemp" 
+        #line 1372 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
         #line 1 "src/grammarlib/none.inc"
         // separator "none" means 0 bytes of separator:
         return 0;
 
-        #line 21718 "src/jemplpl/jemplpl.cc"
+        #line 21772 "src/jemplpl/jemplpl.cc"
 
 
     }
 
-    #line 1374 "src/fpl2cc/fpl_x_parser.h.jemp" 
+    #line 1376 "src/fpl2cc/fpl_x_parser.h.jemp" 
     return 0;
 }
 
@@ -21732,10 +21786,10 @@ size_t eat_separator() {
 
 // reduction rules:
 
-#line 1390 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1392 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -21814,9 +21868,16 @@ bool dummy = true // hack for comma
 
     // fragment+:fragments -> complete
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 36 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 39 "src/jemplpl/jemplpl.fpl"
 
@@ -21860,7 +21921,9 @@ bool dummy = true // hack for comma
     );
 
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 16 "src/grammarlib/jemp.fpl"
 }
 
@@ -21868,7 +21931,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -21947,9 +22010,16 @@ bool dummy = true // hack for comma
 
     // text+:chunks -> fragment
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 36 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 80 "src/jemplpl/jemplpl.fpl"
 
@@ -21960,7 +22030,9 @@ bool dummy = true // hack for comma
     return frag + ";\n";
 
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 19 "src/grammarlib/jemp.fpl"
 }
 
@@ -21968,7 +22040,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22047,14 +22119,23 @@ bool dummy = true // hack for comma
 
     // '@@':at_sign -> text
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 36 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 24 "src/grammarlib/jemp.fpl"
     return "@"; 
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 24 "src/grammarlib/jemp.fpl"
 }
 
@@ -22062,7 +22143,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22141,16 +22222,25 @@ bool dummy = true // hack for comma
 
     // '@/*'^ /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment '*/@'^ /\\n\?/^ -> fragment
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 36 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 89 "src/jemplpl/jemplpl.fpl"
 
     return line_num(comment.self()) + jempl.realign_frag();
 
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 28 "src/grammarlib/jemp.fpl"
 }
 
@@ -22158,7 +22248,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22237,9 +22327,16 @@ bool dummy = true // hack for comma
 
     // '@parameter:'^ /[^@]+/:param_decl '@'^ /\\n\?/^ -> fragment
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 36 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 93 "src/jemplpl/jemplpl.fpl"
 
@@ -22247,7 +22344,9 @@ bool dummy = true // hack for comma
     return "";
 
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 39 "src/grammarlib/jemp.fpl"
 }
 
@@ -22255,7 +22354,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22334,9 +22433,16 @@ bool dummy = true // hack for comma
 
     // '@include:'^ /\\s*/^ /[^@]+/:include_file '@'^ /\\n\?/^ -> fragment
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 36 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 99 "src/jemplpl/jemplpl.fpl"
 
@@ -22346,7 +22452,9 @@ bool dummy = true // hack for comma
     ) + line_num(include_file.self()) + jempl.realign_frag();
 
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 44 "src/grammarlib/jemp.fpl"
 }
 
@@ -22354,7 +22462,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22433,9 +22541,16 @@ bool dummy = true // hack for comma
 
     // '@embed:'^ /\\s*/^ /[^@]+/:embed_file '@'^ /\\n\?/^ -> fragment
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 36 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 113 "src/jemplpl/jemplpl.fpl"
 
@@ -22453,7 +22568,9 @@ bool dummy = true // hack for comma
     );
 
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 50 "src/grammarlib/jemp.fpl"
 }
 
@@ -22461,7 +22578,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22540,9 +22657,16 @@ bool dummy = true // hack for comma
 
     // subst_start^ 'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^ -> fragment
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 36 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 128 "src/jemplpl/jemplpl.fpl"
 
@@ -22556,7 +22680,9 @@ bool dummy = true // hack for comma
     );
 
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 56 "src/grammarlib/jemp.fpl"
 }
 
@@ -22564,7 +22690,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22649,9 +22775,16 @@ bool dummy = true // hack for comma
 
     // leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^ -> fragment
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 36 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 139 "src/jemplpl/jemplpl.fpl"
 
@@ -22659,7 +22792,9 @@ bool dummy = true // hack for comma
     + stringformat("const auto {} = {};\n", name_decl.val(), value.val());
 
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 62 "src/grammarlib/jemp.fpl"
 }
 
@@ -22667,7 +22802,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22746,9 +22881,16 @@ bool dummy = true // hack for comma
 
     // /@realign:\\s*/^ text:realign '@'^ /\\n\?/^ -> fragment
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 36 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 144 "src/jemplpl/jemplpl.fpl"
 
@@ -22757,7 +22899,9 @@ bool dummy = true // hack for comma
     return line_num(realign.self()) + jempl.realign_frag();
 
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 75 "src/grammarlib/jemp.fpl"
 }
 
@@ -22765,7 +22909,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22844,29 +22988,36 @@ bool dummy = true // hack for comma
 
     // '#'^ !'#':variant_expression '#'^ -> template_variant
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-    #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/grammarlib/jemp.fpl:80 (default action for '#'^ !'#':variant_expression '#'^ -> template_variant)"
-    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
-    return std::string(
 
-    #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 1 "src/grammarlib/jemp.fpl:80 (default action for '#'^ !'#':variant_expression '#'^ -> template_variant)"
+    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:54
+    return std::string(
 
-    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 72 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 71 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 70 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 68 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     variant_expression.val().to_str()
     );
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 80 "src/grammarlib/jemp.fpl"
 }
 
@@ -22874,7 +23025,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -22953,29 +23104,36 @@ bool dummy = true // hack for comma
 
     // leading_ws?^ '@-':arg_1 -> subst_start
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-    #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/grammarlib/jemp.fpl:82 (default action for leading_ws\?^ '@-':arg_1 -> subst_start)"
-    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
-    return std::string(
 
-    #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 1 "src/grammarlib/jemp.fpl:82 (default action for leading_ws\?^ '@-':arg_1 -> subst_start)"
+    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:54
+    return std::string(
 
-    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 72 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 71 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 70 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 68 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     arg_1.val().to_str()
     );
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 82 "src/grammarlib/jemp.fpl"
 }
 
@@ -22983,7 +23141,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -23062,29 +23220,36 @@ bool dummy = true // hack for comma
 
     // '@':arg_0 -> subst_start
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-    #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/grammarlib/jemp.fpl:83 (default action for '@':arg_0 -> subst_start)"
-    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
-    return std::string(
 
-    #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 1 "src/grammarlib/jemp.fpl:83 (default action for '@':arg_0 -> subst_start)"
+    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:54
+    return std::string(
 
-    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 72 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 71 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 70 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 68 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     arg_0.val().to_str()
     );
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 83 "src/grammarlib/jemp.fpl"
 }
 
@@ -23092,7 +23257,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -23171,29 +23336,36 @@ bool dummy = true // hack for comma
 
     // '-@':arg_0 trailing_ws?^ -> subst_end
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-    #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/grammarlib/jemp.fpl:85 (default action for '-@':arg_0 trailing_ws\?^ -> subst_end)"
-    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
-    return std::string(
 
-    #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 1 "src/grammarlib/jemp.fpl:85 (default action for '-@':arg_0 trailing_ws\?^ -> subst_end)"
+    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:54
+    return std::string(
 
-    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 72 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 71 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 70 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 68 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     arg_0.val().to_str()
     );
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 85 "src/grammarlib/jemp.fpl"
 }
 
@@ -23201,7 +23373,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -23280,29 +23452,36 @@ bool dummy = true // hack for comma
 
     // '@':arg_0 -> subst_end
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-    #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/grammarlib/jemp.fpl:86 (default action for '@':arg_0 -> subst_end)"
-    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
-    return std::string(
 
-    #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 1 "src/grammarlib/jemp.fpl:86 (default action for '@':arg_0 -> subst_end)"
+    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:54
+    return std::string(
 
-    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 72 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 71 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 70 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 68 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     arg_0.val().to_str()
     );
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 86 "src/grammarlib/jemp.fpl"
 }
 
@@ -23310,7 +23489,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -23389,29 +23568,36 @@ bool dummy = true // hack for comma
 
     // /(\?:[^-@]|-[^@])+/:arg_0 -> rest_of_sub
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-    #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/grammarlib/jemp.fpl:87 (default action for /(\\\?:[^-@]|-[^@])+/:arg_0 -> rest_of_sub)"
-    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
-    return std::string(
 
-    #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 1 "src/grammarlib/jemp.fpl:87 (default action for /(\\\?:[^-@]|-[^@])+/:arg_0 -> rest_of_sub)"
+    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:54
+    return std::string(
 
-    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 72 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 71 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 70 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 68 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     arg_0.val().to_str()
     );
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 87 "src/grammarlib/jemp.fpl"
 }
 
@@ -23419,7 +23605,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -23498,29 +23684,36 @@ bool dummy = true // hack for comma
 
     // /\\n*[ \\t]+/:ws -> leading_ws
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-    #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/grammarlib/jemp.fpl:93 (default action for /\\\\n*[ \\\\t]+/:ws -> leading_ws)"
-    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
-    return std::string(
 
-    #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 1 "src/grammarlib/jemp.fpl:93 (default action for /\\\\n*[ \\\\t]+/:ws -> leading_ws)"
+    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:54
+    return std::string(
 
-    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 72 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 71 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 70 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 68 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     ws.val().to_str()
     );
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 93 "src/grammarlib/jemp.fpl"
 }
 
@@ -23528,7 +23721,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -23607,29 +23800,36 @@ bool dummy = true // hack for comma
 
     // /[ \\t]*\\n+[ \\t]+(\?!@)/:ws -> trailing_ws
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-    #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/grammarlib/jemp.fpl:107 (default action for /[ \\\\t]*\\\\n+[ \\\\t]+(\\\?!@)/:ws -> trailing_ws)"
-    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
-    return std::string(
 
-    #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 1 "src/grammarlib/jemp.fpl:107 (default action for /[ \\\\t]*\\\\n+[ \\\\t]+(\\\?!@)/:ws -> trailing_ws)"
+    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:54
+    return std::string(
 
-    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 72 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 71 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 70 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 68 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     ws.val().to_str()
     );
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 107 "src/grammarlib/jemp.fpl"
 }
 
@@ -23637,7 +23837,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -23716,29 +23916,36 @@ bool dummy = true // hack for comma
 
     // /[ \\t]*\\n/:ws -> trailing_ws
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-    #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/grammarlib/jemp.fpl:111 (default action for /[ \\\\t]*\\\\n/:ws -> trailing_ws)"
-    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
-    return std::string(
 
-    #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 1 "src/grammarlib/jemp.fpl:111 (default action for /[ \\\\t]*\\\\n/:ws -> trailing_ws)"
+    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:54
+    return std::string(
 
-    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 72 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 71 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 70 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 68 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     ws.val().to_str()
     );
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 111 "src/grammarlib/jemp.fpl"
 }
 
@@ -23746,7 +23953,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -23831,9 +24038,16 @@ bool dummy = true // hack for comma
 
     // subst_start^ /#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^ -> fragment
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 36 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 155 "src/jemplpl/jemplpl.fpl"
 
@@ -23868,7 +24082,9 @@ bool dummy = true // hack for comma
     );
 
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 119 "src/grammarlib/jemp.fpl"
 }
 
@@ -23876,7 +24092,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -23958,9 +24174,16 @@ bool dummy = true // hack for comma
 
     // subst_start^ /#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^ -> fragment
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 36 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 150 "src/jemplpl/jemplpl.fpl"
 
@@ -23968,7 +24191,9 @@ bool dummy = true // hack for comma
     return stringformat("\nout += {}{};\n", jempl_name.val(), jempl_args.val());
 
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 122 "src/grammarlib/jemp.fpl"
 }
 
@@ -23976,7 +24201,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -24055,29 +24280,36 @@ bool dummy = true // hack for comma
 
     // subst_start^ &continuation_guts:control_statement subst_end^ -> control_continuation
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-    #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/grammarlib/jemp.fpl:133 (default action for subst_start^ &continuation_guts:control_statement subst_end^ -> control_continuation)"
-    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
-    return std::string(
 
-    #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 1 "src/grammarlib/jemp.fpl:133 (default action for subst_start^ &continuation_guts:control_statement subst_end^ -> control_continuation)"
+    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:54
+    return std::string(
 
-    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 72 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 71 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 70 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 68 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     control_statement.val().to_str()
     );
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 133 "src/grammarlib/jemp.fpl"
 }
 
@@ -24085,7 +24317,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -24164,29 +24396,36 @@ bool dummy = true // hack for comma
 
     // subst_start^ '}':control_statement subst_end^ -> control_end
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-    #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/grammarlib/jemp.fpl:134 (default action for subst_start^ '}':control_statement subst_end^ -> control_end)"
-    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
-    return std::string(
 
-    #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 1 "src/grammarlib/jemp.fpl:134 (default action for subst_start^ '}':control_statement subst_end^ -> control_end)"
+    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:54
+    return std::string(
 
-    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 72 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 71 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 70 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 68 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     control_statement.val().to_str()
     );
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 134 "src/grammarlib/jemp.fpl"
 }
 
@@ -24194,7 +24433,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -24273,29 +24512,36 @@ bool dummy = true // hack for comma
 
     // subst_start^ &control_guts:control_statement subst_end^ -> control_start
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-    #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/grammarlib/jemp.fpl:135 (default action for subst_start^ &control_guts:control_statement subst_end^ -> control_start)"
-    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
-    return std::string(
 
-    #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 1 "src/grammarlib/jemp.fpl:135 (default action for subst_start^ &control_guts:control_statement subst_end^ -> control_start)"
+    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:54
+    return std::string(
 
-    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 72 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 71 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 70 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 68 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     control_statement.val().to_str()
     );
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 135 "src/grammarlib/jemp.fpl"
 }
 
@@ -24303,13 +24549,13 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 // (control_continuation:control_statement fragment*:control_statement -> _subex_0 is a subexpression)
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -24388,9 +24634,16 @@ bool dummy = true // hack for comma
 
     // control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement control_end:control_statement -> control_fragment
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 36 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 187 "src/jemplpl/jemplpl.fpl"
 
@@ -24402,7 +24655,9 @@ bool dummy = true // hack for comma
     );
 
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 137 "src/grammarlib/jemp.fpl"
 }
 
@@ -24410,7 +24665,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -24489,14 +24744,23 @@ bool dummy = true // hack for comma
 
     // control_fragment+ -> fragment
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 36 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 139 "src/grammarlib/jemp.fpl"
     return control_fragment.join(); 
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 139 "src/grammarlib/jemp.fpl"
 }
 
@@ -24504,7 +24768,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -24583,9 +24847,16 @@ bool dummy = true // hack for comma
 
     // subst_start^ &subst_guts:variable subst_end^ -> fragment
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 36 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 197 "src/jemplpl/jemplpl.fpl"
 
@@ -24593,7 +24864,9 @@ bool dummy = true // hack for comma
     + "out += stringformat(\"{}\"," + variable.val().to_str() + ");\n";
 
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 143 "src/grammarlib/jemp.fpl"
 }
 
@@ -24601,7 +24874,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -24680,29 +24953,36 @@ bool dummy = true // hack for comma
 
     // /[^@\\n]+/:t -> text
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-    #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/grammarlib/jemp.fpl:147 (default action for /[^@\\\\n]+/:t -> text)"
-    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
-    return std::string(
 
-    #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 1 "src/grammarlib/jemp.fpl:147 (default action for /[^@\\\\n]+/:t -> text)"
+    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:54
+    return std::string(
 
-    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 72 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 71 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 70 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 68 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     t.val().to_str()
     );
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 147 "src/grammarlib/jemp.fpl"
 }
 
@@ -24710,7 +24990,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -24789,27 +25069,34 @@ bool dummy = true // hack for comma
 
     // leading_ws -> text
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-    #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/grammarlib/jemp.fpl:151 (default action for leading_ws -> text)"
-    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
-    return std::string(
 
-    #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 1 "src/grammarlib/jemp.fpl:151 (default action for leading_ws -> text)"
+    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:54
+    return std::string(
+
+    #line 72 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 71 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 70 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     leading_ws.val()
     );
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 151 "src/grammarlib/jemp.fpl"
 }
 
@@ -24817,7 +25104,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -24896,27 +25183,34 @@ bool dummy = true // hack for comma
 
     // trailing_ws -> text
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-    #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/grammarlib/jemp.fpl:152 (default action for trailing_ws -> text)"
-    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
-    return std::string(
 
-    #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 1 "src/grammarlib/jemp.fpl:152 (default action for trailing_ws -> text)"
+    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:54
+    return std::string(
+
+    #line 72 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 71 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 70 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     trailing_ws.val()
     );
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 152 "src/grammarlib/jemp.fpl"
 }
 
@@ -24924,7 +25218,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -25003,29 +25297,36 @@ bool dummy = true // hack for comma
 
     // /[a-zA-Z_][a-zA-Z_0-9]+/:name -> identifier
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-    #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/grammarlib/jemp.fpl:155 (default action for /[a-zA-Z_][a-zA-Z_0-9]+/:name -> identifier)"
-    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
-    return std::string(
 
-    #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 1 "src/grammarlib/jemp.fpl:155 (default action for /[a-zA-Z_][a-zA-Z_0-9]+/:name -> identifier)"
+    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:54
+    return std::string(
 
-    #line 50 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 72 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 71 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 70 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 68 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     name.val().to_str()
     );
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     #line 155 "src/grammarlib/jemp.fpl"
 }
 
@@ -25033,7 +25334,7 @@ bool dummy = true // hack for comma
 
 
 
-#line 1389 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1391 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
 #line 5 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
@@ -25067,13 +25368,13 @@ bool dummy = true // hack for comma
             return 1;
         }
         static int line_number() {
-            return 4254;
+            return 4277;
         }
         static const char *filename() {
             return "src/fpl2cc/productions.h";
         }
         static const char *location() {
-            return "src/fpl2cc/productions.h:4254";
+            return "src/fpl2cc/productions.h:4277";
         }
         static const char *to_str() {
             return "complete -> _fpl_goal";
@@ -25088,7 +25389,7 @@ bool dummy = true // hack for comma
                 return pname[ind];
             } else {
                 return "param_name index out of bounds at "
-                "src/fpl2cc/productions.h:4254";
+                "src/fpl2cc/productions.h:4277";
             }
         }
         static const char *param_type(unsigned int ind) {
@@ -25102,7 +25403,7 @@ bool dummy = true // hack for comma
             } else {
                 return (
                 "param_type index out of bounds at "
-                "src/fpl2cc/productions.h:4254"
+                "src/fpl2cc/productions.h:4277"
                 );
             }
         }
@@ -25112,28 +25413,35 @@ bool dummy = true // hack for comma
 
     // complete -> _fpl_goal
 
-    #line 56 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 18 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 33 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
-    #line 34 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/fpl2cc/productions.h:4254 (default action for complete -> _fpl_goal)"
-    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:36
-    return std::string(
 
-    #line 54 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 74 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-    #line 53 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-    #line 46 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 1 "src/fpl2cc/productions.h:4277 (default action for complete -> _fpl_goal)"
+    // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:54
+    return std::string(
+
+    #line 72 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 71 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+
+    #line 70 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
     complete.val()
     );
 
-    #line 57 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 4254 "src/fpl2cc/productions.h"
+    #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+    #line 4277 "src/fpl2cc/productions.h"
 }
 
 
@@ -25146,7 +25454,7 @@ bool dummy = true // hack for comma
 #endif // header guard
 
 
-#line 1403 "src/fpl2cc/fpl_x_parser.h.jemp" 
+#line 1405 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 int main(int argc, const char **argv) {
 
@@ -25205,7 +25513,7 @@ std::cout << reformat_code(join(generated_code, "\n\n"));
 
 return total_errors?1:0;
 
-#line 25207 "src/jemplpl/jemplpl.cc"
+#line 25515 "src/jemplpl/jemplpl.cc"
 
 }
 

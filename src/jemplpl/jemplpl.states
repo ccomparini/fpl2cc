@@ -482,7 +482,7 @@ state 0:
     text (28:1):              •/[^@\\n]+/:t                                                                                                             => state 6  (src/grammarlib/jemp.fpl:147)
     text (29:1):              •leading_ws                                                                                                               => state 19 (src/grammarlib/jemp.fpl:151)
     text (30:1):              •trailing_ws                                                                                                              => state 1  (src/grammarlib/jemp.fpl:152)
-    _fpl_goal (32:1):         •complete                                                                                                                 => state 80 (src/fpl2cc/productions.h:4254)
+    _fpl_goal (32:1):         •complete                                                                                                                 => state 80 (src/fpl2cc/productions.h:4277)
 
 state 1:
     text (30:0):  trailing_ws • => (reduce) (src/grammarlib/jemp.fpl:152)
@@ -934,5 +934,5 @@ state 79:
     text (30:1):              •trailing_ws                                                                                                              => state 1  (src/grammarlib/jemp.fpl:152)
 
 state 80:
-    _fpl_goal (32:0):  complete • => (done) (src/fpl2cc/productions.h:4254)
+    _fpl_goal (32:0):  complete • => (done) (src/fpl2cc/productions.h:4277)
 
