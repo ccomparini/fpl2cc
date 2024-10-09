@@ -229,8 +229,7 @@ ExitVal fpl2cc(const fpl_options &opts) {
             std::cout << output;
         } else {
             if(FILE *out = fopen(output_fn.c_str(), "w")) {
-                // uhh... this is easy, if hokey:
-                fprintf(out, "%s\n", output.c_str());
+                fwrite(output.c_str(), output.size(), 1, out);
                 fclose(out);
             } else {
                 fail(stringformat(
