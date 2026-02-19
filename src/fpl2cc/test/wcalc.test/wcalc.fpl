@@ -25,8 +25,8 @@
 #
 # .. except the above was too simple for me to care
 # so I added unary minus, proper numbers, comments,
-# etc.  This has become a sort of general fpl test
-# bed based on the classic desk calculator case.
+# etc.  And precedence - precendence groupings are
+# important!  See the square-brace stuff, below.
 #
 
 @produces std::string
@@ -44,6 +44,8 @@ aexpr -> result +{ return stringformat("{}", aexpr); }+
     .:lhs '+'^ >:rhs -> add +{ return lhs + rhs; }+
     .:lhs '-'^ >:rhs -> sub +{ return lhs - rhs; }+
 ] -> aexpr +{
+    // (this is just to demonstrate that we can apply an action
+    // to all the productions in the group)
     std::cerr << stringformat("YAY addition expression = {}\n", aexpr);
     return aexpr;
 }+,
