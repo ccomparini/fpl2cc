@@ -7,5 +7,8 @@
     return "\n" + thing@join("\n");
 }+
 
-'a'^+ 'b'^ -> thing +{ return "a+ b ghost"; }+
+# This will parse 1 or more 'a' followed by 0 or more 'c'
+# terminated with a 'b', only pushing the 'c's to the parameter
+# stack ('a' and 'b' are "ejected" by the ^ operator).
+'a'^+ 'c'* 'b'^ -> thing +{ return stringformat("a+ b ghost with 'c' {} times", all_matched_steps().param_count()); }+
 

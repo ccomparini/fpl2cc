@@ -1,6 +1,7 @@
 returncode = 0
 stderr = ""
 stdout = "
-a+ b ghost
-a+ b ghost
+a+ b ghost with 'c' 0 times
+a+ b ghost with 'c' 0 times
+a+ b ghost with 'c' 2 times
 "
