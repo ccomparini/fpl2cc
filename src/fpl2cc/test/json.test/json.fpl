@@ -19,7 +19,6 @@
     #include <unistd.h>
     #include <variant>
     #include <vector>
-    #include "util/to_hex.h" // debugging
 
     static bool is_big_endian()
     {
