@@ -4,6 +4,7 @@
 #include "util/c_str_escape.h"
 #include "util/jerror.h"
 #include "util/src_location.h"
+#include "util/stringformat.h"
 
 namespace fpl {
 
@@ -244,6 +245,10 @@ struct grammar_element {
         const char *lb = "";
         const char *rb = "";
         switch(type) {
+            case NONE:
+                lb = "<none";
+                rb = ">";
+                break;
             case TERM_EXACT:
                 lb = "'";
                 rb = "'";
@@ -311,17 +316,12 @@ struct grammar_element {
                 rb = "";
                 break;
             default:
-                lb = "??????";
-                rb = "??????";
+                lb = "?????? ";
+                rb = " ??????";
                 break;
         };
+        return stringformat("{}{::e}{}", lb, expr, rb);
 
-        std::string out;
-        out += lb;
-        out += c_str_escape(expr);
-        out += rb;
-
-        return out;
     }
 };
 
