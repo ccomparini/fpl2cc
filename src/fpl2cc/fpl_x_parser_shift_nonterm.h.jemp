@@ -3,6 +3,15 @@
 @parameter: const fpl_options &opts @
 @declare el_id: prds.element_id_name(el)@
 
+@/*
+ this function will be named:
+   shift_NONTERM_PRODUCTION__xxxxx()
+ ... where xxxxx is the name of the nonterm.
+ Unlike with terminals, the nonterminal would already
+ be on the stack, so we don't shift anything new;
+ we just check for a match.
+*/@
+
 // @el.to_str()@
 bool shift_@el.type_str()@_@el_id@(bool eject) {
     if(lr_next().mismatch && lr_next().element_id == @el_id@) {
