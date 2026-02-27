@@ -1044,15 +1044,10 @@ return out;
      if(something_bad)
          jerror::error("something bad happened");
 
- Applications or libraries calling jerror::error should _not_ assume 
- that the program or function or anything will terminate, but they
- should also not assume they won't.
+ Applications or libraries calling jerror::error without installing
+ their own handler(s) should _not_ assume that the program or function
+ or anything will terminate, but they should also not assume they won't.
  
- Why not use exceptions?  C++ exceptions don't allow warn vs error.
- Also, c++ exceptions lean heavily on making a new type for everything
- which can go wrong, which is a pain.  Also, this lets the receiving
- handler know the src_location whence the error or warning was sent.
-
  */
 class jerror {
 public:
@@ -1062,17 +1057,64 @@ using channel = enum {
     NUM_CHANNELS
 };
 
-using callback = std::function<
-void(const std::string &error, src_location caller)
->;
-using callback_with_channel = std::function<
-void(channel chan, const std::string &error, src_location caller)
->;
-
 private:
-using handler_stack = std::list<callback_with_channel>;
+static void default_warning(channel chan, const std::string &msg, src_location caller = CALLER()) {
+    std::cerr << ensure_nl(stringformat("{} at {}", msg, caller));
+}
 
-static inline handler_stack channels[NUM_CHANNELS];
+static void default_error(channel chan, const std::string &msg, src_location caller = CALLER()) {
+    std::cerr << ensure_nl(stringformat("Fatal error: {}\tat {}", msg, caller));
+    exit(64);
+}
+
+using callback_func = void(const std::string &error, src_location caller);
+using callback = std::function<callback_func>;
+
+// this version lets the called function know which channel
+// it's being called on, which allows implementors to use
+// the same callback for different channels:
+using callback_with_channel_func = void(channel chan, const std::string &error, src_location caller);
+
+// this is what we'll actually store:
+using std_function_cbc = std::function<callback_with_channel_func>; // hack for importing parent constructors
+struct callback_with_channel : public std_function_cbc {
+    using std_function_cbc::std_function_cbc; // import parent constructors
+
+    // This allows users to compare their callback functions with
+    // what we store (eg to detect potential recursion).
+    template<typename CB_FUNCT>
+    bool operator==(CB_FUNCT *rhs) {
+        auto *lhsf = target<CB_FUNCT*>();
+        return lhsf && *lhsf == rhs;
+    }
+
+    void operator()(channel chan, const std::string &error, src_location caller) const {
+        if(*this) {
+            return std_function_cbc::operator()(chan, error, caller);
+        } else if(chan == warning_channel) {
+            return default_warning(chan, error, caller);
+        } else {
+            return default_error(chan, error, caller);
+        }
+    }
+};
+
+using handler_stack = std::list<callback_with_channel>;
+// (struct handler_stacks is just a way to add default handlers)
+struct handler_stacks {
+    handler_stack channels[NUM_CHANNELS];
+
+    handler_stacks() {
+        channels[error_channel].push_back(default_error);
+        channels[warning_channel].push_back(default_warning);
+    }
+
+    handler_stack &operator [](int ind) {
+        return channels[ind];
+    }
+};
+
+static inline handler_stacks channels;
 
 static void on_msg(
 channel chan, const std::string &msg, src_location caller
@@ -1082,12 +1124,11 @@ channel chan, const std::string &msg, src_location caller
     if(handlers.size()) {
         (handlers.back())(chan, msg, caller);
     } else {
-        if(chan > error_channel) {
-            std::cerr << ensure_nl(stringformat("{} at {}", msg, caller));
-        } else {
-            std::cerr << ensure_nl(stringformat("Fatal error: {}\tat {}", msg, caller));
-            exit(2112);
-        }
+        std::cerr << ensure_nl(stringformat(
+        "Internal error: no message handler for channel {} "
+        "when trying to report \"{}\"\tfrom {}",
+        chan, msg, caller
+        ));
     }
 }
 
@@ -1134,10 +1175,29 @@ class handler {
     }
 
     ~handler() {
-
         pop_handler(which_chan);
     }
 };
+
+// Returns the handler function installed at one or more levels
+// outside the current level in the handler stack, or a false
+// value if there's no such handler.
+// false values returned will be callable and will behave like
+// the default handler for that channel, or as the default error
+// handler (which exits) if there's no such channel, so they are
+// safe to call if you don't check (though you probably want to
+// check).
+static callback_with_channel outer_handler(channel chan, int scope=1) {
+    if(chan >= NUM_CHANNELS)
+    return callback_with_channel(nullptr);  // no such channel
+
+    handler_stack chan_stack = channels[chan];
+    if(chan_stack.size() <= scope) {
+        return callback_with_channel(nullptr);
+    } else {
+        return *std::prev(chan_stack.end(), 1 + scope);
+    }
+}
 
 // call this to throw an error.
 // calls the most recently installed error handler, or, if
@@ -2151,7 +2211,7 @@ inline std::string to_str() const {
 #define VERSION_MIN 10
 
 
-#line 2153 "src/jemplpl/jemplpl.cc"
+#line 2213 "src/jemplpl/jemplpl.cc"
 
 
 
@@ -16057,7 +16117,7 @@ static std::string expected_terminals(State st) {
     if(&jemplpl_parser::state_54 == st) {
         return 
         #line 1135 "src/fpl2cc/fpl_x_parser.h.jemp" 
-        "\?\?\?\?\?\?\?\?\?\?\?\?, "
+        "<none>, "
         "'@parameter:', "
         "'@include:', "
         "'@embed:', "
@@ -16438,7 +16498,7 @@ void init(const std::filesystem::path &src) {
     init_import_path(src);
 }
 
-#line 16440 "src/jemplpl/jemplpl.cc"
+#line 16500 "src/jemplpl/jemplpl.cc"
 
 // return to "private" after each such block.
 // this way, authors can add public members
@@ -16696,6 +16756,7 @@ Terminal custom_scanner_subst_guts(fpl_reader &input) {
 #line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
+
 // _fpl_null
 bool shift_NONTERM_PRODUCTION___fpl_null(bool eject) {
     if(lr_next().mismatch && lr_next().element_id == __fpl_null) {
@@ -16719,6 +16780,7 @@ bool shift_NONTERM_PRODUCTION___fpl_null(bool eject) {
 
 
 #line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
+
 
 
 // fragment
@@ -16746,6 +16808,7 @@ bool shift_NONTERM_PRODUCTION__fragment(bool eject) {
 #line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
+
 // complete
 bool shift_NONTERM_PRODUCTION__complete(bool eject) {
     if(lr_next().mismatch && lr_next().element_id == _complete) {
@@ -16769,6 +16832,7 @@ bool shift_NONTERM_PRODUCTION__complete(bool eject) {
 
 
 #line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
+
 
 
 // text
@@ -17687,6 +17751,7 @@ bool shift_TERM_EXACT__terminal_14(bool eject) {
 #line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
+
 // subst_start
 bool shift_NONTERM_PRODUCTION__subst_start(bool eject) {
     if(lr_next().mismatch && lr_next().element_id == _subst_start) {
@@ -17793,6 +17858,7 @@ bool shift_TERM_EXACT__terminal_16(bool eject) {
 
 
 #line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
+
 
 
 // subst_end
@@ -17903,6 +17969,7 @@ bool shift_TERM_EXACT__terminal_18(bool eject) {
 #line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
+
 // leading_ws
 bool shift_NONTERM_PRODUCTION__leading_ws(bool eject) {
     if(lr_next().mismatch && lr_next().element_id == _leading_ws) {
@@ -18002,6 +18069,7 @@ bool shift_TERM_REGEX__terminal_20(bool eject) {
 
 
 #line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
+
 
 
 // identifier
@@ -18420,6 +18488,7 @@ bool shift_TERM_EXACT_INV__terminal_26(bool eject) {
 #line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
+
 // template_variant
 bool shift_NONTERM_PRODUCTION__template_variant(bool eject) {
     if(lr_next().mismatch && lr_next().element_id == _template_variant) {
@@ -18611,6 +18680,7 @@ bool shift_TERM_EXACT__terminal_29(bool eject) {
 #line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
+
 // trailing_ws
 bool shift_NONTERM_PRODUCTION__trailing_ws(bool eject) {
     if(lr_next().mismatch && lr_next().element_id == _trailing_ws) {
@@ -18710,6 +18780,7 @@ bool shift_TERM_REGEX__terminal_31(bool eject) {
 
 
 #line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
+
 
 
 // rest_of_sub
@@ -19112,6 +19183,7 @@ bool shift_TERM_CUSTOM__terminal_37(bool eject) {
 #line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
+
 // control_continuation
 bool shift_NONTERM_PRODUCTION__control_continuation(bool eject) {
     if(lr_next().mismatch && lr_next().element_id == _control_continuation) {
@@ -19135,6 +19207,7 @@ bool shift_NONTERM_PRODUCTION__control_continuation(bool eject) {
 
 
 #line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
+
 
 
 // control_end
@@ -19233,6 +19306,7 @@ bool shift_TERM_CUSTOM__terminal_40(bool eject) {
 #line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
+
 // control_start
 bool shift_NONTERM_PRODUCTION__control_start(bool eject) {
     if(lr_next().mismatch && lr_next().element_id == _control_start) {
@@ -19258,6 +19332,7 @@ bool shift_NONTERM_PRODUCTION__control_start(bool eject) {
 #line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
+
 // (_subex_0)
 bool shift_NONTERM_SUBEXPRESSION___subex_0(bool eject) {
     if(lr_next().mismatch && lr_next().element_id == __subex_0) {
@@ -19281,6 +19356,7 @@ bool shift_NONTERM_SUBEXPRESSION___subex_0(bool eject) {
 
 
 #line 1253 "src/fpl2cc/fpl_x_parser.h.jemp" 
+
 
 
 // control_fragment
@@ -21770,7 +21846,7 @@ static size_t separator_length(const utf8_byte *inp) {
         // separator "none" means 0 bytes of separator:
         return 0;
 
-        #line 21772 "src/jemplpl/jemplpl.cc"
+        #line 21848 "src/jemplpl/jemplpl.cc"
 
 
     }
@@ -25513,7 +25589,7 @@ std::cout << reformat_code(join(generated_code, "\n\n"));
 
 return total_errors?1:0;
 
-#line 25515 "src/jemplpl/jemplpl.cc"
+#line 25591 "src/jemplpl/jemplpl.cc"
 
 }
 
@@ -25524,6 +25600,5 @@ return total_errors?1:0;
 #else
 #undef GENERATED_FPL
 #endif
-
 
 
