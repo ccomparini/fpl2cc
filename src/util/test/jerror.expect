@@ -1,10 +1,17 @@
 returncode = 64
-stderr = "src/util/test/jerror.cc:23 sez 'gonna shout in a bucket' on channel 1
-src/util/test/jerror.cc:24 sez 'shouting in a bucket' on channel 0
-src/util/test/jerror.cc:28 is deeper! inner pease
-src/util/test/jerror.cc:29 sez 'inner peace' on channel 1
-src/util/test/jerror.cc:32 sez 'outer peace' on channel 0
-I'm going to say goodbye now at src/util/test/jerror.cc:39
-Fatal error: goodbye!	at src/util/test/jerror.cc:40
+stderr = "src/util/test/jerror.cc:38 sez 'gonna shout in a bucket' on channel 1
+src/util/test/jerror.cc:39 sez 'shouting in a bucket' on channel 0
+src/util/test/jerror.cc:43 is deeper! inner pease
+src/util/test/jerror.cc:44 sez 'inner peace' on channel 1
+deepest handler will now defer to each outer handler...
+Outerness level: 0   It's us with 🦑 on 1 at src/util/test/jerror.cc:47!
+Outerness level: 1   src/util/test/jerror.cc:47 sez '🦑' on channel 1
+Outerness level: 2   🦑 at src/util/test/jerror.cc:47
+done with deepest handler of '🦑'
+seeking missing handler....
+calling missing handler! at src/util/test/jerror.cc line 57
+src/util/test/jerror.cc:61 sez 'outer peace' on channel 0
+I'm going to say goodbye now at src/util/test/jerror.cc:67
+Fatal error: goodbye!	at src/util/test/jerror.cc:68
 "
 stdout = ""

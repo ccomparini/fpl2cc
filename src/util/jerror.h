@@ -31,15 +31,10 @@
      if(something_bad)
          jerror::error("something bad happened");
 
- Applications or libraries calling jerror::error should _not_ assume 
- that the program or function or anything will terminate, but they
- should also not assume they won't.
+ Applications or libraries calling jerror::error without installing
+ their own handler(s) should _not_ assume that the program or function
+ or anything will terminate, but they should also not assume they won't.
  
- Why not use exceptions?  C++ exceptions don't allow warn vs error.
- Also, c++ exceptions lean heavily on making a new type for everything
- which can go wrong, which is a pain.  Also, this lets the receiving
- handler know the src_location whence the error or warning was sent.
-
  */
 class jerror {
 public:
@@ -49,16 +44,7 @@ public:
         NUM_CHANNELS
     };
 
-    using callback = std::function<
-        void(const std::string &error, src_location caller)
-    >;
-    // this version lets the called function know which channel
-    // it's being called on, which allows implementors to use
-    // the same callback for different channels.  maybe overengineered.
-    using callback_with_channel = std::function<
-        void(channel chan, const std::string &error, src_location caller)
-    >;
-
+private:
     static void default_warning(channel chan, const std::string &msg, src_location caller = CALLER()) {
         std::cerr << ensure_nl(stringformat("{} at {}", msg, caller));
     }
@@ -68,7 +54,38 @@ public:
         exit(64);
     }
 
-private:
+    using callback_func = void(const std::string &error, src_location caller);
+    using callback = std::function<callback_func>;
+
+    // this version lets the called function know which channel
+    // it's being called on, which allows implementors to use
+    // the same callback for different channels:
+    using callback_with_channel_func = void(channel chan, const std::string &error, src_location caller);
+
+    // this is what we'll actually store:
+    using std_function_cbc = std::function<callback_with_channel_func>; // hack for importing parent constructors
+    struct callback_with_channel : public std_function_cbc {
+        using std_function_cbc::std_function_cbc; // import parent constructors
+
+        // This allows users to compare their callback functions with
+        // what we store (eg to detect potential recursion).
+        template<typename CB_FUNCT>
+        bool operator==(CB_FUNCT *rhs) {
+            auto *lhsf = target<CB_FUNCT*>();
+            return lhsf && *lhsf == rhs;
+        }
+
+        void operator()(channel chan, const std::string &error, src_location caller) const {
+            if(*this) {
+                return std_function_cbc::operator()(chan, error, caller);
+            } else if(chan == warning_channel) {
+                return default_warning(chan, error, caller);
+            } else {
+                return default_error(chan, error, caller);
+            }
+        }
+    };
+
     using handler_stack = std::list<callback_with_channel>;
     // (struct handler_stacks is just a way to add default handlers)
     struct handler_stacks {
@@ -148,6 +165,26 @@ public:
             pop_handler(which_chan);
         }
     };
+
+    // Returns the handler function installed at one or more levels
+    // outside the current level in the handler stack, or a false
+    // value if there's no such handler.
+    // false values returned will be callable and will behave like
+    // the default handler for that channel, or as the default error
+    // handler (which exits) if there's no such channel, so they are
+    // safe to call if you don't check (though you probably want to
+    // check).
+    static callback_with_channel outer_handler(channel chan, int scope=1) {
+        if(chan >= NUM_CHANNELS)
+            return callback_with_channel(nullptr);  // no such channel
+
+        handler_stack chan_stack = channels[chan];
+        if(chan_stack.size() <= scope) {
+            return callback_with_channel(nullptr);
+        } else {
+            return *std::prev(chan_stack.end(), 1 + scope);
+        }
+    }
 
     // call this to throw an error.
     // calls the most recently installed error handler, or, if
