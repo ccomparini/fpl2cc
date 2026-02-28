@@ -7,6 +7,7 @@
   #include "to_hex.h"
 #endif
 
+#include <any>
 #include <cstdlib>
 #include <ctype.h>
 #include <list>
@@ -121,7 +122,6 @@ struct _std_to_string_exists_for<T,
 {};
 
 template<typename T>
-//std::string _stringformat(const T &in, const std::string &opts = "") {
 std::string _stringformat(T &in, const std::string &opts = "") {
     if constexpr (std::is_convertible_v<T, std::string> or
                   std::is_convertible_v<T, std::string_view>) {
@@ -322,24 +322,19 @@ template <typename... Args>
 std::string stringformat(std::string_view fmt, Args&&... args) {
 
     const int num_args = sizeof...(args);
-    // ok this works at all - string convert each argument,
-    // before and regardless of if it's going to be used.
-    // it sucks because we can't determine how to format
-    // a given argument before we format it.  is this why
-    // clang isn't shiping with an implementation?
-    // ok whatevs shipit.
-    const std::string str_arg[] = { _stringformat(args) ... };
+
+    std::function<std::string()> converters[] = {
+        std::function<std::string()>(
+            [&args]() {
+                return _stringformat(args);
+            }
+        )...
+    };
 
     // possibly better syntax.  see the notes file.
 
     // ok whatevs here's something kinda like format():
     // https://en.cppreference.com/w/cpp/language/parameter_pack
-    // OMG you cannot iterate the Args list.  you have to recurse.
-    // oh but you _can_ expand to a tuple and sorta iterate that,
-    // but not at run time.
-    // I _think_ the c++ way you have to do this backwards
-    // and for each agument substitute that arg into the string,
-    // as opposed to going through the string as I'm doing. ohwell.
     std::string out;
     const size_t inlen = fmt.size();
     if(inlen == 0) return ""; // (because inlen might be unsigned)
@@ -381,7 +376,7 @@ std::string stringformat(std::string_view fmt, Args&&... args) {
                 }
 
                 if(arg_num < num_args) {
-                    std::string sub = str_arg[arg_num];
+                    std::string sub = converters[arg_num]();
                     if(ts_ind) {
                         while(fmt[ts_ind]) {
 
