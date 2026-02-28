@@ -13,7 +13,34 @@
 #include <list>
 #include <tuple>
 
-// returns the string passed, with an extra newline at the end
+#include <iostream> // debug
+
+
+// XXX this is going into the weeds.  what's the immediate goal?
+//   - show type as possible conversion
+//   - the usual hex conversion etc not as post-processing
+// Do I need any of these immediately?  no.
+// How's this for a new plan:
+//   - run everything through the equivalent of stringformat_post_processor.
+//     ":" separates functions.  Each function gets both the original argument
+//     (whatever type) and the result of the prior function.  The lack of
+//     a function defaults to string formatting as before.  Then :: "just works"
+//     (as before) but we don't need the distinction between formatting/post
+//     processing.  Then things like indent and hex conversion don't have
+//     to be post processed with the silly conversion back to a number;
+//     things like string escaping and columnation stay basically the same.
+// This isn't what you've implemented here with the "opts" stuff but it's
+// actually simpler and more flexible!
+// One remaining question is how to handle things like nested maps and/or
+// types with mixed data.  Maybe the caller wants to print every other integer
+// in hex or whatever - something where different members get different formats.
+// Maybe we're not too worried about that, though? (maybe there's a formatter
+// where the caller supplies callbacks and we do the traversal?)
+
+// OK Punting for the moment because I don't immediately need this and
+// I could really end up in the weeds
+
+// returns the string passed, with a newline at the end
 // if the string didn't have one already.
 inline std::string ensure_nl(const std::string &src) {
     if(!src.length() || src[src.length() - 1] != '\n')
@@ -34,10 +61,8 @@ inline std::string chop_nl(std::string str) {
 
 // OK SO #include<format> doen't seem to exist on my machine.
 // let the reinvention commence.
-// Oh, interesting. this is a nightmare in c++.
 
-//inline std::string _stringformat(const utf8_byte *s) {
-inline std::string _stringformat(const uint8_t *s) {
+inline std::string _stringformat(const uint8_t *s, std::string_view opts) {
     if(!s) {
         return "";
     } else {
@@ -45,7 +70,7 @@ inline std::string _stringformat(const uint8_t *s) {
     }
 }
 
-inline std::string _stringformat(const char *s) {
+inline std::string _stringformat(const char *s, std::string_view opts) {
     if(!s) {
         return "";
     } else {
@@ -53,15 +78,16 @@ inline std::string _stringformat(const char *s) {
     }
 }
 
-inline std::string _stringformat(char * s) {
+inline std::string _stringformat(char * s, std::string_view opts) {
+// XXX do we even need this function?  if so, make it not crash on nulls
     return std::string(s);
 }
 
-inline std::string _stringformat(char c) {
+inline std::string _stringformat(char c, std::string_view opts) {
     return std::string(1, c);
 }
 
-inline std::string _stringformat(bool b) {
+inline std::string _stringformat(bool b, std::string_view opts) {
     if(b) return "true";
     return "false";
 }
@@ -80,7 +106,7 @@ inline std::string to_string(const std::string &in) {
 // or else it never gets matched, but since it calls the
 // more general one, the definition is later
 template <typename T, typename U>
-std::string _stringformat(std::pair<T, U> &x);
+std::string _stringformat(std::pair<T, U> &x, std::string_view opts);
 
 // some alternative syntax models I think the WG21 should
 // consider for templates:
@@ -122,10 +148,14 @@ struct _std_to_string_exists_for<T,
 {};
 
 template<typename T>
-std::string _stringformat(T &in, const std::string &opts = "") {
+std::string _stringformat(T &in, std::string_view opts = "") {
     if constexpr (std::is_convertible_v<T, std::string> or
                   std::is_convertible_v<T, std::string_view>) {
         // it's either already a string or directly convertible
+        // Note:  a const char *foo = nullptr is considered
+        // directly convertible, but will also directly crash.
+        // at the moment this is avoided via the more specific
+        // _stringformat(const char *) function...
         return in;
     } else if constexpr (_has_to_str<T>::value) {
         // it has a to_str method, so use that:
@@ -154,12 +184,13 @@ std::string _stringformat(T &in, const std::string &opts = "") {
 }
 
 template<typename... Args>
-std::string _stringformat(std::tuple<Args...> &in) {
+std::string _stringformat(std::tuple<Args...> &in, std::string_view opts) {
     // I read online someplace that std::pair was a special case
     // of std::tuple, so I was hoping this would cover std::map
     // entries, but of course it doesn't.  why would I expect
     // any generality?  whatevs.  leaving it because it does
     // work for std::tuple.
+// what's the right thing to do with opts in this case?  just pass the options on, regardless of the subtypes?  that could get weird.
     std::string out;
     std::apply([&out](auto &&... args) {
         const int num_args = sizeof...(args);
@@ -175,15 +206,20 @@ std::string _stringformat(std::tuple<Args...> &in) {
 }
 
 template <typename T, typename U>
-std::string _stringformat(std::pair<T, U> &x) {;
+std::string _stringformat(std::pair<T, U> &x, std::string_view opts) {;
+// again, what's the right thing to do with opts in this case?
     return _stringformat(x.first) + " => " + _stringformat(x.second);
 };
 
 // (as above, but const pair)
 template <typename T, typename U>
-std::string _stringformat(const std::pair<T, U> &x) {;
+std::string _stringformat(const std::pair<T, U> &x, std::string_view opts) {;
+// again, what's the right thing to do with opts in this case?
     return _stringformat(x.first) + " => " + _stringformat(x.second);
 };
+
+class stringformat_alternate_formatter {
+}
 
 class stringformat_post_processor {
     // {::c} -> columnate output (on tabs)
@@ -243,6 +279,8 @@ class stringformat_post_processor {
     // {::i} -> indent by the level indicated in the string
     // (which needs to be numeric, but, annoyingly, will
     // already have been stringformatted)
+// XXX we actually have the originals now, too, so we can use them.
+// here's a thought:  arbitrary numbers of ":" in the conversion; they happen one after the other; each is given the original and the result
     static std::string process_i(const std::string &in) {
         int indent = 0;
         int exponent = 1;
@@ -261,6 +299,8 @@ class stringformat_post_processor {
         for(int len = 0; len < indent; len++) {
             out += "  ";
         }
+// return std::string(indent * 2, ' '); // XXX this is the neater way.  why did we do 2 spaces?  oh 2 spaces is a "level".. hmm
+
         return out;
     }
 
@@ -323,18 +363,17 @@ std::string stringformat(std::string_view fmt, Args&&... args) {
 
     const int num_args = sizeof...(args);
 
-    std::function<std::string()> converters[] = {
-        std::function<std::string()>(
-            [&args]() {
-                return _stringformat(args);
+    // ok whatevs here's something kinda like format():
+    // https://en.cppreference.com/w/cpp/language/parameter_pack
+    std::function<std::string(std::string_view)> converters[] = {
+        std::function<std::string(std::string_view)>(
+            [&args](std::string_view opts) -> std::string {
+                return _stringformat(args, opts);
+                //return _stringformat(args);
             }
         )...
     };
 
-    // possibly better syntax.  see the notes file.
-
-    // ok whatevs here's something kinda like format():
-    // https://en.cppreference.com/w/cpp/language/parameter_pack
     std::string out;
     const size_t inlen = fmt.size();
     if(inlen == 0) return ""; // (because inlen might be unsigned)
@@ -350,12 +389,11 @@ std::string stringformat(std::string_view fmt, Args&&... args) {
             } else {
                 // parse the contents of the {}:
                 // Within {}, let's say the _future_ format is:
-                //  [ variable name ] [':' [ to-string function ] [':' [ post processing ] ] ]
-                // But, we can't, presently, because we can't see the names
-                // of the parameters and we've already converted everything
-                // to string.  So let's allow numeric parameter index instead
-                // of the variable name.
-                size_t ts_ind = 0; // pos of to-string function, if any
+                //  [ variable name ] [':' [ to-string args ] [':' [ post processing ] ] ]
+                // .. but there's no way to see the names of the variables,
+                // of course.  So, we'll use 0-based argument numbers.
+                size_t ts_ind = 0; // pos of to-string args, if any
+                size_t ts_len = 0; // length of to-string args
                 size_t pp_ind = 0; // pos of post processing function, if any
                 long arg_num = argi;
                 if(fmt[ind] >= '0' && fmt[ind] <= '9') {
@@ -376,10 +414,9 @@ std::string stringformat(std::string_view fmt, Args&&... args) {
                 }
 
                 if(arg_num < num_args) {
-                    std::string sub = converters[arg_num]();
+                    std::string sub = converters[arg_num](std::string_view(fmt.data() + ts_ind, ts_len));
                     if(ts_ind) {
                         while(fmt[ts_ind]) {
-
                             ts_ind++;
                             if(fmt[ts_ind] == ':' || fmt[ts_ind] == '}')
                                 break;

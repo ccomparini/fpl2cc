@@ -27,6 +27,9 @@ struct just_data {
 };
 
 int main() {
+    std::cout << std::unitbuf;
+    std::cerr << std::unitbuf;
+
     std::cout << stringformat(
         "here's arg 1: {1} and now 0: {0} and last is {}\n", "zero", "oneth", 2
     );
