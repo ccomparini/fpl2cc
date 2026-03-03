@@ -10,9 +10,10 @@ env.Append(CPPPATH=['#build/fpl2cc']) # because we use/test generated headers
 run_cc_tests(env);
 
 # The "fpl_iteself" directory contains fpl source files which
-# we compile and check the output of.  They may deliberately
-# contain/generate errors, and thus may or may not be expected to
-# compile, but should give reasonable error messages etc.
+# we compile and check the output of.  They generally test error
+# and/or warning conditions, and thus each may or may not be
+# expected to actually compile, but we do expect a particular
+# result from to attempted compilation of each.
 for expected in Glob('fpl_itself/*.fpl_expect'):
     basename, foo = os.path.splitext(expected.name)
     target_path = os.path.dirname(expected.get_abspath())
@@ -26,5 +27,10 @@ for expected in Glob('fpl_itself/*.fpl_expect'):
     )
     env.CompareOut(success, [ expected, capfile ])
 
+# ... and these are the more sophisticated tests which actually
+# run the generated parsers/languages generated. Each directory
+# has a separate generated language.  fpl2cc is expected to
+# correctly compile that language, and the generated languages
+# acre actually run and tested.
 run_target_language_tests(env);
 

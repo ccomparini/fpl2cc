@@ -255,6 +255,8 @@ def run_and_capture_action(program, varlist=[], **kwargs):
                                   created if it doesn't already exist.
                                   Ignored if INTERACTIVE is true.  Defaults
                                   to None.
+            STDERR_EXIT=<code>  - If set, return the exit code passed if
+                                  anything whatsoever was written to stderr.
             STDERR=<filename>   - If set, write stderr to the specified file.
                                   Scons $TARGET and $SOURCE variables are
                                   expanded.
@@ -320,6 +322,7 @@ def run_and_capture_action(program, varlist=[], **kwargs):
             timeout = default_kw('TIMEOUT', env, kwargs, 5)
             quiet   = default_kw('QUIET', env, kwargs, False)
 
+        strcommand = strfunction(target, source, env) # for error reporting
         output = run_command(
             command, env, timeout, quiet, profile
         )
@@ -331,7 +334,6 @@ def run_and_capture_action(program, varlist=[], **kwargs):
                 signame = signal.Signals(-returncode).name
             except ValueError:
                 signame = "(unknown signal)"
-            strcommand = strfunction(target, source, env)
             msg = f"\n{signame} ({returncode}) failure on command \"{strcommand}\"\n"
             print(msg, file=sys.stderr)
 
@@ -349,6 +351,15 @@ def run_and_capture_action(program, varlist=[], **kwargs):
         if outfile:
             with open(outfile, mode='wb') as outf:
                 outf.write(output['stdout'])
+
+        if output['stderr']:
+            stderr_exit = default_kw('STDERR_EXIT', env, kwargs, False)
+            if stderr_exit:
+                if quiet:
+                    print(f"Unexpected output from \"{strcommand}\":\n{output['stderr']}", file=sys.stderr)
+                else:
+                    print(f"Unexpected output from \"{strcommand}\" (see above)", file=sys.stderr)
+                return stderr_exit;
 
         if default_kw('IGNORE_EXIT', env, kwargs, False):
             # ignore "real" exit codes (which came from the program),
@@ -536,7 +547,7 @@ def language_from_basename(directory):
 #   [lang].cc: [lang].fpl #bin/fpl2cc
 # for the language specified, and makes the builder for:
 #   [x].result: [x].[lang] [lang]
-def make_language_test_rules(env, directory, language):
+def make_language_test_rules(env, directory, language, stderr_bad):
     langbase = directory + '/' + language
 
     # (langprog = the name of the language executable)
@@ -569,6 +580,7 @@ def make_language_test_rules(env, directory, language):
     env.CaptureFplCompile(
         [ langcc, capfile ],  [ langsource ],
         CAPFILE=capfile,
+        STDERR_EXIT=78 if stderr_bad else False,
     )
 
     compiler = env.Program(langprog, [ langprog + '.cc' ])
@@ -603,14 +615,6 @@ def run_language_tests(env, test_dirs, profile=False):
     #   [x].result: [lang] [x].[lang]
     # for each "expect" file.
     for test_dir in test_dirs:
-        # (Note: test_dir.get_abspath() gets the target path, not the source)
-        absdir = test_dir.get_abspath()
-        language = language_from_basename(absdir)
-        make_language_test_rules(env, absdir, language)
-
-        #print(f"test dir relpath is {test_dir.relpath}", file=sys.stderr)
-        #print(f"test dir name    is {test_dir.name}", file=sys.stderr)
-
         # we might expect certain output from the fpl compile
         # itself (for example, to test warnings emitted by
         # fpl2cc):
@@ -620,6 +624,14 @@ def run_language_tests(env, test_dirs, profile=False):
             env.CompareOut(
                 test_name + '.success', [ expected, test_name + '.fpl_result' ]
             )
+
+        # (Note: test_dir.get_abspath() gets the target path, not the source)
+        absdir = test_dir.get_abspath()
+        language = language_from_basename(absdir)
+        make_language_test_rules(env, absdir, language, not fpl_expecteds)
+
+        #print(f"test dir relpath is {test_dir.relpath}", file=sys.stderr)
+        #print(f"test dir name    is {test_dir.name}", file=sys.stderr)
 
         expecteds = Glob(test_dir.name + '/*.expect')
         for expected in expecteds:

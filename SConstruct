@@ -150,8 +150,8 @@ env.Append(BUILDERS = {
     'Fpl2cc' : Builder(
         action = fpl_compile_command(),
         emitter = depend_on_fpl2cc(),
-	suffix = '.cc',
-	src_suffix = '.fpl'
+	    suffix = '.cc',
+	    src_suffix = '.fpl'
     )
 })
 
@@ -160,8 +160,8 @@ env.Append(BUILDERS = {
     'Fpl2h' : Builder(
         action = fpl_compile_command(),
         emitter = depend_on_fpl2cc(),
-	suffix = '_parser.h',
-	src_suffix = '.fpl'
+	    suffix = '_parser.h',
+	    src_suffix = '.fpl'
     )
 })
 
@@ -171,8 +171,8 @@ env.Append(BUILDERS = {
             fpl_compile_command(), varlist=["FPLOPTS"]
         ),
         emitter = depend_on_fpl2cc(),
-	src_suffix = '.fpl',
-	suffix = '.cc'
+	    src_suffix = '.fpl',
+	    suffix = '.cc'
     )
 })
 
