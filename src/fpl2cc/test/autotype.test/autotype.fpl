@@ -17,23 +17,28 @@
 #  x unnamed things
 #  - multiple ways to get to the same thing
 
-#thing '.'^ -> done;
+@type_for things std::string
+(thing '.'^)+ -> things +{
+    std::cout << stringformat("final type is {}\n", thing@type_name());
+    std::cout << thing@catmap("Got: {}\n");
+    return stringformat("yay, {} things\n", thing@count());
+}+
 
-thing+ '.'^ -> thing;
-zeta -> thing;
 
+
+zeta     -> thing;
 list+    -> thing;
 analogy+ -> thing;
 
+'zzzzzzzzzz' -> zeta;  # (terminal type)
+
 @type_for word std::string
-/[A-Za-z]/ -> word;
-word (','^ word)* -> list;
+/[A-Za-z]+/ -> word;
+word (','^ word)* -> list +{
+    return word@join(", ");
+}+
 
 word:a ':' word:b -> relation;
 relation:ab '::'^ relation:cd -> analogy;
-
-'zzzzzzzzzz' -> zeta;
-
-
 
 

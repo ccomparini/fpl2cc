@@ -54,7 +54,7 @@ class productions {
 
     std::string final_type; // this is what the parser returns. set by @produces or inferred
     std::string def_type; // if not "", fill in unknown types with this
-    std::map<std::string, std::string> type_for_product; // (c++ reduce type for particular product)
+    std::map<std::string, std::string> type_for_product; // (target reduce type for particular product)
     std::set<std::string> all_types; // for deduplication
 
     std::list<std::string> imports; // filenames
@@ -1158,11 +1158,15 @@ class productions {
                 return attr_name;
             } 
 
+            std::string type_name() const {
+                return type;
+            } 
+
             std::string to_str() const {
                 return stringformat(
                     // if there's more than one element, show them
-                    // joined with '|' (i.e. "or")
-                    "    {}:{}{}\n", join(elements, "|"), name(), multiple?"*":""
+                    // joined with '|'
+                    "    {}:{}{}", join(elements, "|"), name(), multiple?"*":""
                 );
             }
 
@@ -1214,13 +1218,16 @@ class productions {
             }
         };
 
+        std::string for_product;
         using attribute_set = std::set<attribute>;
         attribute_set attributes;
-        std::string type_name;
+        std::string type_name; // unfortunately, we need to keep this for name lookups
 
-        generated_type(const std::string &pr, const productions &prds) :
-            type_name(stringformat("_generated_type_for_{}", pr)) {
-            init_attributes(pr, prds);
+        generated_type(const std::string &pr, const productions &prds)
+            : for_product(pr),
+              type_name(stringformat("_generated_type_for_{}", pr)) {
+
+            init_attributes(prds);
         }
 
         // this is so they can be looked up by name:
@@ -1234,6 +1241,29 @@ class productions {
             return type_name;
         }
 
+        // "simple" means it isn't (or doesn't need to be)
+        // a compound type.  In this case, we shouldn't
+        // actually generate a new type.
+        bool is_simple() const {
+            return attributes.size() == 1;
+        }
+
+        // if the type generated has only one attribute,
+        // we don't want to make a complex/compound type
+        // for it - that just makes trouble and it's
+        // unintuitive for fpl authors.  so, if there's
+        // only one attribute, this returns the name of
+        // its type;  otherwise, returns an empty string.
+        // CAVEAT:  ONLY CALL AFTER TYPE RESOLUTION.  sorry.
+        std::string simple_type() const {
+            auto attr = attributes.begin();
+            auto tname = attr->type_name();
+            if(std::next(attr) == attributes.end())
+                return tname;
+            // else there's more than just the one:
+            return "";
+        }
+
         // generated types can be looked up by name in a std::set or similar:
         friend bool operator<(
             const generated_type &left, const generated_type &right
@@ -1241,9 +1271,7 @@ class productions {
             return left.type_name < right.type_name;
         }
 
-        void init_attributes(
-            const std::string &for_product, const productions &prds
-        ) {
+        void init_attributes(const productions &prds) {
             auto strl  = prds.rules_for_product.lower_bound(for_product);
             auto endrl = prds.rules_for_product.upper_bound(for_product);
             for(auto rit = strl; rit != endrl; ++rit) {
@@ -1517,12 +1545,26 @@ public:
         } else {
             if(opts.debug_types) {
                 std::cerr << stringformat(
-                    "{} gets type {} ({})\n", prod, type, why
+                    "{} gets type {} ({}) {}\n", prod, type, why, caller
                 );
             }
             type_for_product[prod] = type;
             all_types.insert(type);
         }
+    }
+
+    // replaces all usages of the given type with the new type
+    void replace_type(const std::string &type, const std::string &with_type) {
+        if(opts.debug_types)
+            std::cerr << stringformat("replacing type {} with {}....\n", type, with_type);
+        for(auto &type_for_prod: type_for_product) {
+            if(type_for_prod.second == type) {
+                if(opts.debug_types)
+                    std::cerr << stringformat("  ... for product {}\n", type_for_prod.first);
+                type_for_prod.second = with_type;
+            }
+        }
+        all_types.erase(type);
     }
 
     void set_precedence(const std::string &product, int precedence) {
@@ -3746,7 +3788,19 @@ public:
             }
             for(auto candidate : gt_candidates) {
                 candidate.resolve_attribute_types(*this);
-                generated_types.insert(candidate);
+                if(candidate.is_simple()) {
+                    // if the generated type has only one attribute,
+                    // then we don't need (or want!) to generate a
+                    // whole new compound type for it.  So, tell
+                    // everything which uses it to use the type
+                    // for that attribute instead.  We do this in
+                    // this pass because we might not be able to
+                    // know the simple type until after
+                    // resolve_attribute_types().
+                    replace_type(candidate.name(), candidate.simple_type());
+                } else {
+                    generated_types.insert(candidate);
+                }
             }
         } else if(has_default_type()) {
             for(auto prr : rules_for_product) {

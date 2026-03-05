@@ -416,6 +416,8 @@ def fpl_compile_command():
     additional_options=""
     if 'FPL_TEST_DEBUG' in os.environ:
         additional_options="--debug-single-step"
+    if 'FPL_DEBUG_TYPES' in os.environ:
+        additional_options="--debug-types"
 
     return f'bin/fpl2cc --src-path=src/grammarlib $FPLOPTS {additional_options} $SOURCES --out $TARGET --depfile .deps --statedump .states'
 

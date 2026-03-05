@@ -1,8 +1,20 @@
 @parameter: const productions &prds@
 @realign: #line {} "{}"@
 
+struct __gt_base {
+    // this is so that on string conversion, generated types
+    // share indent levels.  it's... better than the alternative
+    // of having each indent separately.  sigh.
+    // (errf note that non-generated types will end up
+    // stringconverting with potentially different indentation
+    // as well, since they won't use this counter.  indentation
+    // is just done wrong - need to make it indent at newlines,
+    // within stringformat().  moving on for now.)
+    static inline int _generated_types_indent_level = 0;
+};
+
 @for(auto gen_type: prds.generated_types) {-@
-    struct @gen_type.name()@ {
+    struct @gen_type.name()@ : public __gt_base {
         @for(auto mem : gen_type.attributes) {-@
             @/* to KISS, everything is std::vector (even if there
                 is only ever exactly one match) so that we don't
@@ -17,11 +29,13 @@
         @gen_type.name()@() { }
 
         std::string to_str() const {
-            std::string result = "{\n";
+            std::string result = stringformat("\n{::i}@gen_type.name()@ {{\n", _generated_types_indent_level);
+            _generated_types_indent_level++;
             @for(auto mem : gen_type.attributes) {-@
-                result += stringformat("    @mem.name()@: {}\n", @mem.name()@);
+                result += stringformat("{::i}@mem.name()@: {}\n", _generated_types_indent_level, @mem.name()@);
             @}@
-            result += "}\n";
+            _generated_types_indent_level--;
+            result += stringformat("{::i}}\n", _generated_types_indent_level);
             return result;
         }
     };
