@@ -593,6 +593,7 @@ std::string to_hex(const T &inst) {
     #include "to_hex.h"
     #endif
 
+    #include <any>
     #include <cstdlib>
     #include <ctype.h>
     #include <list>
@@ -707,7 +708,6 @@ std::string to_hex(const T &inst) {
     {};
 
     template<typename T>
-    //std::string _stringformat(const T &in, const std::string &opts = "") {
     std::string _stringformat(T &in, const std::string &opts = "") {
         if constexpr (std::is_convertible_v<T, std::string> or
         std::is_convertible_v<T, std::string_view>) {
@@ -908,24 +908,19 @@ template <typename... Args>
 std::string stringformat(std::string_view fmt, Args&&... args) {
 
 const int num_args = sizeof...(args);
-// ok this works at all - string convert each argument,
-// before and regardless of if it's going to be used.
-// it sucks because we can't determine how to format
-// a given argument before we format it.  is this why
-// clang isn't shiping with an implementation?
-// ok whatevs shipit.
-const std::string str_arg[] = { _stringformat(args) ... };
+
+std::function<std::string()> converters[] = {
+    std::function<std::string()>(
+    [&args]() {
+        return _stringformat(args);
+    }
+    )...
+};
 
 // possibly better syntax.  see the notes file.
 
 // ok whatevs here's something kinda like format():
 // https://en.cppreference.com/w/cpp/language/parameter_pack
-// OMG you cannot iterate the Args list.  you have to recurse.
-// oh but you _can_ expand to a tuple and sorta iterate that,
-// but not at run time.
-// I _think_ the c++ way you have to do this backwards
-// and for each agument substitute that arg into the string,
-// as opposed to going through the string as I'm doing. ohwell.
 std::string out;
 const size_t inlen = fmt.size();
 if(inlen == 0) return ""; // (because inlen might be unsigned)
@@ -967,7 +962,7 @@ for(ind = 0; ind < inlen; ++ind) {
             }
 
             if(arg_num < num_args) {
-                std::string sub = str_arg[arg_num];
+                std::string sub = converters[arg_num]();
                 if(ts_ind) {
                     while(fmt[ts_ind]) {
 
@@ -2211,7 +2206,7 @@ inline std::string to_str() const {
 #define VERSION_MIN 10
 
 
-#line 2213 "src/jemplpl/jemplpl.cc"
+#line 2208 "src/jemplpl/jemplpl.cc"
 
 
 
@@ -2262,7 +2257,7 @@ public:
 // text (28:1):              •/[^@\\n]+/:t                                                                                                             => state 6  (src/grammarlib/jemp.fpl:147)
 // text (29:1):              •leading_ws                                                                                                               => state 19 (src/grammarlib/jemp.fpl:151)
 // text (30:1):              •trailing_ws                                                                                                              => state 1  (src/grammarlib/jemp.fpl:152)
-// _fpl_goal (32:1):         •complete                                                                                                                 => state 80 (src/fpl2cc/productions.h:4277)
+// _fpl_goal (32:1):         •complete                                                                                                                 => state 80 (src/fpl2cc/productions.h:4331)
 //
 void state_0() {
 
@@ -12237,7 +12232,7 @@ void state_79() {
 #line 5 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 //
-// _fpl_goal (32:0):  complete • => (done) (src/fpl2cc/productions.h:4277)
+// _fpl_goal (32:0):  complete • => (done) (src/fpl2cc/productions.h:4331)
 //
 void state_80() {
 
@@ -12412,8 +12407,20 @@ class Terminal {
 
 #line 2 "src/fpl2cc/fpl_x_parser_generated_types.h.jemp"
 
+struct __gt_base {
+    // this is so that on string conversion, generated types
+    // share indent levels.  it's... better than the alternative
+    // of having each indent separately.  sigh.
+    // (errf note that non-generated types will end up
+    // stringconverting with potentially different indentation
+    // as well, since they won't use this counter.  indentation
+    // is just done wrong - need to make it indent at newlines,
+    // within stringformat().  moving on for now.)
+    static inline int _generated_types_indent_level = 0;
+};
 
-#line 28 "src/fpl2cc/fpl_x_parser_generated_types.h.jemp"
+
+#line 42 "src/fpl2cc/fpl_x_parser_generated_types.h.jemp"
 
 
 
@@ -16498,7 +16505,7 @@ void init(const std::filesystem::path &src) {
     init_import_path(src);
 }
 
-#line 16500 "src/jemplpl/jemplpl.cc"
+#line 16507 "src/jemplpl/jemplpl.cc"
 
 // return to "private" after each such block.
 // this way, authors can add public members
@@ -20075,7 +20082,7 @@ static const char *state_string(State st) {
         "    text (28:1):\t •/[^@\\\\n]+/:t \t=> state 6\t(src/grammarlib/jemp.fpl:147)\n"
         "    text (29:1):\t •leading_ws \t=> state 19\t(src/grammarlib/jemp.fpl:151)\n"
         "    text (30:1):\t •trailing_ws \t=> state 1\t(src/grammarlib/jemp.fpl:152)\n"
-        "    _fpl_goal (32:1):\t •complete \t=> state 80\t(src/fpl2cc/productions.h:4277)\n"
+        "    _fpl_goal (32:1):\t •complete \t=> state 80\t(src/fpl2cc/productions.h:4331)\n"
         ;
     }
     if(&jemplpl_parser::state_1 == st) {
@@ -20687,7 +20694,7 @@ static const char *state_string(State st) {
     }
     if(&jemplpl_parser::state_80 == st) {
         return "state_80:\n"
-        "    _fpl_goal (32:0):\t complete •\t=> (done)\t(src/fpl2cc/productions.h:4277)\n"
+        "    _fpl_goal (32:0):\t complete •\t=> (done)\t(src/fpl2cc/productions.h:4331)\n"
         ;
     }
 
@@ -21846,7 +21853,7 @@ static size_t separator_length(const utf8_byte *inp) {
         // separator "none" means 0 bytes of separator:
         return 0;
 
-        #line 21848 "src/jemplpl/jemplpl.cc"
+        #line 21855 "src/jemplpl/jemplpl.cc"
 
 
     }
@@ -25444,13 +25451,13 @@ bool dummy = true // hack for comma
             return 1;
         }
         static int line_number() {
-            return 4277;
+            return 4331;
         }
         static const char *filename() {
             return "src/fpl2cc/productions.h";
         }
         static const char *location() {
-            return "src/fpl2cc/productions.h:4277";
+            return "src/fpl2cc/productions.h:4331";
         }
         static const char *to_str() {
             return "complete -> _fpl_goal";
@@ -25465,7 +25472,7 @@ bool dummy = true // hack for comma
                 return pname[ind];
             } else {
                 return "param_name index out of bounds at "
-                "src/fpl2cc/productions.h:4277";
+                "src/fpl2cc/productions.h:4331";
             }
         }
         static const char *param_type(unsigned int ind) {
@@ -25479,7 +25486,7 @@ bool dummy = true // hack for comma
             } else {
                 return (
                 "param_type index out of bounds at "
-                "src/fpl2cc/productions.h:4277"
+                "src/fpl2cc/productions.h:4331"
                 );
             }
         }
@@ -25500,7 +25507,7 @@ bool dummy = true // hack for comma
 
 
     #line 52 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 1 "src/fpl2cc/productions.h:4277 (default action for complete -> _fpl_goal)"
+    #line 1 "src/fpl2cc/productions.h:4331 (default action for complete -> _fpl_goal)"
     // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:54
     return std::string(
 
@@ -25517,7 +25524,7 @@ bool dummy = true // hack for comma
     );
 
     #line 75 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-    #line 4277 "src/fpl2cc/productions.h"
+    #line 4331 "src/fpl2cc/productions.h"
 }
 
 
@@ -25589,7 +25596,7 @@ std::cout << reformat_code(join(generated_code, "\n\n"));
 
 return total_errors?1:0;
 
-#line 25591 "src/jemplpl/jemplpl.cc"
+#line 25598 "src/jemplpl/jemplpl.cc"
 
 }
 
