@@ -1316,29 +1316,35 @@ public:
         return "<invalid state>";
     }
 
-    // Returns true if elements matching the element id passed
-    // are ejected in the context of the given state, or false
-    // otherwise.
-// XXX actually this can all be determined when compiling the fpl.
-// needs no runtime check.  nicht war?
-    static bool state_ejects(State st, int element_id) {
-        @-for(int sti = 0; sti < prds.num_states(); sti++) {-@
-            @declare state: prds.states.at(sti)@
-            if(&@prds.state_fn(state, true)@ == st) {
-                @for(auto eje : state.ejected_elements()) {@
-                    if(ElementID::@prds.element_id_name(eje)@ == element_id) {
-                        return true;
-                    } else
-                @}@
+
+    // function per nonterminal element which returns true if the
+    // nonterminal is ejected in a particular state:
+    //    bool is_{nonterminal}_ejected_in_state(State st) { ...  }
+    // Terminal ejectedness can be determined at fpl-compile time;
+    // therefore we only generate these for nonterminals.
+    // In many or most cases, a given noterminal is never ejected,
+    // so having a separate function for each nonterminal allows the
+    // c++ compiler to optimize out the trivial cases.
+    @for(int el_id = 0; el_id < prds.elements.size(); ++el_id) {-@
+        @-if(prds.elements[el_id].is_nonterminal()) {@
+            @declare elname: prds.element_id_name(el_id)@
+            static bool is_@elname@_ejected_in_state(State st) {
+                @-for(int sti = 0; sti < prds.num_states(); sti++) {-@
+                    @declare state: prds.states.at(sti)@
+                    @declare ejected: state.ejected_elements().count(prds.elements[el_id])@
+                    @declare state_function: prds.state_fn(sti, true)@
+                    @-if(ejected) {@
+                        if(&@state_function@ == st) {
+                            return true;
+                        } else 
+                    @}-@
+                @-}-@
                 {
                     return false;
                 }
-            } else
+            }
         @-}-@
-        {
-            return false;
-        }
-    }
+    @-}-@
 
     static bool is_goal(int el_id) {
         switch(el_id) {

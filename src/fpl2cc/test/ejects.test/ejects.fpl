@@ -7,8 +7,21 @@
     return "\n" + thing@join("\n");
 }+
 
+'!'^ thing^ -> thing +{
+    if(all_matched_steps().param_count()) {
+        return stringformat(
+            "expected no parameters but got {}", all_matched_steps()
+        );
+    }
+    return "ejected thing";
+}+
+
 # This will parse 1 or more 'a' followed by 0 or more 'c'
 # terminated with a 'b', only pushing the 'c's to the parameter
 # stack ('a' and 'b' are "ejected" by the ^ operator).
-'a'^+ 'c'* 'b'^ -> thing +{ return stringformat("a+ b ghost with 'c' {} times", all_matched_steps().param_count()); }+
+'a'^+ 'c'* 'b'^ -> thing +{
+    return stringformat(
+        "a+ b ghost with 'c' {} times", all_matched_steps().param_count()
+    );
+}+
 

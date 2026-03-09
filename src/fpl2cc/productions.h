@@ -364,7 +364,13 @@ class productions {
         }
     };
 
-    static void warn(const std::string &msg) { jerror::warning(msg); };
+    // stringformats the current input location (eg file and line)
+    std::string location_str() const {
+        if(inp) {
+            return inp->location_str();
+        }
+        return "<no input>";
+    }
 
     static std::string format_error_message(
         const std::string &location,
@@ -375,6 +381,14 @@ class productions {
             nl = "\n";
 
         return stringformat("Error {}: {}{}", location, msg, nl);
+    }
+
+    static void warn(const std::string &msg, const std::string &where="") {
+        if(where.length()) {
+            jerror::warning(stringformat("{} ({})", msg, where));
+        } else {
+            jerror::warning(msg);
+        }
     }
 
     // report an error relative to the file for the reader passed
@@ -766,6 +780,15 @@ class productions {
                     }
                     trans = lr_transition(step.gexpr, ejected, tp, item.rule);
                 } else {
+/*
+// XXX this is lies
+                    if(ejected && step.gexpr.is_nonterminal()) {
+                        warn(stringformat(
+                            "'^' is unsupported for nonterminals (\"{}\")",
+                            step.gexpr
+                        ), prds.location_str());
+                    }
+*/
                     trans = lr_transition(
                         step.gexpr, ejected,
                         lr_transition::STATE, next_stn

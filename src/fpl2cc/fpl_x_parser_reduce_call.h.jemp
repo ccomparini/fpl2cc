@@ -149,11 +149,17 @@
     */@
     lr_pop_to(lr_read_pos - 1);
 
-    @/* ya know, if it weren't for potential side effects, it's
-        possible we could get away with not even calling the
-        reduce function in the eject case...
-    */@
-    bool eject = state_ejects(cur_state, @result_el_id@);
+    @/* Finally, push the state and result of the reduction
+    to the lr stack.
+     */@
+    bool eject = is_@result_el_id@_ejected_in_state(cur_state);
+    @if(opts.debug) {-@
+        std::cerr << stringformat(
+            "State for ejection calcs is {} and sez {}",
+            state_to_str(cur_state), eject?"EJECT!":"keep it"
+        );
+    @-}-@
+
     lr_push(@result_el_id@, eject, src_pos, prod);
 
     @if(opts.debug) {-@
