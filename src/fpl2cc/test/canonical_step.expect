@@ -1,34 +1,34 @@
 returncode = 0
 stderr = ""
 stdout = "... testing canonical steps for parameters
-src/fpl2cc/test/canonical_step.cc:65:  a b c d -> e;
+src/fpl2cc/test/canonical_step.cc:66:  a b c d -> e;
   rule 0: a b c d -> e
     a:  <0.0 = a>
     b:  <0.1 = b>
     c:  <0.2 = c>
     d:  <0.3 = d>
-src/fpl2cc/test/canonical_step.cc:68:  (a b)* c d -> e;
+src/fpl2cc/test/canonical_step.cc:69:  (a b)* c d -> e;
   rule 1: (_subex_0)* c d -> e
     a:  <0.0 = a>
     b: [1] <0.1 = b>
     c:  <1.1 = c>
     d:  <1.2 = d>
-src/fpl2cc/test/canonical_step.cc:71:  (foo:aaa b) bar:aaa d -> e;
+src/fpl2cc/test/canonical_step.cc:72:  (foo:aaa b) bar:aaa d -> e;
   rule 1: (_subex_0) bar:aaa d -> e
     aaa:  <0.0 = foo:aaa>
     b: [1] <0.1 = b>
     d:  <1.2 = d>
-src/fpl2cc/test/canonical_step.cc:74:  a* -> foo;\\na foo b -> bar;
+src/fpl2cc/test/canonical_step.cc:76:  a* -> foo;\\na foo b -> bar;
   rule 0: a* -> foo
     a:  <0.0 = a*>
   rule 1: a foo b -> bar
     a:  <1.0 = a>
     b:  <1.2 = b>
     foo:  <1.1 = foo>
-src/fpl2cc/test/canonical_step.cc:78:  (thing ';'^)* -> things;
+src/fpl2cc/test/canonical_step.cc:80:  (thing ';'^)* -> things;
   rule 1: (_subex_0)*:thing -> things
     thing:  <0.0 = thing>
-src/fpl2cc/test/canonical_step.cc:82:  stuff* -> goal\\na_with_trailing_bs  -> stuff;\\nabbb                -> stuff;\\njust_a              -> stuff;\\nbb                  -> stuff;\\n'b'                 -> stuff;\\n'a'^ 'b':first (', '^ 'b')*:tr -> a_with_trailing_bs;\\n'a'^ ('b' 'b' 'b')+:bees -> abbb;\\n'a'^ -> just_a;\\n'b' 'b' -> bb;
+src/fpl2cc/test/canonical_step.cc:92:  stuff* -> goal\\na_with_trailing_bs  -> stuff;\\nabbb                -> stuff;\\njust_a              -> stuff;\\nbb                  -> stuff;\\n'b'                 -> stuff;\\n'a'^ 'b':first (', '^ 'b')*:tr -> a_with_trailing_bs;\\n'a'^ ('b' 'b' 'b')+:bees -> abbb;\\n'a'^ -> just_a;\\n'b' 'b' -> bb;
   rule 0: stuff* -> goal
     stuff:  <0.0 = stuff*>
   rule 1: a_with_trailing_bs -> stuff

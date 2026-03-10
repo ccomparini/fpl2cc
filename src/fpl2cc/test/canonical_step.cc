@@ -63,21 +63,21 @@ struct cs_test {
 
 static std::vector<cs_test> tests = {
     {
-        "a b c d -> e;", 
+        "a b c d -> e;", THIS_LINE
     },
     {
-        "(a b)* c d -> e;"
+        "(a b)* c d -> e;", THIS_LINE
     },
     {
-        "(foo:aaa b) bar:aaa d -> e;"
+        "(foo:aaa b) bar:aaa d -> e;", THIS_LINE
     },
     {
         "a* -> foo;\n"
-        "a foo b -> bar;"
+        "a foo b -> bar;", THIS_LINE
     },
     {
         // src/fpl2cc/test/reserve.test/reserve.fpl_expect
-        "(thing ';'^)* -> things;"
+        "(thing ';'^)* -> things;", THIS_LINE
     },
     {
         "stuff* -> goal\n"
@@ -89,7 +89,7 @@ static std::vector<cs_test> tests = {
         "'a'^ 'b':first (', '^ 'b')*:tr -> a_with_trailing_bs;\n"
         "'a'^ ('b' 'b' 'b')+:bees -> abbb;\n"
         "'a'^ -> just_a;\n"
-        "'b' 'b' -> bb;"
+        "'b' 'b' -> bb;", THIS_LINE
     },
 };
 
