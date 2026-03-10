@@ -2,6 +2,7 @@
 #define C_STR_ESCAPE_H
 
 #include<string>
+#include<cstdint>
 
 /*
    Returns a version of the string passed which is suitable for

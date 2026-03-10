@@ -4,6 +4,7 @@
 #include <fstream>
 #include <set>
 #include <string>
+#include <string.h> // for strerr
 #include "util/jerror.h"
 #include "util/searchpath.h"
 #include "util/src_location.h"
