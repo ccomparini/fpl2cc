@@ -1,0 +1,2 @@
+git_id	cpu_total	cpu_user	cpu_system	max_rss	timestamp	hostname	arch	os	exit_code	signal
+d7a37f4	0.036771	0.036771	0.000000	35980	1773112848	titan1a	x86_64	Linux 6.5.0-21-generic	0	-
