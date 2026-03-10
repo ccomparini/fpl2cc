@@ -5,4 +5,5 @@ one from src/util/test/src_location.cc:13
 next line from src/util/test/src_location.cc:14
 skipped a couple from src/util/test/src_location.cc:17
 woot from src/util/test/src_location.cc:19
+src/util/test/src_location.cc:21 should be line 21
 "

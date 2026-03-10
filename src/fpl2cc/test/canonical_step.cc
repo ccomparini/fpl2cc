@@ -63,7 +63,7 @@ struct cs_test {
 
 static std::vector<cs_test> tests = {
     {
-        "a b c d -> e;"
+        "a b c d -> e;", 
     },
     {
         "(a b)* c d -> e;"

@@ -8,7 +8,7 @@ typedef const std::string &src_location;
 
 #define _CLUDGE_TO_STR(x) #x
 #define _CLUDGE_STR(x) _CLUDGE_TO_STR(x)
-#define THIS_LINE __FILE__ " line " _CLUDGE_STR(__LINE__)
+#define THIS_LINE __FILE__ ":" _CLUDGE_STR(__LINE__)
 
 #ifndef __has_builtin
   #define __has_builtin(x) 0

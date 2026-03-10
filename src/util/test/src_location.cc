@@ -17,5 +17,7 @@ int main(int argc, char **argv) {
     print_caller("skipped a couple");
 
     print_caller("woot");
+
+    std::cout << THIS_LINE << " should be line 21\n";
 }
 
