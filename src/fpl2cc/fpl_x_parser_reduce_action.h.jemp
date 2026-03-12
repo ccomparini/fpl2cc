@@ -4,14 +4,25 @@
 @declare num_params: rule.parameter_count()@
 @realign: #line {} "{}" @
 
-@return_type@ @rule.rule_fn()@(
-    @-for(int pind = 0; pind < num_params; pind++) {-@
-        @declare pname: rule.parameter_name(pind)@
+@declare arg_container: stringformat("_{}_parameters", rule.rule_fn())@
+struct @arg_container@_t {
+    @-for(auto pname : rule.parameter_names()) {-@
         @declare pstep: prds.canonical_step_for_param(rule.rule_number(), pname)@
-        @- pind?",":"" -@ ReductionParameter<@pstep.type_in_target()@> @pname@
+        ReductionParameter<@pstep.type_in_target()@> @pname@;
     @-}-@
-) {
+};
+
+@return_type@ @rule.rule_fn()@(const @arg_container@_t &@arg_container@) {
     @#fpl_x_parser_reduce_action_meta(prds, rule)@
+
+    @-for(auto pname : rule.parameter_names()) {-@
+        @declare pstep: prds.canonical_step_for_param(rule.rule_number(), pname)@
+        @-if(pstep.is_parameter_single()) {-@
+            const auto &@pname@ = @arg_container@.@pname@.val();
+        @-} else {-@
+            const auto &@pname@ = @arg_container@.@pname@;
+        @-}-@
+    @-}-@
 
     // @rule.to_str()@
 
@@ -34,9 +45,10 @@
 
     @if(auto rule_code = rule.reduce_code()) {-@
         @/* fpl-author-supplied rule code: */@
-        @#fpl_action_#rule_code.language#(prds, rule)@
+        @#fpl_action_#rule_code.language#(prds, rule, arg_container)@
     @} else if(prds.has_generated_type(rule.product())) {@
         @/* auto generated type - initialize from parameters */@
+        // @@generate_types is deprecated; this will no longer work.
         @return_type@ result;
         @-for(int pind = 0; pind < num_params; pind++) {-@
             @declare param: rule.parameter_step(pind)@
@@ -63,10 +75,10 @@
                 @-} else {-@
                     @-if(parmi > 0){@,@}-@ @/* argument separator */@
                     @-if(param.is_nonterminal()) {-@
-                        @-vname@.val()
+                        @-vname@
                     @-} else {-@
                         @/* by default, pass terminals a strings: */@
-                        @-vname@.val().to_str()
+                        @-vname@.to_str()
                     @-}-@
                 @-}-@
             @-}-@

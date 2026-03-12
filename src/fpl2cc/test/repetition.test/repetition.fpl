@@ -135,14 +135,11 @@ digit*:leading digit?:penultimate digit:last -> statement +{
 # match.  So, don't use this as an example of how to
 # actually do this.
 '"'^ !'"':contents* '"'^ -> statement +{
-    //return stringformat("quoted string: \"{}\"", contents@concatenate());
-    return stringformat("quoted string: \"{}\"", contents);
+    return stringformat("quoted string: \"{}\"", contents@concatenate());
 }+
 
-# heh... bug:  foo becomes foo.var() within the string.
-#/f[aeiou]o/:foo -> statement +{
-/f[aeiou]o/ -> statement +{
-    return "close enough to foo";
+/f[aeiou]o/:foo -> statement +{
+    return stringformat("{} is close enough to foo", foo);
 }+
 
 '!'^ xxx_or_def aaa_or_def '!'^ -> statement +{

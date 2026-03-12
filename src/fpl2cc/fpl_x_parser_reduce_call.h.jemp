@@ -124,11 +124,11 @@
     @/* this is the call to the reduce code */@
     @declare num_params: rule.parameter_count()@
     Product prod(
-        @prds.rule_fn(rule) -@ (
+        @prds.rule_fn(rule) -@ ({
             @-for(int pind = 0; pind < num_params; pind++) {-@
                 @- pind?",":"" -@ arg_@-rule.parameter_name(pind)-@
             @-}-@
-        )
+        })
     );
 
     @declare result_el_id: prds.element_id_name(rule.product_element()) @

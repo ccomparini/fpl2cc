@@ -84,13 +84,13 @@ stuff* the_end -> done +{
     if(contents@count() == 0) {
         return stringformat("empty fancy string.");
     }
-    return stringformat("fancy string: «{}»", contents);
+    return stringformat("fancy string: «{}»", contents[0]);
     
 }+ 
 
 @terminal flag [ '🇺🇸' '🇯🇵' '🇰🇷' '🇩🇪'  '🇪🇸' '🇮🇹' '🇬🇧' ]
 &flag+:flags -> stuff +{
-    return stringformat("{} flags: {}\n", flags@count(), flags);
+    return stringformat("{} flags: {}\n", flags@count(), flags.join(" "));
 }+
 
 block -> stuff;

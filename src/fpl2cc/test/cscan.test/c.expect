@@ -1,6 +1,6 @@
 returncode = 0
 stderr = ""
-stdout = "2 flags.val(): 🇺🇸
+stdout = "2 flags: 🇺🇸 🇯🇵
 
 ding!
 "

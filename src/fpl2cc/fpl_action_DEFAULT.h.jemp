@@ -1,10 +1,11 @@
 @/*
 
-fpl-author supplied reduce action, in the "default" (= generated)
+fpl-author supplied reduce action, in the "default" (c++, effectively)
 language.
 
  */@
 @parameter: const productions &prds@
 @parameter: const production_rule &rule@
-@rule.reduce_code().format(false)@
+@parameter: std::string_view arg_container@
+@rule.reduce_code().format(false, arg_container)@
 

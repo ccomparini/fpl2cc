@@ -143,7 +143,7 @@ class productions {
             return parentmost;
         }
 
-        // .... to my surpsise, I seem to have to explicitly
+        // .... to my surprise, I seem to have to explicitly
         // write this?  what am I missing?
         bool operator==(const rulestep &other) const {
             return   (owner == other.owner)
@@ -166,8 +166,37 @@ class productions {
         bool is_multiple()      const { return step().is_multiple();      }
         bool is_optional()      const { return step().is_optional();      }
 
+        // the above refer to the specific step, regardless of
+        // its context in terms of subexpressions.
+        // this one takes into account "parent" expressions -
+        // if it's in a subexpression, it might be single within
+        // the subexpression, but not single as a parameter
+        // due to optionality/multipleness in containing expressions.
+        bool is_parameter_single() const {
+            for(auto up = *this; up; up = up.parent_rulestep()) {
+                if(up.is_multiple() || up.is_optional()) {
+                    return false;
+                }
+            }
+            
+            // actually it's even more complicated, because the
+            // canonical step might be single while the parameter
+            // is not! for example something like:
+            //  '('^ arg (','^ arg)* ')'^
+            // ... the canonical step is the first arg, but
+            // it is melded with any other args, so it's
+            // still multiple from the point of view of the
+            // fpl author.  So it's only "single" if the meld
+            // is 0.
+            // this will warn if we call it before the final
+            // meld is known:
+            return final_meld() == 0;
+        }
+
         // grrr hates the mix and match of variable vs parameter.  fix.
-        std::string parameter_name() const { return step().variable_name(); }
+        std::string parameter_name() const {
+            return step().variable_name();
+        }
 
         // Returns the "flat" next rulestep, which is the rulestep
         // after the current rulestep, ignoring multiples/optionals
@@ -827,7 +856,7 @@ class productions {
             transition_cache = out;
             return out;
         }
- 
+
         void add_item(const lr_item &it) {
             items.insert(it);
         }
@@ -1105,7 +1134,7 @@ class productions {
                         }
                     }
                 }
- 
+
                 if(items_with_eject.size() > 0) {
                     if(items_without_eject.size() > 0) {
                         // some items/rules expect this to be ejected, and
@@ -1826,7 +1855,7 @@ public:
         }
     }
 
-    void parse_directive(const std::string &dir) {
+    void parse_directive(const std::string &dir, size_t start_position) {
         if(dir == "assertion") {
             parse_assertion();
         } else if(dir == "comment") {
@@ -1860,8 +1889,8 @@ public:
             auto emfile = opts.embed_include_path.find(arg_for_directive());
             embeds.emplace(embeds.end(), utf8_buffer(emfile));
         } else if(dir == "generate_types") {
-            // tell this to generate a type for anything whose
-            // type it otherwise can't infer:
+            // DEPRECATED
+            error(*inp, start_position, "generate_types is no longer supported");
             generate_types = true;
         } else if(dir == "goal") {
             parse_goal();
@@ -2459,7 +2488,7 @@ public:
             // called "items".
             set_subex_names(sub, sub.varname);
         }
-        
+
         if(sub.varname == "") {
             // this makes it so that if you have:
             //   (foo:bar)* -> bat;
@@ -2870,7 +2899,7 @@ public:
             if(inp->read_byte_equalling(']')) {
                 break;
             }
-            
+
             size_t rew_pos = inp->current_position();
             std::string this_product;
             if(inp->peek() == '`') {
@@ -3011,8 +3040,9 @@ public:
                     parse_abstracted_reducer();
                 }
             } else if(inp->read_byte_equalling('@')) {
+                auto start = inp->current_position();
                 std::string directive = read_directive(inp);
-                parse_directive(directive);
+                parse_directive(directive, start);
             } else if(inp->peek() == '[') {
                 parse_precedence_group();
             } else if(inp->read_byte_equalling(']')) {
@@ -3948,7 +3978,8 @@ public:
         return nr;
     }
 
-   
+    // recurses subexpressions to find the "real" step for
+    // a given parameter.
     rulestep canonical_step_for_param(
         int rulenum, const std::string &pname
     ) const {
@@ -3990,8 +4021,9 @@ public:
                 step = rule.nth_step(canonical_stepi);
             }
         }
- 
+
         if(step.is_subexpression()) {
+            // recurse to find the "real" step:
             return canonical_step_for_param(subrulenum_for_step(step), pname);
         }
 

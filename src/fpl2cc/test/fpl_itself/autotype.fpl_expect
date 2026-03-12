@@ -1,0 +1,4 @@
+returncode = 1
+stderr = "Error src/fpl2cc/test/fpl_itself/autotype.fpl:9:2 near «generate_typ»: generate_types is no longer supported
+"
+stdout = ""

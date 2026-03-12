@@ -21,7 +21,7 @@
 #include "productions.h"
 
 #define VERSION_MAJ 1
-#define VERSION_MIN 7
+#define VERSION_MIN 8
 
 using namespace fpl;
 

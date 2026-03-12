@@ -6,10 +6,11 @@
 template<typename ReduceType>
 class ReductionParameter {
     // all access to param and lr stacks go through this:
-    StackSlice lr_slice;
+    const StackSlice lr_slice;
 
     // Number of param stack entries to go forward in the
     // param stack get to the next item in this parameter.
+// XXX make const?  except can't :P
     int next_incr;
 
 public:
@@ -60,6 +61,7 @@ public:
 
     // in reduce code, this is accessed via [] or (for the 0th element)
     // just the name of the variable itself.
+// TODO make this return a ref and not a copy
     const ReduceType val(int ind = 0, src_location ca = CALLER()) const {
         const int num_args = count();
         if(ind < 0) ind += num_args; // negative = relative to end + 1 
@@ -89,6 +91,10 @@ public:
         // try to return a default anyway:
         return ReduceType();
     }
+
+// TODO do this this way
+    //const ReduceType &operator[](size_t index) const { return val(index); }
+    ReduceType operator[](size_t index) const { return val(index); }
 
     // Returns the value of the parameter,
     // or the default value passed if the index is out of range.

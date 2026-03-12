@@ -5,6 +5,7 @@
 #include <set>
 #include <string>
 #include <string.h> // for strerr
+#include <string_view>
 #include "util/jerror.h"
 #include "util/searchpath.h"
 #include "util/src_location.h"
@@ -138,10 +139,13 @@ struct code_block {
 
     // formats the code with the assumption that it's c/c++.
     // phase this out in favor of jemp/templates etc.
-    std::string format(bool restore_line = true) const {
+    std::string format(bool restore_line = true, std::string_view arg_container="") const {
         std::string out;
         out += stringformat("\n#line {} \"{}\"\n", line, source_file);
-        out += code;
+        if(arg_container.length())
+            out += substitute_at_syntax(code, arg_container);
+        else
+            out += code;
         if(restore_line) {
             out += "\n#$LINE\n"; // restore compiler's idea of source file/pos
         }
@@ -152,99 +156,66 @@ struct code_block {
         return format(false);
     }
 
-private:
-    static bool is_production_name_char(const char ch) {
-        return (ch == '_')              ||
-               (ch >= 'A' && ch <= 'Z') ||
-               (ch >= 'a' && ch <= 'z') ||
-               (ch >= '0' && ch <= '9');
-    }
+    //
+    // Returns a copy of the source string with the substitutions:
+    //  <argname>@<member name> -> arg_container.<argname>.<member name>
+    //  @@ -> @
+    // (the latter of which is so you can escape an '@')
+    //
+    // This allows fpl authors to access methods like .count(), .position(),
+    // etc in the ReductionParameters.
+    //
+    static std::string substitute_at_syntax(
+        std::string_view source,
+        std::string_view containerName)
+    {
+        std::string result;
+        result.reserve(source.size());
 
-    static bool maybe_name_start(const std::string &str, size_t pos) {
-        // start of string definitely could be the start of a name
-        if(pos == 0) return true;
-        
-        char ch_before = str[pos - 1];
-        if(is_production_name_char(ch_before)) {
-             // apparently we're within the name of another variable - 
-             // eg at "bar" within  "foobar":
-            return false;
-        } else {
-            // the character before the one we're looking at isn't
-            // part of a normal variable name, but it might be something
-            // indicating a member of something else (eg foo.bar or foo->bar)
-            if(ch_before == '.') return false; // foo.bar
-
-            if(ch_before == '>') {
-                // check for ->bar vs possible 2>bar
-                return pos < 2 || str[pos - 2] != '-';
+        size_t pos = 0;
+        while (pos < source.size()) {
+            size_t atPos = source.find('@', pos);
+            if (atPos == std::string_view::npos) {
+                result.append(source.substr(pos));
+                break;
             }
-        }
-        return true;
-    }
 
-public:
-
-    //
-    // For each argument name in the set passed, mangle the code
-    // text as follows:
-    //  <argname>\[([0-9+])\] -> <argname>.val($1)
-    //  <argname>[^@] -> <argname>.val()
-    //  <argname>@ -> argname.
-    // 
-    // This means that the stack slice looks like an array of whatever
-    // type is expected for that variable, but it's a magic array
-    // where the name itself resolves to the first element (so that
-    // simple things like wcalc can just deal in the arg names),
-    // but, if you want metadata about the argument you can access it
-    // via the "@" pseudo operator.
-    //
-    // Perhaps obviously, this only dtrt for code blocks for rule
-    // actions. It's a bit of an ugly hack.  The right thing would
-    // be not to have to write rule actions in c++, but that's a
-    // whole other can of worms so I'm doing this for now.
-    //
-    void mangle_stack_slice_args(const std::set<std::string> args) {
-        for(auto arg : args) {
-            const size_t argl = arg.length();
-            size_t pos = 0;
-            while((pos = code.find(arg, pos)) != std::string::npos) {
-                // we found something matching the name of the arg, but
-                // make sure it matches the _start_ of the arg:
-                size_t endp = pos + argl;
-                if(maybe_name_start(code, pos)) {
-                    // now check what comes right after:
-                    if(code[endp] == '@') {
-                        // author wants metadata: just change the '@' to '.',
-                        // and we'll expect it to result in a call to
-                        // whatever the method in the stack slice is:
-                        code[endp] = '.';
-                    } else if(code[endp] == '[') {
-                        size_t end_brace = endp + 1;
-                        while(code[end_brace] && code[end_brace] != ']')
-                            end_brace++;
-                        if(code[end_brace] != ']') {
-                            jerror::error(stringformat(
-                                "no end brace found on {}\n", arg
-                            ));
-                        }
-                        size_t subl = end_brace - endp - 1;
-                        std::string subs = stringformat(
-                            ".val({})", code.substr(endp + 1, subl)
-                        );
-                        code.replace(endp, end_brace - endp + 1, subs);
-                        endp += subs.length();
-                    } else if(!is_production_name_char(code[endp])) {
-                        // plain production name - default to 0th element:
-                        std::string subs = ".val()";
-                        code.insert(endp, subs);
-                        endp += subs.length();
-                    } // else it's not something to expand
-                }
-                pos = endp;
+            // handle @@ escape
+            if (atPos + 1 < source.size() && source[atPos + 1] == '@') {
+                result.append(source.substr(pos, atPos - pos));
+                result.append("@");
+                pos = atPos + 2;
+                continue;
             }
+
+            // scan backwards to find a valid c++ identifier before @
+            size_t nameEnd = atPos;
+            size_t nameStart = nameEnd;
+            while (nameStart > pos && (std::isalnum(source[nameStart-1]) || source[nameStart-1] == '_'))
+                --nameStart;
+
+            // if no identifier before @, leave it alone
+            if (nameStart == nameEnd) {
+                result.append(source.substr(pos, atPos - pos + 1));
+                pos = atPos + 1;
+                continue;
+            }
+
+            std::string_view argName = source.substr(nameStart, nameEnd - nameStart);
+
+            // append everything before the arg name, then the substitution
+            result.append(source.substr(pos, nameStart - pos));
+            result.append(containerName);
+            result.append(".");
+            result.append(argName);
+            result.append(".");
+
+            pos = atPos + 1;
         }
+
+        return result;
     }
+
 };
 
 std::string to_string(const code_block::source_language &l) {

@@ -198,8 +198,6 @@ public:
             return explicitly_named && varname.length();
         }
 
-
-
         // This determines the precedence with which steps
         // will be assigned to parameters in cases where there
         // are multiple consecutive steps which can match the
@@ -487,7 +485,6 @@ public:
         return found->second;
     }
 
-
     // .. and this is how you can get the step for a given parameter
     // by parameter position.
     // Returns a ref to the step if the index is valid, or a
@@ -511,7 +508,6 @@ public:
 
         return step::false_step();
     }
-
 
     void add_parameter(unsigned stepi, const std::string &name) {
         if(!name.length()) {
@@ -682,7 +678,6 @@ public:
             out = code_for_rule;
         // else return a false code block
 
-        out.mangle_stack_slice_args(parameter_names());
         return out;
     }
 
