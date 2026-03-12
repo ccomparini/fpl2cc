@@ -61,8 +61,8 @@ public:
 
     // in reduce code, this is accessed via [] or (for the 0th element)
     // just the name of the variable itself.
-// TODO make this return a ref and not a copy
-    const ReduceType val(int ind = 0, src_location ca = CALLER()) const {
+    const ReduceType &val(int ind = 0, src_location ca = CALLER()) const {
+
         const int num_args = count();
         if(ind < 0) ind += num_args; // negative = relative to end + 1 
 
@@ -73,7 +73,10 @@ public:
             ));
 
             // return a default item of the ReduceType so we can move on:
-            return ReduceType();
+            {
+                static const ReduceType default_val{};
+                return default_val;
+            }
         }
 
         try {
@@ -88,13 +91,15 @@ public:
                 ca, prod_type_name(typeid(ReduceType)), ind, lr_slice
             ));
         }
-        // try to return a default anyway:
-        return ReduceType();
+        // return a default anyway:
+        {
+            static const ReduceType default_val{};
+            return default_val;
+        }
     }
 
-// TODO do this this way
-    //const ReduceType &operator[](size_t index) const { return val(index); }
-    ReduceType operator[](size_t index) const { return val(index); }
+    const ReduceType &operator[](size_t index) const { return val(index); }
+    //ReduceType operator[](size_t index) const { return val(index); }
 
     // Returns the value of the parameter,
     // or the default value passed if the index is out of range.

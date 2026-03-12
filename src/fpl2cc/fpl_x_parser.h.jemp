@@ -856,7 +856,7 @@ public:
         // so the 0th is not guaranteed to be anything real,
         // though if it's not it will still return a valid
         // (though false) Product.
-        Product product(int ind, src_location caller = CALLER()) const {
+        const Product &product(int ind, src_location caller = CALLER()) const {
             const int pbase = param_base();
 
             if(pbase < 0) {
@@ -865,22 +865,26 @@ public:
                     "{} product({}) called on stack slice with no param base",
                     caller, ind
                 ));
-                return Product();
-            }
-
-            const int num_args = param_count();
-            if(ind < 0) {
-                jerror::warning(stringformat(
-                    "{} wrapping is no longer supported on product({})",
-                    caller, ind
-                ));
-            }
-
-            if((ind >= 0) && (ind < num_args)) {
-                unsigned int sind = pbase + ind;
-                return owner.param_stack_entry(sind, caller);
             } else {
-                return Product();
+                const int num_args = param_count();
+                if(ind < 0) {
+                    jerror::warning(stringformat(
+                        "{} wrapping is no longer supported on product({})",
+                        caller, ind
+                    ));
+                }
+
+                if((ind >= 0) && (ind < num_args)) {
+                    unsigned int sind = pbase + ind;
+                    return owner.param_stack_entry(sind, caller);
+                }
+            }
+
+            // if we got here, something went wrong, but try
+            // to return a default anyway:
+            {
+                static Product def_p{};
+                return def_p;
             }
         }
 
@@ -929,7 +933,7 @@ public:
         cur_state = st;
     }
 
-    Product param_stack_entry(int pos, src_location caller = CALLER()) const {
+    const Product &param_stack_entry(int pos, src_location caller = CALLER()) const {
         // this is very similar to lr_stack_entry.  generalize?
         if((pos >= 0) && (pos < param_stack.size())) {
             return param_stack[pos];
@@ -938,7 +942,8 @@ public:
                 "param stack access out of range ({}/{}) at {}",
                 pos, param_stack.size(), caller
             ));
-            return Product();
+            static Product def_p{};
+            return def_p;
         }
     }
 
