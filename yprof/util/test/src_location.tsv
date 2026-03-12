@@ -1,2 +1,3 @@
 git_id	cpu_total	cpu_user	cpu_system	max_rss	timestamp	hostname	arch	os	exit_code	signal
 d7a37f4	0.001129	0.001129	0.000000	36236	1773112854	titan1a	x86_64	Linux 6.5.0-21-generic	0	-
+6e343a0	0.001906	0.000518	0.001388	1179648	1773335317	Sunbird	arm64	Darwin 23.4.0	0	-
