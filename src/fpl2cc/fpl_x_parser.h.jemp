@@ -338,7 +338,7 @@ public:
     };
 
     // This is an lr stack entry (as opposed to a param stack entry,
-    // which would be a ReductionParameter).
+    // which would be a Product, above).
     // The lr_stack is used for tracking state, and refers to the
     // param stack for finding the actual reduction parameters
     // for reduce actions.
