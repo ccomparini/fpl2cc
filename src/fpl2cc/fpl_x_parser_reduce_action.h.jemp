@@ -5,11 +5,11 @@
 @realign: #line {} "{}" @
 
 @return_type@ @rule.rule_fn()@(
-    @-for(auto pname : rule.parameter_names()) {-@
+    @-for(int pind = 0; pind < num_params; pind++) {-@
+        @declare pname: rule.parameter_name(pind)@
         @declare pstep: prds.canonical_step_for_param(rule.rule_number(), pname)@
-        ReductionParameter<@pstep.type_in_target()@> @pname@,
+        @- pind?",":"" -@ ReductionParameter<@pstep.type_in_target()@> @pname@
     @-}-@
-    bool dummy = true // hack for comma
 ) {
     @#fpl_x_parser_reduce_action_meta(prds, rule)@
 
