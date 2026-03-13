@@ -38,6 +38,7 @@
 #include <regex>
 #include <stdlib.h>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <typeindex>
 #include <typeinfo>
@@ -247,28 +248,6 @@ public:
 
         const Var &var() const { return reduce_value; }
 
-        // Accessors for the different types are named as [element name]_val()
-        // We start at type 1 instead of 0 because we don't need/want an
-        // fpl_null accessor (it has no type anyway)
-        // NOTE:  generally, access is through ReductionParameters
-        @for(int el_id = 1; el_id < prds.elements.size(); ++el_id) {-@
-            @declare el: prds.elements[el_id]@
-            @declare type: prds.type_for(el)@
-            @declare el_name: prds.element_id_name(el_id)@
-            @type@ @el_name@_val(const std::string &caller = CALLER()) const {
-                try {
-                    return std::get<@type@>(var());
-                }
-                catch (std::bad_variant_access& e) {
-                    std::cerr << stringformat(
-                        "{} in @el_name@_val access at {}: "
-                        "tried to get @type@ but it's a {}\n",
-                        e.what(), caller, type_name()
-                    );
-                    throw;
-                }
-            }
-        @-}-@
 
         operator bool() const {
             return !std::holds_alternative<false_product>(reduce_value);
