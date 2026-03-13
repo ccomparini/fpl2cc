@@ -7,7 +7,6 @@
 @default_main
 @produces std::string
 @comment_style sh
-# @generate_types this causes all kinds of fail on generated code
 
 stuff* -> goal +{
     std::cout << stuff@join("{}\n", "");

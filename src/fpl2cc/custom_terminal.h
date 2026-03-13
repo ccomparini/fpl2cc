@@ -53,7 +53,7 @@ struct custom_terminal {
                 type = fpl::grammar_element::TERM_EXACT;
                 break;
             case code_block::DEFAULT:
-                type =  fpl::grammar_element::TERM_CUSTOM;
+                type = fpl::grammar_element::TERM_CUSTOM;
                 break;
             default:
                 jerror::error(
