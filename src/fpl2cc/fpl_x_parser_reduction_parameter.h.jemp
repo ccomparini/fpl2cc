@@ -99,7 +99,24 @@ public:
     }
 
     const ReduceType &operator[](size_t index) const { return val(index); }
-    //ReduceType operator[](size_t index) const { return val(index); }
+
+
+    // This is so that people can use for(auto : xxx) instead of
+    // @@foreach.  maybe we can phase out the @@ stuff?
+    class iterator {
+        const ReductionParameter<ReduceType> &param;
+        int index;
+    public:
+        iterator(const ReductionParameter<ReduceType> &param, int index)
+            : param(param), index(index) {}
+
+        iterator& operator++() { ++index; return *this; }
+        ReduceType operator*() const { return param.val(index); }
+        bool operator!=(const iterator& other) const { return index != other.index; }
+    };
+
+    iterator begin() const { return iterator(*this, 0); }
+    iterator end()   const { return iterator(*this, count()); }
 
     // Returns the value of the parameter,
     // or the default value passed if the index is out of range.
@@ -142,6 +159,9 @@ public:
               });
               return grp;
           }+
+
+       BUT consider it deprecated.  jsut use c++ for(auto th : things) instead.
+       much cleaner.
     */@
     using ForeachFunc = std::function<void(const ReduceType &)>;
     void foreach(ForeachFunc func) const {

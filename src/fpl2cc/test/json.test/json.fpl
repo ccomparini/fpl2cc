@@ -158,9 +158,9 @@
 @type_for member bkv_obj_member
 +object(members) +{
     bkv_object out;
-    members@foreach([&out](const bkv_obj_member &mem)->void {
+    for(auto mem : members) {
         out[mem.key] = mem.val;
-    });
+    }
     return out;
 }+
 
@@ -168,9 +168,9 @@
 +array(elements) +{
     bkv_array out;
     // WTB automatic way to do this.  construct from iterators?
-    elements@foreach([&out](const bkv_item &item)->void {
+    for(auto item : elements) {
         out.push_back(item);
-    });
+    }
     return out;
 }+
 

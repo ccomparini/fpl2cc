@@ -80,9 +80,9 @@ integer:foo list:foo -> doom;
 
 +fruit_list(fruit) +{
     std::list<std::string> list;
-    fruit@foreach([&list](const std::string &fr)->void {
+    for(auto fr: fruit) {
         list.push_back(fr);
-    });
+    }
     std::cout << stringformat(
         "fruit list input has {} elements ({}) and output has {} elements\n",
         fruit@count(), fruit@join(", "), list.size()

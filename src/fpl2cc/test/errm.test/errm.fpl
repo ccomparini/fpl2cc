@@ -28,13 +28,13 @@
 }+;
 
 str* -> done +{
-    str@foreach([](const std::string &st)->void {
+    for(auto st : str) {
         // we elide empty strings because that's what the error cases
         // return.  yay.
         if(st.length()) {
             std::cout << stringformat("string: {}\n", st);
         }
-    });
+    }
 
     return "done";
 }+
