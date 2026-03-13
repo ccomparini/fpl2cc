@@ -816,14 +816,15 @@ public:
         // just past the end of the slice (i.e. -1 means end-of-slice).
         // Accessing to entries outside the slice yields a "false"
         // stack entry.
-        StackEntry operator [](int ind) const {
+        const StackEntry &operator [](int ind) const {
             if(ind < 0) ind += size; // allow negative indexes
 
             int off = ind + base_index;
             if((off < owner.lr_stack_size()) && (off >= 0)) {
                 return owner.lr_stack[off];
             } else {
-                return StackEntry();
+                static StackEntry def_e{};
+                return def_e;
             }
         }
 
