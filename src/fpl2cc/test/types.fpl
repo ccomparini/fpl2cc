@@ -124,13 +124,6 @@ struct json_array {
     return json_object::memlist(1, member);
 }+
 
-+members(member members) +{
-    // this is a shocking number of extra copies and general inefficiency
-    json_object::memlist out(members.size() + 1);
-    out.push_back(member);
-    out.insert(out.end(), members.begin(), members.end());
-    return out;
-}+
 
 +elements(element) +{
     return ellist(1, element);
