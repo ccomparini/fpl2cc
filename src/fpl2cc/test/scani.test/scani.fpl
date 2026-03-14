@@ -6,13 +6,37 @@
 @default_main
 @produces std::string
 @grammar number_melt
+@import 'builtins'
+@separator /[ \t]+/
 @import 'sc0'
 @import 'sc1'.&unhappyface
 
+@terminal anyface [ &melty_face &unhappyface &happyface ]
+
 @goal done
 
-number_face+ -> done +{
-    return number_face@join("\n");
+lines -> done;
+
+line+ &eof^ -> lines +{
+    for(auto nf = line.begin(); nf != line.end(); ++nf) {
+        std::cout << stringformat("{} at {}\n", *nf, nf.raw().position());
+    }
+    return "";
+}+
+
+number_face "\n"+^         -> line;
+&anyface+ "\n"+^           -> line +{
+    return anyface@join("...");
+}+
+
+# note that if we don't follow the !&melty_face with a melty
+# face it'll keep matching.. heh
+"next face is not melty"^ /[.;:]/^? !&melty_face:not_melty &melty_face^ "\n"+^ -> line +{
+    return stringformat("not melty: {}", not_melty);
+}+
+
+number_face+ "\n"+^ -> line +{
+    return number_face@join(" ");
 }+
 
 /[0-9]+/:digits &unhappyface:face -> number_face;

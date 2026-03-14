@@ -1,4 +1,5 @@
 returncode = 0
 stderr = ""
-stdout = "number, then '🫠'
+stdout = "number, then '🫠' at src/fpl2cc/test/scani.test/a.scani:1:1
+number, then '🫠' at src/fpl2cc/test/scani.test/a.scani:2:1
 "

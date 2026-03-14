@@ -2269,7 +2269,7 @@ public:
     // the top level production created
     // syntax: quote grammar_name quote ('.' product_name)?
     // So the grammar name is quoted with whatever kind of quotes,
-    // and is optiinally followed by '.' and the name of
+    // and is optionally followed by '.' and the name of
     // the product to import from the grammar.
     // Returns the name of the top level product imported
     // (which should be the specified product if specified,
@@ -3142,6 +3142,12 @@ public:
             if(!scanner_exists(sname)) {
                 auto subterm = from->custom_terminals[sname];
                 custom_terminals[sname] = subterm;
+
+                // also the inverses!!
+                auto invname = inverse_scanner_name(sname);
+                if(from->scanner_exists(invname)) {
+                    custom_terminals[invname] = from->custom_terminals[invname];
+                }
 
                 // if it's got custom subscanners, we need to import
                 // them (recursively)

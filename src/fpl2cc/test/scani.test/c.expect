@@ -1,0 +1,7 @@
+returncode = 0
+stderr = ""
+stdout = "not melty: ☹️ 
+ at src/fpl2cc/test/scani.test/c.scani:1:1
+☹️...🫠...🫠 at src/fpl2cc/test/scani.test/c.scani:3:1
+🙂...🙂...🙂 at src/fpl2cc/test/scani.test/c.scani:5:1
+"
