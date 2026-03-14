@@ -10,7 +10,6 @@ class ReductionParameter {
 
     // Number of param stack entries to go forward in the
     // param stack get to the next item in this parameter.
-// XXX make const?  except can't :P
     int next_incr;
 
 public:
@@ -57,14 +56,16 @@ public:
 
     // this allows you to refer to the stack slice itself from within
     // reduce functions using the at sign (eg thing@@self())
-    ReductionParameter<ReduceType> self() { return *this; }
+    ReductionParameter<ReduceType> self() {
+        return *this;
+    }
 
-    // in reduce code, this is accessed via [] or (for the 0th element)
-    // just the name of the variable itself.
+    // in reduce code, this is accessed via [] (see below)
+    // or, if the parameter is truly single, directly by name.
     const ReduceType &val(int ind = 0, src_location ca = CALLER()) const {
 
         const int num_args = count();
-        if(ind < 0) ind += num_args; // negative = relative to end + 1 
+        if(ind < 0) ind += num_args; // negative = relative to end + 1
 
         if((ind < 0) || (ind >= num_args)) {
             jerror::warning(stringformat(
@@ -100,7 +101,6 @@ public:
 
     const ReduceType &operator[](size_t index) const { return val(index); }
 
-
     // This is so that people can use for(auto : xxx) instead of
     // @@foreach.  maybe we can phase out the @@ stuff?
     class iterator {
@@ -113,6 +113,11 @@ public:
         iterator& operator++() { ++index; return *this; }
         ReduceType operator*() const { return param.val(index); }
         bool operator!=(const iterator& other) const { return index != other.index; }
+
+        // returns the raw stack entry for the current item
+        const StackEntry &raw() const {
+            return param.lr_slice[index*param.next_incr];
+        }
     };
 
     iterator begin() const { return iterator(*this, 0); }
