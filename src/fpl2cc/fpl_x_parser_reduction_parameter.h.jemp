@@ -56,7 +56,7 @@ public:
 
     // this allows you to refer to the stack slice itself from within
     // reduce functions using the at sign (eg thing@@self())
-    ReductionParameter<ReduceType> self() {
+    const ReductionParameter<ReduceType> &self() const {
         return *this;
     }
 
