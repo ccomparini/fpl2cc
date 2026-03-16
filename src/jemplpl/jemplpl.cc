@@ -2206,7 +2206,7 @@ inline std::string to_str() const {
 #include "util/utf8_buffer.h"
 
 #define VERSION_MAJ 0
-#define VERSION_MIN 10
+#define VERSION_MIN 11
 
 
 #line 2211 "src/jemplpl/jemplpl.cc"
@@ -2222,11 +2222,7 @@ class jemplpl_parser {
 
 public:
 
-#line 74 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
 #line 77 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
-#line 79 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 #line 84 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
@@ -2267,8 +2263,6 @@ void state_0() {
     #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-    #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     eat_separator();
 
 
@@ -2277,192 +2271,144 @@ void state_0() {
 
 
     #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__fragment(false)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_79);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__text(false)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_2);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_9);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_19);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_9);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__control_start(false)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_43);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__control_fragment(false)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_49);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_9);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_19);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__trailing_ws(false)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_1);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONTERM_PRODUCTION__complete(false)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_80);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_4(false)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_4);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_5(true)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_71);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_9(true)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_57);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_12(true)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_61);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_14(true)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_66);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_20(true)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_21);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_24(true)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_75);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_28(false)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_20);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_EXACT__terminal_11(false)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_52);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_33(false)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_5);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_34(false)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_7);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_35(false)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         set_state(&jemplpl_parser::state_8);
 
     } else
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_TERM_REGEX__terminal_45(false)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -2493,8 +2439,6 @@ void state_1() {
     #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-    #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     eat_separator();
 
 
@@ -2503,8 +2447,6 @@ void state_1() {
 
 
     #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
     if(shift_NONE___fpl_null(true)) {
 
         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -2513,15 +2455,11 @@ void state_1() {
 
         #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         // we've matched something, and we're going to generate and
         // push a result, so first we need to clear any mismatches
         // from the top of the stack:
         clear_mismatches();
 
-
-        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -2586,8 +2524,6 @@ void state_1() {
         #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
         Product prod(
         rule_30 ({
 
@@ -2599,16 +2535,10 @@ void state_1() {
             #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-            #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
             auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-            #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
             lr_pop_to(lr_read_pos - 1);
 
-
-            #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
             bool eject = is__text_ejected_in_state(cur_state);
 
             #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -2652,8 +2582,6 @@ void state_1() {
         #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-        #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         eat_separator();
 
 
@@ -2662,72 +2590,54 @@ void state_1() {
 
 
         #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         if(shift_NONTERM_PRODUCTION__text(false)) {
 
             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
             set_state(&jemplpl_parser::state_2);
 
         } else
-
-        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
             set_state(&jemplpl_parser::state_3);
 
         } else
-
-        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         if(shift_NONTERM_PRODUCTION__trailing_ws(false)) {
 
             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
             set_state(&jemplpl_parser::state_1);
 
         } else
-
-        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         if(shift_TERM_EXACT__terminal_4(false)) {
 
             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
             set_state(&jemplpl_parser::state_4);
 
         } else
-
-        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         if(shift_TERM_REGEX__terminal_33(false)) {
 
             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
             set_state(&jemplpl_parser::state_5);
 
         } else
-
-        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         if(shift_TERM_REGEX__terminal_34(false)) {
 
             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
             set_state(&jemplpl_parser::state_7);
 
         } else
-
-        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         if(shift_TERM_REGEX__terminal_35(false)) {
 
             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
             set_state(&jemplpl_parser::state_8);
 
         } else
-
-        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         if(shift_TERM_REGEX__terminal_45(false)) {
 
             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
             set_state(&jemplpl_parser::state_6);
 
         } else
-
-        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
         if(shift_NONE___fpl_null(true)) {
 
             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -2736,15 +2646,11 @@ void state_1() {
 
             #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-            #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
             // we've matched something, and we're going to generate and
             // push a result, so first we need to clear any mismatches
             // from the top of the stack:
             clear_mismatches();
 
-
-            #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
             #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -2809,8 +2715,6 @@ void state_1() {
             #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-            #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
             Product prod(
             rule_1 ({
 
@@ -2822,16 +2726,10 @@ void state_1() {
                 #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                 auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                 lr_pop_to(lr_read_pos - 1);
 
-
-                #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                 bool eject = is__fragment_ejected_in_state(cur_state);
 
                 #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -2867,8 +2765,6 @@ void state_1() {
             #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-            #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
             eat_separator();
 
 
@@ -2877,8 +2773,6 @@ void state_1() {
 
 
             #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
             if(shift_NONE___fpl_null(true)) {
 
                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -2887,15 +2781,11 @@ void state_1() {
 
                 #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                 // we've matched something, and we're going to generate and
                 // push a result, so first we need to clear any mismatches
                 // from the top of the stack:
                 clear_mismatches();
 
-
-                #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                 #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -2960,8 +2850,6 @@ void state_1() {
                 #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                 Product prod(
                 rule_29 ({
 
@@ -2973,16 +2861,10 @@ void state_1() {
                     #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                    #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                     auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                    #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                     lr_pop_to(lr_read_pos - 1);
 
-
-                    #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                     bool eject = is__text_ejected_in_state(cur_state);
 
                     #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -3018,8 +2900,6 @@ void state_1() {
                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                 eat_separator();
 
 
@@ -3028,8 +2908,6 @@ void state_1() {
 
 
                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                 if(shift_NONE___fpl_null(true)) {
 
                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -3038,15 +2916,11 @@ void state_1() {
 
                     #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                    #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                     // we've matched something, and we're going to generate and
                     // push a result, so first we need to clear any mismatches
                     // from the top of the stack:
                     clear_mismatches();
 
-
-                    #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                     #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -3111,8 +2985,6 @@ void state_1() {
                     #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                    #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                     Product prod(
                     rule_2 ({
 
@@ -3124,16 +2996,10 @@ void state_1() {
                         #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                         lr_pop_to(lr_read_pos - 1);
 
-
-                        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                         bool eject = is__text_ejected_in_state(cur_state);
 
                         #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -3169,8 +3035,6 @@ void state_1() {
                     #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                    #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                     eat_separator();
 
 
@@ -3179,8 +3043,6 @@ void state_1() {
 
 
                     #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                     if(shift_NONE___fpl_null(true)) {
 
                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -3189,15 +3051,11 @@ void state_1() {
 
                         #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                         // we've matched something, and we're going to generate and
                         // push a result, so first we need to clear any mismatches
                         // from the top of the stack:
                         clear_mismatches();
 
-
-                        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -3262,8 +3120,6 @@ void state_1() {
                         #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                         Product prod(
                         rule_16 ({
 
@@ -3275,16 +3131,10 @@ void state_1() {
                             #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                            #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                             auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                            #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                             lr_pop_to(lr_read_pos - 1);
 
-
-                            #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                             bool eject = is__leading_ws_ejected_in_state(cur_state);
 
                             #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -3320,8 +3170,6 @@ void state_1() {
                         #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                        #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                         eat_separator();
 
 
@@ -3330,8 +3178,6 @@ void state_1() {
 
 
                         #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                         if(shift_NONE___fpl_null(true)) {
 
                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -3340,15 +3186,11 @@ void state_1() {
 
                             #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                            #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                             // we've matched something, and we're going to generate and
                             // push a result, so first we need to clear any mismatches
                             // from the top of the stack:
                             clear_mismatches();
 
-
-                            #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                             #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -3413,8 +3255,6 @@ void state_1() {
                             #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                            #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                             Product prod(
                             rule_28 ({
 
@@ -3426,16 +3266,10 @@ void state_1() {
                                 #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                 auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                 lr_pop_to(lr_read_pos - 1);
 
-
-                                #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                 bool eject = is__text_ejected_in_state(cur_state);
 
                                 #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -3471,8 +3305,6 @@ void state_1() {
                             #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                            #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                             eat_separator();
 
 
@@ -3481,8 +3313,6 @@ void state_1() {
 
 
                             #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                             if(shift_NONE___fpl_null(true)) {
 
                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -3491,15 +3321,11 @@ void state_1() {
 
                                 #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                 // we've matched something, and we're going to generate and
                                 // push a result, so first we need to clear any mismatches
                                 // from the top of the stack:
                                 clear_mismatches();
 
-
-                                #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                 #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -3564,8 +3390,6 @@ void state_1() {
                                 #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                 Product prod(
                                 rule_17 ({
 
@@ -3577,16 +3401,10 @@ void state_1() {
                                     #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                    #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                     auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                    #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                     lr_pop_to(lr_read_pos - 1);
 
-
-                                    #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                     bool eject = is__trailing_ws_ejected_in_state(cur_state);
 
                                     #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -3622,8 +3440,6 @@ void state_1() {
                                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                 eat_separator();
 
 
@@ -3632,8 +3448,6 @@ void state_1() {
 
 
                                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                 if(shift_NONE___fpl_null(true)) {
 
                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -3642,15 +3456,11 @@ void state_1() {
 
                                     #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                    #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                     // we've matched something, and we're going to generate and
                                     // push a result, so first we need to clear any mismatches
                                     // from the top of the stack:
                                     clear_mismatches();
 
-
-                                    #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                     #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -3715,8 +3525,6 @@ void state_1() {
                                     #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                    #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                     Product prod(
                                     rule_18 ({
 
@@ -3728,16 +3536,10 @@ void state_1() {
                                         #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                         lr_pop_to(lr_read_pos - 1);
 
-
-                                        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                         bool eject = is__trailing_ws_ejected_in_state(cur_state);
 
                                         #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -3777,8 +3579,6 @@ void state_1() {
                                     #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                    #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                     eat_separator();
 
 
@@ -3787,32 +3587,24 @@ void state_1() {
 
 
                                     #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                     if(shift_TERM_EXACT__terminal_16(true)) {
 
                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                         set_state(&jemplpl_parser::state_17);
 
                                     } else
-
-                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                     if(shift_TERM_REGEX__terminal_36(true)) {
 
                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                         set_state(&jemplpl_parser::state_32);
 
                                     } else
-
-                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                     if(shift_TERM_CUSTOM__terminal_40(false)) {
 
                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                         set_state(&jemplpl_parser::state_15);
 
                                     } else
-
-                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                     if(shift_TERM_CUSTOM__terminal_44(false)) {
 
                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -3845,8 +3637,6 @@ void state_1() {
                                     #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                    #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                     eat_separator();
 
 
@@ -3855,24 +3645,18 @@ void state_1() {
 
 
                                     #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                     if(shift_NONTERM_PRODUCTION__subst_end(true)) {
 
                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                         set_state(&jemplpl_parser::state_11);
 
                                     } else
-
-                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                     if(shift_TERM_EXACT__terminal_29(false)) {
 
                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                         set_state(&jemplpl_parser::state_13);
 
                                     } else
-
-                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                     if(shift_TERM_EXACT__terminal_11(false)) {
 
                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -3903,8 +3687,6 @@ void state_1() {
                                     #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                    #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                     eat_separator();
 
 
@@ -3913,8 +3695,6 @@ void state_1() {
 
 
                                     #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                     if(shift_NONE___fpl_null(true)) {
 
                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -3923,15 +3703,11 @@ void state_1() {
 
                                         #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                         // we've matched something, and we're going to generate and
                                         // push a result, so first we need to clear any mismatches
                                         // from the top of the stack:
                                         clear_mismatches();
 
-
-                                        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -4038,8 +3814,6 @@ void state_1() {
                                         #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                         Product prod(
                                         rule_27 ({
 
@@ -4051,16 +3825,10 @@ void state_1() {
                                             #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                            #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                             auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                            #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                             lr_pop_to(lr_read_pos - 1);
 
-
-                                            #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                             bool eject = is__fragment_ejected_in_state(cur_state);
 
                                             #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -4096,8 +3864,6 @@ void state_1() {
                                         #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                        #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                         eat_separator();
 
 
@@ -4106,8 +3872,6 @@ void state_1() {
 
 
                                         #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                         if(shift_NONE___fpl_null(true)) {
 
                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -4116,15 +3880,11 @@ void state_1() {
 
                                             #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                            #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                             // we've matched something, and we're going to generate and
                                             // push a result, so first we need to clear any mismatches
                                             // from the top of the stack:
                                             clear_mismatches();
 
-
-                                            #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                             #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -4189,8 +3949,6 @@ void state_1() {
                                             #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                            #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                             Product prod(
                                             rule_14 ({
 
@@ -4202,16 +3960,10 @@ void state_1() {
                                                 #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                 auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                 lr_pop_to(lr_read_pos - 1);
 
-
-                                                #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                 bool eject = is__subst_end_ejected_in_state(cur_state);
 
                                                 #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -4250,8 +4002,6 @@ void state_1() {
                                             #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                            #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                             eat_separator();
 
 
@@ -4260,32 +4010,24 @@ void state_1() {
 
 
                                             #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                             if(shift_NONTERM_PRODUCTION__trailing_ws(true)) {
 
                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                 set_state(&jemplpl_parser::state_14);
 
                                             } else
-
-                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                             if(shift_TERM_REGEX__terminal_34(false)) {
 
                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                 set_state(&jemplpl_parser::state_7);
 
                                             } else
-
-                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                             if(shift_TERM_REGEX__terminal_35(false)) {
 
                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                 set_state(&jemplpl_parser::state_8);
 
                                             } else
-
-                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                             if(shift_NONE___fpl_null(true)) {
 
                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -4294,15 +4036,11 @@ void state_1() {
 
                                                 #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                 // we've matched something, and we're going to generate and
                                                 // push a result, so first we need to clear any mismatches
                                                 // from the top of the stack:
                                                 clear_mismatches();
 
-
-                                                #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                 #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -4388,8 +4126,6 @@ void state_1() {
                                                 #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                 Product prod(
                                                 rule_13 ({
 
@@ -4401,16 +4137,10 @@ void state_1() {
                                                     #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                    #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                     auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                    #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                     lr_pop_to(lr_read_pos - 1);
 
-
-                                                    #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                     bool eject = is__subst_end_ejected_in_state(cur_state);
 
                                                     #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -4446,8 +4176,6 @@ void state_1() {
                                                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                 eat_separator();
 
 
@@ -4456,8 +4184,6 @@ void state_1() {
 
 
                                                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                 if(shift_NONE___fpl_null(true)) {
 
                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -4466,15 +4192,11 @@ void state_1() {
 
                                                     #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                    #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                     // we've matched something, and we're going to generate and
                                                     // push a result, so first we need to clear any mismatches
                                                     // from the top of the stack:
                                                     clear_mismatches();
 
-
-                                                    #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                     #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -4560,8 +4282,6 @@ void state_1() {
                                                     #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                    #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                     Product prod(
                                                     rule_13 ({
 
@@ -4573,16 +4293,10 @@ void state_1() {
                                                         #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                         lr_pop_to(lr_read_pos - 1);
 
-
-                                                        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                         bool eject = is__subst_end_ejected_in_state(cur_state);
 
                                                         #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -4620,8 +4334,6 @@ void state_1() {
                                                     #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                    #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                     eat_separator();
 
 
@@ -4630,24 +4342,18 @@ void state_1() {
 
 
                                                     #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                     if(shift_NONTERM_PRODUCTION__subst_end(true)) {
 
                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         set_state(&jemplpl_parser::state_16);
 
                                                     } else
-
-                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                     if(shift_TERM_EXACT__terminal_29(false)) {
 
                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         set_state(&jemplpl_parser::state_13);
 
                                                     } else
-
-                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                     if(shift_TERM_EXACT__terminal_11(false)) {
 
                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -4678,8 +4384,6 @@ void state_1() {
                                                     #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                    #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                     eat_separator();
 
 
@@ -4688,8 +4392,6 @@ void state_1() {
 
 
                                                     #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                     if(shift_NONE___fpl_null(true)) {
 
                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -4698,15 +4400,11 @@ void state_1() {
 
                                                         #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                         // we've matched something, and we're going to generate and
                                                         // push a result, so first we need to clear any mismatches
                                                         // from the top of the stack:
                                                         clear_mismatches();
 
-
-                                                        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -4813,8 +4511,6 @@ void state_1() {
                                                         #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                         Product prod(
                                                         rule_23 ({
 
@@ -4826,16 +4522,10 @@ void state_1() {
                                                             #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                            #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                             auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                            #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                             lr_pop_to(lr_read_pos - 1);
 
-
-                                                            #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                             bool eject = is__control_start_ejected_in_state(cur_state);
 
                                                             #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -4873,8 +4563,6 @@ void state_1() {
                                                         #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                        #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         eat_separator();
 
 
@@ -4883,24 +4571,18 @@ void state_1() {
 
 
                                                         #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_NONTERM_PRODUCTION__subst_end(true)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_18);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_TERM_EXACT__terminal_29(false)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_13);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_TERM_EXACT__terminal_11(false)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -4956,8 +4638,6 @@ void state_1() {
                                                         #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                        #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         eat_separator();
 
 
@@ -4966,184 +4646,138 @@ void state_1() {
 
 
                                                         #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_NONTERM_PRODUCTION__text(false)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_2);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_9);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_NONTERM_PRODUCTION__fragment(false)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_28);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_19);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_9);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_NONTERM_PRODUCTION__control_start(false)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_43);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_NONTERM_PRODUCTION__control_fragment(false)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_49);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_9);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_19);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_NONTERM_PRODUCTION__trailing_ws(false)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_1);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_TERM_EXACT__terminal_4(false)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_4);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_TERM_EXACT__terminal_5(true)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_71);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_TERM_EXACT__terminal_9(true)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_57);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_TERM_EXACT__terminal_12(true)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_61);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_TERM_EXACT__terminal_14(true)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_66);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_TERM_REGEX__terminal_20(true)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_21);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_TERM_REGEX__terminal_24(true)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_75);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_TERM_EXACT__terminal_28(false)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_20);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_TERM_EXACT__terminal_11(false)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_52);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_TERM_REGEX__terminal_33(false)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_5);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_TERM_REGEX__terminal_34(false)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_7);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_TERM_REGEX__terminal_35(false)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_8);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_TERM_REGEX__terminal_45(false)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -5176,8 +4810,6 @@ void state_1() {
                                                         #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                        #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         eat_separator();
 
 
@@ -5186,24 +4818,18 @@ void state_1() {
 
 
                                                         #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_TERM_REGEX__terminal_20(true)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_21);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_TERM_EXACT__terminal_28(false)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             set_state(&jemplpl_parser::state_20);
 
                                                         } else
-
-                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                         if(shift_NONE___fpl_null(true)) {
 
                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -5212,15 +4838,11 @@ void state_1() {
 
                                                             #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                            #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                             // we've matched something, and we're going to generate and
                                                             // push a result, so first we need to clear any mismatches
                                                             // from the top of the stack:
                                                             clear_mismatches();
 
-
-                                                            #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                             #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -5285,8 +4907,6 @@ void state_1() {
                                                             #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                            #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                             Product prod(
                                                             rule_29 ({
 
@@ -5298,16 +4918,10 @@ void state_1() {
                                                                 #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                 auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                                #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                 lr_pop_to(lr_read_pos - 1);
 
-
-                                                                #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                 bool eject = is__text_ejected_in_state(cur_state);
 
                                                                 #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -5343,8 +4957,6 @@ void state_1() {
                                                             #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                            #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             eat_separator();
 
 
@@ -5353,8 +4965,6 @@ void state_1() {
 
 
                                                             #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                             if(shift_NONE___fpl_null(true)) {
 
                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -5363,15 +4973,11 @@ void state_1() {
 
                                                                 #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                                #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                 // we've matched something, and we're going to generate and
                                                                 // push a result, so first we need to clear any mismatches
                                                                 // from the top of the stack:
                                                                 clear_mismatches();
 
-
-                                                                #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                                 #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -5457,8 +5063,6 @@ void state_1() {
                                                                 #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                 Product prod(
                                                                 rule_11 ({
 
@@ -5470,16 +5074,10 @@ void state_1() {
                                                                     #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                    #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                     auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                                    #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                     lr_pop_to(lr_read_pos - 1);
 
-
-                                                                    #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                     bool eject = is__subst_start_ejected_in_state(cur_state);
 
                                                                     #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -5516,8 +5114,6 @@ void state_1() {
                                                                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                 eat_separator();
 
 
@@ -5526,16 +5122,12 @@ void state_1() {
 
 
                                                                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                 if(shift_NONTERM_PRODUCTION__identifier(false)) {
 
                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                     set_state(&jemplpl_parser::state_22);
 
                                                                 } else
-
-                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                 if(shift_TERM_REGEX__terminal_46(false)) {
 
                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -5566,8 +5158,6 @@ void state_1() {
                                                                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                 eat_separator();
 
 
@@ -5576,8 +5166,6 @@ void state_1() {
 
 
                                                                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                 if(shift_TERM_EXACT__terminal_22(true)) {
 
                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -5608,8 +5196,6 @@ void state_1() {
                                                                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                 eat_separator();
 
 
@@ -5618,8 +5204,6 @@ void state_1() {
 
 
                                                                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                 if(shift_TERM_REGEX__terminal_23(false)) {
 
                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -5650,8 +5234,6 @@ void state_1() {
                                                                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                 eat_separator();
 
 
@@ -5660,8 +5242,6 @@ void state_1() {
 
 
                                                                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                 if(shift_TERM_EXACT__terminal_11(true)) {
 
                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -5692,8 +5272,6 @@ void state_1() {
                                                                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                 eat_separator();
 
 
@@ -5702,8 +5280,6 @@ void state_1() {
 
 
                                                                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                 if(shift_TERM_REGEX__terminal_8(true)) {
 
                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -5734,8 +5310,6 @@ void state_1() {
                                                                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                 eat_separator();
 
 
@@ -5744,8 +5318,6 @@ void state_1() {
 
 
                                                                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                 if(shift_NONE___fpl_null(true)) {
 
                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -5754,15 +5326,11 @@ void state_1() {
 
                                                                     #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                                    #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                     // we've matched something, and we're going to generate and
                                                                     // push a result, so first we need to clear any mismatches
                                                                     // from the top of the stack:
                                                                     clear_mismatches();
 
-
-                                                                    #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                                     #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -5973,8 +5541,6 @@ void state_1() {
                                                                     #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                    #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                     Product prod(
                                                                     rule_8 ({
 
@@ -5986,16 +5552,10 @@ void state_1() {
                                                                         #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                                        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                         lr_pop_to(lr_read_pos - 1);
 
-
-                                                                        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                         bool eject = is__fragment_ejected_in_state(cur_state);
 
                                                                         #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -6031,8 +5591,6 @@ void state_1() {
                                                                     #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                    #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                     eat_separator();
 
 
@@ -6041,8 +5599,6 @@ void state_1() {
 
 
                                                                     #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                     if(shift_NONE___fpl_null(true)) {
 
                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -6051,15 +5607,11 @@ void state_1() {
 
                                                                         #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                                        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                         // we've matched something, and we're going to generate and
                                                                         // push a result, so first we need to clear any mismatches
                                                                         // from the top of the stack:
                                                                         clear_mismatches();
 
-
-                                                                        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                                         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -6124,8 +5676,6 @@ void state_1() {
                                                                         #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                         Product prod(
                                                                         rule_31 ({
 
@@ -6137,16 +5687,10 @@ void state_1() {
                                                                             #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                            #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                             auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                                            #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                             lr_pop_to(lr_read_pos - 1);
 
-
-                                                                            #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                             bool eject = is__identifier_ejected_in_state(cur_state);
 
                                                                             #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -6208,8 +5752,6 @@ void state_1() {
                                                                         #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                        #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         eat_separator();
 
 
@@ -6218,192 +5760,144 @@ void state_1() {
 
 
                                                                         #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_NONTERM_PRODUCTION__text(false)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_2);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_29);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_NONTERM_PRODUCTION__fragment(false)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_28);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_29);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_19);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_29);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_NONTERM_PRODUCTION__control_start(false)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_43);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_NONTERM_PRODUCTION__control_fragment(false)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_49);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_29);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_19);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_NONTERM_PRODUCTION__trailing_ws(false)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_1);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_TERM_EXACT__terminal_4(false)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_4);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_TERM_EXACT__terminal_5(true)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_71);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_TERM_EXACT__terminal_9(true)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_57);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_TERM_EXACT__terminal_12(true)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_61);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_TERM_EXACT__terminal_14(true)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_66);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_TERM_REGEX__terminal_20(true)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_21);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_TERM_REGEX__terminal_24(true)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_75);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_TERM_EXACT__terminal_28(false)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_20);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_TERM_EXACT__terminal_11(false)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_52);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_TERM_REGEX__terminal_33(false)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_5);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_TERM_REGEX__terminal_34(false)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_7);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_TERM_REGEX__terminal_35(false)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_8);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_TERM_REGEX__terminal_45(false)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -6439,8 +5933,6 @@ void state_1() {
                                                                         #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                        #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         eat_separator();
 
 
@@ -6449,40 +5941,30 @@ void state_1() {
 
 
                                                                         #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_TERM_EXACT__terminal_16(true)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_17);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_TERM_EXACT__terminal_18(true)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_30);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_TERM_REGEX__terminal_36(true)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_32);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_TERM_CUSTOM__terminal_40(false)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_15);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_TERM_CUSTOM__terminal_44(false)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -6515,8 +5997,6 @@ void state_1() {
                                                                         #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                        #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         eat_separator();
 
 
@@ -6525,24 +6005,18 @@ void state_1() {
 
 
                                                                         #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_NONTERM_PRODUCTION__subst_end(true)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_31);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_TERM_EXACT__terminal_29(false)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             set_state(&jemplpl_parser::state_13);
 
                                                                         } else
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_TERM_EXACT__terminal_11(false)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -6573,8 +6047,6 @@ void state_1() {
                                                                         #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                        #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         eat_separator();
 
 
@@ -6583,8 +6055,6 @@ void state_1() {
 
 
                                                                         #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                         if(shift_NONE___fpl_null(true)) {
 
                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -6593,15 +6063,11 @@ void state_1() {
 
                                                                             #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                                            #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                             // we've matched something, and we're going to generate and
                                                                             // push a result, so first we need to clear any mismatches
                                                                             // from the top of the stack:
                                                                             clear_mismatches();
 
-
-                                                                            #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                                             #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -6792,8 +6258,6 @@ void state_1() {
                                                                             #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                            #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                             Product prod(
                                                                             rule_7 ({
 
@@ -6805,16 +6269,10 @@ void state_1() {
                                                                                 #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                 auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                                                #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                 lr_pop_to(lr_read_pos - 1);
 
-
-                                                                                #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                 bool eject = is__fragment_ejected_in_state(cur_state);
 
                                                                                 #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -6852,8 +6310,6 @@ void state_1() {
                                                                             #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                            #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             eat_separator();
 
 
@@ -6862,16 +6318,12 @@ void state_1() {
 
 
                                                                             #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             if(shift_NONTERM_PRODUCTION__identifier(false)) {
 
                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                 set_state(&jemplpl_parser::state_33);
 
                                                                             } else
-
-                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             if(shift_TERM_REGEX__terminal_46(false)) {
 
                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -6905,8 +6357,6 @@ void state_1() {
                                                                             #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                            #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             eat_separator();
 
 
@@ -6915,32 +6365,24 @@ void state_1() {
 
 
                                                                             #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             if(shift_NONTERM_PRODUCTION__template_variant(false)) {
 
                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                 set_state(&jemplpl_parser::state_34);
 
                                                                             } else
-
-                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             if(shift_NONTERM_PRODUCTION__rest_of_sub(false)) {
 
                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                 set_state(&jemplpl_parser::state_38);
 
                                                                             } else
-
-                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             if(shift_TERM_EXACT__terminal_25(true)) {
 
                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                 set_state(&jemplpl_parser::state_40);
 
                                                                             } else
-
-                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             if(shift_TERM_REGEX__terminal_31(false)) {
 
                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -6972,8 +6414,6 @@ void state_1() {
                                                                             #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                            #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             eat_separator();
 
 
@@ -6982,16 +6422,12 @@ void state_1() {
 
 
                                                                             #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             if(shift_NONTERM_PRODUCTION__rest_of_sub(false)) {
 
                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                 set_state(&jemplpl_parser::state_35);
 
                                                                             } else
-
-                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             if(shift_TERM_REGEX__terminal_31(false)) {
 
                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -7024,8 +6460,6 @@ void state_1() {
                                                                             #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                            #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             eat_separator();
 
 
@@ -7034,24 +6468,18 @@ void state_1() {
 
 
                                                                             #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             if(shift_NONTERM_PRODUCTION__subst_end(true)) {
 
                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                 set_state(&jemplpl_parser::state_36);
 
                                                                             } else
-
-                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             if(shift_TERM_EXACT__terminal_29(false)) {
 
                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                 set_state(&jemplpl_parser::state_13);
 
                                                                             } else
-
-                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             if(shift_TERM_EXACT__terminal_11(false)) {
 
                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -7082,8 +6510,6 @@ void state_1() {
                                                                             #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                            #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             eat_separator();
 
 
@@ -7092,8 +6518,6 @@ void state_1() {
 
 
                                                                             #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                             if(shift_NONE___fpl_null(true)) {
 
                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -7102,15 +6526,11 @@ void state_1() {
 
                                                                                 #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                                                #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                 // we've matched something, and we're going to generate and
                                                                                 // push a result, so first we need to clear any mismatches
                                                                                 // from the top of the stack:
                                                                                 clear_mismatches();
 
-
-                                                                                #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                                                 #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -7300,8 +6720,6 @@ void state_1() {
                                                                                 #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                 Product prod(
                                                                                 rule_19 ({
 
@@ -7313,16 +6731,10 @@ void state_1() {
                                                                                     #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                    #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                     auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                                                    #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                     lr_pop_to(lr_read_pos - 1);
 
-
-                                                                                    #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                     bool eject = is__fragment_ejected_in_state(cur_state);
 
                                                                                     #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -7358,8 +6770,6 @@ void state_1() {
                                                                                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                 eat_separator();
 
 
@@ -7368,8 +6778,6 @@ void state_1() {
 
 
                                                                                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                 if(shift_NONE___fpl_null(true)) {
 
                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -7378,15 +6786,11 @@ void state_1() {
 
                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                                                    #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                     // we've matched something, and we're going to generate and
                                                                                     // push a result, so first we need to clear any mismatches
                                                                                     // from the top of the stack:
                                                                                     clear_mismatches();
 
-
-                                                                                    #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                                                     #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -7451,8 +6855,6 @@ void state_1() {
                                                                                     #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                    #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                     Product prod(
                                                                                     rule_15 ({
 
@@ -7464,16 +6866,10 @@ void state_1() {
                                                                                         #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                                                        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                         lr_pop_to(lr_read_pos - 1);
 
-
-                                                                                        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                         bool eject = is__rest_of_sub_ejected_in_state(cur_state);
 
                                                                                         #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -7511,8 +6907,6 @@ void state_1() {
                                                                                     #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                    #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                     eat_separator();
 
 
@@ -7521,24 +6915,18 @@ void state_1() {
 
 
                                                                                     #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                     if(shift_NONTERM_PRODUCTION__subst_end(true)) {
 
                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                         set_state(&jemplpl_parser::state_39);
 
                                                                                     } else
-
-                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                     if(shift_TERM_EXACT__terminal_29(false)) {
 
                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                         set_state(&jemplpl_parser::state_13);
 
                                                                                     } else
-
-                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                     if(shift_TERM_EXACT__terminal_11(false)) {
 
                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -7569,8 +6957,6 @@ void state_1() {
                                                                                     #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                    #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                     eat_separator();
 
 
@@ -7579,8 +6965,6 @@ void state_1() {
 
 
                                                                                     #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                     if(shift_NONE___fpl_null(true)) {
 
                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -7589,15 +6973,11 @@ void state_1() {
 
                                                                                         #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                                                        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                         // we've matched something, and we're going to generate and
                                                                                         // push a result, so first we need to clear any mismatches
                                                                                         // from the top of the stack:
                                                                                         clear_mismatches();
 
-
-                                                                                        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                                                         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -7756,8 +7136,6 @@ void state_1() {
                                                                                         #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                         Product prod(
                                                                                         rule_20 ({
 
@@ -7769,16 +7147,10 @@ void state_1() {
                                                                                             #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                            #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                             auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                                                            #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                             lr_pop_to(lr_read_pos - 1);
 
-
-                                                                                            #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                             bool eject = is__fragment_ejected_in_state(cur_state);
 
                                                                                             #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -7814,8 +7186,6 @@ void state_1() {
                                                                                         #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                        #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                         eat_separator();
 
 
@@ -7824,8 +7194,6 @@ void state_1() {
 
 
                                                                                         #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                         if(shift_TERM_EXACT_INV__terminal_26(false)) {
 
                                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -7856,8 +7224,6 @@ void state_1() {
                                                                                         #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                        #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                         eat_separator();
 
 
@@ -7866,8 +7232,6 @@ void state_1() {
 
 
                                                                                         #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                         if(shift_TERM_EXACT__terminal_25(true)) {
 
                                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -7898,8 +7262,6 @@ void state_1() {
                                                                                         #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                        #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                         eat_separator();
 
 
@@ -7908,8 +7270,6 @@ void state_1() {
 
 
                                                                                         #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                         if(shift_NONE___fpl_null(true)) {
 
                                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -7918,15 +7278,11 @@ void state_1() {
 
                                                                                             #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                                                            #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                             // we've matched something, and we're going to generate and
                                                                                             // push a result, so first we need to clear any mismatches
                                                                                             // from the top of the stack:
                                                                                             clear_mismatches();
 
-
-                                                                                            #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                                                             #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -8033,8 +7389,6 @@ void state_1() {
                                                                                             #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                            #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                             Product prod(
                                                                                             rule_10 ({
 
@@ -8046,16 +7400,10 @@ void state_1() {
                                                                                                 #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                 auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                                                                #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                 lr_pop_to(lr_read_pos - 1);
 
-
-                                                                                                #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                 bool eject = is__template_variant_ejected_in_state(cur_state);
 
                                                                                                 #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -8121,8 +7469,6 @@ void state_1() {
                                                                                             #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                            #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             eat_separator();
 
 
@@ -8131,208 +7477,156 @@ void state_1() {
 
 
                                                                                             #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_NONTERM_PRODUCTION__text(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_2);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_44);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_19);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_44);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_NONTERM_PRODUCTION__control_continuation(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_54);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_NONTERM_PRODUCTION__control_start(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_43);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_NONTERM_PRODUCTION__fragment(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_43);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_NONTERM_SUBEXPRESSION___subex_0(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_55);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_NONTERM_PRODUCTION__control_end(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_53);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_NONTERM_PRODUCTION__control_fragment(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_49);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_44);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_19);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_NONTERM_PRODUCTION__trailing_ws(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_1);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_TERM_EXACT__terminal_4(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_4);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_TERM_EXACT__terminal_5(true)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_71);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_TERM_EXACT__terminal_9(true)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_57);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_TERM_EXACT__terminal_12(true)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_61);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_TERM_EXACT__terminal_14(true)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_66);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_TERM_REGEX__terminal_20(true)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_21);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_TERM_REGEX__terminal_24(true)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_75);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_TERM_EXACT__terminal_28(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_20);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_TERM_EXACT__terminal_11(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_52);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_TERM_REGEX__terminal_33(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_5);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_TERM_REGEX__terminal_34(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_7);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_TERM_REGEX__terminal_35(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_8);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_TERM_REGEX__terminal_45(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -8369,8 +7663,6 @@ void state_1() {
                                                                                             #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                            #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             eat_separator();
 
 
@@ -8379,48 +7671,36 @@ void state_1() {
 
 
                                                                                             #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_TERM_EXACT__terminal_16(true)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_17);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_TERM_REGEX__terminal_36(true)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_32);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_TERM_CUSTOM__terminal_37(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_45);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_TERM_EXACT__terminal_18(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_47);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_TERM_CUSTOM__terminal_40(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_15);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_TERM_CUSTOM__terminal_44(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -8453,8 +7733,6 @@ void state_1() {
                                                                                             #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                            #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             eat_separator();
 
 
@@ -8463,24 +7741,18 @@ void state_1() {
 
 
                                                                                             #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_NONTERM_PRODUCTION__subst_end(true)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_46);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_TERM_EXACT__terminal_29(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 set_state(&jemplpl_parser::state_13);
 
                                                                                             } else
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_TERM_EXACT__terminal_11(false)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -8511,8 +7783,6 @@ void state_1() {
                                                                                             #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                            #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             eat_separator();
 
 
@@ -8521,8 +7791,6 @@ void state_1() {
 
 
                                                                                             #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                             if(shift_NONE___fpl_null(true)) {
 
                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -8531,15 +7799,11 @@ void state_1() {
 
                                                                                                 #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                                                                #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                 // we've matched something, and we're going to generate and
                                                                                                 // push a result, so first we need to clear any mismatches
                                                                                                 // from the top of the stack:
                                                                                                 clear_mismatches();
 
-
-                                                                                                #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                                                                 #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -8646,8 +7910,6 @@ void state_1() {
                                                                                                 #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                 Product prod(
                                                                                                 rule_21 ({
 
@@ -8659,16 +7921,10 @@ void state_1() {
                                                                                                     #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                    #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                     auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                                                                    #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                     lr_pop_to(lr_read_pos - 1);
 
-
-                                                                                                    #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                     bool eject = is__control_continuation_ejected_in_state(cur_state);
 
                                                                                                     #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -8706,8 +7962,6 @@ void state_1() {
                                                                                                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 eat_separator();
 
 
@@ -8716,24 +7970,18 @@ void state_1() {
 
 
                                                                                                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 if(shift_NONTERM_PRODUCTION__subst_end(true)) {
 
                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                     set_state(&jemplpl_parser::state_48);
 
                                                                                                 } else
-
-                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 if(shift_TERM_EXACT__terminal_29(false)) {
 
                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                     set_state(&jemplpl_parser::state_13);
 
                                                                                                 } else
-
-                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 if(shift_TERM_EXACT__terminal_11(false)) {
 
                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -8764,8 +8012,6 @@ void state_1() {
                                                                                                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 eat_separator();
 
 
@@ -8774,8 +8020,6 @@ void state_1() {
 
 
                                                                                                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                 if(shift_NONE___fpl_null(true)) {
 
                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -8784,15 +8028,11 @@ void state_1() {
 
                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                                                                    #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                     // we've matched something, and we're going to generate and
                                                                                                     // push a result, so first we need to clear any mismatches
                                                                                                     // from the top of the stack:
                                                                                                     clear_mismatches();
 
-
-                                                                                                    #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                                                                     #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -8899,8 +8139,6 @@ void state_1() {
                                                                                                     #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                    #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                     Product prod(
                                                                                                     rule_22 ({
 
@@ -8912,16 +8150,10 @@ void state_1() {
                                                                                                         #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                                                                        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                         lr_pop_to(lr_read_pos - 1);
 
-
-                                                                                                        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                         bool eject = is__control_end_ejected_in_state(cur_state);
 
                                                                                                         #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -8964,8 +8196,6 @@ void state_1() {
                                                                                                     #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                    #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                     eat_separator();
 
 
@@ -8974,64 +8204,48 @@ void state_1() {
 
 
                                                                                                     #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                     if(shift_NONTERM_PRODUCTION__leading_ws(true)) {
 
                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                         set_state(&jemplpl_parser::state_51);
 
                                                                                                     } else
-
-                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                         set_state(&jemplpl_parser::state_50);
 
                                                                                                     } else
-
-                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                     if(shift_NONTERM_PRODUCTION__control_start(false)) {
 
                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                         set_state(&jemplpl_parser::state_43);
 
                                                                                                     } else
-
-                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                     if(shift_NONTERM_PRODUCTION__control_fragment(false)) {
 
                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                         set_state(&jemplpl_parser::state_49);
 
                                                                                                     } else
-
-                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                     if(shift_TERM_EXACT__terminal_28(false)) {
 
                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                         set_state(&jemplpl_parser::state_20);
 
                                                                                                     } else
-
-                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                     if(shift_TERM_EXACT__terminal_11(false)) {
 
                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                         set_state(&jemplpl_parser::state_52);
 
                                                                                                     } else
-
-                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                     if(shift_TERM_REGEX__terminal_33(false)) {
 
                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                         set_state(&jemplpl_parser::state_5);
 
                                                                                                     } else
-
-                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                     if(shift_NONE___fpl_null(true)) {
 
                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -9040,15 +8254,11 @@ void state_1() {
 
                                                                                                         #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                                                                        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                         // we've matched something, and we're going to generate and
                                                                                                         // push a result, so first we need to clear any mismatches
                                                                                                         // from the top of the stack:
                                                                                                         clear_mismatches();
 
-
-                                                                                                        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                                                                         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -9113,8 +8323,6 @@ void state_1() {
                                                                                                         #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                         Product prod(
                                                                                                         rule_26 ({
 
@@ -9126,16 +8334,10 @@ void state_1() {
                                                                                                             #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                            #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                             auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                                                                            #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                             lr_pop_to(lr_read_pos - 1);
 
-
-                                                                                                            #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                             bool eject = is__fragment_ejected_in_state(cur_state);
 
                                                                                                             #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -9171,8 +8373,6 @@ void state_1() {
                                                                                                         #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                        #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                         eat_separator();
 
 
@@ -9181,8 +8381,6 @@ void state_1() {
 
 
                                                                                                         #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                         if(shift_TERM_CUSTOM__terminal_40(false)) {
 
                                                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -9213,8 +8411,6 @@ void state_1() {
                                                                                                         #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                        #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                         eat_separator();
 
 
@@ -9223,8 +8419,6 @@ void state_1() {
 
 
                                                                                                         #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                         if(shift_TERM_EXACT__terminal_28(false)) {
 
                                                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -9255,8 +8449,6 @@ void state_1() {
                                                                                                         #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                        #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                         eat_separator();
 
 
@@ -9265,8 +8457,6 @@ void state_1() {
 
 
                                                                                                         #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                         if(shift_NONE___fpl_null(true)) {
 
                                                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -9275,15 +8465,11 @@ void state_1() {
 
                                                                                                             #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                                                                            #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                             // we've matched something, and we're going to generate and
                                                                                                             // push a result, so first we need to clear any mismatches
                                                                                                             // from the top of the stack:
                                                                                                             clear_mismatches();
 
-
-                                                                                                            #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                                                                             #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -9348,8 +8534,6 @@ void state_1() {
                                                                                                             #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                            #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                             Product prod(
                                                                                                             rule_12 ({
 
@@ -9361,16 +8545,10 @@ void state_1() {
                                                                                                                 #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                                #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                 auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                                                                                #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                 lr_pop_to(lr_read_pos - 1);
 
-
-                                                                                                                #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                 bool eject = is__subst_start_ejected_in_state(cur_state);
 
                                                                                                                 #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -9406,8 +8584,6 @@ void state_1() {
                                                                                                             #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                            #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                             eat_separator();
 
 
@@ -9416,8 +8592,6 @@ void state_1() {
 
 
                                                                                                             #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                             if(shift_NONE___fpl_null(true)) {
 
                                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -9426,15 +8600,11 @@ void state_1() {
 
                                                                                                                 #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                                                                                #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                 // we've matched something, and we're going to generate and
                                                                                                                 // push a result, so first we need to clear any mismatches
                                                                                                                 // from the top of the stack:
                                                                                                                 clear_mismatches();
 
-
-                                                                                                                #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                                                                                 #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -9562,8 +8732,6 @@ void state_1() {
                                                                                                                 #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                                #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                 Product prod(
                                                                                                                 rule_25 ({
 
@@ -9575,16 +8743,10 @@ void state_1() {
                                                                                                                     #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                                    #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                     auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                                                                                    #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                     lr_pop_to(lr_read_pos - 1);
 
-
-                                                                                                                    #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                     bool eject = is__control_fragment_ejected_in_state(cur_state);
 
                                                                                                                     #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -9651,8 +8813,6 @@ void state_1() {
                                                                                                                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 eat_separator();
 
 
@@ -9661,216 +8821,162 @@ void state_1() {
 
 
                                                                                                                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_NONTERM_PRODUCTION__text(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_2);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_44);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_19);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_44);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_NONTERM_PRODUCTION__control_continuation(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_54);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_NONTERM_PRODUCTION__fragment(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_54);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_NONTERM_PRODUCTION__control_start(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_43);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_NONTERM_SUBEXPRESSION___subex_0(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_55);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_NONTERM_PRODUCTION__control_end(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_53);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_NONTERM_PRODUCTION__control_fragment(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_49);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_44);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_19);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_NONTERM_PRODUCTION__trailing_ws(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_1);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_TERM_EXACT__terminal_4(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_4);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_TERM_EXACT__terminal_5(true)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_71);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_TERM_EXACT__terminal_9(true)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_57);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_TERM_EXACT__terminal_12(true)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_61);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_TERM_EXACT__terminal_14(true)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_66);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_TERM_REGEX__terminal_20(true)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_21);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_TERM_REGEX__terminal_24(true)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_75);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_TERM_EXACT__terminal_28(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_20);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_TERM_EXACT__terminal_11(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_52);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_TERM_REGEX__terminal_33(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_5);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_TERM_REGEX__terminal_34(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_7);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_TERM_REGEX__terminal_35(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_8);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_TERM_REGEX__terminal_45(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_6);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_NONE___fpl_null(true)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -9909,8 +9015,6 @@ void state_1() {
                                                                                                                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 eat_separator();
 
 
@@ -9919,64 +9023,48 @@ void state_1() {
 
 
                                                                                                                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_NONTERM_PRODUCTION__leading_ws(true)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_51);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_56);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_NONTERM_PRODUCTION__control_continuation(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_54);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_NONTERM_SUBEXPRESSION___subex_0(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_55);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_NONTERM_PRODUCTION__control_end(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_53);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_TERM_EXACT__terminal_28(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_20);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_TERM_EXACT__terminal_11(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_52);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_TERM_REGEX__terminal_33(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -10008,8 +9096,6 @@ void state_1() {
                                                                                                                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 eat_separator();
 
 
@@ -10018,16 +9104,12 @@ void state_1() {
 
 
                                                                                                                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_TERM_CUSTOM__terminal_37(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     set_state(&jemplpl_parser::state_45);
 
                                                                                                                 } else
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_TERM_EXACT__terminal_18(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -10058,8 +9140,6 @@ void state_1() {
                                                                                                                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 eat_separator();
 
 
@@ -10068,8 +9148,6 @@ void state_1() {
 
 
                                                                                                                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_TERM_REGEX__terminal_10(false)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -10100,8 +9178,6 @@ void state_1() {
                                                                                                                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 eat_separator();
 
 
@@ -10110,8 +9186,6 @@ void state_1() {
 
 
                                                                                                                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_TERM_EXACT__terminal_11(true)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -10142,8 +9216,6 @@ void state_1() {
                                                                                                                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 eat_separator();
 
 
@@ -10152,8 +9224,6 @@ void state_1() {
 
 
                                                                                                                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_TERM_REGEX__terminal_8(true)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -10184,8 +9254,6 @@ void state_1() {
                                                                                                                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 eat_separator();
 
 
@@ -10194,8 +9262,6 @@ void state_1() {
 
 
                                                                                                                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                 if(shift_NONE___fpl_null(true)) {
 
                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -10204,15 +9270,11 @@ void state_1() {
 
                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                                                                                    #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                     // we've matched something, and we're going to generate and
                                                                                                                     // push a result, so first we need to clear any mismatches
                                                                                                                     // from the top of the stack:
                                                                                                                     clear_mismatches();
 
-
-                                                                                                                    #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                                                                                     #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -10340,8 +9402,6 @@ void state_1() {
                                                                                                                     #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                                    #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                     Product prod(
                                                                                                                     rule_4 ({
 
@@ -10353,16 +9413,10 @@ void state_1() {
                                                                                                                         #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                                        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                                                                                        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                         lr_pop_to(lr_read_pos - 1);
 
-
-                                                                                                                        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                         bool eject = is__fragment_ejected_in_state(cur_state);
 
                                                                                                                         #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -10398,8 +9452,6 @@ void state_1() {
                                                                                                                     #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                    #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     eat_separator();
 
 
@@ -10408,8 +9460,6 @@ void state_1() {
 
 
                                                                                                                     #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     if(shift_TERM_REGEX__terminal_13(true)) {
 
                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -10440,8 +9490,6 @@ void state_1() {
                                                                                                                     #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                    #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     eat_separator();
 
 
@@ -10450,8 +9498,6 @@ void state_1() {
 
 
                                                                                                                     #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     if(shift_TERM_REGEX__terminal_10(false)) {
 
                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -10482,8 +9528,6 @@ void state_1() {
                                                                                                                     #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                    #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     eat_separator();
 
 
@@ -10492,8 +9536,6 @@ void state_1() {
 
 
                                                                                                                     #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     if(shift_TERM_EXACT__terminal_11(true)) {
 
                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -10524,8 +9566,6 @@ void state_1() {
                                                                                                                     #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                    #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     eat_separator();
 
 
@@ -10534,8 +9574,6 @@ void state_1() {
 
 
                                                                                                                     #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     if(shift_TERM_REGEX__terminal_8(true)) {
 
                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -10566,8 +9604,6 @@ void state_1() {
                                                                                                                     #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                    #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     eat_separator();
 
 
@@ -10576,8 +9612,6 @@ void state_1() {
 
 
                                                                                                                     #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                     if(shift_NONE___fpl_null(true)) {
 
                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -10586,15 +9620,11 @@ void state_1() {
 
                                                                                                                         #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                                                                                        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                         // we've matched something, and we're going to generate and
                                                                                                                         // push a result, so first we need to clear any mismatches
                                                                                                                         // from the top of the stack:
                                                                                                                         clear_mismatches();
 
-
-                                                                                                                        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                                                                                         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -10743,8 +9773,6 @@ void state_1() {
                                                                                                                         #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                                        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                         Product prod(
                                                                                                                         rule_5 ({
 
@@ -10756,16 +9784,10 @@ void state_1() {
                                                                                                                             #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                                            #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                             auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                                                                                            #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                             lr_pop_to(lr_read_pos - 1);
 
-
-                                                                                                                            #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                             bool eject = is__fragment_ejected_in_state(cur_state);
 
                                                                                                                             #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -10801,8 +9823,6 @@ void state_1() {
                                                                                                                         #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                        #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                         eat_separator();
 
 
@@ -10811,8 +9831,6 @@ void state_1() {
 
 
                                                                                                                         #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                         if(shift_TERM_REGEX__terminal_13(true)) {
 
                                                                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -10843,8 +9861,6 @@ void state_1() {
                                                                                                                         #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                        #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                         eat_separator();
 
 
@@ -10853,8 +9869,6 @@ void state_1() {
 
 
                                                                                                                         #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                         if(shift_TERM_REGEX__terminal_10(false)) {
 
                                                                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -10885,8 +9899,6 @@ void state_1() {
                                                                                                                         #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                        #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                         eat_separator();
 
 
@@ -10895,8 +9907,6 @@ void state_1() {
 
 
                                                                                                                         #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                         if(shift_TERM_EXACT__terminal_11(true)) {
 
                                                                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -10927,8 +9937,6 @@ void state_1() {
                                                                                                                         #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                        #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                         eat_separator();
 
 
@@ -10937,8 +9945,6 @@ void state_1() {
 
 
                                                                                                                         #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                         if(shift_TERM_REGEX__terminal_8(true)) {
 
                                                                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -10969,8 +9975,6 @@ void state_1() {
                                                                                                                         #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                        #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                         eat_separator();
 
 
@@ -10979,8 +9983,6 @@ void state_1() {
 
 
                                                                                                                         #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                         if(shift_NONE___fpl_null(true)) {
 
                                                                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -10989,15 +9991,11 @@ void state_1() {
 
                                                                                                                             #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                                                                                            #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                             // we've matched something, and we're going to generate and
                                                                                                                             // push a result, so first we need to clear any mismatches
                                                                                                                             // from the top of the stack:
                                                                                                                             clear_mismatches();
 
-
-                                                                                                                            #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                                                                                             #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -11146,8 +10144,6 @@ void state_1() {
                                                                                                                             #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                                            #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                             Product prod(
                                                                                                                             rule_6 ({
 
@@ -11159,16 +10155,10 @@ void state_1() {
                                                                                                                                 #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                                                #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                                 auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                                                                                                #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                                 lr_pop_to(lr_read_pos - 1);
 
-
-                                                                                                                                #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                                 bool eject = is__fragment_ejected_in_state(cur_state);
 
                                                                                                                                 #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -11204,8 +10194,6 @@ void state_1() {
                                                                                                                             #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                            #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                             eat_separator();
 
 
@@ -11214,8 +10202,6 @@ void state_1() {
 
 
                                                                                                                             #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                             if(shift_TERM_REGEX__terminal_6(false)) {
 
                                                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -11246,8 +10232,6 @@ void state_1() {
                                                                                                                             #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                            #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                             eat_separator();
 
 
@@ -11256,8 +10240,6 @@ void state_1() {
 
 
                                                                                                                             #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                             if(shift_TERM_EXACT__terminal_7(true)) {
 
                                                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -11288,8 +10270,6 @@ void state_1() {
                                                                                                                             #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                            #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                             eat_separator();
 
 
@@ -11298,8 +10278,6 @@ void state_1() {
 
 
                                                                                                                             #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                             if(shift_TERM_REGEX__terminal_8(true)) {
 
                                                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -11330,8 +10308,6 @@ void state_1() {
                                                                                                                             #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                            #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                             eat_separator();
 
 
@@ -11340,8 +10316,6 @@ void state_1() {
 
 
                                                                                                                             #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                            #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                             if(shift_NONE___fpl_null(true)) {
 
                                                                                                                                 #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -11350,15 +10324,11 @@ void state_1() {
 
                                                                                                                                 #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                                                                                                #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                                 // we've matched something, and we're going to generate and
                                                                                                                                 // push a result, so first we need to clear any mismatches
                                                                                                                                 // from the top of the stack:
                                                                                                                                 clear_mismatches();
 
-
-                                                                                                                                #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                                                                                                 #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -11486,8 +10456,6 @@ void state_1() {
                                                                                                                                 #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                                                #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                                 Product prod(
                                                                                                                                 rule_3 ({
 
@@ -11499,16 +10467,10 @@ void state_1() {
                                                                                                                                     #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                                                    #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                                     auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                                                                                                    #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                                     lr_pop_to(lr_read_pos - 1);
 
-
-                                                                                                                                    #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                                     bool eject = is__fragment_ejected_in_state(cur_state);
 
                                                                                                                                     #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -11551,8 +10513,6 @@ void state_1() {
                                                                                                                                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                 eat_separator();
 
 
@@ -11561,64 +10521,48 @@ void state_1() {
 
 
                                                                                                                                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                 if(shift_NONTERM_PRODUCTION__text(false)) {
 
                                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     set_state(&jemplpl_parser::state_76);
 
                                                                                                                                 } else
-
-                                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                 if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
                                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     set_state(&jemplpl_parser::state_3);
 
                                                                                                                                 } else
-
-                                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                 if(shift_NONTERM_PRODUCTION__trailing_ws(false)) {
 
                                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     set_state(&jemplpl_parser::state_1);
 
                                                                                                                                 } else
-
-                                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                 if(shift_TERM_EXACT__terminal_4(false)) {
 
                                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     set_state(&jemplpl_parser::state_4);
 
                                                                                                                                 } else
-
-                                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                 if(shift_TERM_REGEX__terminal_33(false)) {
 
                                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     set_state(&jemplpl_parser::state_5);
 
                                                                                                                                 } else
-
-                                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                 if(shift_TERM_REGEX__terminal_34(false)) {
 
                                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     set_state(&jemplpl_parser::state_7);
 
                                                                                                                                 } else
-
-                                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                 if(shift_TERM_REGEX__terminal_35(false)) {
 
                                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     set_state(&jemplpl_parser::state_8);
 
                                                                                                                                 } else
-
-                                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                 if(shift_TERM_REGEX__terminal_45(false)) {
 
                                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -11649,8 +10593,6 @@ void state_1() {
                                                                                                                                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                 eat_separator();
 
 
@@ -11659,8 +10601,6 @@ void state_1() {
 
 
                                                                                                                                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                 if(shift_TERM_EXACT__terminal_11(true)) {
 
                                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -11691,8 +10631,6 @@ void state_1() {
                                                                                                                                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                 eat_separator();
 
 
@@ -11701,8 +10639,6 @@ void state_1() {
 
 
                                                                                                                                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                 if(shift_TERM_REGEX__terminal_8(true)) {
 
                                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -11733,8 +10669,6 @@ void state_1() {
                                                                                                                                 #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                                #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                 eat_separator();
 
 
@@ -11743,8 +10677,6 @@ void state_1() {
 
 
                                                                                                                                 #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                                #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                 if(shift_NONE___fpl_null(true)) {
 
                                                                                                                                     #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -11753,15 +10685,11 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                                                                                                    #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                                     // we've matched something, and we're going to generate and
                                                                                                                                     // push a result, so first we need to clear any mismatches
                                                                                                                                     // from the top of the stack:
                                                                                                                                     clear_mismatches();
 
-
-                                                                                                                                    #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                                                                                                     #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -11889,8 +10817,6 @@ void state_1() {
                                                                                                                                     #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                                                    #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                                     Product prod(
                                                                                                                                     rule_9 ({
 
@@ -11902,16 +10828,10 @@ void state_1() {
                                                                                                                                         #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                                                        #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                                         auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                                                                                                        #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                                         lr_pop_to(lr_read_pos - 1);
 
-
-                                                                                                                                        #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                                         bool eject = is__fragment_ejected_in_state(cur_state);
 
                                                                                                                                         #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -11973,8 +10893,6 @@ void state_1() {
                                                                                                                                     #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                                    #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     eat_separator();
 
 
@@ -11983,192 +10901,144 @@ void state_1() {
 
 
                                                                                                                                     #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_NONTERM_PRODUCTION__fragment(false)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_79);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_NONTERM_PRODUCTION__text(false)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_2);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_9);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_19);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_9);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_NONTERM_PRODUCTION__control_start(false)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_43);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_NONTERM_PRODUCTION__control_fragment(false)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_49);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_NONTERM_PRODUCTION__subst_start(true)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_9);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_NONTERM_PRODUCTION__leading_ws(false)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_19);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_NONTERM_PRODUCTION__trailing_ws(false)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_1);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_TERM_EXACT__terminal_4(false)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_4);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_TERM_EXACT__terminal_5(true)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_71);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_TERM_EXACT__terminal_9(true)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_57);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_TERM_EXACT__terminal_12(true)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_61);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_TERM_EXACT__terminal_14(true)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_66);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_TERM_REGEX__terminal_20(true)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_21);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_TERM_REGEX__terminal_24(true)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_75);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_TERM_EXACT__terminal_28(false)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_20);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_TERM_EXACT__terminal_11(false)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_52);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_TERM_REGEX__terminal_33(false)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_5);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_TERM_REGEX__terminal_34(false)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_7);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_TERM_REGEX__terminal_35(false)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_8);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_TERM_REGEX__terminal_45(false)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         set_state(&jemplpl_parser::state_6);
 
                                                                                                                                     } else
-
-                                                                                                                                    #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                     if(shift_NONE___fpl_null(true)) {
 
                                                                                                                                         #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -12177,15 +11047,11 @@ void state_1() {
 
                                                                                                                                         #line 4 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
-
-                                                                                                                                        #line 6 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                                         // we've matched something, and we're going to generate and
                                                                                                                                         // push a result, so first we need to clear any mismatches
                                                                                                                                         // from the top of the stack:
                                                                                                                                         clear_mismatches();
 
-
-                                                                                                                                        #line 14 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
                                                                                                                                         #line 35 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
@@ -12250,8 +11116,6 @@ void state_1() {
                                                                                                                                         #line 122 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                                                        #line 124 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                                         Product prod(
                                                                                                                                         rule_0 ({
 
@@ -12263,16 +11127,10 @@ void state_1() {
                                                                                                                                             #line 139 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
 
 
-
-                                                                                                                                            #line 141 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                                             auto src_pos = lr_stack_entry(lr_read_pos).position();
 
-
-                                                                                                                                            #line 144 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                                             lr_pop_to(lr_read_pos - 1);
 
-
-                                                                                                                                            #line 152 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
                                                                                                                                             bool eject = is__complete_ejected_in_state(cur_state);
 
                                                                                                                                             #line 161 "src/fpl2cc/fpl_x_parser_reduce_call.h.jemp" 
@@ -12308,8 +11166,6 @@ void state_1() {
                                                                                                                                         #line 11 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
 
 
-
-                                                                                                                                        #line 13 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         eat_separator();
 
 
@@ -12318,8 +11174,6 @@ void state_1() {
 
 
                                                                                                                                         #line 64 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
-
-                                                                                                                                        #line 34 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
                                                                                                                                         if(shift_NONE___fpl_null(true)) {
 
                                                                                                                                             #line 62 "src/fpl2cc/fpl_x_parser_state.h.jemp" 
@@ -12360,15 +11214,11 @@ void state_1() {
                                                                                                                                         #line 107 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
                                                                                                                                         {
-
-                                                                                                                                            #line 100 "src/fpl2cc/fpl_x_parser.h.jemp" 
                                                                                                                                             const bool copyable = std::is_copy_constructible<Terminal>::value;
                                                                                                                                             static_assert(copyable, "Terminal is not copy constructable");
                                                                                                                                         }
 
                                                                                                                                         {
-
-                                                                                                                                            #line 100 "src/fpl2cc/fpl_x_parser.h.jemp" 
                                                                                                                                             const bool copyable = std::is_copy_constructible<std::string>::value;
                                                                                                                                             static_assert(copyable, "std::string is not copy constructable");
                                                                                                                                         }
@@ -12569,13 +11419,9 @@ void state_1() {
 
                                                                                                                                             #line 285 "src/fpl2cc/fpl_x_parser.h.jemp" 
                                                                                                                                             if(std::holds_alternative<Terminal>(var())) {
-
-                                                                                                                                                #line 281 "src/fpl2cc/fpl_x_parser.h.jemp" 
                                                                                                                                                 return stringformat("{}", std::get<Terminal>(var()));
                                                                                                                                             }
                                                                                                                                             if(std::holds_alternative<std::string>(var())) {
-
-                                                                                                                                                #line 281 "src/fpl2cc/fpl_x_parser.h.jemp" 
                                                                                                                                                 return stringformat("{}", std::get<std::string>(var()));
                                                                                                                                             }
 
@@ -14837,8 +13683,6 @@ void state_1() {
                                                                                                                                     }
 
 
-                                                                                                                                    #line 909 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
                                                                                                                                     // This represents the argument for a given step.  One "argument",
                                                                                                                                     // in this context, can contain 0 or more elements (for example,
                                                                                                                                     // in foo+ -> bar;, foo can have 1 or more elements).
@@ -15899,7 +14743,7 @@ void state_1() {
                                                                                                                                     #line 1222 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
-                                                                                                                                    #line 202 "src/jemplpl/jemplpl.fpl"
+                                                                                                                                    #line 199 "src/jemplpl/jemplpl.fpl"
 
 
                                                                                                                                     static inline std::string quote(const std::string &str) {
@@ -15997,7 +14841,7 @@ void state_1() {
                                                                                                                                         init_import_path(src);
                                                                                                                                     }
 
-                                                                                                                                    #line 15999 "src/jemplpl/jemplpl.cc"
+                                                                                                                                    #line 14843 "src/jemplpl/jemplpl.cc"
 
                                                                                                                                     // return to "private" after each such block.
                                                                                                                                     // this way, authors can add public members
@@ -16470,8 +15314,6 @@ void state_1() {
 
 
 
-                                                                                                                                    #line 1229 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
                                                                                                                                     #line 1239 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
@@ -16585,8 +15427,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // '@@' 
                                                                                                                                     bool shift_TERM_EXACT__terminal_4(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -16639,8 +15479,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_4, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_4)) {
@@ -16668,8 +15506,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // '@/*' 
                                                                                                                                     bool shift_TERM_EXACT__terminal_5(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -16722,8 +15558,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_5, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_5)) {
@@ -16751,8 +15585,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/ 
                                                                                                                                     bool shift_TERM_REGEX__terminal_6(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -16798,8 +15630,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_6, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_6)) {
@@ -16827,8 +15657,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // '*/@' 
                                                                                                                                     bool shift_TERM_EXACT__terminal_7(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -16881,8 +15709,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_7, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_7)) {
@@ -16910,8 +15736,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // /\\n\?/ 
                                                                                                                                     bool shift_TERM_REGEX__terminal_8(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -16957,8 +15781,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_8, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_8)) {
@@ -16986,8 +15808,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // '@parameter:' 
                                                                                                                                     bool shift_TERM_EXACT__terminal_9(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -17040,8 +15860,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_9, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_9)) {
@@ -17069,8 +15887,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // /[^@]+/ 
                                                                                                                                     bool shift_TERM_REGEX__terminal_10(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -17116,8 +15932,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_10, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_10)) {
@@ -17145,8 +15959,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // '@' 
                                                                                                                                     bool shift_TERM_EXACT__terminal_11(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -17205,8 +16017,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_11, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_11)) {
@@ -17234,8 +16044,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // '@include:' 
                                                                                                                                     bool shift_TERM_EXACT__terminal_12(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -17288,8 +16096,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_12, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_12)) {
@@ -17317,8 +16123,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // /\\s*/ 
                                                                                                                                     bool shift_TERM_REGEX__terminal_13(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -17364,8 +16168,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_13, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_13)) {
@@ -17393,8 +16195,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // '@embed:' 
                                                                                                                                     bool shift_TERM_EXACT__terminal_14(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -17447,8 +16247,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_14, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_14)) {
@@ -17502,8 +16300,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // 'error {' 
                                                                                                                                     bool shift_TERM_EXACT__terminal_16(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -17556,8 +16352,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_16, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_16)) {
@@ -17611,8 +16405,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // '}' 
                                                                                                                                     bool shift_TERM_EXACT__terminal_18(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -17665,8 +16457,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_18, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_18)) {
@@ -17720,8 +16510,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // /@declare\\s+/ 
                                                                                                                                     bool shift_TERM_REGEX__terminal_20(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -17767,8 +16555,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_20, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_20)) {
@@ -17822,8 +16608,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // ':' 
                                                                                                                                     bool shift_TERM_EXACT__terminal_22(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -17876,8 +16660,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_22, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_22)) {
@@ -17905,8 +16687,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // /(\?:[^@]|(\?:@@))*/ 
                                                                                                                                     bool shift_TERM_REGEX__terminal_23(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -17952,8 +16732,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_23, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_23)) {
@@ -17981,8 +16759,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // /@realign:\\s*/ 
                                                                                                                                     bool shift_TERM_REGEX__terminal_24(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -18028,8 +16804,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_24, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_24)) {
@@ -18057,8 +16831,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // '#' 
                                                                                                                                     bool shift_TERM_EXACT__terminal_25(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -18111,8 +16883,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_25, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_25)) {
@@ -18140,8 +16910,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // !'#' 
                                                                                                                                     bool shift_TERM_EXACT_INV__terminal_26(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -18184,8 +16952,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_26, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_26)) {
@@ -18239,8 +17005,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // '@-' 
                                                                                                                                     bool shift_TERM_EXACT__terminal_28(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -18293,8 +17057,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_28, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_28)) {
@@ -18322,8 +17084,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // '-@' 
                                                                                                                                     bool shift_TERM_EXACT__terminal_29(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -18376,8 +17136,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_29, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_29)) {
@@ -18431,8 +17189,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // /(\?:[^-@]|-[^@])+/ 
                                                                                                                                     bool shift_TERM_REGEX__terminal_31(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -18478,8 +17234,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_31, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_31)) {
@@ -18533,8 +17287,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // /\\n*[ \\t]+/ 
                                                                                                                                     bool shift_TERM_REGEX__terminal_33(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -18580,8 +17332,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_33, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_33)) {
@@ -18609,8 +17359,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // /[ \\t]*\\n+[ \\t]+(\?!@)/ 
                                                                                                                                     bool shift_TERM_REGEX__terminal_34(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -18656,8 +17404,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_34, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_34)) {
@@ -18685,8 +17431,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // /[ \\t]*\\n/ 
                                                                                                                                     bool shift_TERM_REGEX__terminal_35(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -18732,8 +17476,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_35, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_35)) {
@@ -18761,8 +17503,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // /#\\s*/ 
                                                                                                                                     bool shift_TERM_REGEX__terminal_36(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -18808,8 +17548,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_36, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_36)) {
@@ -18837,8 +17575,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // &continuation_guts 
                                                                                                                                     bool shift_TERM_CUSTOM__terminal_37(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -18879,8 +17615,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_37, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_37)) {
@@ -18960,8 +17694,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // &control_guts 
                                                                                                                                     bool shift_TERM_CUSTOM__terminal_40(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -19002,8 +17734,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_40, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_40)) {
@@ -19109,8 +17839,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // &subst_guts 
                                                                                                                                     bool shift_TERM_CUSTOM__terminal_44(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -19151,8 +17879,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_44, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_44)) {
@@ -19180,8 +17906,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // /[^@\\n]+/ 
                                                                                                                                     bool shift_TERM_REGEX__terminal_45(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -19227,8 +17951,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_45, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_45)) {
@@ -19256,8 +17978,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // /[a-zA-Z_][a-zA-Z_0-9]+/ 
                                                                                                                                     bool shift_TERM_REGEX__terminal_46(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -19303,8 +18023,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_46, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_46)) {
@@ -19332,8 +18050,6 @@ void state_1() {
 
                                                                                                                                     #line 4 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
 
-
-                                                                                                                                    #line 8 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                     // ␄_fpl_goal 
                                                                                                                                     bool shift_END_OF_PARSE__terminal_47(bool eject) {
                                                                                                                                         if(auto next_up = lr_next()) {
@@ -19374,8 +18090,6 @@ void state_1() {
 
                                                                                                                                             lr_push(_terminal_47, eject, pos, Product(result));
 
-
-                                                                                                                                            #line 42 "src/fpl2cc/fpl_x_parser_shift_term.h.jemp" 
                                                                                                                                             bytes_eaten = 0;
 
                                                                                                                                             if(!lr_read(_terminal_47)) {
@@ -23325,8 +22039,6 @@ void state_1() {
                                                                                                                                         #line 1365 "src/fpl2cc/fpl_x_parser.h.jemp" 
                                                                                                                                         {
 
-                                                                                                                                            #line 1356 "src/fpl2cc/fpl_x_parser.h.jemp" 
-
                                                                                                                                             #line 1363 "src/fpl2cc/fpl_x_parser.h.jemp" 
 
 
@@ -23334,12 +22046,10 @@ void state_1() {
                                                                                                                                             // separator "none" means 0 bytes of separator:
                                                                                                                                             return 0;
 
-                                                                                                                                            #line 23336 "src/jemplpl/jemplpl.cc"
+                                                                                                                                            #line 22048 "src/jemplpl/jemplpl.cc"
 
 
                                                                                                                                         }
-
-                                                                                                                                        #line 1367 "src/fpl2cc/fpl_x_parser.h.jemp" 
                                                                                                                                         return 0;
                                                                                                                                     }
 
@@ -23368,8 +22078,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -23439,23 +22147,19 @@ void state_1() {
                                                                                                                                         // fragment+:fragments -> complete
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 39 "src/jemplpl/jemplpl.fpl"
 
                                                                                                                                         std::string guts;
 
-                                                                                                                                        _rule_0_parameters.fragments.foreach(
-                                                                                                                                        [&guts] (const std::string &frag) { guts += frag; }
-                                                                                                                                        );
+                                                                                                                                        for(auto fragi = _rule_0_parameters.fragments.begin(); fragi != _rule_0_parameters.fragments.end(); ++fragi) {
+                                                                                                                                            guts += *fragi;
+                                                                                                                                        }
 
                                                                                                                                         std::string function_name = output_function_name();
 
@@ -23492,8 +22196,6 @@ void state_1() {
 
 
 
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 16 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -23516,8 +22218,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -23587,15 +22287,11 @@ void state_1() {
                                                                                                                                         // text+:chunks -> fragment
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
                                                                                                                                         #line 80 "src/jemplpl/jemplpl.fpl"
 
@@ -23607,8 +22303,6 @@ void state_1() {
 
 
 
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 19 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -23631,8 +22325,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -23702,22 +22394,16 @@ void state_1() {
                                                                                                                                         // '@@':at_sign -> text
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 24 "src/grammarlib/jemp.fpl"
                                                                                                                                         return "@"; 
 
 
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 24 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -23740,8 +22426,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -23811,24 +22495,18 @@ void state_1() {
                                                                                                                                         // '@/*'^ /(\?:[^*]|(\?:\\*[^\\/])|(\?:\\*\\/[^@]))*/:comment '*/@'^ /\\n\?/^ -> fragment
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+                                                                                                                                        #line 28 "src/grammarlib/jemp.fpl"
 
-                                                                                                                                        #line 89 "src/jemplpl/jemplpl.fpl"
-
-                                                                                                                                        return line_num(_rule_3_parameters.comment.self()) + jempl.realign_frag();
+                                                                                                                                        return "";
 
 
 
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 28 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -23851,8 +22529,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -23922,25 +22598,19 @@ void state_1() {
                                                                                                                                         // '@parameter:'^ /[^@]+/:param_decl '@'^ /\\n\?/^ -> fragment
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 93 "src/jemplpl/jemplpl.fpl"
+                                                                                                                                        #line 89 "src/jemplpl/jemplpl.fpl"
 
                                                                                                                                         jempl.params.push_back(param_decl);
                                                                                                                                         return "";
 
 
 
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 39 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -23963,8 +22633,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -24034,18 +22702,15 @@ void state_1() {
                                                                                                                                         // '@include:'^ /\\s*/^ /[^@]+/:include_file '@'^ /\\n\?/^ -> fragment
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
+                                                                                                                                        #line 95 "src/jemplpl/jemplpl.fpl"
 
-                                                                                                                                        #line 99 "src/jemplpl/jemplpl.fpl"
-
+                                                                                                                                        // XXX OK here we need to test this, and also save the new position somehow...
                                                                                                                                         return jempl.realign_frag(include_file, "1") + stringformat(
                                                                                                                                         "\nout += std::string((const char *)utf8_buffer({}).data());\n",
                                                                                                                                         include_file
@@ -24053,8 +22718,6 @@ void state_1() {
 
 
 
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 44 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -24077,8 +22740,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -24148,17 +22809,13 @@ void state_1() {
                                                                                                                                         // '@embed:'^ /\\s*/^ /[^@]+/:embed_file '@'^ /\\n\?/^ -> fragment
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 113 "src/jemplpl/jemplpl.fpl"
+                                                                                                                                        #line 110 "src/jemplpl/jemplpl.fpl"
 
                                                                                                                                         auto full_path = jempl.import_path.find(embed_file);
 
@@ -24175,8 +22832,6 @@ void state_1() {
 
 
 
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 50 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -24199,8 +22854,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -24270,17 +22923,13 @@ void state_1() {
                                                                                                                                         // subst_start^ 'error {'^ subst_end^ fragment+:error_fragments subst_start^ '}'^ subst_end^ -> fragment
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 128 "src/jemplpl/jemplpl.fpl"
+                                                                                                                                        #line 125 "src/jemplpl/jemplpl.fpl"
 
                                                                                                                                         return stringformat(
                                                                                                                                         "{{\n{}\n"
@@ -24293,8 +22942,6 @@ void state_1() {
 
 
 
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 56 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -24319,8 +22966,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -24400,25 +23045,19 @@ void state_1() {
                                                                                                                                         // leading_ws? /@declare\\s+/^ identifier:name_decl ':'^ /(\?:[^@]|(\?:@@))*/:value '@'^ /\\n\?/^ -> fragment
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 139 "src/jemplpl/jemplpl.fpl"
+                                                                                                                                        #line 136 "src/jemplpl/jemplpl.fpl"
 
                                                                                                                                         return line_num(_rule_8_parameters.value.self())
                                                                                                                                         + stringformat("const auto {} = {};\n", name_decl, value);
 
 
 
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 62 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -24441,8 +23080,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -24512,17 +23149,13 @@ void state_1() {
                                                                                                                                         // /@realign:\\s*/^ text:realign '@'^ /\\n\?/^ -> fragment
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 144 "src/jemplpl/jemplpl.fpl"
+                                                                                                                                        #line 141 "src/jemplpl/jemplpl.fpl"
 
                                                                                                                                         jempl.realign_fragment = realign;
 
@@ -24530,8 +23163,6 @@ void state_1() {
 
 
 
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 75 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -24554,8 +23185,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -24625,16 +23254,12 @@ void state_1() {
                                                                                                                                         // '#'^ !'#':variant_expression '#'^ -> template_variant
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-
-                                                                                                                                        #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 1 "src/grammarlib/jemp.fpl:80 (default action for '#'^ !'#':variant_expression '#'^ -> template_variant)"
                                                                                                                                         // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:66
                                                                                                                                         return std::string(
@@ -24645,15 +23270,9 @@ void state_1() {
 
                                                                                                                                         #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 82 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 80 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         variant_expression.to_str()
                                                                                                                                         );
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 80 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -24676,8 +23295,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -24747,16 +23364,12 @@ void state_1() {
                                                                                                                                         // leading_ws?^ '@-':arg_1 -> subst_start
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-
-                                                                                                                                        #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 1 "src/grammarlib/jemp.fpl:82 (default action for leading_ws\?^ '@-':arg_1 -> subst_start)"
                                                                                                                                         // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:66
                                                                                                                                         return std::string(
@@ -24767,15 +23380,9 @@ void state_1() {
 
                                                                                                                                         #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 82 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 80 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         arg_1.to_str()
                                                                                                                                         );
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 82 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -24798,8 +23405,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -24869,16 +23474,12 @@ void state_1() {
                                                                                                                                         // '@':arg_0 -> subst_start
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-
-                                                                                                                                        #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 1 "src/grammarlib/jemp.fpl:83 (default action for '@':arg_0 -> subst_start)"
                                                                                                                                         // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:66
                                                                                                                                         return std::string(
@@ -24889,15 +23490,9 @@ void state_1() {
 
                                                                                                                                         #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 82 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 80 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         arg_0.to_str()
                                                                                                                                         );
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 83 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -24920,8 +23515,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -24991,16 +23584,12 @@ void state_1() {
                                                                                                                                         // '-@':arg_0 trailing_ws?^ -> subst_end
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-
-                                                                                                                                        #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 1 "src/grammarlib/jemp.fpl:85 (default action for '-@':arg_0 trailing_ws\?^ -> subst_end)"
                                                                                                                                         // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:66
                                                                                                                                         return std::string(
@@ -25011,15 +23600,9 @@ void state_1() {
 
                                                                                                                                         #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 82 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 80 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         arg_0.to_str()
                                                                                                                                         );
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 85 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -25042,8 +23625,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -25113,16 +23694,12 @@ void state_1() {
                                                                                                                                         // '@':arg_0 -> subst_end
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-
-                                                                                                                                        #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 1 "src/grammarlib/jemp.fpl:86 (default action for '@':arg_0 -> subst_end)"
                                                                                                                                         // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:66
                                                                                                                                         return std::string(
@@ -25133,15 +23710,9 @@ void state_1() {
 
                                                                                                                                         #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 82 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 80 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         arg_0.to_str()
                                                                                                                                         );
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 86 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -25164,8 +23735,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -25235,16 +23804,12 @@ void state_1() {
                                                                                                                                         // /(\?:[^-@]|-[^@])+/:arg_0 -> rest_of_sub
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-
-                                                                                                                                        #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 1 "src/grammarlib/jemp.fpl:87 (default action for /(\\\?:[^-@]|-[^@])+/:arg_0 -> rest_of_sub)"
                                                                                                                                         // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:66
                                                                                                                                         return std::string(
@@ -25255,15 +23820,9 @@ void state_1() {
 
                                                                                                                                         #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 82 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 80 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         arg_0.to_str()
                                                                                                                                         );
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 87 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -25286,8 +23845,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -25357,16 +23914,12 @@ void state_1() {
                                                                                                                                         // /\\n*[ \\t]+/:ws -> leading_ws
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-
-                                                                                                                                        #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 1 "src/grammarlib/jemp.fpl:93 (default action for /\\\\n*[ \\\\t]+/:ws -> leading_ws)"
                                                                                                                                         // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:66
                                                                                                                                         return std::string(
@@ -25377,15 +23930,9 @@ void state_1() {
 
                                                                                                                                         #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 82 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 80 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         ws.to_str()
                                                                                                                                         );
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 93 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -25408,8 +23955,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -25479,16 +24024,12 @@ void state_1() {
                                                                                                                                         // /[ \\t]*\\n+[ \\t]+(\?!@)/:ws -> trailing_ws
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-
-                                                                                                                                        #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 1 "src/grammarlib/jemp.fpl:107 (default action for /[ \\\\t]*\\\\n+[ \\\\t]+(\\\?!@)/:ws -> trailing_ws)"
                                                                                                                                         // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:66
                                                                                                                                         return std::string(
@@ -25499,15 +24040,9 @@ void state_1() {
 
                                                                                                                                         #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 82 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 80 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         ws.to_str()
                                                                                                                                         );
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 107 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -25530,8 +24065,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -25601,16 +24134,12 @@ void state_1() {
                                                                                                                                         // /[ \\t]*\\n/:ws -> trailing_ws
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-
-                                                                                                                                        #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 1 "src/grammarlib/jemp.fpl:111 (default action for /[ \\\\t]*\\\\n/:ws -> trailing_ws)"
                                                                                                                                         // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:66
                                                                                                                                         return std::string(
@@ -25621,15 +24150,9 @@ void state_1() {
 
                                                                                                                                         #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 82 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 80 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         ws.to_str()
                                                                                                                                         );
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 111 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -25654,8 +24177,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -25735,17 +24256,13 @@ void state_1() {
                                                                                                                                         // subst_start^ /#\\s*/^ identifier:jempl_name template_variant:variant rest_of_sub:jempl_args subst_end^ -> fragment
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 155 "src/jemplpl/jemplpl.fpl"
+                                                                                                                                        #line 152 "src/jemplpl/jemplpl.fpl"
 
                                                                                                                                         std::list<std::string> cases;
                                                                                                                                         std::string search_re = stringformat("{}.*\\.h\\.jemp$", jempl_name);
@@ -25779,8 +24296,6 @@ void state_1() {
 
 
 
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 119 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -25804,8 +24319,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -25880,25 +24393,19 @@ void state_1() {
                                                                                                                                         // subst_start^ /#\\s*/^ identifier:jempl_name rest_of_sub:jempl_args subst_end^ -> fragment
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 150 "src/jemplpl/jemplpl.fpl"
+                                                                                                                                        #line 147 "src/jemplpl/jemplpl.fpl"
 
                                                                                                                                         add_import(jempl.import_path.find(jempl_name + ".h.jemp"));
                                                                                                                                         return stringformat("\nout += {}{};\n", jempl_name, jempl_args);
 
 
 
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 122 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -25921,8 +24428,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -25992,16 +24497,12 @@ void state_1() {
                                                                                                                                         // subst_start^ &continuation_guts:control_statement subst_end^ -> control_continuation
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-
-                                                                                                                                        #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 1 "src/grammarlib/jemp.fpl:133 (default action for subst_start^ &continuation_guts:control_statement subst_end^ -> control_continuation)"
                                                                                                                                         // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:66
                                                                                                                                         return std::string(
@@ -26012,15 +24513,9 @@ void state_1() {
 
                                                                                                                                         #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 82 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 80 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         control_statement.to_str()
                                                                                                                                         );
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 133 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -26043,8 +24538,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -26114,16 +24607,12 @@ void state_1() {
                                                                                                                                         // subst_start^ '}':control_statement subst_end^ -> control_end
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-
-                                                                                                                                        #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 1 "src/grammarlib/jemp.fpl:134 (default action for subst_start^ '}':control_statement subst_end^ -> control_end)"
                                                                                                                                         // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:66
                                                                                                                                         return std::string(
@@ -26134,15 +24623,9 @@ void state_1() {
 
                                                                                                                                         #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 82 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 80 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         control_statement.to_str()
                                                                                                                                         );
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 134 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -26165,8 +24648,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -26236,16 +24717,12 @@ void state_1() {
                                                                                                                                         // subst_start^ &control_guts:control_statement subst_end^ -> control_start
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-
-                                                                                                                                        #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 1 "src/grammarlib/jemp.fpl:135 (default action for subst_start^ &control_guts:control_statement subst_end^ -> control_start)"
                                                                                                                                         // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:66
                                                                                                                                         return std::string(
@@ -26256,15 +24733,9 @@ void state_1() {
 
                                                                                                                                         #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 82 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 80 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         control_statement.to_str()
                                                                                                                                         );
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 135 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -26293,8 +24764,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -26364,17 +24833,13 @@ void state_1() {
                                                                                                                                         // control_start:control_statement fragment*:control_statement (_subex_0)*:control_statement control_end:control_statement -> control_fragment
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 187 "src/jemplpl/jemplpl.fpl"
+                                                                                                                                        #line 184 "src/jemplpl/jemplpl.fpl"
 
                                                                                                                                         return stringformat(
                                                                                                                                         "{}{}\n{}\n",
@@ -26385,8 +24850,6 @@ void state_1() {
 
 
 
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 137 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -26409,8 +24872,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -26480,22 +24941,16 @@ void state_1() {
                                                                                                                                         // control_fragment+ -> fragment
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 139 "src/grammarlib/jemp.fpl"
                                                                                                                                         return _rule_26_parameters.control_fragment.join(); 
 
 
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 139 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -26518,8 +24973,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -26589,25 +25042,19 @@ void state_1() {
                                                                                                                                         // subst_start^ &subst_guts:variable subst_end^ -> fragment
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 47 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 197 "src/jemplpl/jemplpl.fpl"
+                                                                                                                                        #line 194 "src/jemplpl/jemplpl.fpl"
 
                                                                                                                                         return line_num(_rule_27_parameters.variable.self())
                                                                                                                                         + "out += stringformat(\"{}\"," + variable.to_str() + ");\n";
 
 
 
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 143 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -26630,8 +25077,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -26701,16 +25146,12 @@ void state_1() {
                                                                                                                                         // /[^@\\n]+/:t -> text
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-
-                                                                                                                                        #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 1 "src/grammarlib/jemp.fpl:147 (default action for /[^@\\\\n]+/:t -> text)"
                                                                                                                                         // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:66
                                                                                                                                         return std::string(
@@ -26721,15 +25162,9 @@ void state_1() {
 
                                                                                                                                         #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 82 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 80 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         t.to_str()
                                                                                                                                         );
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 147 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -26752,8 +25187,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -26823,16 +25256,12 @@ void state_1() {
                                                                                                                                         // leading_ws -> text
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-
-                                                                                                                                        #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 1 "src/grammarlib/jemp.fpl:151 (default action for leading_ws -> text)"
                                                                                                                                         // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:66
                                                                                                                                         return std::string(
@@ -26843,12 +25272,8 @@ void state_1() {
 
                                                                                                                                         #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 82 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         leading_ws);
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 151 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -26871,8 +25296,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -26942,16 +25365,12 @@ void state_1() {
                                                                                                                                         // trailing_ws -> text
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-
-                                                                                                                                        #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 1 "src/grammarlib/jemp.fpl:152 (default action for trailing_ws -> text)"
                                                                                                                                         // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:66
                                                                                                                                         return std::string(
@@ -26962,12 +25381,8 @@ void state_1() {
 
                                                                                                                                         #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 82 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         trailing_ws);
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 152 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -26990,8 +25405,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -27061,16 +25474,12 @@ void state_1() {
                                                                                                                                         // /[a-zA-Z_][a-zA-Z_0-9]+/:name -> identifier
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-
-                                                                                                                                        #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 1 "src/grammarlib/jemp.fpl:155 (default action for /[a-zA-Z_][a-zA-Z_0-9]+/:name -> identifier)"
                                                                                                                                         // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:66
                                                                                                                                         return std::string(
@@ -27081,15 +25490,9 @@ void state_1() {
 
                                                                                                                                         #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 82 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
-                                                                                                                                        #line 80 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         name.to_str()
                                                                                                                                         );
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 155 "src/grammarlib/jemp.fpl"
                                                                                                                                     }
 
@@ -27112,8 +25515,6 @@ void state_1() {
 
                                                                                                                                         #line 3 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
-
-                                                                                                                                        #line 5 "src/fpl2cc/fpl_x_parser_reduce_action_meta.h.jemp" 
 
                                                                                                                                         struct {
                                                                                                                                             static const char *name() {
@@ -27183,16 +25584,12 @@ void state_1() {
                                                                                                                                         // complete -> _fpl_goal
 
 
-                                                                                                                                        #line 29 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 44 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
 
 
                                                                                                                                         #line 86 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-
-                                                                                                                                        #line 64 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 1 "src/fpl2cc/productions.h:4392 (default action for complete -> _fpl_goal)"
                                                                                                                                         // src/fpl2cc/fpl_x_parser_reduce_action.h.jemp:66
                                                                                                                                         return std::string(
@@ -27203,12 +25600,8 @@ void state_1() {
 
                                                                                                                                         #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
 
-                                                                                                                                        #line 76 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
-
                                                                                                                                         #line 82 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         complete);
-
-                                                                                                                                        #line 87 "src/fpl2cc/fpl_x_parser_reduce_action.h.jemp" 
                                                                                                                                         #line 4392 "src/fpl2cc/productions.h"
                                                                                                                                     }
 
@@ -27226,7 +25619,7 @@ void state_1() {
 
                                                                                                                                 int main(int argc, const char **argv) {
 
-                                                                                                                                    #line 300 "src/jemplpl/jemplpl.fpl"
+                                                                                                                                    #line 297 "src/jemplpl/jemplpl.fpl"
 
                                                                                                                                     if(argc < 2) {
                                                                                                                                         jerror::error("Please provide a source file name.\n");
@@ -27281,7 +25674,7 @@ void state_1() {
 
                                                                                                                                     return total_errors?1:0;
 
-                                                                                                                                    #line 27283 "src/jemplpl/jemplpl.cc"
+                                                                                                                                    #line 25676 "src/jemplpl/jemplpl.cc"
 
                                                                                                                                 }
 

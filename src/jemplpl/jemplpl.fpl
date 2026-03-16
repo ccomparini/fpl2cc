@@ -29,7 +29,7 @@
 #include "util/utf8_buffer.h"
 
 #define VERSION_MAJ 0
-#define VERSION_MIN 10
+#define VERSION_MIN 11
 
 }+
 
@@ -39,9 +39,9 @@
 +complete(fragments) +{
     std::string guts;
 
-    fragments@foreach(
-        [&guts] (const std::string &frag) { guts += frag; }
-    );
+    for(auto fragi = fragments@begin(); fragi != fragments@end(); ++fragi) {
+        guts += *fragi;
+    }
 
     std::string function_name = output_function_name();
 
@@ -86,10 +86,6 @@
 }+
 
 
-+fragment(comment) +{
-    return line_num(comment@self()) + jempl.realign_frag();
-}+
-
 +fragment(param_decl) +{
     jempl.params.push_back(param_decl);
     return "";
@@ -97,6 +93,7 @@
 
 # @include: filename @
 +fragment(include_file) +{
+// XXX OK here we need to test this, and also save the new position somehow...
     return jempl.realign_frag(include_file, "1") + stringformat(
         "\nout += std::string((const char *)utf8_buffer({}).data());\n",
         include_file
