@@ -165,7 +165,7 @@ public:
               return grp;
           }+
 
-       BUT consider it deprecated.  jsut use c++ for(auto th : things) instead.
+       BUT consider it deprecated.  just use c++ for(auto th : things) instead.
        much cleaner.
     */@
     using ForeachFunc = std::function<void(const ReduceType &)>;

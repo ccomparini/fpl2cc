@@ -12,7 +12,7 @@
 @terminal continuation_guts ('}' &subst_guts '{')
 
 # A complete template is composed of "fragments".  Each
-# fragment is the "digest" of a section of the template.
+# fragment is the digest of a section of the template.
 fragment+:fragments -> complete ;
 
 # Arbitrary text is concatenated to a fragment:
