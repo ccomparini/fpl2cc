@@ -408,7 +408,7 @@ public:
     }
 
 private:
-    fpl_reader_p            reader;      // (must be non-null)
+    fpl_reader_p            reader;      // must be non-null.  owned by caller
     State                   cur_state;
     std::vector<StackEntry> lr_stack;
     int                     lr_read_pos;
@@ -437,8 +437,8 @@ public:
     @class_name@(fpl_reader_p rdr) :
         reader(rdr),
         cur_state(&@class_name@::state_0),
-        lr_read_pos(0),
-        bytes_eaten(0),
+        lr_read_pos(0),     // position in the lr stack
+        bytes_eaten(0),     // number of bytes of separator
         stop_parsing(false),
         max_errors(1),
         num_errors(0),
@@ -451,6 +451,10 @@ public:
 
         lr_stack.reserve(@opts.lr_stack_reserve@);
         param_stack.reserve(@opts.param_stack_reserve@);
+    }
+
+    void set_reader(fpl_reader_p rdr) {
+        reader = rdr;
     }
 
     // debugging:
