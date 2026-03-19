@@ -131,6 +131,12 @@ public:
         exit(1);
     }
 
+    // constructs a reader with the equvalent of 0-length input
+    fpl_reader() :
+        input_filename("<N/A>"),
+        read_pos(0) {
+    }
+
     explicit fpl_reader(
         std::istream &input,
         const std::string &infn,
