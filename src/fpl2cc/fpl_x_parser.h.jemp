@@ -474,8 +474,24 @@ public:
 
     void set_max_errors(int newmax) { max_errors = newmax; }
 
+    // formats an error message giving a location relative
+    // to our input reader
+    std::string format_error_message(
+        size_t pos,
+        const std::string &msg,
+        src_location caller = CALLER()
+    ) const {
+        const char *nl = "";
+        if(msg[msg.length() - 1] != '\n')
+            nl = "\n";
+
+        return stringformat("Error {} near «{}»: {}{}",
+            reader->location_str(pos), reader->debug_peek(pos, 12), msg, nl
+        );
+    }
+
     void error(size_t pos, const std::string &msg) {
-        std::string full_msg = reader->format_error_message(pos, msg);
+        std::string full_msg = format_error_message(pos, msg);
         fputs(full_msg.c_str(), stderr);
         if(++num_errors >= max_errors) {
             fputs("too many errors.  aborting\n", stderr);

@@ -253,22 +253,6 @@ public:
         return std::string(inpp_as_char(offset), char_length(offset));
     }
 
-    // formats an error message in the context of this reader.
-    std::string format_error_message(
-        size_t pos,
-        const std::string &msg,
-        src_location caller = CALLER()
-    ) const {
-        const char *nl = "";
-        if(msg[msg.length() - 1] != '\n')
-            nl = "\n";
-
-        return stringformat("Error {} near «{}»: {}{}",
-            location_str(pos), debug_peek(pos, 12), msg, nl
-        );
-    }
-
-
     // Returns the length in bytes of the newline "character" at the
     // position passed.
     // Any 2 bytes in a row with one each of 0x0a and 0x0d counts as
@@ -283,7 +267,6 @@ public:
 
         return utf8::newline_length(buffer.data() + at);
     }
-
 
 private:
     // Returns the length in bytes of the the character at the absolute
