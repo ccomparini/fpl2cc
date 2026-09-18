@@ -132,8 +132,10 @@ public:
     }
 
     // constructs a reader with the equvalent of 0-length input
-    fpl_reader() :
+    fpl_reader(ErrorCallback ecb = &default_fail) :
         input_filename("<N/A>"),
+        buffer(),
+        on_error(ecb),
         read_pos(0) {
     }
 
