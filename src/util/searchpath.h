@@ -41,6 +41,10 @@ public:
         initialized = true;
     }
 
+    void clear() {
+        directories.clear(); // should we also change the initialized flag?
+    }
+
     bool append_from_env(const std::string &var) {
         if(const char *env_p = std::getenv(var.c_str())) {
             append_path(env_p);
