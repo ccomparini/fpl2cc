@@ -62,6 +62,10 @@ step+:steps '->'^ production_name code_block -> rule ;
 # naming as well (internally it's called ProdExpr)
 grammar_element quantifier? -> step ;
 
+# hook so that we can warn if there's space before a quantifier:
+grammar_element /\s+/:space quantifier -> grammar_element_sp_quantifier;
+grammar_element_sp_quantifier          -> step;
+
 zero_or_more -> quantifier ;
 one_or_more  -> quantifier ;
 zero_or_one  -> quantifier ;
