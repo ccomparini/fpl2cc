@@ -23,7 +23,7 @@ env.Program('#bin/fpl2cc', [ 'fpl2cc.cc', ])
 # we can still recreate it (with fpl2cc):
 env.Precious('#bin/fpl2cc')
 
-env.Fpl2h('fpl.fpl')
+env.Fpl2h('fpl2cc.fpl')
 # env.Program('#bin/fpl', [ 'fpl.cc', ])
 
 # test subdir:
