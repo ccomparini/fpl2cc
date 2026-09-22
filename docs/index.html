@@ -61,7 +61,6 @@
         <li> <span class="gel">#</span> comment
         <li> <span class="gel">@</span> <a href="#directives">directive</a>
         <li> <span class="gel">+{</span><span class="optional">code</span><span class="gel">}+</span> code block
-        <li> <span class="optional"></span><span class="optional">code</span><span class="gel">}+</span> code block
         <li> <span class="optional"></span><a href="#rules">production rule</a></span>
         <li> XXX sub-fpl files fill in
       </ul>
@@ -98,7 +97,7 @@
       <span class="subhead">Production rules</span>
       <p>Production rules are of the form:
       <pre>
-        &lt;<a href="#expressions">exprs</a> to match&gt; -&gt; &lt;production name&gt; { &lt;code&gt; }
+        &lt;<a href="#expressions">exprs</a> to match&gt; -&gt; &lt;production name&gt; +{ &lt;code&gt; }+
                    or
         &lt;<a href="#exprsessions">exprs</a> to match&gt; -&gt; &lt;production name&gt; ;
       </pre>
