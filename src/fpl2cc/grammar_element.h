@@ -185,8 +185,7 @@ struct grammar_element {
             case TERM_REGEX:     return TERM_REGEX_INV;
 
             // assuming a given custom terminal has implemented
-            // an inverse implemented someplace, it too can
-            // have an inverse:
+            // an inverse someplace, it too can have an inverse:
             case TERM_CUSTOM:    return TERM_CUSTOM_INV;
 
             // (and, of course, you can invert back)
@@ -204,7 +203,7 @@ struct grammar_element {
             // of other things matched within the nonterm.
             // Inverting the lack-of-separator assertion is the
             // same as just leaving it out of the rule, so I
-            // we don't need the ability to invert it.
+            // think we don't need the ability to invert it.
             // So, at present, nothing else has an inverse
             // type.
             default: return NONE; // (no inverse)

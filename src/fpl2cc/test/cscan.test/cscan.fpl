@@ -36,7 +36,7 @@
         }
     }
     reader->go_to(start); // no match; put the scan back
-    return Terminal();
+    return Terminal();    // ... and return a false terminal
     
 }+
 
