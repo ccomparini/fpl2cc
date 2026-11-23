@@ -28,7 +28,8 @@ a_to_b:w a_to_b:x a_to_b:y a_to_b:z -> four_a_b +{
 }+
 
 a_to_d:w a_to_d:x a_to_d:y a_to_d:z -> four_a_d +{
-    return "Bauhaus logo";
+    // https://en.wikipedia.org/wiki/4AD
+    return "record label";
 }+
 
 a_to_d 'a' 'b' 'x'^ -> ambiguous_a_b_x +{
